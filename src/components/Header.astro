@@ -1,4 +1,9 @@
 ---
+import { getFeaturedStates } from '../lib/supabase';
+import type { State } from '../types/supabase';
+import SearchInput from './SearchInput.astro';
+
+const featuredStates = await getFeaturedStates();
 ---
 
 <header class="fixed w-full bg-white/90 backdrop-blur-sm shadow-sm z-50 transition-all duration-300" id="header">
@@ -34,15 +39,8 @@
     </nav>
 
     <div class="flex items-center space-x-4">
-      <div class="relative hidden md:block">
-        <input 
-          type="text" 
-          placeholder="Search states & cities..." 
-          class="w-64 pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-500"
-        >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+      <div class="relative hidden md:block w-64">
+        <SearchInput variant="nav" />
       </div>
       
       <button class="md:hidden text-gray-700" id="mobile-menu-button">
@@ -56,14 +54,7 @@
   <!-- Mobile Menu -->
   <div class="md:hidden bg-white shadow-lg absolute w-full left-0 top-full transform -translate-y-full opacity-0 invisible transition-all duration-300" id="mobile-menu">
     <div class="px-4 py-3">
-      <input 
-        type="text" 
-        placeholder="Search states & cities..." 
-        class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-500"
-      >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-7 top-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
+      <SearchInput variant="nav" />
     </div>
     <div class="border-t border-gray-200">
       <a href="/" class="block px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700">Home</a>
@@ -102,40 +93,35 @@
     const statesDropdownButton = document.getElementById('mobile-states-button');
     const statesDropdown = document.getElementById('states-dropdown');
 
-    // Scroll functionality for the header
-    if (header) {
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > 10) {
-          header.classList.add('py-2', 'shadow');
-          header.classList.remove('py-4');
-        } else {
-          header.classList.add('py-4');
-          header.classList.remove('py-2', 'shadow');
-        }
-      });
-    }
-
     // Mobile menu toggle
-    if (mobileMenuButton && mobileMenu) {
-      mobileMenuButton.addEventListener('click', () => {
-        const isVisible = !mobileMenu.classList.contains('invisible');
-        
-        if (isVisible) {
-          mobileMenu.classList.add('invisible', 'opacity-0', '-translate-y-full');
-          mobileMenu.classList.remove('opacity-100', 'translate-y-0');
-        } else {
-          mobileMenu.classList.remove('invisible', 'opacity-0', '-translate-y-full');
-          mobileMenu.classList.add('opacity-100', 'translate-y-0');
-        }
-      });
-    }
+    mobileMenuButton?.addEventListener('click', () => {
+      mobileMenu?.classList.toggle('-translate-y-full');
+      mobileMenu?.classList.toggle('opacity-0');
+      mobileMenu?.classList.toggle('invisible');
+    });
 
-    // States dropdown in mobile menu
-    if (statesDropdownButton && statesDropdown) {
-      statesDropdownButton.addEventListener('click', () => {
-        const isVisible = statesDropdown.style.display !== 'none';
-        statesDropdown.style.display = isVisible ? 'none' : 'block';
-      });
-    }
+    // States dropdown toggle
+    statesDropdownButton?.addEventListener('click', () => {
+      if (statesDropdown) {
+        statesDropdown.style.display = statesDropdown.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+
+    // Header scroll behavior
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.pageYOffset;
+      if (currentScroll <= 0) {
+        header?.classList.remove('-translate-y-full');
+        return;
+      }
+      
+      if (currentScroll > lastScroll && !mobileMenu?.classList.contains('opacity-0')) {
+        header?.classList.add('-translate-y-full');
+      } else {
+        header?.classList.remove('-translate-y-full');
+      }
+      lastScroll = currentScroll;
+    });
   });
 </script>

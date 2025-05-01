@@ -15,7 +15,7 @@ const states: State[] = await getFeaturedStates();
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {states.map((state: State) => (
         <a 
-          href={`/states/${state.id}`} 
+          href={`/states/${state.name.toLowerCase().replace(/\s+/g, '-')}`} 
           class="group relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
         >
           <img 

@@ -1,33 +1,38 @@
 ---
-import { getAllCities } from '../lib/supabase';
-import type { StateWithCities } from '../lib/supabase';
-
+// Remove the supabase import since we're not using it anymore
 interface PopularCity {
   state: string;
   city: string;
 }
 
-// Get all cities and sort them randomly to simulate "popular" cities
-const allCities: StateWithCities[] = await getAllCities();
-const popularCities: PopularCity[] = allCities
-  .flatMap(({ state, cities }: StateWithCities) => 
-    cities.map((city: string) => ({ state, city }))
-  )
-  .sort(() => Math.random() - 0.5)
-  .slice(0, 12);
+// Curated list of major cities with high population and likely e-waste recycling needs
+const popularCities: PopularCity[] = [
+  { state: "California", city: "Los Angeles" },
+  { state: "California", city: "San Francisco" },
+  { state: "New York", city: "New York City" },
+  { state: "Texas", city: "Austin" },
+  { state: "Texas", city: "Houston" },
+  { state: "Illinois", city: "Chicago" },
+  { state: "Washington", city: "Seattle" },
+  { state: "Massachusetts", city: "Boston" },
+  { state: "Georgia", city: "Atlanta" },
+  { state: "Colorado", city: "Denver" },
+  { state: "Florida", city: "Miami" },
+  { state: "Nevada", city: "Las Vegas" }
+];
 ---
 
 <section class="py-16 bg-white">
   <div class="container mx-auto px-4">
     <div class="text-center mb-12">
       <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900">Popular Cities</h2>
-      <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Discover some of the most visited cities across the country</p>
+      <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Find electronics recycling centers in major metropolitan areas</p>
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {popularCities.map(({ state, city }: PopularCity) => (
+      {popularCities.map(({ state, city }) => (
         <a 
-          href={`/states/${state.toLowerCase()}#${city.toLowerCase().replace(/\s+/g, '-')}`}
+          href={`/states/${state.toLowerCase().replace(/\s+/g, '-')}/${city.toLowerCase().replace(/\s+/g, '-')}`}
           class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
         >
           <h3 class="font-medium text-gray-900">{city}</h3>

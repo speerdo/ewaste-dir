@@ -4,7 +4,9 @@ export interface RecyclingCenter {
   state_id: string;
   city_id: string;
   city: string;
+  state: string;
   full_address: string;
+  postal_code?: number;
   latitude: number;
   longitude: number;
   phone?: string;
@@ -13,7 +15,9 @@ export interface RecyclingCenter {
   rating?: number;
   reviews?: number;
   logo?: string;
+  photo?: string;
   description?: string;
+  accepted_items?: string;
   created_at?: string;
   updated_at?: string;
 }

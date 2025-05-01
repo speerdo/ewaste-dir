@@ -1,108 +1,147 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getState, getCitiesByState, getAllStates } from '../../lib/supabase';
-import type { City } from '../../types/supabase';
+import { supabase } from '../../lib/supabase';
+import type { RecyclingCenter } from '../../types/supabase';
 
-// Generate routes for all states
+// Add popular states to ensure they're included in static generation
+const popularStates = [
+  "California",
+  "New York",
+  "Texas",
+  "Illinois",
+  "Washington",
+  "Massachusetts",
+  "Georgia",
+  "Colorado",
+  "Florida",
+  "Nevada"
+];
+
 export async function getStaticPaths() {
-  const states = await getAllStates();
-  return states.map(state => ({
-    params: { state: state.id }
+  // Get states from both tables
+  const [{ data: statesFromCenters }, { data: statesFromStates }] = await Promise.all([
+    supabase.from('recycling_centers').select('state').order('state'),
+    supabase.from('states').select('name').order('name')
+  ]);
+
+  // Combine and deduplicate states
+  const allStates = [
+    ...(statesFromCenters?.map(row => row.state) || []),
+    ...(statesFromStates?.map(row => row.name) || [])
+  ];
+  
+  const uniqueStates = [...new Set(allStates)].filter(Boolean);
+
+  return uniqueStates.map(stateName => ({
+    params: { 
+      state: stateName.toLowerCase().replace(/\s+/g, '-')
+    },
+    props: { stateName }
   }));
 }
 
-const { state: stateId } = Astro.params;
-const state = await getState(stateId);
-const cities: City[] = await getCitiesByState(stateId);
+// Get the state parameter from the URL and convert it back to proper case
+const { state } = Astro.params;
+const { stateName } = Astro.props;
 
-// Default image for cities that don't have one
-const defaultCityImage = 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80';
+// Get all recycling centers for this state
+let allCenters: any[] = [];
+let page = 0;
+const pageSize = 1000;
+let hasMore = true;
 
-// If state doesn't exist, redirect to homepage
-if (!state) {
-  return Astro.redirect('/');
+while (hasMore) {
+  const { data, error } = await supabase
+    .from('recycling_centers')
+    .select('*')
+    .eq('state', stateName)
+    .order('city')
+    .range(page * pageSize, (page + 1) * pageSize - 1);
+
+  if (error) {
+    console.error('Error fetching centers:', error);
+    return Astro.redirect('/404');
+  }
+
+  if (!data || data.length === 0) {
+    hasMore = false;
+  } else {
+    allCenters = [...allCenters, ...data];
+    page++;
+  }
+
+  // Break if we've fetched all records
+  if (data && data.length < pageSize) {
+    hasMore = false;
+  }
 }
+
+const centers = allCenters;
+
+// Group centers by city
+const centersByCity = centers.reduce<Record<string, RecyclingCenter[]>>((acc, center) => {
+  const city = center.city || 'Unknown';
+  if (!acc[city]) {
+    acc[city] = [];
+  }
+  acc[city].push(center);
+  return acc;
+}, {});
+
+// Sort cities by name
+const sortedCities = Object.keys(centersByCity).sort();
 ---
 
-<Layout title={`Electronics Recycling in ${state.name}`}>
-  <div class="relative">
-    <!-- Hero Section -->
-    <div class="relative h-[400px] overflow-hidden">
-      <img 
-        src={state.image_url || defaultCityImage} 
-        alt={`Electronics recycling in ${state.name}`} 
-        class="w-full h-full object-cover"
-      />
-      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-      <div class="absolute inset-0 flex items-center justify-center">
-        <div class="text-center text-white px-4">
-          <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">
-            Electronics Recycling in {state.name}
-          </h1>
-          <p class="text-xl md:text-2xl max-w-3xl mx-auto">
-            Find certified e-waste recycling centers in cities across {state.name}
-          </p>
+<Layout title={`E-Waste Recycling Centers in ${stateName}`}>
+  <div class="bg-white min-h-screen py-12">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto">
+        <nav class="flex mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-2">
+            <li>
+              <a href="/" class="hover:text-primary-600">Home</a>
+            </li>
+            <li>
+              <span class="mx-2">/</span>
+            </li>
+            <li>
+              <a href="/states" class="hover:text-primary-600">States</a>
+            </li>
+            <li>
+              <span class="mx-2">/</span>
+            </li>
+            <li>
+              <span class="text-gray-900 font-medium">{stateName}</span>
+            </li>
+          </ol>
+        </nav>
+
+        <h1 class="text-4xl font-display font-bold text-gray-900 mb-4">
+          E-Waste Recycling Centers in {stateName}
+        </h1>
+        
+        <p class="text-xl text-gray-600 mb-8">
+          Found recycling centers in {sortedCities.length} {sortedCities.length === 1 ? 'city' : 'cities'} across {stateName}
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedCities.map(city => (
+            <a 
+              href={`/states/${stateName.toLowerCase().replace(/\s+/g, '-')}/${city.toLowerCase().replace(/\s+/g, '-')}`}
+              class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
+            >
+              <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600">
+                  {city}
+                </h2>
+                <p class="text-gray-600">
+                  {centersByCity[city].length} {centersByCity[city].length === 1 ? 'center' : 'centers'}
+                </p>
+              </div>
+            </a>
+          ))}
         </div>
       </div>
     </div>
-
-    <!-- Cities Grid -->
-    <div class="container mx-auto px-4 py-12">
-      <h2 class="text-3xl font-display font-bold text-gray-900 mb-8">
-        Cities with E-Waste Recycling Centers
-      </h2>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {cities.map((city) => (
-          <a 
-            href={`/states/${state.id}/${city.id}`}
-            class="group relative h-64 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
-          >
-            <img 
-              src={city.image_url || defaultCityImage} 
-              alt={`Recycling centers in ${city.name}`} 
-              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-6 z-20">
-              <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-accent-300 transition-colors">
-                {city.name}
-              </h3>
-              <p class="text-gray-200 text-sm mb-3 line-clamp-2 group-hover:line-clamp-none transition-all">
-                {city.description || `Find electronics recycling centers in ${city.name}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`}
-              </p>
-              <span class="inline-flex items-center text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                View recycling centers
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </span>
-            </div>
-          </a>
-        ))}
-      </div>
-
-      {cities.length === 0 && (
-        <div class="text-center py-12">
-          <p class="text-gray-500">No cities with recycling centers found in {state.name}.</p>
-        </div>
-      )}
-    </div>
-
-    <!-- State Description -->
-    {state.description && (
-      <div class="bg-gray-50 py-12">
-        <div class="container mx-auto px-4">
-          <div class="prose prose-lg mx-auto">
-            <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">
-              About Electronics Recycling in {state.name}
-            </h2>
-            <div class="text-gray-600">
-              {state.description}
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
   </div>
 </Layout>

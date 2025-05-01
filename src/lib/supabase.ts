@@ -18,7 +18,20 @@ export async function getAllStates(): Promise<State[]> {
     .order('name');
 
   if (error) throw error;
-  return data || [];
+
+  // Convert to State type with proper formatting
+  return (data || []).map((state) => ({
+    id: state.name.toLowerCase().replace(/\s+/g, '-'),
+    name: state.name,
+    description:
+      state.description ||
+      `Find electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
+    image_url:
+      state.image_url ||
+      'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+    featured: state.featured,
+    nearby_states: state.nearby_states,
+  }));
 }
 
 export async function getState(stateId: string): Promise<State | null> {
@@ -157,8 +170,7 @@ export async function getAllCities(): Promise<StateWithCities[]> {
   const { data, error } = await supabase
     .from('recycling_centers')
     .select('state, city')
-    .order('state')
-    .order('city');
+    .not('city', 'is', null);
 
   if (error) throw error;
 
@@ -176,11 +188,26 @@ export async function getAllCities(): Promise<StateWithCities[]> {
     {}
   );
 
-  // Convert to array format
-  return Object.entries(citiesByState).map(([state, cities]) => ({
-    state,
-    cities: Array.from(cities),
-  }));
+  // Get all states and shuffle them
+  const states = Object.keys(citiesByState);
+  for (let i = states.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [states[i], states[j]] = [states[j], states[i]];
+  }
+
+  // Take 8 random states and for each state, up to 3 random cities
+  return states.slice(0, 8).map((state) => {
+    const cities = Array.from(citiesByState[state]);
+    // Shuffle cities
+    for (let i = cities.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cities[i], cities[j]] = [cities[j], cities[i]];
+    }
+    return {
+      state,
+      cities: cities.slice(0, 3),
+    };
+  });
 }
 
 export async function getFeaturedStates(): Promise<State[]> {
@@ -197,8 +224,22 @@ export async function getFeaturedStates(): Promise<State[]> {
       throw error;
     }
 
-    console.log('Featured states data:', data);
-    return data || [];
+    // Convert to State type with proper formatting
+    const states = (data || []).map((state) => ({
+      id: state.name.toLowerCase().replace(/\s+/g, '-'),
+      name: state.name,
+      description:
+        state.description ||
+        `Find electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
+      image_url:
+        state.image_url ||
+        'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+      featured: true,
+      nearby_states: state.nearby_states,
+    }));
+
+    console.log('Featured states data:', states);
+    return states;
   } catch (err) {
     console.error('Exception in getFeaturedStates:', err);
     throw err;

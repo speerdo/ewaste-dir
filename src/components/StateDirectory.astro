@@ -20,7 +20,7 @@ const sortedLetters = Object.keys(groupedStates).sort();
 const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80';
 ---
 
-<section class="py-16 bg-gray-50">
+<section class="py-16 bg-gray-50" id="state-directory">
   <div class="container mx-auto px-4">
     <div class="text-center mb-12">
       <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900">Find E-Waste Recycling Centers by State</h2>
@@ -36,7 +36,7 @@ const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79
               {groupedStates[letter].map(state => (
                 <li>
                   <a 
-                    href={`/states/${state.id}`}
+                    href={`/states/${state.name.toLowerCase().replace(/\s+/g, '-')}`}
                     class="text-gray-600 hover:text-green-600 hover:underline transition-colors"
                   >
                     {state.name}
@@ -54,33 +54,3 @@ const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79
     </div>
   </div>
 </section>
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-  {states.map(state => (
-    <a 
-      href={`/states/${state.id}`} 
-      class="group relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
-    >
-      <img 
-        src={state.image_url || defaultStateImage} 
-        alt={state.name} 
-        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-      />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>
-      <div class="absolute bottom-0 left-0 right-0 p-6 z-20">
-        <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-accent-300 transition-colors">
-          {state.name}
-        </h3>
-        <p class="text-gray-200 text-sm mb-3 line-clamp-2 group-hover:line-clamp-none transition-all">
-          {state.description || `Find electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`}
-        </p>
-        <span class="inline-flex items-center text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-          View state
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </span>
-      </div>
-    </a>
-  ))}
-</div>

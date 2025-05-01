@@ -1,0 +1,187 @@
+---
+import { getAllStates, getCitiesByState } from '../lib/supabase';
+
+interface Props {
+  placeholder?: string;
+  className?: string;
+  variant?: 'hero' | 'nav';
+}
+
+const { placeholder = "Search by city or state...", className = "", variant = "hero" } = Astro.props;
+
+// Get all states and their cities at build time
+const states = await getAllStates();
+const cityStatePairs = await Promise.all(
+  states.map(async (state) => {
+    const cities = await getCitiesByState(state.id);
+    return cities.map(city => ({
+      city: city.name,
+      state: state.name
+    }));
+  })
+).then(results => results.flat());
+
+const id = variant === 'hero' ? 'hero' : 'nav';
+---
+
+<div class:list={["relative", className]}>
+  <form 
+    id={`search-form-${id}`}
+    class="relative"
+  >
+    <input
+      type="text"
+      id={`search-input-${id}`}
+      name="q"
+      placeholder={placeholder}
+      class:list={[
+        "w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent",
+        variant === 'hero' 
+          ? "px-4 py-3 rounded-lg" 
+          : "pl-10 pr-4 py-2 rounded-full"
+      ]}
+      autocomplete="off"
+    />
+    {variant === 'nav' && (
+      <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+    )}
+  </form>
+
+  <div 
+    id={`search-results-${id}`}
+    class="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50 max-h-96 overflow-y-auto"
+  >
+    <div class="p-2">
+      <div id={`results-content-${id}`} class="divide-y divide-gray-100"></div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ cityStatePairs, id }}>
+  const searchForm = document.getElementById(`search-form-${id}`);
+  const searchInput = document.getElementById(`search-input-${id}`);
+  const searchResults = document.getElementById(`search-results-${id}`);
+  const resultsContent = document.getElementById(`results-content-${id}`);
+  let searchTimeout;
+
+  // Function to search through city-state pairs
+  function searchLocations(query) {
+    query = query.toLowerCase().trim();
+    if (!query) return [];
+
+    // First try exact matches
+    const exactMatches = cityStatePairs.filter(({ city, state }) => {
+      const cityLower = city.toLowerCase();
+      const stateLower = state.toLowerCase();
+      return cityLower === query || stateLower === query;
+    });
+
+    // Then try partial matches
+    const partialMatches = cityStatePairs.filter(({ city, state }) => {
+      const cityLower = city.toLowerCase();
+      const stateLower = state.toLowerCase();
+      return (cityLower.includes(query) || stateLower.includes(query)) && 
+             !exactMatches.find(m => m.city === city && m.state === state);
+    });
+
+    // Combine and map to suggestion format
+    return [...exactMatches, ...partialMatches]
+      .slice(0, 10)
+      .map(({ city, state }) => ({
+        text: `${city}, ${state}`,
+        url: `/states/${state.toLowerCase()}/${city.toLowerCase().replace(/\s+/g, '-')}`
+      }));
+  }
+
+  // Handle form submission
+  searchForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    const suggestions = searchLocations(query);
+    console.log(`Search results (${id}):`, suggestions);
+
+    if (suggestions.length > 0) {
+      // If there's an exact match, go to that page
+      const exactMatch = suggestions.find(s => 
+        s.text.toLowerCase() === query.toLowerCase()
+      );
+      if (exactMatch) {
+        window.location.href = exactMatch.url;
+        return;
+      }
+      // If there's only one result, use that
+      if (suggestions.length === 1) {
+        window.location.href = suggestions[0].url;
+        return;
+      }
+      // Otherwise show suggestions
+      showSuggestions(suggestions);
+    } else {
+      resultsContent.innerHTML = `
+        <div class="px-4 py-3 text-gray-500">
+          No locations found matching "${query}"
+        </div>
+      `;
+      searchResults.classList.remove('hidden');
+    }
+  });
+
+  // Handle input changes for autocomplete
+  searchInput?.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    const query = searchInput.value.trim();
+    
+    if (query.length < 2) {
+      searchResults.classList.add('hidden');
+      return;
+    }
+
+    searchTimeout = setTimeout(() => {
+      const suggestions = searchLocations(query);
+      showSuggestions(suggestions);
+    }, 150);
+  });
+
+  function showSuggestions(suggestions) {
+    if (suggestions.length > 0) {
+      resultsContent.innerHTML = suggestions
+        .map(suggestion => `
+          <button
+            class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
+            data-url="${suggestion.url}"
+            onclick="window.location.href='${suggestion.url}'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            </svg>
+            <span>${suggestion.text}</span>
+          </button>
+        `)
+        .join('');
+      searchResults.classList.remove('hidden');
+    } else {
+      searchResults.classList.add('hidden');
+    }
+  }
+
+  // Close suggestions when clicking outside
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!searchInput?.contains(target) && !searchResults?.contains(target)) {
+      searchResults?.classList.add('hidden');
+    }
+  });
+
+  // Handle keyboard navigation
+  searchInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      searchResults.classList.add('hidden');
+    }
+  });
+</script>

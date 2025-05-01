@@ -10,26 +10,51 @@ import type { Marker } from '../../../components/MapComponent.astro';
 const DEFAULT_LOGO = '/images/default-recycling-logo.svg';
 
 // Generate routes for all cities in all states
-export async function getStaticPaths({ paginate }: { paginate: any }) {
+export async function getStaticPaths() {
+  // First get all states
   const { data: states } = await supabase
     .from('states')
-    .select('*')
-    .order('name');
+    .select('name');
+
+  if (!states) return [];
 
   const paths = [];
 
-  if (states) {
-    // Process states in chunks to avoid memory issues
-    const CHUNK_SIZE = 10;
-    for (let i = 0; i < states.length; i += CHUNK_SIZE) {
-      const stateChunk = states.slice(i, i + CHUNK_SIZE);
+  // For each state, get its cities
+  for (const stateRow of states) {
+    const stateName = stateRow.name;
+    const stateId = stateName.toLowerCase().replace(/\s+/g, '-');
+
+    // Get cities for this state
+    const { data: centers } = await supabase
+      .from('recycling_centers')
+      .select('city')
+      .eq('state', stateName)
+      .not('city', 'is', null);
+
+    if (centers) {
+      // Get unique cities
+      const cities = [...new Set(centers.map(c => c.city))];
       
-      for (const state of stateChunk) {
-        const cities = await getCitiesByState(state.id);
-        paths.push(...cities.map(city => ({
-          params: { state: state.id, city: city.id },
-          props: { state, cityData: city }  // Pass data as props to avoid refetching
-        })));
+      // Add a path for each city
+      for (const cityName of cities) {
+        const cityId = cityName.toLowerCase().replace(/\s+/g, '-');
+        paths.push({
+          params: { 
+            state: stateId,
+            city: cityId
+          },
+          props: {
+            state: {
+              id: stateId,
+              name: stateName
+            },
+            cityData: {
+              id: cityId,
+              name: cityName
+            }
+          }
+        });
       }
     }
   }
@@ -42,13 +67,20 @@ const state = await getState(stateId);
 
 // Convert city ID back to name format (e.g., "san-francisco" -> "San Francisco")
 const cityName = cityId.split('-')
-  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+  .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
   .join(' ');
 
 const centers = await getRecyclingCentersByCity(stateId, cityName);
 
+// Sort centers by rating (if available)
+const sortedCenters = [...centers].sort((a, b) => {
+  const ratingA = Number(a.rating) || 0;
+  const ratingB = Number(b.rating) || 0;
+  return ratingB - ratingA;
+});
+
 // Convert centers to map markers
-const mapMarkers: Marker[] = centers.map(center => ({
+const mapMarkers: Marker[] = sortedCenters.map(center => ({
   lat: Number(center.latitude),
   lng: Number(center.longitude),
   name: center.name,
@@ -64,16 +96,27 @@ console.log('Map markers:', mapMarkers);
 
 // Format working hours for display
 function formatWorkingHours(hours: any): string {
+  console.log('Raw hours data:', hours);
   if (!hours) return 'Hours not available';
-  if (typeof hours === 'string') return hours;
-  if (hours === '24/7') return 'Open 24/7';
+  if (typeof hours === 'string') {
+    if (hours === '24/7') return 'Open 24/7';
+    return hours;
+  }
   
   try {
-    const parsed = JSON.parse(hours);
+    let parsed = hours;
+    if (typeof hours === 'string') {
+      parsed = JSON.parse(hours);
+    }
+    console.log('Parsed hours:', parsed);
+    
+    const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     return Object.entries(parsed)
+      .sort(([a], [b]) => daysOrder.indexOf(a) - daysOrder.indexOf(b))
       .map(([day, time]) => `${day}: ${time}`)
       .join('\n');
-  } catch {
+  } catch (error) {
+    console.error('Error parsing hours:', error);
     return hours.toString();
   }
 }
@@ -87,6 +130,25 @@ if (!state) {
 <Layout title={`Recycling Centers in ${cityName}, ${state.name}`}>
   <div class="bg-white">
     <div class="container mx-auto px-4 py-8">
+      <!-- Add the global script before any usage -->
+      <script>
+        // Declare the function type on the window object
+        declare global {
+          interface Window {
+            showDirections: (lat: number, lng: number) => void;
+            openDirections: (lat: number, lng: number) => void;
+          }
+        }
+
+        // Define both functions globally
+        window.showDirections = function(lat: number, lng: number): void {
+          if (!lat || !lng) return;
+          window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
+        };
+
+        window.openDirections = window.showDirections; // Alias for compatibility with map component
+      </script>
+
       <div class="mb-8">
         <a 
           href={`/states/${stateId}`}
@@ -102,9 +164,23 @@ if (!state) {
       <h1 class="text-4xl font-display font-bold text-gray-900 mb-2">
         Electronics Recycling in {cityName}
       </h1>
-      <p class="text-xl text-gray-600 mb-8">
+      <p class="text-xl text-gray-600 mb-4">
         {centers.length} recycling {centers.length === 1 ? 'center' : 'centers'} in {cityName}, {state.name}
       </p>
+
+      {centers.length > 1 && (
+        <div class="mb-8">
+          <button
+            id="toggleSort"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          >
+            <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+            </svg>
+            Sort by Rating (High to Low)
+          </button>
+        </div>
+      )}
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Map Section -->
@@ -122,12 +198,13 @@ if (!state) {
         </div>
 
         <!-- Recycling Centers List -->
-        <div class="space-y-6">
-          {centers.map((center: RecyclingCenter) => (
+        <div id="centersList" class="space-y-6">
+          {sortedCenters.map((center: RecyclingCenter) => (
             <div 
               id={`center-${center.id}`}
               class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer" 
               data-center-id={center.id}
+              data-rating={center.rating || 0}
             >
               <div class="p-6">
                 <div class="flex items-start justify-between">
@@ -204,8 +281,34 @@ if (!state) {
                       <svg class="w-6 h-6 text-gray-400 mr-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <div class="text-gray-600 whitespace-pre-line">
-                        {formatWorkingHours(center.working_hours)}
+                      <div class="text-gray-600">
+                        <button 
+                          type="button"
+                          class="hours-toggle flex items-center gap-2 hover:text-green-600 transition-colors"
+                          onclick="this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'); document.getElementById(this.getAttribute('aria-controls')).style.display = this.getAttribute('aria-expanded') === 'true' ? 'block' : 'none'; this.querySelector('svg').classList.toggle('rotate-180')"
+                          aria-expanded="false"
+                          aria-controls={`hours-${center.id}`}
+                        >
+                          <span>Opening Hours</span>
+                          <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        <div 
+                          id={`hours-${center.id}`}
+                          class="mt-2 space-y-1"
+                          style="display: none;"
+                        >
+                          {formatWorkingHours(center.working_hours).split('\n').map(line => {
+                            const [day, time] = line.split(': ');
+                            return (
+                              <div class="flex justify-between py-1">
+                                <span class="font-medium text-gray-700">{day}</span>
+                                <span class="text-gray-600">{time}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -237,7 +340,7 @@ if (!state) {
                     </a>
                   )}
                   <button
-                    onclick={`showDirections(${center.latitude}, ${center.longitude})`}
+                    onclick={`window.showDirections(${center.latitude}, ${center.longitude})`}
                     class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                   >
                     Get Directions
@@ -362,11 +465,6 @@ if (!state) {
           }
         }
 
-        function showDirections(lat, lng) {
-          if (!lat || !lng) return;
-          window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
-        }
-
         // Initialize map when the Google Maps API is loaded
         if (typeof google !== 'undefined' && google.maps) {
           console.log('Google Maps API already loaded, initializing map');
@@ -391,26 +489,36 @@ if (!state) {
             document.head.appendChild(script);
           }
         }
+      
+        let sortAscending = false; // Start with descending (high to low)
+        const centersList = document.getElementById('centersList');
+        const toggleSort = document.getElementById('toggleSort');
+
+        if (toggleSort && centersList) {
+          toggleSort.addEventListener('click', () => {
+            sortAscending = !sortAscending;
+            const centers = Array.from(centersList.children);
+            
+            centers.sort((a, b) => {
+              const ratingA = parseFloat(Object.assign({}, a).dataset?.rating || '0');
+              const ratingB = parseFloat(Object.assign({}, b).dataset?.rating || '0');
+              return sortAscending ? ratingA - ratingB : ratingB - ratingA;
+            });
+
+            // Update button text to clearly show current sort order
+            toggleSort.innerHTML = `
+              <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              Sort by Rating (${sortAscending ? 'Low to High' : 'High to Low'})
+            `;
+
+            // Reorder the elements
+            centers.forEach(center => centersList.appendChild(center));
+          });
+        }
       </script>
 
-      <style is:global>
-        .gm-style .gm-style-iw-c {
-          padding: 0 !important;
-          border-radius: 0.75rem !important;
-          max-width: 300px !important;
-        }
-        .gm-style .gm-style-iw-d {
-          overflow: hidden !important;
-          padding: 0 !important;
-        }
-        .gm-style .gm-style-iw-t::after {
-          background: linear-gradient(45deg, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 51%, rgba(255,255,255,0) 100%) !important;
-        }
-        .gm-style .gm-ui-hover-effect {
-          top: 0 !important;
-          right: 0 !important;
-        }
-      </style>
     </>
   )}
 </Layout>
@@ -419,41 +527,129 @@ if (!state) {
   .highlight-center {
     @apply ring-2 ring-green-500 transform scale-[1.02];
   }
+  
+  /* Add smooth transitions for the hours dropdown */
+  .transform {
+    transition-property: transform;
+    transition-duration: 200ms;
+  }
+  
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+  .gm-style-iw-chr {
+    max-height: 18px !important;
+  }
+  .gm-style .gm-style-iw-c {
+    padding: 0 !important;
+    border-radius: 0.75rem !important;
+    max-width: 300px !important;
+  }
+  .gm-style .gm-style-iw-d {
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+  .gm-style .gm-style-iw-t::after {
+    background: linear-gradient(45deg, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 51%, rgba(255,255,255,0) 100%) !important;
+  }
+  .gm-style .gm-ui-hover-effect {
+    top: 0 !important;
+    right: 0 !important;
+  }
+  
+  /* Additional styles to remove focus indicators */
+  .info-window-link {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .info-window-link:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  .info-window-link:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    ring: 0 !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Remove tap highlight on mobile */
+  .gm-style * {
+    -webkit-tap-highlight-color: transparent;
+  }
 </style>
 
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    // Handle hours toggle clicks
+    document.querySelectorAll('[data-hours-toggle]').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // Stop the event from bubbling up to the center card
+        
+        const btn = e.currentTarget;
+        const content = document.getElementById(btn.getAttribute('aria-controls'));
+        
+        if (content) {
+          const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', !isExpanded ? 'true' : 'false');
+          content.style.display = !isExpanded ? 'block' : 'none';
+          btn.querySelector('svg')?.classList.toggle('rotate-180');
+        }
+      });
+    });
+  });
+</script>
+
 <script>
+  interface MarkerClickEvent extends CustomEvent {
+    detail: {
+      centerId: string;
+    };
+  }
+
   // Handle marker clicks from the map
-  document.addEventListener('markerClick', (e: any) => {
+  document.addEventListener('markerClick', ((event: MarkerClickEvent) => {
     // Remove highlight from all centers
     document.querySelectorAll('[data-center-id]').forEach(el => {
       el.classList.remove('highlight-center');
     });
 
     // Highlight the clicked center
-    const centerId = e.detail.centerId;
+    const centerId = event.detail.centerId;
     const centerElement = document.getElementById(`center-${centerId}`);
     if (centerElement) {
       centerElement.classList.add('highlight-center');
       centerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  });
+  }) as EventListener);
 
   // Handle clicks on center cards
   document.querySelectorAll('[data-center-id]').forEach(element => {
-    element.addEventListener('click', (e) => {
-      const centerId = (e.currentTarget as HTMLElement).dataset.centerId;
+    element.addEventListener('click', (event) => {
+      // Don't trigger center card click if clicking on a button or link
+      const target = event.target as HTMLElement;
+      if (target && (target.closest('button') || target.closest('a'))) {
+        return;
+      }
+
+      const currentTarget = event.currentTarget as HTMLElement;
+      const centerId = currentTarget.dataset.centerId;
+      
       if (centerId) {
         // Dispatch event to highlight marker on map
-        const event = new CustomEvent('centerSelect', {
+        const customEvent = new CustomEvent('centerSelect', {
           detail: { centerId }
         });
-        document.dispatchEvent(event);
+        document.dispatchEvent(customEvent);
 
         // Highlight the clicked center
         document.querySelectorAll('[data-center-id]').forEach(el => {
           el.classList.remove('highlight-center');
         });
-        (e.currentTarget as HTMLElement).classList.add('highlight-center');
+        currentTarget.classList.add('highlight-center');
       }
     });
   });

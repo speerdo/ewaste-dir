@@ -1,0 +1,141 @@
+---
+---
+
+<header class="fixed w-full bg-white/90 backdrop-blur-sm shadow-sm z-50 transition-all duration-300" id="header">
+  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <a href="/" class="text-2xl font-display font-bold text-primary-900 flex items-center">
+      <span class="text-accent-600">Recycle</span>OldTech
+    </a>
+    
+    <nav class="hidden md:flex space-x-6">
+      <a href="/" class="text-gray-700 hover:text-primary-700 transition-colors font-medium">Home</a>
+      <div class="group relative">
+        <button class="text-gray-700 hover:text-primary-700 transition-colors font-medium flex items-center">
+          States
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+          <div class="py-2 max-h-96 overflow-y-auto">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <a 
+                href={`/states/${['california', 'new-york', 'texas', 'florida'][i]}`} 
+                class="block px-4 py-2 text-gray-800 hover:bg-primary-50 hover:text-primary-700"
+              >
+                {['California', 'New York', 'Texas', 'Florida'][i]}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+      <a href="#" class="text-gray-700 hover:text-primary-700 transition-colors font-medium">About</a>
+      <a href="#" class="text-gray-700 hover:text-primary-700 transition-colors font-medium">Contact</a>
+    </nav>
+
+    <div class="flex items-center space-x-4">
+      <div class="relative hidden md:block">
+        <input 
+          type="text" 
+          placeholder="Search states & cities..." 
+          class="w-64 pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-500"
+        >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      
+      <button class="md:hidden text-gray-700" id="mobile-menu-button">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="md:hidden bg-white shadow-lg absolute w-full left-0 top-full transform -translate-y-full opacity-0 invisible transition-all duration-300" id="mobile-menu">
+    <div class="px-4 py-3">
+      <input 
+        type="text" 
+        placeholder="Search states & cities..." 
+        class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-500"
+      >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-7 top-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+    <div class="border-t border-gray-200">
+      <a href="/" class="block px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700">Home</a>
+      <div class="relative">
+        <button 
+          id="mobile-states-button"
+          class="flex items-center justify-between w-full px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700"
+        >
+          <span>States</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="bg-gray-50 relative" id="states-dropdown" style="display: none;">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <a 
+              href={`/states/${['california', 'new-york', 'texas', 'florida'][i]}`} 
+              class="block px-8 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700"
+            >
+              {['California', 'New York', 'Texas', 'Florida'][i]}
+            </a>
+          ))}
+        </div>
+      </div>
+      <a href="#" class="block px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700">About</a>
+      <a href="#" class="block px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700">Contact</a>
+    </div>
+  </div>
+</header>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const header = document.getElementById('header');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const statesDropdownButton = document.getElementById('mobile-states-button');
+    const statesDropdown = document.getElementById('states-dropdown');
+
+    // Scroll functionality for the header
+    if (header) {
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 10) {
+          header.classList.add('py-2', 'shadow');
+          header.classList.remove('py-4');
+        } else {
+          header.classList.add('py-4');
+          header.classList.remove('py-2', 'shadow');
+        }
+      });
+    }
+
+    // Mobile menu toggle
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', () => {
+        const isVisible = !mobileMenu.classList.contains('invisible');
+        
+        if (isVisible) {
+          mobileMenu.classList.add('invisible', 'opacity-0', '-translate-y-full');
+          mobileMenu.classList.remove('opacity-100', 'translate-y-0');
+        } else {
+          mobileMenu.classList.remove('invisible', 'opacity-0', '-translate-y-full');
+          mobileMenu.classList.add('opacity-100', 'translate-y-0');
+        }
+      });
+    }
+
+    // States dropdown in mobile menu
+    if (statesDropdownButton && statesDropdown) {
+      statesDropdownButton.addEventListener('click', () => {
+        const isVisible = statesDropdown.style.display !== 'none';
+        statesDropdown.style.display = isVisible ? 'none' : 'block';
+      });
+    }
+  });
+</script>

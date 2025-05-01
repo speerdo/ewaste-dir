@@ -1,0 +1,20 @@
+{
+  "name": "directory-website",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "import-data": "node scripts/import-data.js"
+  },
+  "dependencies": {
+    "@astrojs/tailwind": "^5.1.0",
+    "@supabase/supabase-js": "^2.39.7",
+    "astro": "^5.2.5",
+    "tailwindcss": "^3.4.1",
+    "@types/google.maps": "^3.55.4"
+  }
+}

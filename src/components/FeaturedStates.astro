@@ -1,0 +1,43 @@
+---
+import { getFeaturedStates } from '../lib/supabase';
+import type { State } from '../types/supabase';
+
+const states: State[] = await getFeaturedStates();
+---
+
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-4">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900">Explore States</h2>
+      <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Discover what each state has to offer, from vibrant cities to natural wonders</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {states.map((state: State) => (
+        <a 
+          href={`/states/${state.id}`} 
+          class="group relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
+        >
+          <img 
+            src={state.image_url} 
+            alt={state.name} 
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-6 z-20">
+            <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-accent-300 transition-colors">{state.name}</h3>
+            <p class="text-gray-200 text-sm mb-3 line-clamp-2 group-hover:line-clamp-none transition-all">
+              {state.description}
+            </p>
+            <span class="inline-flex items-center text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              View state
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,108 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getState, getCitiesByState, getAllStates } from '../../lib/supabase';
+import type { City } from '../../types/supabase';
+
+// Generate routes for all states
+export async function getStaticPaths() {
+  const states = await getAllStates();
+  return states.map(state => ({
+    params: { state: state.id }
+  }));
+}
+
+const { state: stateId } = Astro.params;
+const state = await getState(stateId);
+const cities: City[] = await getCitiesByState(stateId);
+
+// Default image for cities that don't have one
+const defaultCityImage = 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80';
+
+// If state doesn't exist, redirect to homepage
+if (!state) {
+  return Astro.redirect('/');
+}
+---
+
+<Layout title={`Electronics Recycling in ${state.name}`}>
+  <div class="relative">
+    <!-- Hero Section -->
+    <div class="relative h-[400px] overflow-hidden">
+      <img 
+        src={state.image_url || defaultCityImage} 
+        alt={`Electronics recycling in ${state.name}`} 
+        class="w-full h-full object-cover"
+      />
+      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="text-center text-white px-4">
+          <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">
+            Electronics Recycling in {state.name}
+          </h1>
+          <p class="text-xl md:text-2xl max-w-3xl mx-auto">
+            Find certified e-waste recycling centers in cities across {state.name}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cities Grid -->
+    <div class="container mx-auto px-4 py-12">
+      <h2 class="text-3xl font-display font-bold text-gray-900 mb-8">
+        Cities with E-Waste Recycling Centers
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {cities.map((city) => (
+          <a 
+            href={`/states/${state.id}/${city.id}`}
+            class="group relative h-64 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
+          >
+            <img 
+              src={city.image_url || defaultCityImage} 
+              alt={`Recycling centers in ${city.name}`} 
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6 z-20">
+              <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-accent-300 transition-colors">
+                {city.name}
+              </h3>
+              <p class="text-gray-200 text-sm mb-3 line-clamp-2 group-hover:line-clamp-none transition-all">
+                {city.description || `Find electronics recycling centers in ${city.name}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`}
+              </p>
+              <span class="inline-flex items-center text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                View recycling centers
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      {cities.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-gray-500">No cities with recycling centers found in {state.name}.</p>
+        </div>
+      )}
+    </div>
+
+    <!-- State Description -->
+    {state.description && (
+      <div class="bg-gray-50 py-12">
+        <div class="container mx-auto px-4">
+          <div class="prose prose-lg mx-auto">
+            <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">
+              About Electronics Recycling in {state.name}
+            </h2>
+            <div class="text-gray-600">
+              {state.description}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+</Layout>

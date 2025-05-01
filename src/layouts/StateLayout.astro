@@ -1,0 +1,243 @@
+---
+import Layout from './Layout.astro';
+import MapComponent from '../components/MapComponent.astro';
+import { getState, getRecyclingCentersByState } from '../lib/supabase';
+import type { State, RecyclingCenter } from '../types/supabase';
+import type { CentersByCity } from '../lib/supabase';
+
+interface Props {
+  state: State;
+}
+
+const { state } = Astro.props;
+console.log('State data:', state);
+
+// Get recycling centers data from Supabase
+const centersByCity: CentersByCity = await getRecyclingCentersByState(state.id);
+console.log('Centers by city:', centersByCity);
+
+// Count centers with 24/7 availability (if we have this data)
+const centers24_7 = Object.values(centersByCity)
+  .flat()
+  .filter((center: RecyclingCenter) => 
+    center.working_hours && typeof center.working_hours === 'string' && center.working_hours.includes('24/7')
+  ).length;
+
+// Count total centers
+const totalCenters = Object.values(centersByCity)
+  .reduce((acc, centers: RecyclingCenter[]) => acc + centers.length, 0);
+
+interface CityAnchor {
+  id: string;
+  name: string;
+}
+
+// Generate city anchor links from recycling centers data
+const cityAnchors: CityAnchor[] = Object.keys(centersByCity).map((cityName) => ({
+  id: cityName.toLowerCase().replace(/\s+/g, '-'),
+  name: cityName
+}));
+console.log('City anchors:', cityAnchors);
+
+// Get the first center from each city to use as the city's data
+const cityData = Object.entries(centersByCity).map(([cityName, centers]: [string, RecyclingCenter[]]) => {
+  const firstCenter = centers[0];
+  return {
+    id: cityName.toLowerCase().replace(/\s+/g, '-'),
+    name: cityName,
+    description: `Find electronics recycling centers in ${cityName}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
+    address: firstCenter.full_address,
+    coordinates: {
+      lat: firstCenter.latitude || 0,
+      lng: firstCenter.longitude || 0
+    }
+  };
+});
+console.log('City data:', cityData);
+
+// For now, let's use a placeholder image for states until we have proper images
+const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80';
+---
+
+<Layout title={`${state.name} Electronics Recycling Centers | E-Waste Hub`} description={`Find certified electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`}>
+  <!-- State Hero -->
+  <div class="pt-16"> <!-- Added padding to account for fixed header -->
+    <!-- Hero Image -->
+    <div class="relative h-[400px] overflow-hidden">
+      <img 
+        src={state.image_url || defaultStateImage} 
+        alt={`Electronics recycling in ${state.name}`} 
+        class="w-full h-full object-cover"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+      
+      <!-- Hero Content -->
+      <div class="absolute bottom-0 left-0 right-0 text-white p-8">
+        <div class="container mx-auto">
+          <!-- Breadcrumb -->
+          <nav class="mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2">
+              <li>
+                <a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a>
+              </li>
+              <li class="flex items-center">
+                <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-white font-medium ml-2">{state.name}</span>
+              </li>
+            </ol>
+          </nav>
+          
+          <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div>
+              <h1 class="text-4xl md:text-5xl font-display font-bold mb-3">
+                Electronics Recycling in {state.name}
+              </h1>
+              <p class="text-lg text-gray-200 max-w-2xl">{state.description || `Find certified electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`}</p>
+            </div>
+            <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium shadow-lg transition-colors flex items-center justify-center whitespace-nowrap">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              </svg>
+              Find Nearest Center
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    {totalCenters > 0 && (
+      <div class="bg-white border-b border-gray-200">
+        <div class="container mx-auto px-4 py-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-green-600">{totalCenters}</div>
+              <div class="text-sm text-gray-600">Recycling Centers</div>
+            </div>
+            {centers24_7 > 0 && (
+              <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">{centers24_7}</div>
+                <div class="text-sm text-gray-600">24/7 Drop-off Available</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+    <!-- City Quick Nav -->
+    {cityAnchors.length > 0 && (
+      <div class="bg-gray-50 border-b border-gray-200 sticky top-16 z-40"> <!-- Added sticky positioning -->
+        <div class="container mx-auto px-4 py-4">
+          <div class="flex items-center space-x-4 overflow-x-auto">
+            <span class="text-gray-600 font-medium whitespace-nowrap">Quick Jump:</span>
+            {cityAnchors.map((city: CityAnchor) => (
+              <a 
+                href={`#${city.id}`} 
+                class="px-4 py-2 bg-white hover:bg-green-50 text-gray-700 hover:text-green-700 rounded-full transition-colors whitespace-nowrap shadow-sm"
+              >
+                {city.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+
+  <!-- Cities Content -->
+  {cityData.length > 0 ? (
+    <div class="container mx-auto px-4 py-12">
+      <div class="space-y-16">
+        {cityData.map((city) => (
+          <section id={city.id} class="scroll-mt-32"> <!-- Increased scroll margin to account for sticky header -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+              <div class="lg:col-span-2">
+                <h2 class="text-3xl font-display font-bold text-gray-900 mb-4">{city.name}</h2>
+                <p class="text-gray-600 mb-6">{city.description}</p>
+                <div class="flex items-center text-gray-500 mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>{city.address}</span>
+                </div>
+                
+                <div class="rounded-lg overflow-hidden shadow-md">
+                  <img 
+                    src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(city.address)}&zoom=13&size=800x400&key=${import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY}`}
+                    alt={`Map of ${city.name}, ${state.name}`} 
+                    class="w-full h-auto object-cover"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Location</h3>
+                <MapComponent data-lat={city.coordinates.lat} data-lng={city.coordinates.lng} data-name={city.name} />
+              </div>
+            </div>
+            
+            <div class="border-b border-gray-200 pb-8 pt-4">
+              <a 
+                href="#" 
+                class="inline-flex items-center text-green-700 hover:text-green-800"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                View recycling center details
+              </a>
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  ) : (
+    <div class="container mx-auto px-4 py-12">
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">No Recycling Centers Found</h2>
+        <p class="text-gray-600">We couldn't find any recycling centers in {state.name}. Please check back later or try another state.</p>
+      </div>
+    </div>
+  )}
+
+  <!-- Render children (RecyclingCenters component) -->
+  <slot />
+
+  <!-- Related States -->
+  {state.nearby_states && state.nearby_states.length > 0 && (
+    <div class="bg-gray-50 py-12">
+      <div class="container mx-auto px-4">
+        <h2 class="text-2xl font-display font-bold text-gray-900 mb-8">Nearby States</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {await Promise.all(Object.values(state.nearby_states).slice(0, 3).map(async nearbyState => {
+            const relatedState = await getState(nearbyState);
+            if (!relatedState) return null;
+            
+            return (
+              <a href={`/states/${relatedState.id}`} class="group">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-shadow group-hover:shadow-lg">
+                  <div class="h-40 overflow-hidden">
+                    <img 
+                      src={relatedState.image_url || defaultStateImage} 
+                      alt={relatedState.name} 
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div class="p-4">
+                    <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-700 transition-colors">{relatedState.name}</h3>
+                    <p class="text-sm text-gray-600 line-clamp-2">{relatedState.description}</p>
+                  </div>
+                </div>
+              </a>
+            );
+          }))}
+        </div>
+      </div>
+    </div>
+  )}
+</Layout>

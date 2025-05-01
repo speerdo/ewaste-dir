@@ -1,0 +1,45 @@
+<section class="py-16 bg-gradient-to-r from-green-900 to-green-800 text-white overflow-hidden relative">
+  <!-- Background pattern -->
+  <div class="absolute inset-0 opacity-10">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" fill="#fff">
+      <path d="M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z"></path>
+    </svg>
+  </div>
+
+  <div class="container mx-auto px-4 relative z-10">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-display font-bold">What Responsible Recyclers Say</h2>
+      <p class="mt-3 text-lg text-gray-300 max-w-2xl mx-auto">Hear from people and businesses who are making a difference through proper electronics recycling</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div class="bg-white rounded-xl shadow-lg p-6 text-gray-800 transform transition-transform hover:-translate-y-2">
+          <div class="flex items-center mb-4">
+            <div class="text-green-500">
+              {Array.from({ length: 5 }).map((_, j) => (
+                <span class="inline-block">★</span>
+              ))}
+            </div>
+          </div>
+          <blockquote class="mb-4 text-gray-600">
+            {[
+              "Finding a certified recycling center was so easy with this directory. I recycled all my old electronics knowing they'd be handled responsibly.",
+              "As an IT manager, I needed a reliable way to dispose of corporate e-waste. This platform helped us find certified partners who ensure data security.",
+              "The recycling center we found through this directory helped our school dispose of old computers and taught our students about e-waste responsibility."
+            ][i]}
+          </blockquote>
+          <div class="flex items-center">
+            <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
+              {["SK", "TM", "EP"][i]}
+            </div>
+            <div class="ml-3">
+              <div class="font-medium text-gray-900">{["Sarah K.", "Tom M.", "Emma P."][i]}</div>
+              <div class="text-sm text-gray-500">{["Eco-Conscious Consumer", "Corporate IT Manager", "School Administrator"][i]}</div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

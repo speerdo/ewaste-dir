@@ -10,7 +10,7 @@ import type { Marker } from '../../../components/MapComponent.astro';
 const DEFAULT_LOGO = '/images/default-recycling-logo.svg';
 
 // Generate routes for all cities in all states
-export async function getStaticPaths() {
+export async function getStaticPaths({ paginate }: { paginate: any }) {
   const { data: states } = await supabase
     .from('states')
     .select('*')
@@ -19,11 +19,18 @@ export async function getStaticPaths() {
   const paths = [];
 
   if (states) {
-    for (const state of states) {
-      const cities = await getCitiesByState(state.id);
-      paths.push(...cities.map(city => ({
-        params: { state: state.id, city: city.id }
-      })));
+    // Process states in chunks to avoid memory issues
+    const CHUNK_SIZE = 10;
+    for (let i = 0; i < states.length; i += CHUNK_SIZE) {
+      const stateChunk = states.slice(i, i + CHUNK_SIZE);
+      
+      for (const state of stateChunk) {
+        const cities = await getCitiesByState(state.id);
+        paths.push(...cities.map(city => ({
+          params: { state: state.id, city: city.id },
+          props: { state, cityData: city }  // Pass data as props to avoid refetching
+        })));
+      }
     }
   }
 

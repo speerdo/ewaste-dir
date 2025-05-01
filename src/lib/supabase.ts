@@ -6,6 +6,11 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Cache for state and city data
+const stateCache = new Map<string, State>();
+const cityCache = new Map<string, City[]>();
+const recyclingCenterCache = new Map<string, RecyclingCenter[]>();
+
 export async function getAllStates(): Promise<State[]> {
   const { data, error } = await supabase
     .from('states')
@@ -16,14 +21,22 @@ export async function getAllStates(): Promise<State[]> {
   return data || [];
 }
 
-export async function getState(id: string): Promise<State | null> {
+export async function getState(stateId: string): Promise<State | null> {
+  // Check cache first
+  if (stateCache.has(stateId)) {
+    return stateCache.get(stateId) || null;
+  }
+
   const { data, error } = await supabase
     .from('states')
     .select('*')
-    .eq('id', id)
+    .eq('id', stateId)
     .single();
 
   if (error) throw error;
+  if (data) {
+    stateCache.set(stateId, data);
+  }
   return data;
 }
 
@@ -34,22 +47,33 @@ export interface CentersByCity {
 export async function getRecyclingCentersByState(
   stateId: string
 ): Promise<CentersByCity> {
-  // First get the state name from the ID
-  const { data: stateData, error: stateError } = await supabase
-    .from('states')
-    .select('name')
-    .eq('id', stateId)
-    .single();
+  // Check cache first
+  const cacheKey = `state_${stateId}`;
+  if (recyclingCenterCache.has(cacheKey)) {
+    const centers = recyclingCenterCache.get(cacheKey) || [];
+    return centers.reduce((acc: CentersByCity, center: RecyclingCenter) => {
+      const city = center.city || 'Unknown';
+      if (!acc[city]) {
+        acc[city] = [];
+      }
+      acc[city].push(center);
+      return acc;
+    }, {});
+  }
 
-  if (stateError) throw stateError;
-  if (!stateData) throw new Error('State not found');
+  // First get the state name from the ID
+  const state = await getState(stateId);
+  if (!state) throw new Error('State not found');
 
   const { data, error } = await supabase
     .from('recycling_centers')
     .select('*')
-    .ilike('state', stateData.name);
+    .ilike('state', state.name);
 
   if (error) throw error;
+
+  // Cache the results
+  recyclingCenterCache.set(cacheKey, data || []);
 
   // Group centers by city
   return (data || []).reduce((acc: CentersByCity, center: RecyclingCenter) => {
@@ -66,20 +90,23 @@ export async function getRecyclingCentersByCity(
   stateId: string,
   city: string
 ): Promise<RecyclingCenter[]> {
-  // First get the state name from the ID
-  const { data: stateData, error: stateError } = await supabase
-    .from('states')
-    .select('name')
-    .eq('id', stateId)
-    .single();
+  // Check cache first
+  const cacheKey = `state_${stateId}`;
+  if (recyclingCenterCache.has(cacheKey)) {
+    const centers = recyclingCenterCache.get(cacheKey) || [];
+    return centers.filter(
+      (center) => center.city?.toLowerCase() === city.toLowerCase()
+    );
+  }
 
-  if (stateError) throw stateError;
-  if (!stateData) throw new Error('State not found');
+  // First get the state name from the ID
+  const state = await getState(stateId);
+  if (!state) throw new Error('State not found');
 
   const { data, error } = await supabase
     .from('recycling_centers')
     .select('*')
-    .ilike('state', stateData.name)
+    .ilike('state', state.name)
     .ilike('city', city);
 
   if (error) throw error;
@@ -87,20 +114,19 @@ export async function getRecyclingCentersByCity(
 }
 
 export async function getCitiesByState(stateId: string): Promise<City[]> {
-  // First get the state name from the ID
-  const { data: stateData, error: stateError } = await supabase
-    .from('states')
-    .select('name')
-    .eq('id', stateId)
-    .single();
+  // Check cache first
+  if (cityCache.has(stateId)) {
+    return cityCache.get(stateId) || [];
+  }
 
-  if (stateError) throw stateError;
-  if (!stateData) throw new Error('State not found');
+  // First get the state name from the ID
+  const state = await getState(stateId);
+  if (!state) throw new Error('State not found');
 
   const { data, error } = await supabase
     .from('recycling_centers')
     .select('city')
-    .ilike('state', stateData.name)
+    .ilike('state', state.name)
     .order('city')
     .not('city', 'is', null);
 
@@ -109,14 +135,17 @@ export async function getCitiesByState(stateId: string): Promise<City[]> {
   // Get unique cities
   const uniqueCities = [...new Set(data?.map((row) => row.city) || [])];
 
-  // Convert to City type
-  return uniqueCities.map((cityName) => ({
+  // Convert to City type and cache
+  const cities = uniqueCities.map((cityName) => ({
     id: cityName.toLowerCase().replace(/\s+/g, '-'),
     state_id: stateId,
     name: cityName,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }));
+
+  cityCache.set(stateId, cities);
+  return cities;
 }
 
 export interface StateWithCities {

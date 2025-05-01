@@ -33,85 +33,24 @@ const props = Astro.props;
 </div>
 
 <script>
-  // This function initializes the map when the Google Maps API is loaded
-  function initializeMap() {
-    const mapElements = document.querySelectorAll('#map') as NodeListOf<HTMLElement>;
-    
-    mapElements.forEach(mapElement => {
-      const loadingElement = mapElement.parentElement?.querySelector('.map-loading') as HTMLElement;
+  // Batch size for marker creation
+  const MARKER_BATCH_SIZE = 20;
+  const MARKER_BATCH_DELAY = 10; // milliseconds
+  
+  let activeMarker: google.maps.Marker | null = null;
+
+  // This function creates markers in batches to avoid blocking the main thread
+  async function createMarkersInBatches(map: google.maps.Map, markers: any[], infoWindow: google.maps.InfoWindow) {
+    const markerRefs = new Map();
+    const bounds = new google.maps.LatLngBounds();
+
+    // Process markers in batches
+    for (let i = 0; i < markers.length; i += MARKER_BATCH_SIZE) {
+      const batch = markers.slice(i, i + MARKER_BATCH_SIZE);
       
-      try {
-        // Get markers from data attribute
-        const markers = JSON.parse(mapElement.dataset.markers || '[]');
-        const zoom = parseInt(mapElement.dataset.zoom || '12', 10);
-        
-        if (!markers.length) {
-          console.error('No markers provided');
-          return;
-        }
-
-        console.log('Initializing map with markers:', markers);
-        
-        // Create map instance centered on the first marker
-        const map = new google.maps.Map(mapElement, {
-          center: { lat: markers[0].lat, lng: markers[0].lng },
-          zoom,
-          styles: [
-            {
-              "featureType": "administrative",
-              "elementType": "labels.text.fill",
-              "stylers": [{"color": "#444444"}]
-            },
-            {
-              "featureType": "landscape",
-              "elementType": "all",
-              "stylers": [{"color": "#f2f2f2"}]
-            },
-            {
-              "featureType": "poi",
-              "elementType": "all",
-              "stylers": [{"visibility": "off"}]
-            },
-            {
-              "featureType": "road",
-              "elementType": "all",
-              "stylers": [{"saturation": -100}, {"lightness": 45}]
-            },
-            {
-              "featureType": "road.highway",
-              "elementType": "all",
-              "stylers": [{"visibility": "simplified"}]
-            },
-            {
-              "featureType": "road.arterial",
-              "elementType": "labels.icon",
-              "stylers": [{"visibility": "off"}]
-            },
-            {
-              "featureType": "transit",
-              "elementType": "all",
-              "stylers": [{"visibility": "off"}]
-            },
-            {
-              "featureType": "water",
-              "elementType": "all",
-              "stylers": [{"color": "#c5e0ec"}, {"visibility": "on"}]
-            }
-          ]
-        });
-
-        // Create bounds to fit all markers
-        const bounds = new google.maps.LatLngBounds();
-        
-        // Create info window
-        const infoWindow = new google.maps.InfoWindow();
-
-        // Store marker references
-        const markerRefs = new Map();
-        let activeMarker: google.maps.Marker | null = null;
-
-        // Add markers
-        markers.forEach((marker: any) => {
+      // Create a batch of markers
+      const batchPromises = batch.map(marker => {
+        return new Promise<void>((resolve) => {
           const position = { lat: marker.lat, lng: marker.lng };
           const mapMarker = new google.maps.Marker({
             position,
@@ -184,7 +123,91 @@ const props = Astro.props;
             // Pan to marker
             map.panTo(position);
           });
+
+          resolve();
         });
+      });
+
+      // Wait for all markers in the batch to be created
+      await Promise.all(batchPromises);
+      
+      // Small delay between batches to prevent UI blocking
+      await new Promise(resolve => setTimeout(resolve, MARKER_BATCH_DELAY));
+    }
+
+    return { markerRefs, bounds };
+  }
+
+  // This function initializes the map when the Google Maps API is loaded
+  async function initializeMap() {
+    const mapElements = document.querySelectorAll('#map') as NodeListOf<HTMLElement>;
+    
+    mapElements.forEach(async (mapElement) => {
+      const loadingElement = mapElement.parentElement?.querySelector('.map-loading') as HTMLElement;
+      
+      try {
+        // Get markers from data attribute
+        const markers = JSON.parse(mapElement.dataset.markers || '[]');
+        const zoom = parseInt(mapElement.dataset.zoom || '12', 10);
+        
+        if (!markers.length) {
+          console.error('No markers provided');
+          return;
+        }
+
+        // Create map instance centered on the first marker
+        const map = new google.maps.Map(mapElement, {
+          center: { lat: markers[0].lat, lng: markers[0].lng },
+          zoom,
+          styles: [
+            {
+              "featureType": "administrative",
+              "elementType": "labels.text.fill",
+              "stylers": [{"color": "#444444"}]
+            },
+            {
+              "featureType": "landscape",
+              "elementType": "all",
+              "stylers": [{"color": "#f2f2f2"}]
+            },
+            {
+              "featureType": "poi",
+              "elementType": "all",
+              "stylers": [{"visibility": "off"}]
+            },
+            {
+              "featureType": "road",
+              "elementType": "all",
+              "stylers": [{"saturation": -100}, {"lightness": 45}]
+            },
+            {
+              "featureType": "road.highway",
+              "elementType": "all",
+              "stylers": [{"visibility": "simplified"}]
+            },
+            {
+              "featureType": "road.arterial",
+              "elementType": "labels.icon",
+              "stylers": [{"visibility": "off"}]
+            },
+            {
+              "featureType": "transit",
+              "elementType": "all",
+              "stylers": [{"visibility": "off"}]
+            },
+            {
+              "featureType": "water",
+              "elementType": "all",
+              "stylers": [{"color": "#c5e0ec"}, {"visibility": "on"}]
+            }
+          ]
+        });
+
+        // Create info window
+        const infoWindow = new google.maps.InfoWindow();
+
+        // Create markers in batches
+        const { markerRefs, bounds } = await createMarkersInBatches(map, markers, infoWindow);
 
         // Listen for center selection events
         document.addEventListener('centerSelect', (e: any) => {
@@ -246,13 +269,7 @@ const props = Astro.props;
         // Fit map to show all markers with padding
         if (markers.length > 1) {
           const padding = { top: 50, right: 50, bottom: 50, left: 50 };
-          const paddingOptions = {
-            top: padding.top,
-            right: padding.right,
-            bottom: padding.bottom,
-            left: padding.left
-          };
-          map.fitBounds(bounds, paddingOptions);
+          map.fitBounds(bounds, padding);
         }
         
         // Hide loading indicator

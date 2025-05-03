@@ -8,74 +8,92 @@ import type { Marker } from '../../../components/MapComponent.astro';
 import CentersList from '../../../components/recycling-centers/CentersList.astro';
 import '../../../styles/recycling-centers.css';
 
+// Enable pre-rendering for this dynamic route
+export const prerender = true;
+
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
 
 // Generate static routes for all cities in all states
 export async function getStaticPaths() {
-  console.log('Building static routes for all city pages...');
-  
-  // First get all states
-  const { data: states } = await supabase
-    .from('states')
-    .select('name');
-
-  if (!states || states.length === 0) {
-    console.error('No states found in database');
-    return [];
-  }
-
-  console.log(`Found ${states.length} states`);
-  const paths = [];
-
-  // For each state, get its cities
-  for (const stateRow of states) {
-    const stateName = stateRow.name;
-    const stateId = stateName.toLowerCase().replace(/\s+/g, '-');
+  try {
+    console.log('Building static routes for all city pages...');
     
-    console.log(`Processing cities for ${stateName}...`);
+    // First get all states
+    const { data: states, error: statesError } = await supabase
+      .from('states')
+      .select('name');
 
-    // Get cities for this state
-    const { data: centers } = await supabase
-      .from('recycling_centers')
-      .select('city')
-      .eq('state', stateName)
-      .not('city', 'is', null);
-
-    if (centers && centers.length > 0) {
-      // Get unique cities
-      const cities = [...new Set(centers.map(c => c.city))];
-      console.log(`Found ${cities.length} unique cities in ${stateName}`);
-      
-      // Add a path for each city
-      for (const cityName of cities) {
-        if (!cityName) continue; // Skip null/empty city names
-        
-        const cityId = cityName.toLowerCase().replace(/\s+/g, '-');
-        paths.push({
-          params: { 
-            state: stateId,
-            city: cityId
-          },
-          props: {
-            stateData: {
-              id: stateId,
-              name: stateName
-            },
-            cityData: {
-              id: cityId,
-              name: cityName
-            }
-          }
-        });
-      }
-    } else {
-      console.log(`No cities found for ${stateName}`);
+    if (statesError) {
+      console.error('Error fetching states:', statesError);
+      throw statesError;
     }
-  }
 
-  console.log(`Generated ${paths.length} city pages`);
-  return paths;
+    if (!states || states.length === 0) {
+      console.error('No states found in database');
+      return [];
+    }
+
+    console.log(`Found ${states.length} states`);
+    const paths = [];
+
+    // For each state, get its cities
+    for (const stateRow of states) {
+      const stateName = stateRow.name;
+      const stateId = stateName.toLowerCase().replace(/\s+/g, '-');
+      
+      console.log(`Processing cities for ${stateName}...`);
+
+      // Get cities for this state
+      const { data: centers, error: centersError } = await supabase
+        .from('recycling_centers')
+        .select('city')
+        .eq('state', stateName)
+        .not('city', 'is', null);
+
+      if (centersError) {
+        console.error(`Error fetching centers for ${stateName}:`, centersError);
+        continue;
+      }
+
+      if (centers && centers.length > 0) {
+        // Get unique cities
+        const cities = [...new Set(centers.map(c => c.city))];
+        console.log(`Found ${cities.length} unique cities in ${stateName}`);
+        
+        // Add a path for each city
+        for (const cityName of cities) {
+          if (!cityName) continue; // Skip null/empty city names
+          
+          const cityId = cityName.toLowerCase().replace(/\s+/g, '-');
+          paths.push({
+            params: { 
+              state: stateId,
+              city: cityId
+            },
+            props: {
+              stateData: {
+                id: stateId,
+                name: stateName
+              },
+              cityData: {
+                id: cityId,
+                name: cityName
+              }
+            }
+          });
+        }
+      } else {
+        console.log(`No cities found for ${stateName}`);
+      }
+    }
+
+    console.log(`Generated ${paths.length} city pages`);
+    return paths;
+  } catch (error) {
+    console.error('Error in getStaticPaths:', error);
+    throw error;
+  }
 }
 
 // Get data from params or props

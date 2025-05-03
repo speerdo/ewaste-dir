@@ -1,7 +1,42 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getRecyclingCentersByState, getState } from '../../lib/supabase';
+import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import type { RecyclingCenter } from '../../types/supabase';
+import '../../styles/states.css';
+
+// Enable pre-rendering for this dynamic route
+export const prerender = true;
+
+export async function getStaticPaths() {
+  try {
+    console.log('Building static routes for all state pages...');
+    
+    const { data: states, error: statesError } = await supabase
+      .from('states')
+      .select('*');
+
+    if (statesError) {
+      console.error('Error fetching states:', statesError);
+      throw statesError;
+    }
+
+    if (!states || states.length === 0) {
+      console.error('No states found in database');
+      return [];
+    }
+
+    console.log(`Found ${states.length} states`);
+    
+    return states.map(state => ({
+      params: { state: state.name.toLowerCase().replace(/\s+/g, '-') },
+      props: { state }
+    }));
+  } catch (error) {
+    console.error('Error in getStaticPaths:', error);
+    throw error;
+  }
+}
 
 // Get the state parameter from the URL
 const { state: stateId } = Astro.params;

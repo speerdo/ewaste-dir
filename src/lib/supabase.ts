@@ -11,6 +11,19 @@ const stateCache = new Map<string, State>();
 const cityCache = new Map<string, City[]>();
 const recyclingCenterCache = new Map<string, RecyclingCenter[]>();
 
+/**
+ * Normalizes a string for use in URLs by:
+ * - Converting to lowercase
+ * - Replacing non-alphanumeric characters with hyphens
+ * - Removing leading/trailing hyphens
+ */
+export function normalizeForUrl(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
 export async function getAllStates(): Promise<State[]> {
   const { data, error } = await supabase
     .from('states')
@@ -35,45 +48,78 @@ export async function getAllStates(): Promise<State[]> {
 }
 
 export async function getState(stateId: string): Promise<State | null> {
-  // Check cache first
-  if (stateCache.has(stateId)) {
-    return stateCache.get(stateId) || null;
-  }
+  try {
+    console.log(`Getting state data for: ${stateId}`);
 
-  // Convert state ID back to name format (e.g., "new-york" -> "New York")
-  const stateName = stateId
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    // First try exact match
+    const { data: exactMatch, error: exactError } = await supabase
+      .from('states')
+      .select('*')
+      .eq('name', stateId.replace(/-/g, ' '))
+      .single();
 
-  const { data, error } = await supabase
-    .from('states')
-    .select('*')
-    .ilike('name', stateName)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') {
-      return null; // No state found
+    if (exactMatch) {
+      console.log(`Found exact match for state: ${exactMatch.name}`);
+      return {
+        id: normalizeForUrl(exactMatch.name),
+        name: exactMatch.name,
+        description: exactMatch.description,
+        image_url: exactMatch.image_url,
+        featured: exactMatch.featured,
+        created_at: exactMatch.created_at,
+        updated_at: exactMatch.updated_at,
+        nearby_states: exactMatch.nearby_states,
+      };
     }
-    throw error;
-  }
 
-  if (data) {
-    const state: State = {
-      id: data.name.toLowerCase().replace(/\s+/g, '-'),
-      name: data.name,
-      description: data.description,
-      image_url: data.image_url,
-      featured: data.featured,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      nearby_states: data.nearby_states,
-    };
-    stateCache.set(stateId, state);
-    return state;
+    // Try case-insensitive match
+    const { data: likeMatch, error: likeError } = await supabase
+      .from('states')
+      .select('*')
+      .ilike('name', stateId.replace(/-/g, ' '))
+      .single();
+
+    if (likeMatch) {
+      console.log(`Found case-insensitive match for state: ${likeMatch.name}`);
+      return {
+        id: normalizeForUrl(likeMatch.name),
+        name: likeMatch.name,
+        description: likeMatch.description,
+        image_url: likeMatch.image_url,
+        featured: likeMatch.featured,
+        created_at: likeMatch.created_at,
+        updated_at: likeMatch.updated_at,
+        nearby_states: likeMatch.nearby_states,
+      };
+    }
+
+    // If not found in states table, try to find in recycling_centers
+    const { data: centers, error: centersError } = await supabase
+      .from('recycling_centers')
+      .select('state')
+      .ilike('state', stateId.replace(/-/g, ' '))
+      .limit(1);
+
+    if (centers && centers.length > 0) {
+      console.log(`Found state in recycling centers: ${centers[0].state}`);
+      return {
+        id: normalizeForUrl(centers[0].state),
+        name: centers[0].state,
+        description: `Find electronics recycling centers in ${centers[0].state}`,
+        image_url:
+          'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51',
+        featured: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+
+    console.log(`No state found for: ${stateId}`);
+    return null;
+  } catch (error) {
+    console.error('Error in getState:', error);
+    return null;
   }
-  return null;
 }
 
 export interface CentersByCity {
@@ -142,27 +188,40 @@ export async function getRecyclingCentersByCity(
   stateId: string,
   city: string
 ): Promise<RecyclingCenter[]> {
-  // Check cache first
-  const cacheKey = `state_${stateId}`;
-  if (recyclingCenterCache.has(cacheKey)) {
-    const centers = recyclingCenterCache.get(cacheKey) || [];
-    return centers.filter(
-      (center) => center.city?.toLowerCase() === city.toLowerCase()
-    );
+  try {
+    console.log(`Fetching centers for ${city}, ${stateId}...`);
+
+    // First get the state name from the ID
+    const state = await getState(stateId);
+    if (!state) {
+      console.error(`State not found: ${stateId}`);
+      return [];
+    }
+
+    // Use case-insensitive matching for both state and city
+    const { data, error } = await supabase
+      .from('recycling_centers')
+      .select('*')
+      .ilike('state', state.name)
+      .ilike('city', city)
+      .order('name');
+
+    if (error) {
+      console.error('Error fetching recycling centers:', error);
+      return [];
+    }
+
+    if (!data || data.length === 0) {
+      console.log(`No centers found for ${city}, ${state.name}`);
+      return [];
+    }
+
+    console.log(`Found ${data.length} centers in ${city}, ${state.name}`);
+    return data;
+  } catch (error) {
+    console.error('Error in getRecyclingCentersByCity:', error);
+    return [];
   }
-
-  // First get the state name from the ID
-  const state = await getState(stateId);
-  if (!state) throw new Error('State not found');
-
-  const { data, error } = await supabase
-    .from('recycling_centers')
-    .select('*')
-    .ilike('state', state.name)
-    .ilike('city', city);
-
-  if (error) throw error;
-  return data || [];
 }
 
 export async function getCitiesByState(stateId: string): Promise<City[]> {

@@ -1,13 +1,18 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates } from '../../lib/supabase';
+import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates, normalizeForUrl } from '../../lib/supabase';
 import { supabase } from '../../lib/supabase';
 import type { RecyclingCenter } from '../../types/supabase';
 
-// Enable pre-rendering for this dynamic route
-export const prerender = true;
+// Enable hybrid mode - static paths for production, dynamic in dev
+export const prerender = import.meta.env.PROD;
 
 export async function getStaticPaths() {
+  // Only run in production build
+  if (!import.meta.env.PROD) {
+    return [];
+  }
+
   try {
     console.log('Building static routes for all state pages...');
     
@@ -28,7 +33,7 @@ export async function getStaticPaths() {
     console.log(`Found ${states.length} states`);
     
     return states.map(state => ({
-      params: { state: state.name.toLowerCase().replace(/\s+/g, '-') },
+      params: { state: normalizeForUrl(state.name) },
       props: { state }
     }));
   } catch (error) {

@@ -1,27 +1,32 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getState, getCitiesByState, getRecyclingCentersByCity, getAllStates } from '../../../lib/supabase';
+import { getState, getCitiesByState, getRecyclingCentersByCity, getAllStates, normalizeForUrl } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import { supabase } from '../../../lib/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
 import CentersList from '../../../components/recycling-centers/CentersList.astro';
 
-// Enable pre-rendering for this dynamic route
-export const prerender = true;
+// Enable hybrid mode - static paths for production, dynamic in dev
+export const prerender = import.meta.env.PROD;
 
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
 
-// Generate static routes for all cities in all states
+// Generate static routes for production build
 export async function getStaticPaths() {
+  // Only run in production build
+  if (!import.meta.env.PROD) {
+    return [];
+  }
+
   try {
     console.log('Building static routes for all city pages...');
     
-    // First get all states
+    // First get all states to ensure we have the correct data
     const { data: states, error: statesError } = await supabase
       .from('states')
-      .select('name');
+      .select('*');
 
     if (statesError) {
       console.error('Error fetching states:', statesError);
@@ -33,61 +38,87 @@ export async function getStaticPaths() {
       return [];
     }
 
-    console.log(`Found ${states.length} states`);
+    console.log(`Found ${states.length} states in database`);
+
+    // Create a map of normalized state names to actual state names
+    const stateNameMap = new Map(
+      states.map(state => [state.name.toLowerCase(), state.name])
+    );
+
+    // Get all recycling centers
+    const { data: centers, error: centersError } = await supabase
+      .from('recycling_centers')
+      .select('state, city')
+      .not('city', 'is', null)
+      .not('state', 'is', null);
+
+    if (centersError) {
+      console.error('Error fetching centers:', centersError);
+      throw centersError;
+    }
+
+    if (!centers || centers.length === 0) {
+      console.error('No centers found in database');
+      return [];
+    }
+
+    console.log(`Found ${centers.length} total recycling centers`);
+
+    // Create a map of states and their cities
+    const stateMap = new Map<string, Set<string>>();
+    
+    centers.forEach(center => {
+      const state = center.state.trim();
+      const city = center.city.trim();
+      const normalizedState = state.toLowerCase();
+      
+      // Only include states that exist in our states table
+      if (stateNameMap.has(normalizedState)) {
+        if (!stateMap.has(state)) {
+          stateMap.set(state, new Set());
+        }
+        stateMap.get(state)?.add(city);
+      }
+    });
+
     const paths = [];
 
-    // For each state, get its cities
-    for (const stateRow of states) {
-      const stateName = stateRow.name;
-      const stateId = stateName.toLowerCase().replace(/\s+/g, '-');
+    // Generate paths for each state and city
+    for (const [stateName, cities] of stateMap) {
+      const stateId = normalizeForUrl(stateName);
       
-      console.log(`Processing cities for ${stateName}...`);
-
-      // Get cities for this state
-      const { data: centers, error: centersError } = await supabase
-        .from('recycling_centers')
-        .select('city')
-        .eq('state', stateName)
-        .not('city', 'is', null);
-
-      if (centersError) {
-        console.error(`Error fetching centers for ${stateName}:`, centersError);
-        continue;
-      }
-
-      if (centers && centers.length > 0) {
-        // Get unique cities
-        const cities = [...new Set(centers.map(c => c.city))];
-        console.log(`Found ${cities.length} unique cities in ${stateName}`);
+      for (const cityName of cities) {
+        const cityId = normalizeForUrl(cityName);
         
-        // Add a path for each city
-        for (const cityName of cities) {
-          if (!cityName) continue; // Skip null/empty city names
-          
-          const cityId = cityName.toLowerCase().replace(/\s+/g, '-');
-          paths.push({
-            params: { 
-              state: stateId,
-              city: cityId
+        // Verify the city has centers
+        const { data: cityExists } = await supabase
+          .from('recycling_centers')
+          .select('id')
+          .ilike('state', stateName)
+          .ilike('city', cityName)
+          .limit(1);
+
+        if (!cityExists || cityExists.length === 0) continue;
+
+        paths.push({
+          params: { 
+            state: stateId,
+            city: cityId
+          },
+          props: {
+            stateData: {
+              id: stateId,
+              name: stateName
             },
-            props: {
-              stateData: {
-                id: stateId,
-                name: stateName
-              },
-              cityData: {
-                id: cityId,
-                name: cityName
-              }
+            cityData: {
+              id: cityId,
+              name: cityName
             }
-          });
-        }
-      } else {
-        console.log(`No cities found for ${stateName}`);
+          }
+        });
       }
     }
 
-    console.log(`Generated ${paths.length} city pages`);
     return paths;
   } catch (error) {
     console.error('Error in getStaticPaths:', error);
@@ -97,25 +128,30 @@ export async function getStaticPaths() {
 
 // Get data from params or props
 const { state: stateParam, city: cityParam } = Astro.params;
-const { stateData, cityData } = Astro.props;
 
-// Use either the route params or the pre-computed props
-const stateId = stateData?.id || stateParam || '';
-const stateName = stateData?.name;
-const cityName = cityData?.name || cityParam?.split('-')
-  .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-  .join(' ') || '';
-
-// Get state data if not provided in props
-const state = stateData || await getState(stateId);
-
-// If state doesn't exist, redirect to homepage
-if (!state) {
-  return Astro.redirect('/');
+if (!stateParam || !cityParam) {
+  return Astro.redirect('/404');
 }
 
+// Get state data
+const state = await getState(stateParam);
+if (!state) {
+  return Astro.redirect('/404');
+}
+
+// Convert city param to proper name format
+const cityWords = cityParam.split('-').map(word => 
+  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+);
+const cityName = cityWords.join(' ');
+
 // Get centers data
-const centers = await getRecyclingCentersByCity(stateId, cityName);
+const centers = await getRecyclingCentersByCity(stateParam, cityName);
+
+// If no centers found, redirect to state page
+if (!centers || centers.length === 0) {
+  return Astro.redirect(`/states/${stateParam}`);
+}
 
 // Convert centers to map markers
 const mapMarkers: Marker[] = centers.map(center => ({
@@ -190,7 +226,7 @@ const mapMarkers: Marker[] = centers.map(center => ({
 
       <div class="mb-8">
         <a 
-          href={`/states/${stateId}`}
+          href={`/states/${stateParam}`}
           class="text-green-600 hover:text-green-700 flex items-center"
         >
           <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

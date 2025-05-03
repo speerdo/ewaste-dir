@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "NODE_ENV=development astro dev",
+    "build": "NODE_ENV=production astro build",
     "preview": "astro preview",
     "astro": "astro",
     "import-data": "node scripts/import-data.js"
@@ -13,6 +13,7 @@
   "dependencies": {
     "@astrojs/node": "^9.2.1",
     "@astrojs/tailwind": "^5.1.0",
+    "@astrojs/vercel": "^8.1.4",
     "@googlemaps/js-api-loader": "^1.16.8",
     "@supabase/supabase-js": "^2.39.8",
     "@types/google.maps": "^3.55.4",

@@ -4,8 +4,8 @@ import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates, n
 import { supabase } from '../../lib/supabase';
 import type { RecyclingCenter } from '../../types/supabase';
 
-// Enable static generation for production
-export const prerender = true;
+// Enable static generation for production, dynamic in dev
+export const prerender = import.meta.env.PROD;
 
 export async function getStaticPaths() {
   console.log('Starting getStaticPaths for states...');
@@ -32,12 +32,19 @@ export async function getStaticPaths() {
       return [];
     }
 
-    console.log(`Found ${states.length} states`);
+    console.log(`Found ${states.length} states, generating paths...`);
     
-    return states.map(state => ({
-      params: { state: normalizeForUrl(state.name) },
-      props: { state }
-    }));
+    const paths = states.map(state => {
+      const normalizedName = normalizeForUrl(state.name);
+      console.log(`Generating path for state: ${state.name} -> ${normalizedName}`);
+      return {
+        params: { state: normalizedName },
+        props: { state }
+      };
+    });
+
+    console.log(`Successfully generated ${paths.length} state paths`);
+    return paths;
   } catch (error) {
     console.error('Error in getStaticPaths:', error);
     throw error;

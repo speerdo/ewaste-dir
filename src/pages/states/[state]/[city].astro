@@ -7,8 +7,8 @@ import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
 import CentersList from '../../../components/recycling-centers/CentersList.astro';
 
-// Enable static generation for production
-export const prerender = true;
+// Enable static generation for production, dynamic in dev
+export const prerender = import.meta.env.PROD;
 
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
@@ -46,6 +46,7 @@ export async function getStaticPaths() {
     const stateNameMap = new Map(
       states.map(state => [state.name.toLowerCase(), state.name])
     );
+    console.log('Created state name map with entries:', stateNameMap.size);
 
     // Get all recycling centers
     const { data: centers, error: centersError } = await supabase
@@ -68,6 +69,7 @@ export async function getStaticPaths() {
 
     // Create a map of states and their cities
     const stateMap = new Map<string, Set<string>>();
+    let processedCenters = 0;
     
     centers.forEach(center => {
       const state = center.state.trim();
@@ -80,28 +82,51 @@ export async function getStaticPaths() {
           stateMap.set(state, new Set());
         }
         stateMap.get(state)?.add(city);
+        processedCenters++;
       }
     });
 
+    console.log(`Processed ${processedCenters} centers into ${stateMap.size} states`);
+
     const paths = [];
+    let processedCities = 0;
+    let totalCities = 0;
+
+    // Count total cities first
+    for (const cities of stateMap.values()) {
+      totalCities += cities.size;
+    }
+
+    console.log(`Beginning to process ${totalCities} total cities...`);
 
     // Generate paths for each state and city
     for (const [stateName, cities] of stateMap) {
       const stateId = normalizeForUrl(stateName);
+      console.log(`Processing cities for state: ${stateName} (${cities.size} cities)`);
       
       for (const cityName of cities) {
         const cityId = normalizeForUrl(cityName);
+        processedCities++;
         
         // Verify the city has centers
-        const { data: cityExists } = await supabase
+        const { data: cityExists, error: cityError } = await supabase
           .from('recycling_centers')
           .select('id')
           .ilike('state', stateName)
           .ilike('city', cityName)
           .limit(1);
 
-        if (!cityExists || cityExists.length === 0) continue;
+        if (cityError) {
+          console.error(`Error verifying city ${cityName}, ${stateName}:`, cityError);
+          continue;
+        }
 
+        if (!cityExists || cityExists.length === 0) {
+          console.log(`No centers found for ${cityName}, ${stateName} - skipping`);
+          continue;
+        }
+
+        console.log(`Adding path for ${cityName}, ${stateName} (${processedCities}/${totalCities})`);
         paths.push({
           params: { 
             state: stateId,
@@ -121,6 +146,7 @@ export async function getStaticPaths() {
       }
     }
 
+    console.log(`Successfully generated ${paths.length} paths out of ${totalCities} total cities`);
     return paths;
   } catch (error) {
     console.error('Error in getStaticPaths:', error);

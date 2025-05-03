@@ -1,24 +1,26 @@
 ---
-// Remove the supabase import since we're not using it anymore
+import { Image } from 'astro:assets';
+
 interface PopularCity {
   state: string;
   city: string;
+  image: string;
 }
 
 // Curated list of major cities with high population and likely e-waste recycling needs
 const popularCities: PopularCity[] = [
-  { state: "California", city: "Los Angeles" },
-  { state: "California", city: "San Francisco" },
-  { state: "New York", city: "New York City" },
-  { state: "Texas", city: "Austin" },
-  { state: "Texas", city: "Houston" },
-  { state: "Illinois", city: "Chicago" },
-  { state: "Washington", city: "Seattle" },
-  { state: "Massachusetts", city: "Boston" },
-  { state: "Georgia", city: "Atlanta" },
-  { state: "Colorado", city: "Denver" },
-  { state: "Florida", city: "Miami" },
-  { state: "Nevada", city: "Las Vegas" }
+  { state: "California", city: "Los Angeles", image: "/images/los_angeles.jpg" },
+  { state: "California", city: "San Francisco", image: "/images/san_francisco.jpg" },
+  { state: "New York", city: "New York City", image: "/images/new_york_city.jpg" },
+  { state: "Texas", city: "Austin", image: "/images/austin.jpg" },
+  { state: "Texas", city: "Houston", image: "/images/houston.jpg" },
+  { state: "Illinois", city: "Chicago", image: "/images/chicago.jpg" },
+  { state: "Washington", city: "Seattle", image: "/images/seattle.jpg" },
+  { state: "Massachusetts", city: "Boston", image: "/images/boston.jpg" },
+  { state: "Georgia", city: "Atlanta", image: "/images/atlanta.jpg" },
+  { state: "Colorado", city: "Denver", image: "/images/denver.JPG" },
+  { state: "Florida", city: "Miami", image: "/images/miami.jpg" },
+  { state: "Nevada", city: "Las Vegas", image: "/images/las_vegas.jpg" }
 ];
 ---
 
@@ -29,24 +31,34 @@ const popularCities: PopularCity[] = [
       <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Find electronics recycling centers in major metropolitan areas</p>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {popularCities.map(({ state, city }) => (
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {popularCities.map(({ state, city, image }) => (
         <a 
           href={`/states/${state.toLowerCase().replace(/\s+/g, '-')}/${city.toLowerCase().replace(/\s+/g, '-')}`}
-          class="block p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          class="group relative overflow-hidden rounded-xl aspect-[4/3] transform hover:-translate-y-1 transition-all duration-300"
         >
-          <h3 class="font-medium text-gray-900">{city}</h3>
-          <p class="text-sm text-gray-600">{state}</p>
+          <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10"></div>
+          <Image
+            src={image}
+            alt={`${city}, ${state}`}
+            width={400}
+            height={300}
+            class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+          />
+          <div class="absolute inset-0 z-20 p-6 flex flex-col justify-end">
+            <h3 class="font-bold text-2xl text-white drop-shadow-lg">{city}</h3>
+            <p class="text-white/90 text-sm mt-1 drop-shadow-lg">{state}</p>
+          </div>
         </a>
       ))}
     </div>
 
     <div class="text-center mt-12">
       <a 
-        href="/states" 
+        href="#state-directory" 
         class="inline-flex items-center bg-primary-100 text-primary-800 px-6 py-3 rounded-full font-medium hover:bg-primary-200 transition-colors"
       >
-        View All Cities
+        View All States
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
         </svg>

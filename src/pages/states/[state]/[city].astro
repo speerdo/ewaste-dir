@@ -5,25 +5,35 @@ import type { RecyclingCenter } from '../../../types/supabase';
 import { supabase } from '../../../lib/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
+import CentersList from '../../../components/recycling-centers/CentersList.astro';
+import '../../../styles/recycling-centers.css';
 
 // Default images
-const DEFAULT_LOGO = '/images/default-recycling-logo.svg';
+const DEFAULT_LOGO = '/images/recycling.webp';
 
-// Generate routes for all cities in all states
+// Generate static routes for all cities in all states
 export async function getStaticPaths() {
+  console.log('Building static routes for all city pages...');
+  
   // First get all states
   const { data: states } = await supabase
     .from('states')
     .select('name');
 
-  if (!states) return [];
+  if (!states || states.length === 0) {
+    console.error('No states found in database');
+    return [];
+  }
 
+  console.log(`Found ${states.length} states`);
   const paths = [];
 
   // For each state, get its cities
   for (const stateRow of states) {
     const stateName = stateRow.name;
     const stateId = stateName.toLowerCase().replace(/\s+/g, '-');
+    
+    console.log(`Processing cities for ${stateName}...`);
 
     // Get cities for this state
     const { data: centers } = await supabase
@@ -32,12 +42,15 @@ export async function getStaticPaths() {
       .eq('state', stateName)
       .not('city', 'is', null);
 
-    if (centers) {
+    if (centers && centers.length > 0) {
       // Get unique cities
       const cities = [...new Set(centers.map(c => c.city))];
+      console.log(`Found ${cities.length} unique cities in ${stateName}`);
       
       // Add a path for each city
       for (const cityName of cities) {
+        if (!cityName) continue; // Skip null/empty city names
+        
         const cityId = cityName.toLowerCase().replace(/\s+/g, '-');
         paths.push({
           params: { 
@@ -45,7 +58,7 @@ export async function getStaticPaths() {
             city: cityId
           },
           props: {
-            state: {
+            stateData: {
               id: stateId,
               name: stateName
             },
@@ -56,31 +69,39 @@ export async function getStaticPaths() {
           }
         });
       }
+    } else {
+      console.log(`No cities found for ${stateName}`);
     }
   }
 
+  console.log(`Generated ${paths.length} city pages`);
   return paths;
 }
 
-const { state: stateId, city: cityId } = Astro.params;
-const state = await getState(stateId);
+// Get data from params or props
+const { state: stateParam, city: cityParam } = Astro.params;
+const { stateData, cityData } = Astro.props;
 
-// Convert city ID back to name format (e.g., "san-francisco" -> "San Francisco")
-const cityName = cityId.split('-')
+// Use either the route params or the pre-computed props
+const stateId = stateData?.id || stateParam || '';
+const stateName = stateData?.name;
+const cityName = cityData?.name || cityParam?.split('-')
   .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-  .join(' ');
+  .join(' ') || '';
 
+// Get state data if not provided in props
+const state = stateData || await getState(stateId);
+
+// If state doesn't exist, redirect to homepage
+if (!state) {
+  return Astro.redirect('/');
+}
+
+// Get centers data
 const centers = await getRecyclingCentersByCity(stateId, cityName);
 
-// Sort centers by rating (if available)
-const sortedCenters = [...centers].sort((a, b) => {
-  const ratingA = Number(a.rating) || 0;
-  const ratingB = Number(b.rating) || 0;
-  return ratingB - ratingA;
-});
-
 // Convert centers to map markers
-const mapMarkers: Marker[] = sortedCenters.map(center => ({
+const mapMarkers: Marker[] = centers.map(center => ({
   lat: Number(center.latitude),
   lng: Number(center.longitude),
   name: center.name,
@@ -89,46 +110,47 @@ const mapMarkers: Marker[] = sortedCenters.map(center => ({
   website: center.site,
   id: center.id
 })).filter(marker => !isNaN(marker.lat) && !isNaN(marker.lng));
-
-// Debug log the centers and markers
-console.log('Centers data:', centers);
-console.log('Map markers:', mapMarkers);
-
-// Format working hours for display
-function formatWorkingHours(hours: any): string {
-  console.log('Raw hours data:', hours);
-  if (!hours) return 'Hours not available';
-  if (typeof hours === 'string') {
-    if (hours === '24/7') return 'Open 24/7';
-    return hours;
-  }
-  
-  try {
-    let parsed = hours;
-    if (typeof hours === 'string') {
-      parsed = JSON.parse(hours);
-    }
-    console.log('Parsed hours:', parsed);
-    
-    const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return Object.entries(parsed)
-      .sort(([a], [b]) => daysOrder.indexOf(a) - daysOrder.indexOf(b))
-      .map(([day, time]) => `${day}: ${time}`)
-      .join('\n');
-  } catch (error) {
-    console.error('Error parsing hours:', error);
-    return hours.toString();
-  }
-}
-
-// If state doesn't exist, redirect to homepage
-if (!state) {
-  return Astro.redirect('/');
-}
 ---
 
 <Layout title={`Recycling Centers in ${cityName}, ${state.name}`}>
   <div class="bg-white">
+    {/* Load Google Maps API directly */}
+    <script is:inline define:vars={{ mapApiKey: import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY }}>
+      window.GOOGLE_MAPS_API_KEY = mapApiKey || '';
+      
+      // Load Google Maps API using the recommended pattern
+      function initGoogleMaps() {
+        console.log('Google Maps API loaded');
+        window.dispatchEvent(new Event('google-maps-ready'));
+      }
+      
+      // Define the callback function on the window
+      window.initGoogleMaps = initGoogleMaps;
+      
+      // Load the script if not already loaded
+      if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY}&callback=initGoogleMaps&libraries=places&v=weekly`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+    </script>
+    
+    <!-- Add inline styles to prevent layout shift -->
+    <style is:inline>
+      @media (min-width: 1024px) {
+        .map-container {
+          grid-column: 1;
+          grid-row: 1;
+        }
+        .centers-container {
+          grid-column: 2;
+          grid-row: 1;
+        }
+      }
+    </style>
+    
     <div class="container mx-auto px-4 py-8">
       <!-- Add the global script before any usage -->
       <script>
@@ -168,23 +190,9 @@ if (!state) {
         {centers.length} recycling {centers.length === 1 ? 'center' : 'centers'} in {cityName}, {state.name}
       </p>
 
-      {centers.length > 1 && (
-        <div class="mb-8">
-          <button
-            id="toggleSort"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          >
-            <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-            </svg>
-            Sort by Rating (High to Low)
-          </button>
-        </div>
-      )}
-
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Map Section -->
-        <div class="rounded-xl overflow-hidden shadow-lg h-[600px] lg:sticky lg:top-4">
+        <!-- Map Section (always first on desktop) -->
+        <div class="map-container rounded-xl overflow-hidden shadow-lg h-[600px] lg:sticky lg:top-4">
           {mapMarkers.length > 0 ? (
             <MapComponent 
               markers={mapMarkers}
@@ -197,158 +205,9 @@ if (!state) {
           )}
         </div>
 
-        <!-- Recycling Centers List -->
-        <div id="centersList" class="space-y-6">
-          {sortedCenters.map((center: RecyclingCenter) => (
-            <div 
-              id={`center-${center.id}`}
-              class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer" 
-              data-center-id={center.id}
-              data-rating={center.rating || 0}
-            >
-              <div class="p-6">
-                <div class="flex items-start justify-between">
-                  <div class="flex-grow">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2">
-                      {center.name}
-                    </h2>
-                    {center.rating && (
-                      <div class="flex items-center mb-2">
-                        {Array.from({ length: Math.round(Number(center.rating)) }).map(() => (
-                          <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                        <span class="ml-2 text-gray-600">
-                          {Number(center.rating).toFixed(1)} ({center.reviews || 0} reviews)
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div class="flex-shrink-0 ml-4">
-                    {center.logo ? (
-                      <img 
-                        src={center.logo}
-                        alt={`${center.name} logo`}
-                        class="w-16 h-16 object-contain rounded-lg bg-gray-50"
-                        onerror={`this.onerror=null; this.src='${DEFAULT_LOGO}';`}
-                      />
-                    ) : (
-                      <div class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div class="mt-4 space-y-3">
-                  <div class="flex items-start">
-                    <svg class="w-6 h-6 text-gray-400 mr-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <address class="not-italic text-gray-600">
-                      {center.full_address}
-                    </address>
-                  </div>
-
-                  {center.phone && (
-                    <div class="flex items-center">
-                      <svg class="w-6 h-6 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                      <a href={`tel:${center.phone}`} class="text-green-600 hover:text-green-700">
-                        {center.phone}
-                      </a>
-                    </div>
-                  )}
-
-                  {center.site && (
-                    <div class="flex items-center">
-                      <svg class="w-6 h-6 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                      </svg>
-                      <a href={center.site} target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700">
-                        Visit Website
-                      </a>
-                    </div>
-                  )}
-
-                  {center.working_hours && (
-                    <div class="flex items-start">
-                      <svg class="w-6 h-6 text-gray-400 mr-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <div class="text-gray-600">
-                        <button 
-                          type="button"
-                          class="hours-toggle flex items-center gap-2 hover:text-green-600 transition-colors"
-                          onclick="this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'); document.getElementById(this.getAttribute('aria-controls')).style.display = this.getAttribute('aria-expanded') === 'true' ? 'block' : 'none'; this.querySelector('svg').classList.toggle('rotate-180')"
-                          aria-expanded="false"
-                          aria-controls={`hours-${center.id}`}
-                        >
-                          <span>Opening Hours</span>
-                          <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        <div 
-                          id={`hours-${center.id}`}
-                          class="mt-2 space-y-1"
-                          style="display: none;"
-                        >
-                          {formatWorkingHours(center.working_hours).split('\n').map(line => {
-                            const [day, time] = line.split(': ');
-                            return (
-                              <div class="flex justify-between py-1">
-                                <span class="font-medium text-gray-700">{day}</span>
-                                <span class="text-gray-600">{time}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {center.description && (
-                    <div class="mt-4 text-gray-600">
-                      <p>{center.description}</p>
-                    </div>
-                  )}
-                </div>
-
-                <div class="mt-6 flex flex-wrap gap-4">
-                  {center.phone && (
-                    <a
-                      href={`tel:${center.phone}`}
-                      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    >
-                      Call Now
-                    </a>
-                  )}
-                  {center.site && (
-                    <a
-                      href={center.site}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    >
-                      Visit Website
-                    </a>
-                  )}
-                  <button
-                    onclick={`window.showDirections(${center.latitude}, ${center.longitude})`}
-                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                  >
-                    Get Directions
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+        <!-- Recycling Centers List (always second on desktop) -->
+        <div class="centers-container">
+          <CentersList centers={centers} defaultLogo={DEFAULT_LOGO} />
         </div>
       </div>
     </div>
@@ -356,301 +215,85 @@ if (!state) {
 
   {mapMarkers.length > 0 && (
     <>
-      <script define:vars={{ centers, mapMarkers }}>
-        // @ts-nocheck
-        let map;
-        let markers = [];
-        let infoWindow;
-        let isMapInitialized = false;
-        
-        function initMap() {
-          if (isMapInitialized) return;
-          
-          const mapElement = document.getElementById('map');
-          if (!mapElement) {
-            console.error('Map element not found');
-            return;
-          }
-
-          const apiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
-          console.log('API Key available:', !!apiKey);
-          
-          if (!apiKey) {
-            console.error('Google Maps API key is missing');
-            mapElement.innerHTML = '<p class="text-red-500 p-4">Google Maps API key is missing</p>';
-            return;
-          }
-
-          try {
-            console.log('Initializing map with center:', {
-              lat: Number(mapMarkers[0].lat) || 0,
-              lng: Number(mapMarkers[0].lng) || 0
-            });
-
-            map = new google.maps.Map(mapElement, {
-              center: { 
-                lat: Number(mapMarkers[0].lat) || 0, 
-                lng: Number(mapMarkers[0].lng) || 0
-              },
-              zoom: 12,
-              styles: [
-                {
-                  featureType: 'poi',
-                  elementType: 'labels',
-                  stylers: [{ visibility: 'off' }]
-                }
-              ]
-            });
-
-            infoWindow = new google.maps.InfoWindow();
-            const bounds = new google.maps.LatLngBounds();
-            let validMarkers = 0;
-
-            console.log('Adding markers for centers:', mapMarkers.length);
-
-            // Add markers for each center
-            mapMarkers.forEach((marker, index) => {
-              if (marker.lat && marker.lng) {
-                const position = { lat: Number(marker.lat), lng: Number(marker.lng) };
-                const markerObj = new google.maps.Marker({
-                  position,
-                  map,
-                  title: marker.name,
-                  animation: google.maps.Animation.DROP,
-                  optimized: true
-                });
-
-                bounds.extend(position);
-                validMarkers++;
-
-                const content = 
-                  '<div class="p-4">' +
-                  '<h3 class="font-bold text-lg mb-2">' + marker.name + '</h3>' +
-                  '<p class="text-gray-600 mb-2">' + (marker.address || '') + '</p>' +
-                  (marker.phone ? '<p class="text-gray-600 mb-2">' + marker.phone + '</p>' : '') +
-                  '<div class="flex gap-2 mt-4">' +
-                  (marker.phone ? 
-                    '<a href="tel:' + marker.phone + '" class="text-green-600 hover:text-green-700">Call</a>'
-                  : '') +
-                  (marker.website ? 
-                    '<a href="' + marker.website + '" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700">Website</a>'
-                  : '') +
-                  '</div>' +
-                  '</div>';
-
-                markerObj.addListener('click', () => {
-                  infoWindow.setContent(content);
-                  infoWindow.open(map, markerObj);
-                });
-
-                markers.push(markerObj);
-              }
-            });
-
-            console.log('Valid markers added:', validMarkers);
-
-            // Only fit bounds if we have multiple valid markers
-            if (validMarkers > 1) {
-              map.fitBounds(bounds);
-              // Add some padding to the bounds
-              const padding = { top: 50, right: 50, bottom: 50, left: 50 };
-              map.fitBounds(bounds, padding);
-            }
-
-            isMapInitialized = true;
-            console.log('Map initialization complete');
-          } catch (error) {
-            console.error('Error initializing Google Maps:', error);
-            mapElement.innerHTML = '<p class="text-red-500 p-4">Error loading map: ' + error.message + '</p>';
-          }
-        }
-
-        // Initialize map when the Google Maps API is loaded
-        if (typeof google !== 'undefined' && google.maps) {
-          console.log('Google Maps API already loaded, initializing map');
-          initMap();
-        } else {
-          console.log('Loading Google Maps API');
-          // Load Google Maps API if not already loaded
-          if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
-            const script = document.createElement('script');
-            const apiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
-            script.async = true;
-            script.defer = true;
-            script.onerror = (error) => {
-              console.error('Failed to load Google Maps script:', error);
-              const mapElement = document.getElementById('map');
-              if (mapElement) {
-                mapElement.innerHTML = '<p class="text-red-500 p-4">Failed to load Google Maps</p>';
-              }
-            };
-            window.initMap = initMap;
-            document.head.appendChild(script);
-          }
-        }
+      <script is:inline>
+        // Define global direction functions
+        window.showDirections = function(lat, lng) {
+          if (!lat || !lng) return;
+          window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
+        };
+        window.openDirections = window.showDirections;
+      </script>
       
-        let sortAscending = false; // Start with descending (high to low)
-        const centersList = document.getElementById('centersList');
-        const toggleSort = document.getElementById('toggleSort');
-
-        if (toggleSort && centersList) {
-          toggleSort.addEventListener('click', () => {
-            sortAscending = !sortAscending;
-            const centers = Array.from(centersList.children);
-            
-            centers.sort((a, b) => {
-              const ratingA = parseFloat(Object.assign({}, a).dataset?.rating || '0');
-              const ratingB = parseFloat(Object.assign({}, b).dataset?.rating || '0');
-              return sortAscending ? ratingA - ratingB : ratingB - ratingA;
-            });
-
-            // Update button text to clearly show current sort order
-            toggleSort.innerHTML = `
-              <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-              </svg>
-              Sort by Rating (${sortAscending ? 'Low to High' : 'High to Low'})
-            `;
-
-            // Reorder the elements
-            centers.forEach(center => centersList.appendChild(center));
+      <script type="module">
+        // Create a function to handle marker clicks
+        function handleMarkerClick(centerId) {
+          console.log('Marker clicked:', centerId);
+          
+          // Remove highlight from all centers
+          document.querySelectorAll('[data-center-id]').forEach((el) => {
+            el.classList.remove('highlight-center');
+          });
+          
+          // Find and highlight the center card
+          const centerElement = document.getElementById(`center-${centerId}`);
+          if (centerElement) {
+            centerElement.classList.add('highlight-center');
+            centerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+        
+        // Create a function to handle center card clicks
+        function handleCenterClick(event) {
+          // Don't trigger if clicking on a button or link
+          if (event.target.closest('button') || event.target.closest('a')) {
+            return;
+          }
+          
+          const card = event.currentTarget;
+          const centerId = card.getAttribute('data-center-id');
+          if (!centerId) return;
+          
+          console.log('Center card clicked:', centerId);
+          
+          // Remove highlight from all centers
+          document.querySelectorAll('[data-center-id]').forEach((el) => {
+            el.classList.remove('highlight-center');
+          });
+          
+          // Add highlight to the clicked center
+          card.classList.add('highlight-center');
+          
+          // Notify the map to focus on this marker
+          const customEvent = new CustomEvent('centerSelect', {
+            detail: { centerId }
+          });
+          document.dispatchEvent(customEvent);
+        }
+        
+        // Set up the interactions between centers and map
+        function setupInteractions() {
+          console.log('Setting up center-map interactions');
+          
+          // Handle marker clicks
+          document.addEventListener('markerClick', (event) => {
+            handleMarkerClick(event.detail.centerId);
+          });
+          
+          // Add click handlers to all center cards
+          document.querySelectorAll('[data-center-id]').forEach(card => {
+            card.addEventListener('click', handleCenterClick);
           });
         }
+        
+        // Initialize when page loads
+        document.addEventListener('astro:page-load', () => {
+          console.log('Page loaded, setting up interactions');
+          setupInteractions();
+        });
+        
+        // Also run immediately for initial page load
+        setupInteractions();
       </script>
-
     </>
   )}
 </Layout>
-
-<style>
-  .highlight-center {
-    @apply ring-2 ring-green-500 transform scale-[1.02];
-  }
-  
-  /* Add smooth transitions for the hours dropdown */
-  .transform {
-    transition-property: transform;
-    transition-duration: 200ms;
-  }
-  
-  .rotate-180 {
-    transform: rotate(180deg);
-  }
-  .gm-style-iw-chr {
-    max-height: 18px !important;
-  }
-  .gm-style .gm-style-iw-c {
-    padding: 0 !important;
-    border-radius: 0.75rem !important;
-    max-width: 300px !important;
-  }
-  .gm-style .gm-style-iw-d {
-    overflow: hidden !important;
-    padding: 0 !important;
-  }
-  .gm-style .gm-style-iw-t::after {
-    background: linear-gradient(45deg, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 51%, rgba(255,255,255,0) 100%) !important;
-  }
-  .gm-style .gm-ui-hover-effect {
-    top: 0 !important;
-    right: 0 !important;
-  }
-  
-  /* Additional styles to remove focus indicators */
-  .info-window-link {
-    outline: none !important;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  .info-window-link:focus {
-    outline: none !important;
-    box-shadow: none !important;
-  }
-  
-  .info-window-link:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
-    ring: 0 !important;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  /* Remove tap highlight on mobile */
-  .gm-style * {
-    -webkit-tap-highlight-color: transparent;
-  }
-</style>
-
-<script is:inline>
-  document.addEventListener('astro:page-load', () => {
-    // Handle hours toggle clicks
-    document.querySelectorAll('[data-hours-toggle]').forEach(button => {
-      button.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation(); // Stop the event from bubbling up to the center card
-        
-        const btn = e.currentTarget;
-        const content = document.getElementById(btn.getAttribute('aria-controls'));
-        
-        if (content) {
-          const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-          btn.setAttribute('aria-expanded', !isExpanded ? 'true' : 'false');
-          content.style.display = !isExpanded ? 'block' : 'none';
-          btn.querySelector('svg')?.classList.toggle('rotate-180');
-        }
-      });
-    });
-  });
-</script>
-
-<script>
-  interface MarkerClickEvent extends CustomEvent {
-    detail: {
-      centerId: string;
-    };
-  }
-
-  // Handle marker clicks from the map
-  document.addEventListener('markerClick', ((event: MarkerClickEvent) => {
-    // Remove highlight from all centers
-    document.querySelectorAll('[data-center-id]').forEach(el => {
-      el.classList.remove('highlight-center');
-    });
-
-    // Highlight the clicked center
-    const centerId = event.detail.centerId;
-    const centerElement = document.getElementById(`center-${centerId}`);
-    if (centerElement) {
-      centerElement.classList.add('highlight-center');
-      centerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }) as EventListener);
-
-  // Handle clicks on center cards
-  document.querySelectorAll('[data-center-id]').forEach(element => {
-    element.addEventListener('click', (event) => {
-      // Don't trigger center card click if clicking on a button or link
-      const target = event.target as HTMLElement;
-      if (target && (target.closest('button') || target.closest('a'))) {
-        return;
-      }
-
-      const currentTarget = event.currentTarget as HTMLElement;
-      const centerId = currentTarget.dataset.centerId;
-      
-      if (centerId) {
-        // Dispatch event to highlight marker on map
-        const customEvent = new CustomEvent('centerSelect', {
-          detail: { centerId }
-        });
-        document.dispatchEvent(customEvent);
-
-        // Highlight the clicked center
-        document.querySelectorAll('[data-center-id]').forEach(el => {
-          el.classList.remove('highlight-center');
-        });
-        currentTarget.classList.add('highlight-center');
-      }
-    });
-  });
-</script> 

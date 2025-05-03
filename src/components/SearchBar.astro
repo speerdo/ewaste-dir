@@ -1,152 +1,83 @@
 ---
 // SearchBar.astro
-import { getAllStates, getCitiesByState } from '../lib/supabase';
-
-// Get all states and their cities at build time
-const states = await getAllStates();
-const cityStatePairs = await Promise.all(
-  states.map(async (state) => {
-    const cities = await getCitiesByState(state.id);
-    return cities.map(city => ({
-      city: city.name,
-      state: state.name
-    }));
-  })
-).then(results => results.flat());
+import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
 ---
 
-<div class="relative max-w-2xl mx-auto">
-  <form 
-    id="search-form"
-    class="flex flex-col sm:flex-row gap-2"
-  >
-    <div class="relative flex-grow">
-      <input
-        type="text"
-        id="search-input"
-        name="q"
-        placeholder="Search by city or state..."
-        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-        autocomplete="off"
-      />
-      <button 
-        type="button"
-        id="use-location-btn"
-        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-600"
-        title="Use my location"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-        </svg>
-      </button>
-    </div>
-
+<div class="relative">
+  <div class="relative flex">
+    <input
+      type="text"
+      id="search-input"
+      class="block flex-1 rounded-l-lg border-0 px-4 py-3 text-gray-900 shadow-sm placeholder:text-gray-400 sm:text-sm sm:leading-6 focus:border-none focus:outline-none"
+      placeholder="Enter a city or state..."
+      autocomplete="off"
+    />
     <button
-      type="submit"
-      class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex-shrink-0"
+      id="search-button"
+      type="button"
+      class="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors"
     >
-      Search
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <span class="ml-2 font-medium">Search</span>
     </button>
-  </form>
+    <button
+      id="use-location-btn"
+      type="button"
+      class="absolute right-0 top-0 bottom-0 mr-[120px] flex items-center pr-3 text-gray-400 hover:text-gray-500"
+      title="Use my location"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    </button>
+  </div>
 
-  <div 
-    id="search-results"
-    class="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50 max-h-96 overflow-y-auto"
-  >
-    <div class="p-2">
-      <div id="results-content" class="divide-y divide-gray-100"></div>
-    </div>
+  <!-- Search Results -->
+  <div id="search-results" class="absolute z-10 mt-1 w-full overflow-hidden rounded-md bg-white shadow-lg hidden">
+    <div id="results-content" class="divide-y divide-gray-100"></div>
   </div>
 </div>
 
-<script define:vars={{ cityStatePairs }}>
-  const searchForm = document.getElementById('search-form');
-  const searchInput = document.getElementById('search-input');
-  const searchResults = document.getElementById('search-results');
-  const resultsContent = document.getElementById('results-content');
-  let searchTimeout;
+<script>
+  import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
+  
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const searchButton = document.getElementById('search-button') as HTMLButtonElement;
+  const searchResults = document.getElementById('search-results') as HTMLDivElement;
+  const resultsContent = document.getElementById('results-content') as HTMLDivElement;
+  const useLocationBtn = document.getElementById('use-location-btn') as HTMLButtonElement;
 
-  // Function to search through city-state pairs
-  function searchLocations(query) {
-    query = query.toLowerCase().trim();
-    if (!query) return [];
-
-    // First try exact matches
-    const exactMatches = cityStatePairs.filter(({ city, state }) => {
-      const cityLower = city.toLowerCase();
-      const stateLower = state.toLowerCase();
-      return cityLower === query || stateLower === query;
-    });
-
-    // Then try partial matches
-    const partialMatches = cityStatePairs.filter(({ city, state }) => {
-      const cityLower = city.toLowerCase();
-      const stateLower = state.toLowerCase();
-      return (cityLower.includes(query) || stateLower.includes(query)) && 
-             !exactMatches.find(m => m.city === city && m.state === state);
-    });
-
-    // Combine and map to suggestion format
-    return [...exactMatches, ...partialMatches]
-      .slice(0, 10)
-      .map(({ city, state }) => ({
-        text: `${city}, ${state}`,
-        url: `/states/${state.toLowerCase()}/${city.toLowerCase().replace(/\s+/g, '-')}`
-      }));
+  // Debounce function
+  function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
+    let timeout: NodeJS.Timeout;
+    return (...args: Parameters<T>) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
   }
 
-  // Handle form submission
-  searchForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const query = searchInput.value.trim();
-    if (!query) return;
-
-    const suggestions = searchLocations(query);
-    console.log('Search results:', suggestions);
-
-    if (suggestions.length > 0) {
-      // If there's an exact match, go to that page
-      const exactMatch = suggestions.find(s => 
-        s.text.toLowerCase() === query.toLowerCase()
-      );
-      if (exactMatch) {
-        window.location.href = exactMatch.url;
-        return;
-      }
-      // If there's only one result, use that
-      if (suggestions.length === 1) {
-        window.location.href = suggestions[0].url;
-        return;
-      }
-      // Otherwise show suggestions
-      showSuggestions(suggestions);
-    } else {
-      resultsContent.innerHTML = `
-        <div class="px-4 py-3 text-gray-500">
-          No locations found matching "${query}"
-        </div>
-      `;
-      searchResults.classList.remove('hidden');
-    }
-  });
-
-  // Handle input changes for autocomplete
-  searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    const query = searchInput.value.trim();
-    
-    if (query.length < 2) {
+  // Search function
+  const search = debounce(async (query: string) => {
+    if (!query || query.length < 2) {
       searchResults.classList.add('hidden');
       return;
     }
 
-    searchTimeout = setTimeout(() => {
-      const suggestions = searchLocations(query);
+    try {
+      const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
+      const suggestions = await response.json();
       showSuggestions(suggestions);
-    }, 150);
-  });
+    } catch (error) {
+      console.error('Search error:', error);
+      searchResults.classList.add('hidden');
+    }
+  }, 300);
 
-  function showSuggestions(suggestions) {
+  // Show suggestions
+  function showSuggestions(suggestions: Array<{ text: string; url: string }>) {
     if (suggestions.length > 0) {
       resultsContent.innerHTML = suggestions
         .map(suggestion => `
@@ -170,7 +101,7 @@ const cityStatePairs = await Promise.all(
 
   // Close suggestions when clicking outside
   document.addEventListener('click', (event) => {
-    if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+    if (!searchInput.contains(event.target as Node) && !searchResults.contains(event.target as Node)) {
       searchResults.classList.add('hidden');
     }
   });
@@ -179,41 +110,75 @@ const cityStatePairs = await Promise.all(
   searchInput.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       searchResults.classList.add('hidden');
+    } else if (event.key === 'Enter') {
+      // Trigger search on Enter
+      const firstSuggestion = resultsContent.querySelector('button[data-url]') as HTMLButtonElement;
+      if (firstSuggestion) {
+        window.location.href = firstSuggestion.dataset.url || '';
+      }
     }
   });
 
-  // Keep the existing geolocation code
-  const useLocationBtn = document.getElementById('use-location-btn');
-  useLocationBtn.addEventListener('click', () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
-      return;
-    }
+  // Search input handler
+  searchInput.addEventListener('input', (event) => {
+    search((event.target as HTMLInputElement).value);
+  });
 
+  // Search button handler
+  searchButton.addEventListener('click', () => {
+    const firstSuggestion = resultsContent.querySelector('button[data-url]') as HTMLButtonElement;
+    if (firstSuggestion) {
+      window.location.href = firstSuggestion.dataset.url || '';
+    }
+  });
+
+  // Use location button handler
+  useLocationBtn.addEventListener('click', async () => {
+    // Show loading state
+    const originalContent = useLocationBtn.innerHTML;
+    useLocationBtn.innerHTML = `
+      <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    `;
     useLocationBtn.disabled = true;
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const response = await fetch(`/api/geocode?lat=${position.coords.latitude}&lng=${position.coords.longitude}`);
-          const data = await response.json();
-          
-          if (data.city && data.state) {
-            window.location.href = `/states/${data.state.toLowerCase()}/${data.city.toLowerCase().replace(/\s+/g, '-')}`;
-          } else {
-            throw new Error('Location not found');
-          }
-        } catch (error) {
-          console.error('Error getting location:', error);
-          alert('Could not determine your location. Please try searching manually.');
-        } finally {
-          useLocationBtn.disabled = false;
-        }
-      },
-      (error) => {
-        console.error('Geolocation error:', error);
-        alert('Could not get your location. Please try searching manually.');
-        useLocationBtn.disabled = false;
+
+    try {
+      // Get current location
+      const coordinates = await getCurrentLocation();
+      console.log('Current location:', coordinates);
+
+      // Get city and state from coordinates
+      const location = await reverseGeocode(coordinates);
+      console.log('Location found:', location);
+
+      if (!location.city || !location.state) {
+        throw new Error('Could not determine your city and state');
       }
-    );
+
+      // Redirect to city page
+      const citySlug = location.city.toLowerCase().replace(/\s+/g, '-');
+      const stateSlug = location.state.toLowerCase();
+      window.location.href = `/states/${stateSlug}/${citySlug}`;
+    } catch (error) {
+      console.error('Error finding location:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Could not determine your location';
+      
+      // Show error message in the search results dropdown
+      resultsContent.innerHTML = `
+        <div class="px-4 py-3 text-red-500">
+          <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          ${errorMessage}
+        </div>
+      `;
+      searchResults.classList.remove('hidden');
+    } finally {
+      // Restore button state
+      useLocationBtn.innerHTML = originalContent;
+      useLocationBtn.disabled = false;
+    }
   });
 </script> 

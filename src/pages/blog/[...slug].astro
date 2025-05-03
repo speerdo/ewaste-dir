@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import BlogPost from '../../layouts/BlogPost.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  console.log('Found posts:', posts.length);
+  console.log('Available slugs:', posts.map((p: CollectionEntry<'blog'>) => p.slug));
+  
+  return posts.map((post: CollectionEntry<'blog'>) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { slug } = Astro.params;
+const { post } = Astro.props;
+console.log('Current slug:', slug);
+console.log('Found post:', post?.slug);
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+const { Content } = await post.render();
+---
+
+<BlogPost post={post}>
+  <Content />
+</BlogPost>
+
+<style>
+  h2 {
+    @apply text-2xl font-bold text-gray-900 mb-4;
+  }
+
+  h3 {
+    @apply text-xl font-bold text-gray-900 mb-4;
+  }
+
+  h4 {
+    @apply text-lg font-bold text-gray-900 mb-4;
+  }
+
+  p {
+    @apply text-gray-600 mb-4;
+  }
+  
+</style>

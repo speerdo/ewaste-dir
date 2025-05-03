@@ -4,17 +4,35 @@ import MapComponent from '../components/MapComponent.astro';
 import { getState, getRecyclingCentersByState } from '../lib/supabase';
 import type { State, RecyclingCenter } from '../types/supabase';
 import type { CentersByCity } from '../lib/supabase';
+import type { Marker } from '../components/MapComponent.astro';
+
+// Declare global type for the API key
+declare global {
+  interface Window {
+    GOOGLE_MAPS_API_KEY: string;
+  }
+}
 
 interface Props {
   state: State;
+  cityData: {
+    id: string;
+    name: string;
+    description: string;
+    address: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  }[];
 }
 
-const { state } = Astro.props;
-console.log('State data:', state);
+const { state, cityData } = Astro.props;
+// console.log('State data:', state);
 
 // Get recycling centers data from Supabase
 const centersByCity: CentersByCity = await getRecyclingCentersByState(state.id);
-console.log('Centers by city:', centersByCity);
+// console.log('Centers by city:', centersByCity);
 
 // Count centers with 24/7 availability (if we have this data)
 const centers24_7 = Object.values(centersByCity)
@@ -37,10 +55,10 @@ const cityAnchors: CityAnchor[] = Object.keys(centersByCity).map((cityName) => (
   id: cityName.toLowerCase().replace(/\s+/g, '-'),
   name: cityName
 }));
-console.log('City anchors:', cityAnchors);
+// console.log('City anchors:', cityAnchors);
 
 // Get the first center from each city to use as the city's data
-const cityData = Object.entries(centersByCity).map(([cityName, centers]: [string, RecyclingCenter[]]) => {
+const citiesWithCenters = Object.entries(centersByCity).map(([cityName, centers]: [string, RecyclingCenter[]]) => {
   const firstCenter = centers[0];
   return {
     id: cityName.toLowerCase().replace(/\s+/g, '-'),
@@ -53,13 +71,13 @@ const cityData = Object.entries(centersByCity).map(([cityName, centers]: [string
     }
   };
 });
-console.log('City data:', cityData);
+// console.log('City data:', citiesWithCenters);
 
 // For now, let's use a placeholder image for states until we have proper images
 const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80';
 ---
 
-<Layout title={`${state.name} Electronics Recycling Centers | E-Waste Hub`} description={`Find certified electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`}>
+<Layout title={`Electronics Recycling in ${state.name}`} description={`Find certified electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`}>
   <!-- State Hero -->
   <div class="pt-16"> <!-- Added padding to account for fixed header -->
     <!-- Hero Image -->
@@ -148,10 +166,10 @@ const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79
   </div>
 
   <!-- Cities Content -->
-  {cityData.length > 0 ? (
+  {citiesWithCenters.length > 0 ? (
     <div class="container mx-auto px-4 py-12">
       <div class="space-y-16">
-        {cityData.map((city) => (
+        {citiesWithCenters.map((city) => (
           <section id={city.id} class="scroll-mt-32"> <!-- Increased scroll margin to account for sticky header -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               <div class="lg:col-span-2">
@@ -167,7 +185,7 @@ const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79
                 
                 <div class="rounded-lg overflow-hidden shadow-md">
                   <img 
-                    src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(city.address)}&zoom=13&size=800x400&key=${import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY}`}
+                    src={`https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(city.address)}&zoom=13&size=800x400&key=${window.GOOGLE_MAPS_API_KEY}`}
                     alt={`Map of ${city.name}, ${state.name}`} 
                     class="w-full h-auto object-cover"
                   />
@@ -176,7 +194,12 @@ const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79
               
               <div>
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Location</h3>
-                <MapComponent data-lat={city.coordinates.lat} data-lng={city.coordinates.lng} data-name={city.name} />
+                <MapComponent markers={[{
+                  lat: city.coordinates.lat,
+                  lng: city.coordinates.lng,
+                  name: city.name,
+                  id: city.id
+                }]} />
               </div>
             </div>
             

@@ -1,0 +1,20 @@
+---
+import type { RecyclingCenter } from '../../types/supabase';
+import CenterCard from './CenterCard.astro';
+
+export interface Props {
+  centers: RecyclingCenter[];
+  defaultLogo: string;
+}
+
+const { centers, defaultLogo } = Astro.props;
+
+// Sort centers alphabetically by name
+const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<div>
+  <div id="centersList" class="space-y-6">
+    {sortedCenters.map(center => <CenterCard center={center} defaultLogo={defaultLogo} />)}
+  </div>
+</div> 

@@ -14,316 +14,279 @@ export interface Props {
   initialZoom?: number;
 }
 
-const props = Astro.props;
+const { markers, initialZoom = 12 } = Astro.props;
+
+declare global {
+  interface Window {
+    initializeMap: () => void;
+    openDirections: (lat: number, lng: number) => void;
+  }
+}
 ---
 
-<div class="map-container relative rounded-lg overflow-hidden shadow-md h-full w-full" data-component="map-component">
-  <div 
-    id="map" 
-    class="h-full w-full" 
-    data-markers={JSON.stringify(props.markers)}
-    data-zoom={props.initialZoom || 12}
-  ></div>
-  <div class="absolute inset-0 flex items-center justify-center bg-gray-100 map-loading">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto mb-3"></div>
-      <p class="text-gray-600">Loading map...</p>
+<div class="relative w-full h-full rounded-lg overflow-hidden">
+  <div id="map" class="w-full h-full">
+    <!-- Loading state -->
+    <div class="absolute inset-0 flex items-center justify-center bg-gray-100">
+      <div class="text-gray-500">Loading map...</div>
+    </div>
+  </div>
+
+  <!-- Error state (hidden by default) -->
+  <div id="mapError" class="absolute inset-0 flex items-center justify-center bg-gray-100 hidden">
+    <div class="text-center p-4">
+      <p class="text-red-500 mb-2">Failed to load map</p>
+      <p class="text-gray-500 text-sm">Please try refreshing the page</p>
     </div>
   </div>
 </div>
 
-<script>
-  // Batch size for marker creation
-  const MARKER_BATCH_SIZE = 20;
-  const MARKER_BATCH_DELAY = 10; // milliseconds
-  
-  let activeMarker: google.maps.Marker | null = null;
-
-  // Function to open directions in Google Maps
-  function openDirections(lat: number, lng: number) {
-    if (!lat || !lng) return;
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+<style>
+  /* Custom styles for Google Maps InfoWindow */
+  :global(.gm-style-iw.gm-style-iw-c) {
+    padding: 0 !important;
+    max-height: none !important;
   }
 
-  // This function creates markers in batches to avoid blocking the main thread
-  async function createMarkersInBatches(map: google.maps.Map, markers: any[], infoWindow: google.maps.InfoWindow) {
-    const markerRefs = new Map();
-    const bounds = new google.maps.LatLngBounds();
+  :global(.gm-style-iw-d) {
+    overflow: hidden !important;
+    max-height: none !important;
+  }
 
-    // Process markers in batches
-    for (let i = 0; i < markers.length; i += MARKER_BATCH_SIZE) {
-      const batch = markers.slice(i, i + MARKER_BATCH_SIZE);
-      
-      // Create a batch of markers
-      const batchPromises = batch.map(marker => {
-        return new Promise<void>((resolve) => {
-          const position = { lat: marker.lat, lng: marker.lng };
-          const mapMarker = new google.maps.Marker({
+  :global(.gm-style-iw-tc) {
+    display: none !important;
+  }
+
+  :global(.gm-style-iw button[title="Close"]) {
+    margin: 8px !important;
+    padding: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 28px !important;
+    height: 28px !important;
+    opacity: 0.7;
+    border-radius: 50% !important;
+    background: white !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  :global(.gm-style-iw button[title="Close"]:hover) {
+    opacity: 1;
+  }
+
+  :global(.gm-style-iw button[title="Close"] span) {
+    margin: 6px !important;
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  :global(.gm-style-iw-chr) {
+    padding-top: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+  }
+  
+  /* Remove focus outlines from info window links */
+  :global(.gm-style-iw-d a),
+  :global(.gm-style-iw-d button),
+  :global(.map-link) {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    text-decoration: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  
+  :global(.gm-style-iw-d a:focus),
+  :global(.gm-style-iw-d button:focus),
+  :global(.map-link:focus) {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    text-decoration: none !important;
+  }
+</style>
+
+<script define:vars={{ markers, initialZoom }}>
+  // Declare global variables for map functionality
+  let map;
+  let activeMarker = null;
+  let activeInfoWindow = null;
+  const markerRefs = new Map();
+  const infoWindowRefs = new Map();
+
+  function handleMapError(error) {
+    console.error('Map error:', error);
+    const mapElement = document.getElementById('map');
+    const errorElement = document.getElementById('mapError');
+    if (mapElement && errorElement) {
+      mapElement.style.display = 'none';
+      errorElement.style.display = 'flex';
+    }
+  }
+
+  // Initialize the map with markers
+  async function initializeMap() {
+    try {
+      const mapElement = document.getElementById('map');
+      if (!mapElement) {
+        throw new Error('Map element not found');
+      }
+
+      // Get API key from window or environment
+      const apiKey = window.GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        throw new Error('Google Maps API key is missing');
+      }
+
+      console.log('Initializing map with markers:', markers.length);
+
+      // Initialize map with first marker as center
+      map = new google.maps.Map(mapElement, {
+        center: markers[0] ? { lat: Number(markers[0].lat), lng: Number(markers[0].lng) } : { lat: 0, lng: 0 },
+        zoom: initialZoom,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      });
+
+      // Add markers to the map
+      const bounds = new google.maps.LatLngBounds();
+      let validMarkers = 0;
+
+      markers.forEach((marker) => {
+        if (marker.lat && marker.lng) {
+          const position = { lat: Number(marker.lat), lng: Number(marker.lng) };
+          const markerObj = new google.maps.Marker({
             position,
             map,
             title: marker.name,
-            animation: google.maps.Animation.DROP
+            animation: google.maps.Animation.DROP,
+            optimized: true
           });
 
-          // Store marker reference
-          markerRefs.set(marker.id, mapMarker);
-
-          // Extend bounds
           bounds.extend(position);
+          validMarkers++;
 
           // Create info window content
           const content = `
-            <div class="p-3 max-w-sm">
-              <h3 class="font-bold text-lg">${marker.name}</h3>
-              ${marker.address ? `<p class="text-gray-600 mt-1">${marker.address}</p>` : ''}
-              <div class="flex gap-2 mt-2">
-                ${marker.phone ? `
-                  <a href="tel:${marker.phone}" class="text-green-600 hover:text-green-700 flex items-center outline-none focus:outline-none focus:ring-0">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    Call
-                  </a>
-                ` : ''}
-                ${marker.website ? `
-                  <a href="${marker.website}" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700 flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                    Website
-                  </a>
-                ` : ''}
-                <a href="#" onclick="openDirections(${marker.lat}, ${marker.lng}); return false;" class="text-green-600 hover:text-green-700 flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Directions
-                </a>
+            <div class="p-4">
+              <h3 class="font-bold text-lg mb-2">${marker.name}</h3>
+              ${marker.address ? `<p class="text-gray-600 mb-2">${marker.address}</p>` : ''}
+              ${marker.phone ? `<p class="text-gray-600 mb-2">${marker.phone}</p>` : ''}
+              <div class="flex gap-2 mt-4">
+                ${marker.phone ? `<a href="tel:${marker.phone}" class="text-green-600 hover:text-green-700 map-link">Call</a>` : ''}
+                ${marker.website ? `<a href="${marker.website}" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700 map-link">Website</a>` : ''}
+                <button onclick="window.openDirections(${marker.lat}, ${marker.lng})" class="text-green-600 hover:text-green-700 map-link">Directions</button>
               </div>
             </div>
           `;
 
-          // Add click listener
-          mapMarker.addListener('click', () => {
-            // Stop any existing animation
-            if (activeMarker && activeMarker !== mapMarker) {
+          const infoWindow = new google.maps.InfoWindow({ content });
+
+          markerObj.addListener('click', () => {
+            // Close any previously open info window
+            if (activeInfoWindow) {
+              activeInfoWindow.close();
+            }
+            
+            // Open this marker's info window
+            infoWindow.open(map, markerObj);
+            activeInfoWindow = infoWindow;
+            
+            // Set bounce animation
+            if (activeMarker && activeMarker !== markerObj) {
               activeMarker.setAnimation(null);
             }
+            markerObj.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(() => markerObj.setAnimation(null), 2100);
+            activeMarker = markerObj;
 
-            // Animate this marker
-            mapMarker.setAnimation(google.maps.Animation.BOUNCE);
-            setTimeout(() => mapMarker.setAnimation(null), 2100);
-            activeMarker = mapMarker;
-
-            // Open info window
-            infoWindow.setContent(content);
-            infoWindow.open(map, mapMarker);
-
-            // Dispatch custom event
-            const event = new CustomEvent('markerClick', { 
+            // Dispatch marker click event
+            const event = new CustomEvent('markerClick', {
               detail: { centerId: marker.id }
             });
             document.dispatchEvent(event);
-
-            // Pan to marker
-            map.panTo(position);
+            
+            console.log('Marker clicked:', marker.id);
           });
 
-          resolve();
-        });
+          // Store references to markers and info windows
+          markerRefs.set(marker.id, markerObj);
+          infoWindowRefs.set(marker.id, infoWindow);
+        }
       });
 
-      // Wait for all markers in the batch to be created
-      await Promise.all(batchPromises);
-      
-      // Small delay between batches to prevent UI blocking
-      await new Promise(resolve => setTimeout(resolve, MARKER_BATCH_DELAY));
-    }
+      // Fit bounds if we have multiple valid markers
+      if (validMarkers > 1) {
+        map.fitBounds(bounds);
+        const padding = { top: 50, right: 50, bottom: 50, left: 50 };
+        map.fitBounds(bounds, padding);
+      }
 
-    return { markerRefs, bounds };
+      console.log('Map initialized with', validMarkers, 'markers');
+    } catch (error) {
+      handleMapError(error);
+    }
   }
 
-  // This function initializes the map when the Google Maps API is loaded
-  async function initializeMap() {
-    const mapElements = document.querySelectorAll('#map') as NodeListOf<HTMLElement>;
-    
-    mapElements.forEach(async (mapElement) => {
-      const loadingElement = mapElement.parentElement?.querySelector('.map-loading') as HTMLElement;
-      
-      try {
-        // Get markers from data attribute
-        const markers = JSON.parse(mapElement.dataset.markers || '[]');
-        const zoom = parseInt(mapElement.dataset.zoom || '12', 10);
-        
-        if (!markers.length) {
-          console.error('No markers provided');
-          return;
-        }
-
-        // Create map instance centered on the first marker
-        const map = new google.maps.Map(mapElement, {
-          center: { lat: markers[0].lat, lng: markers[0].lng },
-          zoom,
-          styles: [
-            {
-              "featureType": "administrative",
-              "elementType": "labels.text.fill",
-              "stylers": [{"color": "#444444"}]
-            },
-            {
-              "featureType": "landscape",
-              "elementType": "all",
-              "stylers": [{"color": "#f2f2f2"}]
-            },
-            {
-              "featureType": "poi",
-              "elementType": "all",
-              "stylers": [{"visibility": "off"}]
-            },
-            {
-              "featureType": "road",
-              "elementType": "all",
-              "stylers": [{"saturation": -100}, {"lightness": 45}]
-            },
-            {
-              "featureType": "road.highway",
-              "elementType": "all",
-              "stylers": [{"visibility": "simplified"}]
-            },
-            {
-              "featureType": "road.arterial",
-              "elementType": "labels.icon",
-              "stylers": [{"visibility": "off"}]
-            },
-            {
-              "featureType": "transit",
-              "elementType": "all",
-              "stylers": [{"visibility": "off"}]
-            },
-            {
-              "featureType": "water",
-              "elementType": "all",
-              "stylers": [{"color": "#c5e0ec"}, {"visibility": "on"}]
-            }
-          ]
-        });
-
-        // Create info window
-        const infoWindow = new google.maps.InfoWindow();
-
-        // Create markers in batches
-        const { markerRefs, bounds } = await createMarkersInBatches(map, markers, infoWindow);
-
-        // Listen for center selection events
-        document.addEventListener('centerSelect', (e: any) => {
-          const marker = markerRefs.get(e.detail.centerId);
-          if (marker) {
-            // Stop any existing animation
-            if (activeMarker && activeMarker !== marker) {
-              activeMarker.setAnimation(null);
-            }
-
-            // Animate the marker
-            marker.setAnimation(google.maps.Animation.BOUNCE);
-            setTimeout(() => marker.setAnimation(null), 2100);
-            activeMarker = marker;
-
-            // Open info window
-            const selectedMarker = markers.find((m: any) => m.id === e.detail.centerId);
-            if (selectedMarker) {
-              const content = `
-                <div class="p-3 max-w-sm">
-                  <h3 class="font-bold text-lg">${selectedMarker.name}</h3>
-                  ${selectedMarker.address ? `<p class="text-gray-600 mt-1">${selectedMarker.address}</p>` : ''}
-                  <div class="flex gap-2 mt-2">
-                    ${selectedMarker.phone ? `
-                      <a href="tel:${selectedMarker.phone}" class="text-green-600 hover:text-green-700 flex items-center outline-none focus:outline-none focus:ring-0">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                        Call
-                      </a>
-                    ` : ''}
-                    ${selectedMarker.website ? `
-                      <a href="${selectedMarker.website}" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700 flex items-center outline-none focus:outline-none focus:ring-0">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                        </svg>
-                        Website
-                      </a>
-                    ` : ''}
-                    <a href="#" onclick="openDirections(${selectedMarker.lat}, ${selectedMarker.lng}); return false;" class="text-green-600 hover:text-green-700 flex items-center outline-none focus:outline-none focus:ring-0">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      Directions
-                    </a>
-                  </div>
-                </div>
-              `;
-              infoWindow.setContent(content);
-              infoWindow.open(map, marker);
-            }
-
-            // Pan to marker
-            map.panTo(marker.getPosition());
-          }
-        });
-
-        // Fit map to show all markers with padding
-        if (markers.length > 1) {
-          const padding = { top: 50, right: 50, bottom: 50, left: 50 };
-          map.fitBounds(bounds, padding);
+  // Set up event listeners for map interactions
+  function setupMapListeners() {
+    // Listen for center selection events (from card clicks)
+    document.addEventListener('centerSelect', (e) => {
+      console.log('Center select event received:', e.detail);
+      const marker = markerRefs.get(e.detail.centerId);
+      if (marker) {
+        // Close any existing info window
+        if (activeInfoWindow) {
+          activeInfoWindow.close();
         }
         
-        // Hide loading indicator
-        if (loadingElement) {
-          loadingElement.style.display = 'none';
+        // Find the associated info window and open it
+        const infoWindow = infoWindowRefs.get(e.detail.centerId);
+        if (infoWindow) {
+          infoWindow.open(map, marker);
+          activeInfoWindow = infoWindow;
         }
-      } catch (error) {
-        console.error('Error initializing map:', error);
-        if (loadingElement) {
-          loadingElement.innerHTML = '<p class="text-red-500">Error loading map</p>';
+        
+        // Set marker animation
+        if (activeMarker && activeMarker !== marker) {
+          activeMarker.setAnimation(null);
         }
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(() => marker.setAnimation(null), 2100);
+        activeMarker = marker;
+        
+        // Pan map to marker position
+        map.panTo(marker.getPosition());
+        map.setZoom(15);
+        
+        console.log('Map centered on marker:', e.detail.centerId);
+      } else {
+        console.error('Marker not found for center:', e.detail.centerId);
       }
     });
   }
-
-  // Set up the Google Maps script if it hasn't been loaded yet
-  function loadGoogleMapsAPI() {
-    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-      const apiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
-      if (!apiKey) {
-        console.error('Google Maps API key is missing');
-        return;
-      }
-
-      console.log('Loading Google Maps API');
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initializeMap`;
-      script.async = true;
-      script.defer = true;
-      
-      // Define the callback globally
-      (window as any).initializeMap = initializeMap;
-      
-      script.onerror = (error) => {
-        console.error('Failed to load Google Maps script:', error);
-        const loadingElements = document.querySelectorAll('.map-loading') as NodeListOf<HTMLElement>;
-        loadingElements.forEach(el => {
-          el.innerHTML = '<p class="text-red-500">Failed to load Google Maps</p>';
-        });
-      };
-
-      document.head.appendChild(script);
-    } else {
-      // If the API is already loaded, just initialize the map
-      initializeMap();
-    }
+  
+  // Main function to initialize everything
+  function initMap() {
+    // Initialize the map with markers
+    initializeMap();
+    
+    // Set up event listeners
+    setupMapListeners();
   }
 
-  // Initialize maps when the component is mounted
-  document.addEventListener('DOMContentLoaded', loadGoogleMapsAPI);
+  // Initialize map when Google Maps API is loaded
+  if (typeof google !== 'undefined' && google.maps) {
+    console.log('Google Maps API already loaded, initializing map');
+    initMap();
+  } else {
+    console.log('Waiting for Google Maps API to load');
+    window.addEventListener('google-maps-ready', initMap);
+  }
 </script>

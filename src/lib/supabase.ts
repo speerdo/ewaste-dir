@@ -40,17 +40,40 @@ export async function getState(stateId: string): Promise<State | null> {
     return stateCache.get(stateId) || null;
   }
 
+  // Convert state ID back to name format (e.g., "new-york" -> "New York")
+  const stateName = stateId
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
   const { data, error } = await supabase
     .from('states')
     .select('*')
-    .eq('id', stateId)
+    .ilike('name', stateName)
     .single();
 
-  if (error) throw error;
-  if (data) {
-    stateCache.set(stateId, data);
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null; // No state found
+    }
+    throw error;
   }
-  return data;
+
+  if (data) {
+    const state: State = {
+      id: data.name.toLowerCase().replace(/\s+/g, '-'),
+      name: data.name,
+      description: data.description,
+      image_url: data.image_url,
+      featured: data.featured,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      nearby_states: data.nearby_states,
+    };
+    stateCache.set(stateId, state);
+    return state;
+  }
+  return null;
 }
 
 export interface CentersByCity {
@@ -78,18 +101,34 @@ export async function getRecyclingCentersByState(
   const state = await getState(stateId);
   if (!state) throw new Error('State not found');
 
-  const { data, error } = await supabase
-    .from('recycling_centers')
-    .select('*')
-    .ilike('state', state.name);
+  let allCenters: RecyclingCenter[] = [];
+  let page = 0;
+  const pageSize = 1000;
 
-  if (error) throw error;
+  // Use pagination to get all centers
+  while (true) {
+    const { data, error } = await supabase
+      .from('recycling_centers')
+      .select('*')
+      .ilike('state', state.name)
+      .order('city')
+      .range(page * pageSize, (page + 1) * pageSize - 1);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) break;
+
+    allCenters = [...allCenters, ...data];
+
+    if (data.length < pageSize) break;
+    page++;
+  }
 
   // Cache the results
-  recyclingCenterCache.set(cacheKey, data || []);
+  recyclingCenterCache.set(cacheKey, allCenters);
 
   // Group centers by city
-  return (data || []).reduce((acc: CentersByCity, center: RecyclingCenter) => {
+  return allCenters.reduce((acc: CentersByCity, center: RecyclingCenter) => {
     const city = center.city || 'Unknown';
     if (!acc[city]) {
       acc[city] = [];

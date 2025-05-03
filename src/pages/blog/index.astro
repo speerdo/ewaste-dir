@@ -1,0 +1,58 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+const posts = await getCollection('blog');
+posts.sort((a: CollectionEntry<'blog'>, b: CollectionEntry<'blog'>) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<Layout title="Blog | RecycleOldTech - Electronics Recycling News and Updates" description="Stay informed about electronics recycling trends, environmental impact of e-waste, and best practices for responsible disposal.">
+  <div class="pt-32 pb-16 bg-gradient-to-b from-green-900 via-green-800 to-green-700">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl md:text-5xl font-display font-bold text-white text-center mb-6">RecycleOldTech Blog</h1>
+      <p class="text-xl text-green-50 text-center max-w-3xl mx-auto">
+        Stay informed about electronics recycling trends and environmental impact
+      </p>
+    </div>
+  </div>
+
+  <div class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {posts.map((post: CollectionEntry<'blog'>) => (
+          <article class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+            <a href={`/blog/${post.slug}`} class="block">
+              <img 
+                src={post.data.image} 
+                alt={post.data.title}
+                class="w-full h-48 object-cover"
+              />
+              <div class="p-6">
+                <div class="text-green-600 text-sm font-medium mb-2">
+                  {new Date(post.data.pubDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </div>
+                <h2 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+                  {post.data.title}
+                </h2>
+                <p class="text-gray-600 line-clamp-3 mb-4">
+                  {post.data.description}
+                </p>
+                <span class="text-green-600 font-medium inline-flex items-center">
+                  Read more
+                  <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </span>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+</Layout>

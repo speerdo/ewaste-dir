@@ -1,98 +1,35 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { supabase } from '../../lib/supabase';
+import { getRecyclingCentersByState, getState } from '../../lib/supabase';
 import type { RecyclingCenter } from '../../types/supabase';
 
-// Add popular states to ensure they're included in static generation
-const popularStates = [
-  "California",
-  "New York",
-  "Texas",
-  "Illinois",
-  "Washington",
-  "Massachusetts",
-  "Georgia",
-  "Colorado",
-  "Florida",
-  "Nevada"
-];
+// Get the state parameter from the URL
+const { state: stateId } = Astro.params;
 
-export async function getStaticPaths() {
-  // Get states from both tables
-  const [{ data: statesFromCenters }, { data: statesFromStates }] = await Promise.all([
-    supabase.from('recycling_centers').select('state').order('state'),
-    supabase.from('states').select('name').order('name')
-  ]);
-
-  // Combine and deduplicate states
-  const allStates = [
-    ...(statesFromCenters?.map(row => row.state) || []),
-    ...(statesFromStates?.map(row => row.name) || [])
-  ];
-  
-  const uniqueStates = [...new Set(allStates)].filter(Boolean);
-
-  return uniqueStates.map(stateName => ({
-    params: { 
-      state: stateName.toLowerCase().replace(/\s+/g, '-')
-    },
-    props: { stateName }
-  }));
+if (!stateId) {
+  return Astro.redirect('/404');
 }
 
-// Get the state parameter from the URL and convert it back to proper case
-const { state } = Astro.params;
-const { stateName } = Astro.props;
+// Get the state details
+const state = await getState(stateId);
+if (!state) {
+  return Astro.redirect('/404');
+}
 
 // Get all recycling centers for this state
-let allCenters: any[] = [];
-let page = 0;
-const pageSize = 1000;
-let hasMore = true;
-
-while (hasMore) {
-  const { data, error } = await supabase
-    .from('recycling_centers')
-    .select('*')
-    .eq('state', stateName)
-    .order('city')
-    .range(page * pageSize, (page + 1) * pageSize - 1);
-
-  if (error) {
-    console.error('Error fetching centers:', error);
-    return Astro.redirect('/404');
-  }
-
-  if (!data || data.length === 0) {
-    hasMore = false;
-  } else {
-    allCenters = [...allCenters, ...data];
-    page++;
-  }
-
-  // Break if we've fetched all records
-  if (data && data.length < pageSize) {
-    hasMore = false;
-  }
-}
-
-const centers = allCenters;
-
-// Group centers by city
-const centersByCity = centers.reduce<Record<string, RecyclingCenter[]>>((acc, center) => {
-  const city = center.city || 'Unknown';
-  if (!acc[city]) {
-    acc[city] = [];
-  }
-  acc[city].push(center);
-  return acc;
-}, {});
+const centersByCity = await getRecyclingCentersByState(stateId);
 
 // Sort cities by name
 const sortedCities = Object.keys(centersByCity).sort();
+
+// Calculate total centers
+const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum + centers.length, 0);
+
+// Log for debugging
+console.log(`Found ${totalCenters} centers in ${state.name}, grouped into ${sortedCities.length} cities`);
 ---
 
-<Layout title={`E-Waste Recycling Centers in ${stateName}`}>
+<Layout title={`E-Waste Recycling Centers in ${state.name}`}>
   <div class="bg-white min-h-screen py-12">
     <div class="container mx-auto px-4">
       <div class="max-w-4xl mx-auto">
@@ -111,23 +48,29 @@ const sortedCities = Object.keys(centersByCity).sort();
               <span class="mx-2">/</span>
             </li>
             <li>
-              <span class="text-gray-900 font-medium">{stateName}</span>
+              <span class="text-gray-900 font-medium">{state.name}</span>
             </li>
           </ol>
         </nav>
 
         <h1 class="text-4xl font-display font-bold text-gray-900 mb-4">
-          E-Waste Recycling Centers in {stateName}
+          E-Waste Recycling Centers in {state.name}
         </h1>
         
-        <p class="text-xl text-gray-600 mb-8">
-          Found recycling centers in {sortedCities.length} {sortedCities.length === 1 ? 'city' : 'cities'} across {stateName}
-        </p>
+        {sortedCities.length > 0 ? (
+          <p class="text-xl text-gray-600 mb-8">
+            Found {totalCenters} recycling centers in {sortedCities.length} {sortedCities.length === 1 ? 'city' : 'cities'} across {state.name}
+          </p>
+        ) : (
+          <p class="text-xl text-gray-600 mb-8">
+            No recycling centers found in {state.name}. Please try another state or check back later.
+          </p>
+        )}
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedCities.map(city => (
             <a 
-              href={`/states/${stateName.toLowerCase().replace(/\s+/g, '-')}/${city.toLowerCase().replace(/\s+/g, '-')}`}
+              href={`/states/${stateId}/${city.toLowerCase().replace(/\s+/g, '-')}`}
               class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
             >
               <div class="p-6">

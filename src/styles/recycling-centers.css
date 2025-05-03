@@ -1,0 +1,92 @@
+.highlight-center {
+  @apply ring-2 ring-green-500 transform scale-[1.02] shadow-lg transition-all duration-300 bg-green-50;
+}
+
+/* Add smooth transitions for center cards */
+[data-center-id] {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Add smooth transitions for the hours dropdown */
+.transform {
+  transition-property: transform;
+  transition-duration: 200ms;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Google Maps info window styles */
+.gm-style-iw-chr {
+  max-height: 18px !important;
+}
+.gm-style .gm-style-iw-c {
+  padding: 0 !important;
+  border-radius: 0.75rem !important;
+  max-width: 300px !important;
+}
+.gm-style .gm-style-iw-d {
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+.gm-style .gm-style-iw-t::after {
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0) 51%,
+    rgba(255, 255, 255, 0) 100%
+  ) !important;
+}
+.gm-style .gm-ui-hover-effect {
+  top: 0 !important;
+  right: 0 !important;
+}
+
+/* Additional styles to remove focus indicators */
+.info-window-link {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.info-window-link:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.info-window-link:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  ring: 0 !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove tap highlight on mobile */
+.gm-style * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove focus borders from map info window links */
+.gm-style .gm-style-iw-d a,
+.gm-style .gm-style-iw-d button,
+.map-link {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none !important;
+  border: none !important;
+}
+
+.gm-style .gm-style-iw-d a:focus,
+.gm-style .gm-style-iw-d button:focus,
+.map-link:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-decoration: none !important;
+}
+
+.map-link:hover {
+  color: #047857 !important; /* darker green on hover */
+  text-decoration: underline !important;
+}

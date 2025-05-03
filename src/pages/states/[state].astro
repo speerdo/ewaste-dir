@@ -4,14 +4,16 @@ import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates, n
 import { supabase } from '../../lib/supabase';
 import type { RecyclingCenter } from '../../types/supabase';
 
-// Enable hybrid mode - static paths for production, dynamic in dev
-export const prerender = import.meta.env.PROD;
+// Enable static generation for production
+export const prerender = true;
 
 export async function getStaticPaths() {
-  // Only run in production build
-  if (!import.meta.env.PROD) {
-    return [];
-  }
+  console.log('Starting getStaticPaths for states...');
+  console.log('Environment:', {
+    PROD: import.meta.env.PROD,
+    DEV: import.meta.env.DEV,
+    MODE: import.meta.env.MODE
+  });
 
   try {
     console.log('Building static routes for all state pages...');

@@ -1,6 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getState, getCitiesByState, getRecyclingCentersByCity, getRecyclingCentersByState, getAllStates, normalizeForUrl } from '../../../lib/supabase';
+import { getState, getCitiesByState, getRecyclingCentersByCity, getRecyclingCentersByState, getAllStates, normalizeForUrl, verifyConnection } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import { supabase } from '../../../lib/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
@@ -16,11 +16,18 @@ export const prerender = true;
 
 // Generate static routes for production build efficiently
 export async function getStaticPaths() {
+  let stopMonitor: (() => void) | undefined;
+  
   try {
     console.log('Building static city pages...');
     
     // Start the build monitor
-    const stopMonitor = monitorBuildProcess(60000); // Report every minute
+    stopMonitor = monitorBuildProcess(60000); // Report every minute
+
+    // Verify database connection first
+    console.log('Verifying database connection...');
+    await verifyConnection();
+    console.log('Database connection verified.');
     
     // Efficiently fetch all states
     const { data: states, error } = await supabase
@@ -30,14 +37,14 @@ export async function getStaticPaths() {
       
     if (error) {
       console.error('Error fetching states:', error);
-      stopMonitor();
-      return [];
+      if (stopMonitor) stopMonitor();
+      throw error;
     }
     
     if (!states || states.length === 0) {
       console.error('No states found');
-      stopMonitor();
-      return [];
+      if (stopMonitor) stopMonitor();
+      throw new Error('No states found in database');
     }
     
     console.log(`Found ${states.length} states, processing in batches for optimal memory usage`);
@@ -153,11 +160,12 @@ export async function getStaticPaths() {
     }
     
     console.log(`Generated static paths for ${allPaths.length} city pages`);
-    stopMonitor(); // Stop the monitor when done
+    if (stopMonitor) stopMonitor(); // Stop the monitor when done
     return allPaths;
   } catch (error) {
     console.error('Error generating city pages:', error);
-    return []; // Return empty array to avoid build failure
+    if (stopMonitor) stopMonitor();
+    throw error;
   }
 }
 

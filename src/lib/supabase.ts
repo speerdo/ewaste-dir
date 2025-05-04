@@ -4,7 +4,42 @@ import type { State, RecyclingCenter, City } from '../types/supabase';
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Validate Supabase credentials
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase credentials. Make sure PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY are set in your environment variables.'
+  );
+}
+
+// Initialize Supabase client with retries
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false, // Don't persist auth state during builds
+  },
+  global: {
+    headers: { 'x-client-info': 'astro-build' },
+  },
+});
+
+// Verify database connection
+export async function verifyConnection() {
+  try {
+    const { data, error } = await supabase
+      .from('states')
+      .select('count')
+      .limit(1);
+
+    if (error) {
+      throw error;
+    }
+    return true;
+  } catch (error) {
+    console.error('Failed to connect to Supabase:', error);
+    throw new Error(
+      'Failed to connect to database. Please check your credentials and try again.'
+    );
+  }
+}
 
 // Enhanced cache configuration
 const stateCache = new Map<string, State>();

@@ -38,7 +38,7 @@ const clearCaches = () => {
       console.log(`🧹 Clearing cache directory: ${dir}`);
       try {
         // Use rimraf via execSync for better directory removal
-        execSync(`rm -rf "${dirPath}"`);
+        execSync(`rm -rf "${dirPath}"`, { stdio: 'ignore' });
       } catch (error) {
         console.warn(`⚠️ Could not remove directory ${dir}: ${error.message}`);
       }
@@ -60,42 +60,48 @@ const warmupDatabase = async () => {
 
   // Simple HTTP request to wake up Supabase
   return new Promise((resolve) => {
-    const url = new URL(
-      '/rest/v1/states?select=name&limit=1',
-      process.env.PUBLIC_SUPABASE_URL
-    );
-    const req = https.get(
-      url,
-      {
-        headers: {
-          apikey: process.env.PUBLIC_SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${process.env.PUBLIC_SUPABASE_ANON_KEY}`,
+    try {
+      const url = new URL(
+        '/rest/v1/states?select=name&limit=1',
+        process.env.PUBLIC_SUPABASE_URL
+      );
+      const req = https.get(
+        url,
+        {
+          headers: {
+            apikey: process.env.PUBLIC_SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${process.env.PUBLIC_SUPABASE_ANON_KEY}`,
+          },
+          timeout: 5000,
         },
-      },
-      (res) => {
-        let data = '';
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
+        (res) => {
+          let data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
 
-        res.on('end', () => {
-          console.log(`✅ Supabase connection ready: ${res.statusCode}`);
-          resolve();
-        });
-      }
-    );
+          res.on('end', () => {
+            console.log(`✅ Supabase connection ready: ${res.statusCode}`);
+            resolve();
+          });
+        }
+      );
 
-    req.on('error', (error) => {
-      console.error(`❌ Error warming up Supabase: ${error.message}`);
+      req.on('error', (error) => {
+        console.error(`❌ Error warming up Supabase: ${error.message}`);
+        resolve(); // Continue anyway
+      });
+
+      // Set timeout
+      req.setTimeout(5000, () => {
+        console.warn('⚠️ Supabase warmup timed out');
+        req.destroy();
+        resolve();
+      });
+    } catch (error) {
+      console.error('Failed to warm up Supabase:', error.message);
       resolve(); // Continue anyway
-    });
-
-    // Set timeout
-    req.setTimeout(5000, () => {
-      console.warn('⚠️ Supabase warmup timed out');
-      req.destroy();
-      resolve();
-    });
+    }
   });
 };
 
@@ -106,7 +112,8 @@ const optimizeNodeSettings = () => {
   // Expose GC for manual calls if needed
   try {
     execSync(
-      'node --expose-gc -e "console.log(\'✅ Garbage collection exposed\')"'
+      'node --expose-gc -e "console.log(\'✅ Garbage collection exposed\')"',
+      { stdio: 'ignore' }
     );
     // Set flag for later usage
     process.env.EXPOSE_GC = 'true';
@@ -130,11 +137,19 @@ const increaseUlimit = () => {
     if (process.platform !== 'win32') {
       console.log('🔧 Increasing file descriptor limit...');
       // Try to set ulimit to maximum
-      execSync('ulimit -n 65536 || true');
+      try {
+        execSync('ulimit -n 65536 || true', { stdio: 'ignore' });
+      } catch (e) {
+        // Ignore errors, this might not work in all environments
+      }
 
       // Check what we were able to set
-      const limit = execSync('ulimit -n').toString().trim();
-      console.log(`ℹ️ File descriptor limit: ${limit}`);
+      try {
+        const limit = execSync('ulimit -n').toString().trim();
+        console.log(`ℹ️ File descriptor limit: ${limit}`);
+      } catch (e) {
+        console.log('⚠️ Could not check file descriptor limit');
+      }
     }
   } catch (error) {
     console.warn('⚠️ Could not increase ulimit:', error.message);
@@ -164,4 +179,7 @@ const main = async () => {
 };
 
 // Run the script
-main();
+main().catch((err) => {
+  console.error('Unhandled error in optimization script:', err);
+  // Don't exit with error, let the build continue
+});

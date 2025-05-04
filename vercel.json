@@ -2,8 +2,8 @@
   "github": {
     "silent": true
   },
-  "buildCommand": "NODE_ENV=production node --max-old-space-size=7168 scripts/optimize-for-build.js && npm run build:optimized",
-  "installCommand": "npm ci --no-audit --no-fund --prefer-offline",
+  "buildCommand": "NODE_OPTIONS=\"--max-old-space-size=7168\" NODE_ENV=production astro build",
+  "installCommand": "npm ci --prefer-offline",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "headers": [

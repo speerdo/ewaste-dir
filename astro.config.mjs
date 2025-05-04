@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import node from '@astrojs/node';
-import vercel from '@astrojs/vercel/static';
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,20 +13,22 @@ export default defineConfig({
           analytics: true,
           imageService: true,
           speedInsights: true,
-          buildOutput: {
-            minify: true,
-          },
         })
       : node({
           mode: 'standalone',
         }),
-  // Increase build performance
   build: {
-    // Use more worker threads for parallel processing
-    // This helps with large static site generation
-    inlineStylesheets: 'never',
+    // Static site generation performance optimizations
     format: 'file',
     assets: 'assets',
+    // Set build concurrency for large builds
+    concurrentPages: 2, // Limiting concurrent page generation to manage memory
+    // Enable build reporting to monitor progress
+    reporter: {
+      config: {
+        reportDetailLevel: 'verbose',
+      },
+    },
   },
   vite: {
     define: {
@@ -37,43 +39,16 @@ export default defineConfig({
     build: {
       // Reduce build log verbosity
       reportCompressedSize: false,
-      // Increase build speed
-      minify: 'terser',
-      // Split chunks more aggressively for parallel loading
-      rollupOptions: {
-        output: {
-          manualChunks: (id) => {
-            if (id.includes('node_modules')) {
-              return 'vendor';
-            }
-          },
-        },
-      },
-      // Increase Vite's performance
-      cssCodeSplit: false,
-      assetsInlineLimit: 0,
-      // Add source map for production debugging if needed
-      sourcemap: false,
-      // Increase bundle write speed
-      write: true,
-      // Enable multi-threading
-      emptyOutDir: true,
-      copyPublicDir: true,
+      // Optimize large chunks
       chunkSizeWarningLimit: 1000,
     },
-    // Optimize server performance during build
-    server: {
-      fs: {
-        strict: false,
-      },
-      hmr: {
-        overlay: false,
-      },
-    },
-    // Optimize for large builds
+    // Optimize memory usage
     optimizeDeps: {
-      // Force inclusion of these dependencies
-      include: ['tailwindcss'],
+      force: true,
+    },
+    // Ensure shared dependencies are split properly
+    ssr: {
+      noExternal: ['@supabase/supabase-js'],
     },
   },
   routes: [
@@ -82,4 +57,6 @@ export default defineConfig({
       entryPoint: 'src/api/*.ts',
     },
   ],
+  // Enable HTML compression for smaller file sizes
+  compressHTML: true,
 });

@@ -114,3 +114,75 @@ function formatTime(seconds: number): string {
 
   return parts.join(' ');
 }
+
+/**
+ * Monitor system resources during build
+ * Call this function at the start of static path generation
+ */
+export function monitorBuildProcess(intervalMs = 30000): () => void {
+  console.log('Starting build process monitor...');
+
+  // Get initial timestamp
+  const startTime = Date.now();
+  let lastReportTime = startTime;
+  let pagesGenerated = 0;
+
+  // Create monitor interval
+  const intervalId = setInterval(() => {
+    // Calculate memory usage
+    const memoryUsage = process.memoryUsage();
+    const memoryUsedMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
+    const memoryTotalMB = Math.round(memoryUsage.heapTotal / 1024 / 1024);
+    const memoryRss = Math.round(memoryUsage.rss / 1024 / 1024);
+
+    // Calculate elapsed time
+    const elapsedMs = Date.now() - startTime;
+    const elapsedMinutes = (elapsedMs / 60000).toFixed(1);
+
+    // Get rate of page generation
+    const timeSinceLastReport = Date.now() - lastReportTime;
+    const pagesPerMinute = (pagesGenerated / (elapsedMs / 60000)).toFixed(1);
+
+    console.log(`=== BUILD MONITOR REPORT ===`);
+    console.log(`⏱️ Elapsed time: ${elapsedMinutes} minutes`);
+    console.log(
+      `🧠 Memory usage: ${memoryUsedMB}MB / ${memoryTotalMB}MB (Heap), ${memoryRss}MB (RSS)`
+    );
+    console.log(`📊 Generation rate: ${pagesPerMinute} pages/minute`);
+    console.log(`===========================`);
+
+    // Try to trigger garbage collection
+    try {
+      if (typeof global.gc === 'function') {
+        global.gc();
+
+        // Report memory after GC
+        const afterGC = process.memoryUsage();
+        const afterGCUsedMB = Math.round(afterGC.heapUsed / 1024 / 1024);
+        console.log(
+          `🧹 After GC: ${afterGCUsedMB}MB heap used (${
+            memoryUsedMB - afterGCUsedMB
+          }MB freed)`
+        );
+      }
+    } catch (e) {
+      // Ignore if GC is not available
+    }
+
+    // Reset for next interval
+    lastReportTime = Date.now();
+  }, intervalMs);
+
+  // Return a function to track pages and stop monitoring
+  return function stopMonitoring() {
+    clearInterval(intervalId);
+
+    // Final report
+    const totalElapsedMs = Date.now() - startTime;
+    const totalElapsedMinutes = (totalElapsedMs / 60000).toFixed(1);
+
+    console.log(`=== BUILD MONITOR FINAL REPORT ===`);
+    console.log(`⏱️ Total build time: ${totalElapsedMinutes} minutes`);
+    console.log(`===========================`);
+  };
+}

@@ -595,3 +595,43 @@ export async function getFeaturedStates(): Promise<State[]> {
     throw err;
   }
 }
+
+// Add this function to optimize querying recycling centers
+export async function getAllCitiesByState(): Promise<Record<string, string[]>> {
+  try {
+    // This is a more efficient query for static generation
+    const { data, error } = await supabase
+      .from('recycling_centers')
+      .select('state, city')
+      .not('city', 'is', null);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      return {};
+    }
+
+    // Group cities by state
+    const citiesByState: Record<string, Set<string>> = {};
+
+    data.forEach((item) => {
+      if (item.state && item.city) {
+        if (!citiesByState[item.state]) {
+          citiesByState[item.state] = new Set();
+        }
+        citiesByState[item.state].add(item.city);
+      }
+    });
+
+    // Convert sets to arrays for easier handling
+    const result: Record<string, string[]> = {};
+    for (const [state, cities] of Object.entries(citiesByState)) {
+      result[state] = Array.from(cities);
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error fetching all cities by state:', error);
+    return {};
+  }
+}

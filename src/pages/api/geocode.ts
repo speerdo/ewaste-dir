@@ -1,238 +1,210 @@
 import type { APIRoute } from 'astro';
 
-export type GeocodeResponse = {
+// Disable prerendering for this endpoint
+export const prerender = false;
+
+export interface GeocodeResponse {
   city: string;
   state: string;
-  display: string;
-  raw_address: Record<string, any>;
   coordinates: {
     lat: number;
     lng: number;
   };
-};
+}
 
-export type GeocodeErrorResponse = {
+export interface GeocodeErrorResponse {
   error: string;
-  message?: string;
   details?: Record<string, any>;
+}
+
+const corsHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-export const GET: APIRoute = async ({ url }): Promise<Response> => {
-  const rawLat = url.searchParams.get('lat');
-  const rawLng = url.searchParams.get('lng');
+const handler: APIRoute = async ({ url, request }): Promise<Response> => {
+  // Handle preflight requests
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
 
-  console.log('Received raw coordinates:', {
-    rawLat,
-    rawLng,
-    rawLatType: typeof rawLat,
-    rawLngType: typeof rawLng,
-    rawLatNull: rawLat === null,
-    rawLngNull: rawLng === null,
-    rawLatNullStr: rawLat === 'null',
-    rawLngNullStr: rawLng === 'null',
+  // Enhanced logging
+  const requestUrl = new URL(request.url);
+  console.log('Geocoding Debug Info:', {
+    fullUrl: url.toString(),
+    requestUrl: request.url,
+    urlSearchParams: Object.fromEntries(url.searchParams),
+    requestSearchParams: Object.fromEntries(requestUrl.searchParams),
+    rawRequest: request,
   });
 
-  // Handle missing or empty coordinates
-  if (!rawLat || !rawLng || rawLat === 'null' || rawLng === 'null') {
-    console.log('Coordinate validation failed:', {
-      rawLatFalsy: !rawLat,
-      rawLngFalsy: !rawLng,
-      rawLatNullStr: rawLat === 'null',
-      rawLngNullStr: rawLng === 'null',
-    });
+  try {
+    // Get params from URL first, then fallback to request URL
+    const lat =
+      url.searchParams.get('lat') ?? requestUrl.searchParams.get('lat');
+    const lng =
+      url.searchParams.get('lng') ?? requestUrl.searchParams.get('lng');
 
-    return new Response(
-      JSON.stringify({
-        error: 'Missing or invalid coordinates',
-        details: {
-          rawLat,
-          rawLng,
-          reason: 'Coordinates must be provided and cannot be null',
-          validationChecks: {
-            rawLatFalsy: !rawLat,
-            rawLngFalsy: !rawLng,
-            rawLatNullStr: rawLat === 'null',
-            rawLngNullStr: rawLng === 'null',
+    console.log('Parsed coordinates:', { lat, lng });
+
+    // Handle missing coordinates
+    if (!lat || !lng) {
+      return new Response(
+        JSON.stringify({
+          error: 'Missing coordinates',
+          details: {
+            providedLat: lat,
+            providedLng: lng,
+            searchParams: Object.fromEntries(url.searchParams),
+            requestSearchParams: Object.fromEntries(requestUrl.searchParams),
           },
-        },
-      } satisfies GeocodeErrorResponse),
-      {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, no-cache, must-revalidate',
-        },
-      }
-    );
-  }
+        } satisfies GeocodeErrorResponse),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
 
-  // Parse coordinates, handling potential scientific notation
-  let lat: number, lng: number;
+    // Parse coordinates
+    const parsedLat = Number(lat);
+    const parsedLng = Number(lng);
 
-  try {
-    lat = typeof rawLat === 'string' ? Number(rawLat) : rawLat;
-    lng = typeof rawLng === 'string' ? Number(rawLng) : rawLng;
-  } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: 'Failed to parse coordinates',
-        details: {
-          rawLat,
-          rawLng,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        },
-      } satisfies GeocodeErrorResponse),
-      {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, no-cache, must-revalidate',
-        },
-      }
-    );
-  }
+    // Validate parsed coordinates
+    if (isNaN(parsedLat) || isNaN(parsedLng)) {
+      return new Response(
+        JSON.stringify({
+          error: 'Invalid coordinates format',
+          details: {
+            providedLat: lat,
+            providedLng: lng,
+            parsedLat,
+            parsedLng,
+          },
+        } satisfies GeocodeErrorResponse),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
 
-  console.log('Parsed coordinates:', { lat, lng });
+    // Validate coordinate ranges
+    if (
+      parsedLat < -90 ||
+      parsedLat > 90 ||
+      parsedLng < -180 ||
+      parsedLng > 180
+    ) {
+      return new Response(
+        JSON.stringify({
+          error: 'Coordinates out of valid range',
+          details: { parsedLat, parsedLng },
+        } satisfies GeocodeErrorResponse),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
 
-  // Validate coordinates
-  if (isNaN(lat) || isNaN(lng)) {
-    return new Response(
-      JSON.stringify({
-        error: 'Invalid coordinates format',
-        details: {
-          rawLat,
-          rawLng,
-          parsedLat: lat,
-          parsedLng: lng,
-          reason: 'Coordinates must be valid numbers',
-        },
-      } satisfies GeocodeErrorResponse),
-      {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, no-cache, must-revalidate',
-        },
-      }
-    );
-  }
-
-  // Validate coordinate ranges
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-    return new Response(
-      JSON.stringify({
-        error: 'Coordinates out of valid range',
-        details: {
-          lat,
-          lng,
-          reason:
-            'Latitude must be between -90 and 90, longitude between -180 and 180',
-        },
-      } satisfies GeocodeErrorResponse),
-      {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, no-cache, must-revalidate',
-        },
-      }
-    );
-  }
-
-  try {
     // Use OpenStreetMap's Nominatim service for geocoding
-    const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat.toFixed(
+    const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${parsedLat.toFixed(
       6
-    )}&lon=${lng.toFixed(6)}&zoom=18&addressdetails=1`;
+    )}&lon=${parsedLng.toFixed(6)}&zoom=18&addressdetails=1`;
+
     console.log('Calling Nominatim:', nominatimUrl);
 
     const response = await fetch(nominatimUrl, {
       headers: {
-        'User-Agent': 'E-Waste Recycling Directory/1.0',
+        'User-Agent': 'Astro-Geocoding-Service/1.0',
       },
     });
 
     if (!response.ok) {
       console.error('Nominatim error:', response.status, response.statusText);
-      throw new Error(
-        `Geocoding service error: ${response.status} ${response.statusText}`
+      return new Response(
+        JSON.stringify({
+          error: 'Geocoding service error',
+          details: {
+            status: response.status,
+            statusText: response.statusText,
+          },
+        } satisfies GeocodeErrorResponse),
+        {
+          status: 502,
+          headers: corsHeaders,
+        }
       );
     }
 
     const data = await response.json();
     console.log('Nominatim response:', data);
 
-    // Extract city and state from the response
-    const address = data.address;
-
-    // Try multiple fields for city name
-    const city =
-      address.city ||
-      address.town ||
-      address.village ||
-      address.suburb ||
-      address.municipality ||
-      address.district;
-
-    // Try multiple fields for state name
-    const state = address.state || address.province || address.region;
-
-    console.log('Extracted location:', { city, state, address });
-
-    if (!city || !state) {
+    if (!data.address) {
       return new Response(
         JSON.stringify({
-          error: 'Could not determine city and state from your location',
-          details: {
-            foundCity: !!city,
-            foundState: !!state,
-            address: address,
-            coordinates: { lat, lng },
-          },
+          error: 'No address found',
+          details: data,
         } satisfies GeocodeErrorResponse),
         {
-          status: 422,
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-store, no-cache, must-revalidate',
-          },
+          status: 404,
+          headers: corsHeaders,
         }
       );
     }
 
-    return new Response(
-      JSON.stringify({
-        city,
-        state,
-        display: `${city}, ${state}`,
-        raw_address: address,
-        coordinates: { lat, lng },
-      } satisfies GeocodeResponse),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, no-cache, must-revalidate',
-        },
-      }
-    );
+    const city = data.address.city || data.address.town || data.address.village;
+    const state = data.address.state;
+
+    if (!city || !state) {
+      return new Response(
+        JSON.stringify({
+          error: 'Location not found',
+          details: data.address,
+        } satisfies GeocodeErrorResponse),
+        {
+          status: 404,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    const geocodeResult: GeocodeResponse = {
+      city,
+      state,
+      coordinates: { lat: parsedLat, lng: parsedLng },
+    };
+
+    return new Response(JSON.stringify(geocodeResult), {
+      status: 200,
+      headers: corsHeaders,
+    });
   } catch (error) {
     console.error('Geocoding error:', error);
     return new Response(
       JSON.stringify({
-        error: 'Geocoding failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Internal server error',
         details: {
-          coordinates: { lat, lng },
+          message: error instanceof Error ? error.message : String(error),
         },
       } satisfies GeocodeErrorResponse),
       {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, no-cache, must-revalidate',
-        },
+        headers: corsHeaders,
       }
     );
   }
 };
+
+// Export both GET and get to handle case sensitivity
+export const GET = handler;
+export const get = handler;
+
+// Also export as default
+export default handler;

@@ -8,8 +8,8 @@ export interface Coordinates {
   lng: number;
 }
 
-export interface City {
-  name: string;
+export interface Location {
+  city: string;
   state: string;
   coordinates: Coordinates;
 }
@@ -23,20 +23,55 @@ export class GeocodingError extends Error {
 
 export async function reverseGeocode(
   coordinates: Coordinates
-): Promise<GeocodeResponse> {
-  const params = new URLSearchParams({
-    lat: coordinates.lat.toFixed(6),
-    lng: coordinates.lng.toFixed(6),
-  });
+): Promise<Location> {
+  const baseUrl = '/api/geocode';
+  const url = new URL(baseUrl, window.location.origin);
+  url.searchParams.set('lat', coordinates.lat.toFixed(6));
+  url.searchParams.set('lng', coordinates.lng.toFixed(6));
 
-  const response = await fetch(`/api/geocode?${params.toString()}`);
-  const data = await response.json();
+  console.log('Making request to:', url.toString());
 
-  if (!response.ok || data.error) {
-    throw new GeocodingError(data.error || 'Geocoding failed', data.details);
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+    console.log('Response:', {
+      ok: response.ok,
+      status: response.status,
+      data,
+    });
+
+    if (!response.ok) {
+      throw new GeocodingError(
+        data.error || `HTTP error ${response.status}`,
+        data.details
+      );
+    }
+
+    // Validate the response data
+    if (!data.city || !data.state || !data.coordinates) {
+      throw new GeocodingError('Invalid response format', data);
+    }
+
+    return {
+      city: data.city,
+      state: data.state,
+      coordinates: data.coordinates,
+    };
+  } catch (error) {
+    if (error instanceof GeocodingError) {
+      throw error;
+    }
+    throw new GeocodingError('Failed to fetch location data', {
+      originalError: error instanceof Error ? error.message : String(error),
+    });
   }
-
-  return data;
 }
 
 export function calculateDistance(
@@ -56,14 +91,14 @@ export function calculateDistance(
   return R * c;
 }
 
-function toRad(degrees: number): number {
-  return (degrees * Math.PI) / 180;
+function toRad(value: number): number {
+  return (value * Math.PI) / 180;
 }
 
 export async function findNearestCity(
   coordinates: Coordinates,
-  cities: City[]
-): Promise<City | null> {
+  cities: Location[]
+): Promise<Location | null> {
   console.log('Finding nearest city to:', coordinates);
   console.log('Number of cities to search:', cities.length);
 
@@ -80,7 +115,7 @@ export async function findNearestCity(
     const distance = calculateDistance(coordinates, city.coordinates);
     console.log(
       'Checking city:',
-      city.name,
+      city.city,
       city.state,
       'at distance:',
       distance
@@ -90,7 +125,7 @@ export async function findNearestCity(
       nearestCity = city;
       console.log(
         'New nearest city found:',
-        city.name,
+        city.city,
         city.state,
         'at distance:',
         distance
@@ -122,22 +157,19 @@ export async function getCurrentLocation(): Promise<Coordinates> {
         });
       },
       (error) => {
+        let message = 'An unknown error occurred';
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            reject(
-              new Error('Please allow location access to use this feature')
-            );
+            message = 'Please allow location access to use this feature';
             break;
           case error.POSITION_UNAVAILABLE:
-            reject(new Error('Location information is unavailable'));
+            message = 'Location information is unavailable';
             break;
           case error.TIMEOUT:
-            reject(new Error('Location request timed out'));
-            break;
-          default:
-            reject(new Error('An unknown error occurred'));
+            message = 'Location request timed out';
             break;
         }
+        reject(new Error(message));
       },
       {
         enableHighAccuracy: true,

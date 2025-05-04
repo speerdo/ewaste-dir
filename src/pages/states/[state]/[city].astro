@@ -6,97 +6,63 @@ import { supabase } from '../../../lib/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
 import CentersList from '../../../components/recycling-centers/CentersList.astro';
+import { processBatches, chunkArray } from '../../../lib/build-utils';
 
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
 
-// Generate static routes for production build
+// Generate static routes for production build with optimized processing
 export async function getStaticPaths() {
-  console.log('Starting getStaticPaths for city pages...');
-
   try {
-    // Use the same approach as the state page - get ALL states first
+    console.log('Starting getStaticPaths for city pages...');
+    
+    // Get ALL states efficiently
     const allStates = await getAllStates();
     console.log(`Found ${allStates.length} states to process for city pages`);
     
     // Track our progress
     const startTime = Date.now();
-    let completedStates = 0;
-    let totalCities = 0;
     
-    // Process all states to get their cities
-    const pathPromises = allStates.map(async (state) => {
-      console.log(`Processing cities for state: ${state.name} (${completedStates + 1}/${allStates.length})`);
-      
-      try {
-        // Use the EXACT SAME function that the state page uses
-        // This ensures consistency between what's shown on state page and what's generated
-        const centersByCity = await getRecyclingCentersByState(state.id);
-        
-        // Get all cities for this state
-        const cities = Object.keys(centersByCity);
-        
-        console.log(`Found ${cities.length} cities in ${state.name}`);
-        totalCities += cities.length;
-        
-        // Generate paths for each city in this state
-        const statePaths = cities.map(cityName => {
-          const stateId = normalizeForUrl(state.name);
-          const cityId = normalizeForUrl(cityName);
+    // Process states in parallel batches (5 at a time)
+    // Use our optimized batch processor
+    const stateBatchResults = await processBatches(
+      allStates,
+      async (state) => {
+        try {
+          // Fetch all centers for this state (leveraging our optimized caching)
+          const centersByCity = await getRecyclingCentersByState(state.id);
+          const cities = Object.keys(centersByCity);
           
-          return {
+          // Generate paths for all cities in this state
+          return cities.map(cityName => ({
             params: { 
-              state: stateId,
-              city: cityId
+              state: normalizeForUrl(state.name),
+              city: normalizeForUrl(cityName)
+            },
+            props: { 
+              stateName: state.name,
+              cityName
             }
-          };
-        });
-        
-        completedStates++;
-        
-        // Log progress
-        if (completedStates % 5 === 0 || completedStates === allStates.length) {
-          const elapsedTime = (Date.now() - startTime) / 1000;
-          console.log(`Progress: ${completedStates}/${allStates.length} states processed (${elapsedTime.toFixed(1)}s)`);
+          }));
+        } catch (error) {
+          console.error(`Error processing state ${state.name}:`, error);
+          return [];
         }
-        
-        return statePaths;
-      } catch (error) {
-        console.error(`Error processing state ${state.name}:`, error);
-        return [];
+      },
+      {
+        batchSize: 5,
+        label: 'states',
+        reportInterval: 5
       }
-    });
+    );
     
-    // Wait for all states to be processed
-    const pathsArrays = await Promise.all(pathPromises);
+    // Flatten the results
+    const paths = stateBatchResults.flat();
     
-    // Flatten the array of arrays into a single array
-    const paths = pathsArrays.flat();
+    // Final report
+    const totalTime = (Date.now() - startTime) / 1000;
+    console.log(`Generated ${paths.length} static city pages in ${totalTime.toFixed(1)}s`);
     
-    // Verify we have important cities
-    const importantCities = [
-      {state: 'texas', city: 'austin'},
-      {state: 'texas', city: 'dallas'},
-      {state: 'texas', city: 'houston'},
-      {state: 'new-york', city: 'new-york'},
-      {state: 'california', city: 'los-angeles'},
-      {state: 'illinois', city: 'chicago'}
-    ];
-    
-    console.log('Checking for important cities:');
-    importantCities.forEach(({state, city}) => {
-      const found = paths.some(p => 
-        p.params.state === state && p.params.city === city
-      );
-      
-      if (found) {
-        console.log(`✓ Found ${city}, ${state}`);
-      } else {
-        console.warn(`⚠️ Missing important city: ${city}, ${state}`);
-      }
-    });
-    
-    console.log(`Generated ${paths.length} static city pages from ${totalCities} cities across ${allStates.length} states`);
     return paths;
   } catch (error) {
     console.error('Error generating city pages:', error);
@@ -106,19 +72,20 @@ export async function getStaticPaths() {
 
 // Get data from params
 const { state: stateParam, city: cityParam } = Astro.params;
+const { stateName, cityName: propCityName } = Astro.props || {};
 
 if (!stateParam || !cityParam) {
   return Astro.redirect('/404');
 }
 
-// Get state data
-const state = await getState(stateParam);
+// Get state data - use props when available to avoid extra DB calls
+const state = stateName ? { name: stateName, id: stateParam } : await getState(stateParam);
 if (!state) {
   return Astro.redirect('/404');
 }
 
-// Convert city param to proper name format
-const cityName = cityParam.split('-').map(word => 
+// Convert city param to proper name format or use provided prop
+const cityName = propCityName || cityParam.split('-').map(word => 
   word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
 ).join(' ');
 

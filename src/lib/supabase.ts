@@ -6,17 +6,18 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Cache for state and city data
+// Enhanced cache configuration
 const stateCache = new Map<string, State>();
 const cityCache = new Map<string, City[]>();
 const recyclingCenterCache = new Map<string, RecyclingCenter[]>();
-
-// Add at the top with other cache declarations
+const centersByCityCache = new Map<string, Record<string, RecyclingCenter[]>>();
 const featuredStatesCache = new Map<
   string,
   { data: State[]; timestamp: number }
 >();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Extended cache duration to reduce API calls during build
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes for build process
 
 /**
  * Normalizes a string for use in URLs by:
@@ -31,32 +32,80 @@ export function normalizeForUrl(str: string): string {
     .replace(/(^-|-$)/g, '');
 }
 
+// States batch loading for build optimization
+let allStatesPromise: Promise<State[]> | null = null;
+
 export async function getAllStates(): Promise<State[]> {
-  const { data, error } = await supabase
-    .from('states')
-    .select('*')
-    .order('name');
+  // Return shared promise to avoid duplicate requests during build
+  if (allStatesPromise) {
+    return allStatesPromise;
+  }
 
-  if (error) throw error;
+  allStatesPromise = (async () => {
+    const cacheKey = 'all-states';
 
-  // Convert to State type with proper formatting
-  return (data || []).map((state) => ({
-    id: state.name.toLowerCase().replace(/\s+/g, '-'),
-    name: state.name,
-    description:
-      state.description ||
-      `Find electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
-    image_url:
-      state.image_url ||
-      'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    featured: state.featured,
-    nearby_states: state.nearby_states,
-  }));
+    // Check cache first
+    const cached = stateCache.get(cacheKey);
+    if (cached) {
+      return [cached];
+    }
+
+    const { data, error } = await supabase
+      .from('states')
+      .select('*')
+      .order('name');
+
+    if (error) throw error;
+
+    // Convert to State type with proper formatting and cache each state
+    const states = (data || []).map((state) => {
+      const formattedState = {
+        id: normalizeForUrl(state.name),
+        name: state.name,
+        description:
+          state.description ||
+          `Find electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
+        image_url:
+          state.image_url ||
+          'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+        featured: state.featured,
+        nearby_states: state.nearby_states,
+      };
+
+      // Cache individual state
+      stateCache.set(formattedState.id, formattedState);
+      stateCache.set(formattedState.name.toLowerCase(), formattedState);
+
+      return formattedState;
+    });
+
+    return states;
+  })();
+
+  try {
+    const result = await allStatesPromise;
+    // Clear promise reference after completion to allow future refreshes
+    // but keep cache entries
+    allStatesPromise = null;
+    return result;
+  } catch (error) {
+    allStatesPromise = null;
+    throw error;
+  }
 }
 
 export async function getState(stateId: string): Promise<State | null> {
   try {
-    console.log(`Getting state data for: ${stateId}`);
+    // Check cache first
+    if (stateCache.has(stateId)) {
+      return stateCache.get(stateId) || null;
+    }
+
+    // Also try with spaces replaced
+    const altKey = stateId.replace(/-/g, ' ');
+    if (stateCache.has(altKey)) {
+      return stateCache.get(altKey) || null;
+    }
 
     // First try exact match
     const { data: exactMatch, error: exactError } = await supabase
@@ -66,8 +115,7 @@ export async function getState(stateId: string): Promise<State | null> {
       .single();
 
     if (exactMatch) {
-      console.log(`Found exact match for state: ${exactMatch.name}`);
-      return {
+      const state = {
         id: normalizeForUrl(exactMatch.name),
         name: exactMatch.name,
         description: exactMatch.description,
@@ -77,6 +125,12 @@ export async function getState(stateId: string): Promise<State | null> {
         updated_at: exactMatch.updated_at,
         nearby_states: exactMatch.nearby_states,
       };
+
+      // Cache the result
+      stateCache.set(state.id, state);
+      stateCache.set(state.name.toLowerCase(), state);
+
+      return state;
     }
 
     // Try case-insensitive match
@@ -87,8 +141,7 @@ export async function getState(stateId: string): Promise<State | null> {
       .single();
 
     if (likeMatch) {
-      console.log(`Found case-insensitive match for state: ${likeMatch.name}`);
-      return {
+      const state = {
         id: normalizeForUrl(likeMatch.name),
         name: likeMatch.name,
         description: likeMatch.description,
@@ -98,6 +151,12 @@ export async function getState(stateId: string): Promise<State | null> {
         updated_at: likeMatch.updated_at,
         nearby_states: likeMatch.nearby_states,
       };
+
+      // Cache the result
+      stateCache.set(state.id, state);
+      stateCache.set(state.name.toLowerCase(), state);
+
+      return state;
     }
 
     // If not found in states table, try to find in recycling_centers
@@ -108,8 +167,7 @@ export async function getState(stateId: string): Promise<State | null> {
       .limit(1);
 
     if (centers && centers.length > 0) {
-      console.log(`Found state in recycling centers: ${centers[0].state}`);
-      return {
+      const state = {
         id: normalizeForUrl(centers[0].state),
         name: centers[0].state,
         description: `Find electronics recycling centers in ${centers[0].state}`,
@@ -119,9 +177,14 @@ export async function getState(stateId: string): Promise<State | null> {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
+
+      // Cache the result
+      stateCache.set(state.id, state);
+      stateCache.set(state.name.toLowerCase(), state);
+
+      return state;
     }
 
-    console.log(`No state found for: ${stateId}`);
     return null;
   } catch (error) {
     console.error('Error in getState:', error);
@@ -133,62 +196,166 @@ export interface CentersByCity {
   [city: string]: RecyclingCenter[];
 }
 
+// Shared promise to prevent duplicate queries during build
+const stateRecyclingPromises = new Map<string, Promise<CentersByCity>>();
+
 export async function getRecyclingCentersByState(
   stateId: string
 ): Promise<CentersByCity> {
-  // Check cache first
-  const cacheKey = `state_${stateId}`;
-  if (recyclingCenterCache.has(cacheKey)) {
-    const centers = recyclingCenterCache.get(cacheKey) || [];
-    return centers.reduce((acc: CentersByCity, center: RecyclingCenter) => {
-      const city = center.city || 'Unknown';
-      if (!acc[city]) {
-        acc[city] = [];
-      }
-      acc[city].push(center);
-      return acc;
-    }, {});
+  // Return existing promise if this request is already in progress
+  if (stateRecyclingPromises.has(stateId)) {
+    return stateRecyclingPromises.get(stateId)!;
   }
 
-  // First get the state name from the ID
-  const state = await getState(stateId);
-  if (!state) throw new Error('State not found');
-
-  let allCenters: RecyclingCenter[] = [];
-  let page = 0;
-  const pageSize = 1000;
-
-  // Use pagination to get all centers
-  while (true) {
-    const { data, error } = await supabase
-      .from('recycling_centers')
-      .select('*')
-      .ilike('state', state.name)
-      .order('city')
-      .range(page * pageSize, (page + 1) * pageSize - 1);
-
-    if (error) throw error;
-
-    if (!data || data.length === 0) break;
-
-    allCenters = [...allCenters, ...data];
-
-    if (data.length < pageSize) break;
-    page++;
-  }
-
-  // Cache the results
-  recyclingCenterCache.set(cacheKey, allCenters);
-
-  // Group centers by city
-  return allCenters.reduce((acc: CentersByCity, center: RecyclingCenter) => {
-    const city = center.city || 'Unknown';
-    if (!acc[city]) {
-      acc[city] = [];
+  // Create a new promise for this request
+  const promise = (async () => {
+    // Check cache first
+    const cacheKey = `state_${stateId}`;
+    if (centersByCityCache.has(cacheKey)) {
+      return centersByCityCache.get(cacheKey) || {};
     }
-    acc[city].push(center);
-    return acc;
-  }, {});
+
+    // Also check recycling center cache
+    if (recyclingCenterCache.has(cacheKey)) {
+      const centers = recyclingCenterCache.get(cacheKey) || [];
+
+      // Group centers by city
+      const groupedCenters = centers.reduce(
+        (acc: CentersByCity, center: RecyclingCenter) => {
+          const city = center.city || 'Unknown';
+          if (!acc[city]) {
+            acc[city] = [];
+          }
+          acc[city].push(center);
+          return acc;
+        },
+        {}
+      );
+
+      // Cache the grouped result
+      centersByCityCache.set(cacheKey, groupedCenters);
+
+      return groupedCenters;
+    }
+
+    // First get the state name from the ID
+    const state = await getState(stateId);
+    if (!state) throw new Error(`State not found: ${stateId}`);
+
+    let allCenters: RecyclingCenter[] = [];
+    let page = 0;
+    const pageSize = 1000;
+
+    try {
+      // Use a more efficient approach with Promise.all to fetch multiple pages in parallel
+      const fetchPage = async (pageNum: number): Promise<RecyclingCenter[]> => {
+        const { data, error } = await supabase
+          .from('recycling_centers')
+          .select('*')
+          .ilike('state', state.name)
+          .order('city')
+          .range(pageNum * pageSize, (pageNum + 1) * pageSize - 1);
+
+        if (error) throw error;
+        return data || [];
+      };
+
+      // First get page 0 to check how many results we have
+      const firstPageResults = await fetchPage(0);
+      allCenters = [...firstPageResults];
+
+      // If we have a full page, there might be more
+      if (firstPageResults.length === pageSize) {
+        // First, estimate how many pages we might need
+        // Get count first for efficiency (faster than fetching all data to count)
+        const { count, error: countError } = await supabase
+          .from('recycling_centers')
+          .select('*', { count: 'exact', head: true })
+          .ilike('state', state.name);
+
+        if (countError) throw countError;
+
+        // Calculate estimated page count
+        const estimatedPageCount = Math.ceil((count || 0) / pageSize);
+
+        // Fetch remaining pages in parallel (starting from page 1)
+        if (estimatedPageCount > 1) {
+          const pagePromises = [];
+          for (let p = 1; p < estimatedPageCount; p++) {
+            pagePromises.push(fetchPage(p));
+          }
+
+          const additionalResults = await Promise.all(pagePromises);
+          // Combine all results
+          additionalResults.forEach((pageData) => {
+            allCenters = [...allCenters, ...pageData];
+          });
+        }
+      }
+    } catch (error) {
+      console.error(
+        `Error fetching recycling centers for ${state.name}:`,
+        error
+      );
+      // If there was an error with parallel fetch, fall back to sequential approach
+      allCenters = []; // Reset centers
+      // Use original sequential approach as fallback
+      let hasMorePages = true;
+      page = 0;
+
+      while (hasMorePages) {
+        const { data, error } = await supabase
+          .from('recycling_centers')
+          .select('*')
+          .ilike('state', state.name)
+          .order('city')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          hasMorePages = false;
+        } else {
+          allCenters = [...allCenters, ...data];
+          hasMorePages = data.length === pageSize;
+          page++;
+        }
+      }
+    }
+
+    // Cache the raw results
+    recyclingCenterCache.set(cacheKey, allCenters);
+
+    // Group centers by city more efficiently
+    const centersByCity: CentersByCity = {};
+    for (const center of allCenters) {
+      const city = center.city || 'Unknown';
+      if (!centersByCity[city]) {
+        centersByCity[city] = [];
+      }
+      centersByCity[city].push(center);
+    }
+
+    // Cache the grouped results
+    centersByCityCache.set(cacheKey, centersByCity);
+
+    return centersByCity;
+  })();
+
+  // Store the promise
+  stateRecyclingPromises.set(stateId, promise);
+
+  try {
+    // Wait for it to complete
+    const result = await promise;
+    // Clear the promise but keep the cache
+    stateRecyclingPromises.delete(stateId);
+    return result;
+  } catch (error) {
+    // Remove failed promise
+    stateRecyclingPromises.delete(stateId);
+    throw error;
+  }
 }
 
 export async function getRecyclingCentersByCity(

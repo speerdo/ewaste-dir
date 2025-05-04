@@ -8,73 +8,56 @@ import type { RecyclingCenter } from '../../types/supabase';
 export const prerender = import.meta.env.PROD;
 
 export async function getStaticPaths() {
-  console.log('Starting getStaticPaths for states...');
-  console.log('Environment:', {
-    PROD: import.meta.env.PROD,
-    DEV: import.meta.env.DEV,
-    MODE: import.meta.env.MODE
-  });
-
   try {
-    console.log('Building static routes for all state pages...');
-    
-    const { data: states, error: statesError } = await supabase
+    // More efficient state fetching 
+    const { data: states } = await supabase
       .from('states')
-      .select('*');
-
-    if (statesError) {
-      console.error('Error fetching states:', statesError);
-      throw statesError;
-    }
+      .select('name')
+      .order('name');
 
     if (!states || states.length === 0) {
-      console.error('No states found in database');
       return [];
     }
-
-    console.log(`Found ${states.length} states, generating paths...`);
     
-    const paths = states.map(state => {
+    // Simplified path generation with minimal logging
+    return states.map(state => {
       const normalizedName = normalizeForUrl(state.name);
-      console.log(`Generating path for state: ${state.name} -> ${normalizedName}`);
       return {
         params: { state: normalizedName },
-        props: { state }
+        props: { stateName: state.name, stateId: normalizedName }
       };
     });
-
-    console.log(`Successfully generated ${paths.length} state paths`);
-    return paths;
   } catch (error) {
     console.error('Error in getStaticPaths:', error);
-    throw error;
+    return [];
   }
 }
 
 // Get the state parameter from the URL
-const { state: stateId } = Astro.params;
+const { state: stateParam } = Astro.params;
+const { stateName, stateId } = Astro.props;
 
-if (!stateId) {
+if (!stateParam) {
   return Astro.redirect('/404');
 }
 
-// Get the state details
-const state = await getState(stateId);
+// Get the state details - use props when available to avoid extra DB calls
+const state = stateName && stateId ? 
+  { id: stateId, name: stateName } : 
+  await getState(stateParam);
+
 if (!state) {
   return Astro.redirect('/404');
 }
 
 // Get all recycling centers for this state
-const centersByCity = await getRecyclingCentersByState(stateId);
+const centersByCity = await getRecyclingCentersByState(state.id);
 
 // Sort cities by name
 const sortedCities = Object.keys(centersByCity).sort();
 
 // Calculate total centers
 const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum + centers.length, 0);
-
-// Log for debugging
-console.log(`Found ${totalCenters} centers in ${state.name}, grouped into ${sortedCities.length} cities`);
 ---
 
 <Layout title={`E-Waste Recycling Centers in ${state.name}`}>

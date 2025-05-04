@@ -11,6 +11,13 @@ const stateCache = new Map<string, State>();
 const cityCache = new Map<string, City[]>();
 const recyclingCenterCache = new Map<string, RecyclingCenter[]>();
 
+// Add at the top with other cache declarations
+const featuredStatesCache = new Map<
+  string,
+  { data: State[]; timestamp: number }
+>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 /**
  * Normalizes a string for use in URLs by:
  * - Converting to lowercase
@@ -198,13 +205,83 @@ export async function getRecyclingCentersByCity(
       return [];
     }
 
-    // Use case-insensitive matching for both state and city
-    const { data, error } = await supabase
+    // Try multiple approaches to find the centers
+    // 1. First try direct case-insensitive match
+    let { data, error } = await supabase
       .from('recycling_centers')
       .select('*')
       .ilike('state', state.name)
       .ilike('city', city)
       .order('name');
+
+    // 2. If no results, try with words in different order (for cities like "West New York")
+    if (!data || data.length === 0) {
+      console.log(
+        `No exact match found. Trying alternative search for ${city}...`
+      );
+      const words = city.split(' ');
+
+      if (words.length > 1) {
+        const cityAlternatives = [
+          // Try different word orders
+          [...words].reverse().join(' '),
+          // Try with common prefix/suffix alternatives
+          city.replace(/^Mount\s/i, 'Mt '),
+          city.replace(/^Mt\s/i, 'Mount '),
+          city.replace(/^Saint\s/i, 'St '),
+          city.replace(/^St\s/i, 'Saint '),
+          // Add more variations as needed
+        ];
+
+        for (const altCity of cityAlternatives) {
+          const { data: altData, error: altError } = await supabase
+            .from('recycling_centers')
+            .select('*')
+            .ilike('state', state.name)
+            .ilike('city', altCity)
+            .order('name');
+
+          if (altData && altData.length > 0) {
+            console.log(
+              `Found centers using alternative city name: ${altCity}`
+            );
+            data = altData;
+            break;
+          }
+        }
+      }
+    }
+
+    // 3. If still no results, try with fuzzy matching (city starts with or contains)
+    if (!data || data.length === 0) {
+      console.log(`Still no match. Trying fuzzy matching for ${city}...`);
+
+      // Try "starts with" pattern
+      const { data: startsWithData, error: startsWithError } = await supabase
+        .from('recycling_centers')
+        .select('*')
+        .ilike('state', state.name)
+        .ilike('city', `${city}%`)
+        .order('name');
+
+      if (startsWithData && startsWithData.length > 0) {
+        console.log(`Found centers with city starting with "${city}"`);
+        data = startsWithData;
+      } else {
+        // Try "contains" pattern as last resort
+        const { data: containsData, error: containsError } = await supabase
+          .from('recycling_centers')
+          .select('*')
+          .ilike('state', state.name)
+          .ilike('city', `%${city}%`)
+          .order('name');
+
+        if (containsData && containsData.length > 0) {
+          console.log(`Found centers with city containing "${city}"`);
+          data = containsData;
+        }
+      }
+    }
 
     if (error) {
       console.error('Error fetching recycling centers:', error);
@@ -310,7 +387,13 @@ export async function getAllCities(): Promise<StateWithCities[]> {
 
 export async function getFeaturedStates(): Promise<State[]> {
   try {
-    console.log('Fetching featured states...');
+    // Check cache first
+    const now = Date.now();
+    const cached = featuredStatesCache.get('featured');
+    if (cached && now - cached.timestamp < CACHE_DURATION) {
+      return cached.data;
+    }
+
     const { data, error } = await supabase
       .from('states')
       .select('*')
@@ -336,7 +419,9 @@ export async function getFeaturedStates(): Promise<State[]> {
       nearby_states: state.nearby_states,
     }));
 
-    console.log('Featured states data:', states);
+    // Cache the results
+    featuredStatesCache.set('featured', { data: states, timestamp: now });
+
     return states;
   } catch (err) {
     console.error('Exception in getFeaturedStates:', err);

@@ -372,6 +372,73 @@ export async function getRecyclingCentersByCity(
       return [];
     }
 
+    // Handle special cases for major cities first
+    const specialCityVariants: Record<string, string[]> = {
+      'new york': ['new york', 'new york city', 'nyc', 'manhattan'],
+      miami: ['miami', 'miami beach', 'miami-dade', 'north miami'],
+      'los angeles': ['los angeles', 'la', 'los angeles city'],
+      washington: [
+        'washington',
+        'washington dc',
+        'district of columbia',
+        'washington d.c.',
+      ],
+    };
+
+    // Check if this is a special city case
+    const normalizedCity = city.toLowerCase().trim();
+    let cityVariantsToTry: string[] = [];
+
+    // Find all matching variants
+    for (const [baseCity, variants] of Object.entries(specialCityVariants)) {
+      if (
+        variants.includes(normalizedCity) ||
+        normalizedCity.includes(baseCity)
+      ) {
+        console.log(
+          `Detected special city case: ${city} matches base city ${baseCity}`
+        );
+        cityVariantsToTry = variants;
+        break;
+      }
+    }
+
+    // If we have variants to try, check all of them and combine results
+    if (cityVariantsToTry.length > 0) {
+      console.log(
+        `Trying ${cityVariantsToTry.length} known variants for ${city}`
+      );
+      let allResults: RecyclingCenter[] = [];
+
+      for (const variant of cityVariantsToTry) {
+        const { data: variantData, error: variantError } = await supabase
+          .from('recycling_centers')
+          .select('*')
+          .ilike('state', state.name)
+          .ilike('city', variant)
+          .order('name');
+
+        if (variantData && variantData.length > 0) {
+          console.log(
+            `Found ${variantData.length} centers with city variant: "${variant}"`
+          );
+          allResults = [...allResults, ...variantData];
+        }
+      }
+
+      // Deduplicate results by ID
+      if (allResults.length > 0) {
+        const uniqueResults = allResults.filter(
+          (center, index, self) =>
+            index === self.findIndex((c) => c.id === center.id)
+        );
+        console.log(
+          `After deduplication: ${uniqueResults.length} unique centers for ${city}, ${state.name}`
+        );
+        return uniqueResults;
+      }
+    }
+
     // Try multiple approaches to find the centers
     // 1. First try direct case-insensitive match
     let { data, error } = await supabase
@@ -397,6 +464,12 @@ export async function getRecyclingCentersByCity(
           city.replace(/^Mt\s/i, 'Mount '),
           city.replace(/^Saint\s/i, 'St '),
           city.replace(/^St\s/i, 'Saint '),
+          city.replace(/\sCity$/i, ''),
+          city + ' City',
+          city.replace(/^North\s/i, 'N '),
+          city.replace(/^South\s/i, 'S '),
+          city.replace(/^East\s/i, 'E '),
+          city.replace(/^West\s/i, 'W '),
           // Add more variations as needed
         ];
 

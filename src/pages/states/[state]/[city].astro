@@ -44,7 +44,7 @@ export async function getStaticPaths() {
     
     // Process states in batches to avoid memory issues
     const allPaths = [];
-    const batchSize = 3; // Process fewer states at a time to reduce memory pressure
+    const batchSize = 5; // Increased from 3 to 5 states per batch to cover more states
     const stateBatches = chunkArray(states, batchSize);
     
     console.log(`Split into ${stateBatches.length} batches of ${batchSize} states each`);
@@ -59,33 +59,59 @@ export async function getStaticPaths() {
       // Process states in this batch sequentially to keep memory usage stable
       for (const stateData of batch) {
         const stateId = normalizeForUrl(stateData.name);
+        console.log(`Processing state: ${stateData.name} (${stateId})`);
         
-        // Directly query for unique cities to avoid loading all centers
-        const { data: cityData, error: cityError } = await supabase
-          .from('recycling_centers')
-          .select('city, state')
-          .eq('state', stateData.name)
-          .not('city', 'is', null);
+        // Fetch cities in paginated chunks to handle large states
+        let citiesForState: Set<string> = new Set();
+        let hasMore = true;
+        let page = 0;
+        const pageSize = 1000; // Large enough for most states, but still manageable
+        
+        while (hasMore) {
+          console.log(`Fetching cities for ${stateData.name}, page ${page+1}`);
           
-        if (cityError) {
-          console.error(`Error fetching cities for ${stateData.name}:`, cityError);
-          continue;
-        }
-        
-        if (!cityData || cityData.length === 0) {
-          console.log(`No cities found for ${stateData.name}`);
-          continue;
-        }
-        
-        // Get unique cities efficiently
-        const citySet = new Set<string>();
-        cityData.forEach(item => {
-          if (item.city && typeof item.city === 'string') {
-            citySet.add(item.city);
+          // Directly query for unique cities to avoid loading all centers
+          const { data: cityData, error: cityError } = await supabase
+            .from('recycling_centers')
+            .select('city, state')
+            .eq('state', stateData.name)
+            .not('city', 'is', null)
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+            
+          if (cityError) {
+            console.error(`Error fetching cities for ${stateData.name}, page ${page+1}:`, cityError);
+            break;
           }
-        });
+          
+          if (!cityData || cityData.length === 0) {
+            console.log(`No more cities found for ${stateData.name} on page ${page+1}`);
+            hasMore = false;
+            continue;
+          }
+          
+          // Add unique cities from this page to our set
+          let newCitiesInPage = 0;
+          cityData.forEach(item => {
+            if (item.city && typeof item.city === 'string' && !citiesForState.has(item.city)) {
+              citiesForState.add(item.city);
+              newCitiesInPage++;
+            }
+          });
+          
+          console.log(`Added ${newCitiesInPage} new cities from page ${page+1}`);
+          
+          // Check if we should fetch more pages
+          hasMore = cityData.length === pageSize;
+          page++;
+          
+          // Avoid infinite loops
+          if (page > 10) {
+            console.warn(`Reached maximum page count for ${stateData.name}, stopping pagination`);
+            hasMore = false;
+          }
+        }
         
-        const uniqueCities = Array.from(citySet);
+        const uniqueCities = Array.from(citiesForState);
         console.log(`Found ${uniqueCities.length} unique cities in ${stateData.name}`);
         totalCities += uniqueCities.length;
         
@@ -103,12 +129,22 @@ export async function getStaticPaths() {
         
         allPaths.push(...statePaths);
         console.log(`Added ${statePaths.length} paths for ${stateData.name}, total paths: ${allPaths.length}/${totalCities}`);
+        
+        // Force garbage collection after each state to free memory
+        try {
+          if (typeof globalThis.gc === 'function') {
+            console.log('Running garbage collection after processing state');
+            globalThis.gc();
+          }
+        } catch (e) {
+          // Ignore if gc is not available
+        }
       }
       
-      // Force garbage collection if available
+      // Force garbage collection after each batch
       try {
         if (typeof globalThis.gc === 'function') {
-          console.log('Running garbage collection');
+          console.log('Running garbage collection after batch');
           globalThis.gc();
         }
       } catch (e) {

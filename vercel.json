@@ -2,7 +2,7 @@
   "github": {
     "silent": true
   },
-  "buildCommand": "NODE_OPTIONS=\"--max-old-space-size=7168\" NODE_ENV=production astro build",
+  "buildCommand": "npm run build:full",
   "installCommand": "npm ci --prefer-offline",
   "outputDirectory": "dist",
   "cleanUrls": true,

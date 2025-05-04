@@ -17,7 +17,6 @@ const STATES_DIR = path.join(DIST_DIR, 'states');
 // Format: [state-folder, city-folder, display name]
 const CRITICAL_PAGES = [
   ['new-york', 'new-york', 'New York, NY'],
-  ['new-york', 'new-york-city', 'New York City, NY'],
   ['florida', 'miami', 'Miami, FL'],
   ['california', 'los-angeles', 'Los Angeles, CA'],
   ['texas', 'austin', 'Austin, TX'],

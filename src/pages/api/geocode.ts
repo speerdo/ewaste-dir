@@ -20,7 +20,7 @@ export interface GeocodeErrorResponse {
 const corsHeaders = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
@@ -38,28 +38,42 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
   }
 
   try {
-    // Get the URL parameters directly from the request URL
-    const requestUrl = new URL(request.url);
-    const lat = requestUrl.searchParams.get('lat');
-    const lng = requestUrl.searchParams.get('lng');
+    let lat: string | null = null;
+    let lng: string | null = null;
 
-    console.log('Request URL and params:', {
-      fullUrl: request.url,
-      params: Object.fromEntries(requestUrl.searchParams),
-      lat,
-      lng,
-    });
+    // Handle both GET and POST requests
+    if (request.method === 'GET') {
+      const url = new URL(request.url);
+      lat = url.searchParams.get('lat');
+      lng = url.searchParams.get('lng');
+      console.log('GET params:', { lat, lng });
+    } else if (request.method === 'POST') {
+      const body = await request.json();
+      console.log('POST body:', body);
+      lat = body.lat?.toString() ?? null;
+      lng = body.lng?.toString() ?? null;
+    } else {
+      return new Response(
+        JSON.stringify({
+          error: 'Method not allowed',
+          details: { method: request.method },
+        } satisfies GeocodeErrorResponse),
+        {
+          status: 405,
+          headers: corsHeaders,
+        }
+      );
+    }
 
     // Handle missing coordinates
-    if (!lat || !lng) {
+    if (lat == null || lng == null) {
       return new Response(
         JSON.stringify({
           error: 'Missing coordinates',
           details: {
+            method: request.method,
             providedLat: lat,
             providedLng: lng,
-            fullUrl: request.url,
-            params: Object.fromEntries(requestUrl.searchParams),
           },
         } satisfies GeocodeErrorResponse),
         {
@@ -199,6 +213,10 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
     );
   }
 };
+
+// Export both POST and post to handle case sensitivity
+export const POST = handler;
+export const post = handler;
 
 // Export both GET and get to handle case sensitivity
 export const GET = handler;

@@ -20,7 +20,7 @@ const corsHeaders = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Accept',
 };
 
 export const config = {
@@ -42,7 +42,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
     // Handle both GET and POST requests
     if (request.method === 'GET') {
       // Log the raw request for debugging
-      console.log('Request object:', {
+      console.log('GET Request object:', {
         url: request.url,
         method: request.method,
         headers: Object.fromEntries(request.headers),
@@ -77,9 +77,46 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         console.error('Error extracting zip code:', error);
       }
     } else if (request.method === 'POST') {
-      const body = await request.json();
-      zipCode = body.zip?.toString() ?? null;
-      console.log('POST request - zip code from body:', zipCode);
+      try {
+        console.log('Processing POST request');
+        const contentType = request.headers.get('content-type');
+        console.log('Content-Type:', contentType);
+
+        if (!contentType?.includes('application/json')) {
+          return new Response(
+            JSON.stringify({
+              error: 'Invalid Content-Type',
+              details: {
+                expected: 'application/json',
+                received: contentType,
+              },
+            } satisfies ZipCodeErrorResponse),
+            {
+              status: 415,
+              headers: corsHeaders,
+            }
+          );
+        }
+
+        const body = await request.json();
+        console.log('POST request body:', body);
+        zipCode = body.zip?.toString() ?? null;
+        console.log('POST request - zip code from body:', zipCode);
+      } catch (error) {
+        console.error('Error parsing POST request body:', error);
+        return new Response(
+          JSON.stringify({
+            error: 'Invalid request body',
+            details: {
+              message: error instanceof Error ? error.message : String(error),
+            },
+          } satisfies ZipCodeErrorResponse),
+          {
+            status: 400,
+            headers: corsHeaders,
+          }
+        );
+      }
     } else {
       return new Response(
         JSON.stringify({

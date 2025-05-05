@@ -5,8 +5,11 @@ import { supabase } from '../../lib/supabase';
 import type { RecyclingCenter } from '../../types/supabase';
 import { monitorBuildProcess } from '../../lib/build-utils';
 
-// Ensure static generation for SEO benefits
-export const prerender = true;
+// Convert to SSR
+export const prerender = false;
+
+// Set cache control headers for Vercel Edge Caching
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 
 export async function getStaticPaths() {
   console.log('Building static state pages...');
@@ -62,10 +65,8 @@ if (!stateParam) {
   return Astro.redirect('/404');
 }
 
-// Get the state details - use props when available to avoid extra DB calls
-const state = stateName && stateId ? 
-  { id: stateId, name: stateName } : 
-  await getState(stateParam);
+// Get the state details
+const state = await getState(stateParam);
 
 if (!state) {
   return Astro.redirect('/404');

@@ -2,8 +2,10 @@
   "github": {
     "silent": true
   },
-  "buildCommand": "npm run build:full",
-  "installCommand": "npm ci --prefer-offline",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "astro",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "headers": [
@@ -11,8 +13,20 @@
       "source": "/(.*)",
       "headers": [
         {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400"
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
         }
       ]
     },
@@ -24,11 +38,30 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/_astro/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ],
+  "regions": ["iad1"],
+  "functions": {
+    "src/pages/**/*": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "build": {
     "env": {
       "NODE_OPTIONS": "--max-old-space-size=7168 --no-warnings"
     }
+  },
+  "crons": {
+    "revalidate": "0 */6 * * *"
   }
 }

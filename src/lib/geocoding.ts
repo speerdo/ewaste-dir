@@ -29,7 +29,12 @@ export async function reverseGeocode(
   url.searchParams.set('lat', coordinates.lat.toFixed(6));
   url.searchParams.set('lng', coordinates.lng.toFixed(6));
 
-  console.log('Making request to:', url.toString());
+  console.log('Geocoding request details:', {
+    coordinates,
+    constructedUrl: url.toString(),
+    origin: window.location.origin,
+    searchParams: Object.fromEntries(url.searchParams),
+  });
 
   try {
     const response = await fetch(url, {
@@ -40,12 +45,15 @@ export async function reverseGeocode(
       },
     });
 
-    const data = await response.json();
-    console.log('Response:', {
-      ok: response.ok,
+    // Log the full response details before parsing
+    console.log('Raw response:', {
       status: response.status,
-      data,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers),
     });
+
+    const data = await response.json();
+    console.log('Response data:', data);
 
     if (!response.ok) {
       throw new GeocodingError(

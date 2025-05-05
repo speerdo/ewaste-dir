@@ -40,7 +40,10 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
     requestUrl: request.url,
     urlSearchParams: Object.fromEntries(url.searchParams),
     requestSearchParams: Object.fromEntries(requestUrl.searchParams),
-    rawRequest: request,
+    rawRequest: {
+      method: request.method,
+      headers: Object.fromEntries(request.headers),
+    },
   });
 
   try {
@@ -50,7 +53,14 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
     const lng =
       url.searchParams.get('lng') ?? requestUrl.searchParams.get('lng');
 
-    console.log('Parsed coordinates:', { lat, lng });
+    console.log('Parsed coordinates:', {
+      lat,
+      lng,
+      urlLat: url.searchParams.get('lat'),
+      urlLng: url.searchParams.get('lng'),
+      requestUrlLat: requestUrl.searchParams.get('lat'),
+      requestUrlLng: requestUrl.searchParams.get('lng'),
+    });
 
     // Handle missing coordinates
     if (!lat || !lng) {

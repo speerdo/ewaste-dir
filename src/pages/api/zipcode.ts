@@ -27,7 +27,7 @@ export const config = {
   runtime: 'edge',
 };
 
-const handler: APIRoute = async ({ request }): Promise<Response> => {
+const handler: APIRoute = async ({ request, url }): Promise<Response> => {
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -41,11 +41,13 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
 
     // Handle both GET and POST requests
     if (request.method === 'GET') {
-      const url = new URL(request.url);
+      // Use the URL object passed by Astro
       zipCode = url.searchParams.get('zip');
+      console.log('GET request - zip code from URL:', zipCode);
     } else if (request.method === 'POST') {
       const body = await request.json();
       zipCode = body.zip?.toString() ?? null;
+      console.log('POST request - zip code from body:', zipCode);
     } else {
       return new Response(
         JSON.stringify({
@@ -61,10 +63,15 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
 
     // Handle missing zip code
     if (!zipCode) {
+      console.error('Missing zip code parameter');
       return new Response(
         JSON.stringify({
           error: 'Missing zip code',
-          details: { method: request.method },
+          details: {
+            method: request.method,
+            url: url.toString(),
+            params: Object.fromEntries(url.searchParams),
+          },
         } satisfies ZipCodeErrorResponse),
         {
           status: 400,
@@ -75,6 +82,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
 
     // Validate zip code format
     if (!/^\d{5}(-\d{4})?$/.test(zipCode)) {
+      console.error('Invalid zip code format:', zipCode);
       return new Response(
         JSON.stringify({
           error: 'Invalid zip code format',

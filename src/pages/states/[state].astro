@@ -11,55 +11,8 @@ export const prerender = false;
 // Set cache control headers for Vercel Edge Caching
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 
-export async function getStaticPaths() {
-  console.log('Building static state pages...');
-  
-  // Start the build monitor for states
-  const stopMonitor = monitorBuildProcess(60000); // Report every minute
-  
-  try {
-    // Fetch all states efficiently
-    const { data: states, error } = await supabase
-      .from('states')
-      .select('name')
-      .order('name');
-      
-    if (error) {
-      console.error('Error fetching states:', error);
-      stopMonitor();
-      return [];
-    }
-    
-    if (!states || states.length === 0) {
-      console.error('No states found');
-      stopMonitor();
-      return [];
-    }
-    
-    console.log(`Found ${states.length} states, generating paths`);
-    
-    // Generate paths efficiently
-    const paths = states.map(state => {
-      const normalizedName = normalizeForUrl(state.name);
-      return {
-        params: { state: normalizedName },
-        props: { stateName: state.name, stateId: normalizedName }
-      };
-    });
-    
-    console.log(`Generated ${paths.length} state pages`);
-    stopMonitor();
-    return paths;
-  } catch (error) {
-    console.error('Error in getStaticPaths:', error);
-    stopMonitor();
-    return [];
-  }
-}
-
 // Get the state parameter from the URL
 const { state: stateParam } = Astro.params;
-const { stateName, stateId } = Astro.props;
 
 if (!stateParam) {
   return Astro.redirect('/404');
@@ -123,7 +76,7 @@ const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum +
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedCities.map(city => (
             <a 
-              href={`/states/${stateId}/${city.toLowerCase().replace(/\s+/g, '-')}`}
+              href={`/states/${state.id}/${city.toLowerCase().replace(/\s+/g, '-')}`}
               class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
             >
               <div class="p-6">

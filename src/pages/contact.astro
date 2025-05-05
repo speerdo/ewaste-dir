@@ -54,7 +54,8 @@ import Layout from '../layouts/Layout.astro';
 
         <div class="bg-gray-50 rounded-xl p-8">
           <h2 class="text-2xl font-display font-bold text-gray-900 mb-6">Send Us a Message</h2>
-          <form class="space-y-6">
+          <form class="space-y-6" action="https://api.web3forms.com/submit" method="POST">
+            <input type="hidden" name="access_key" value="ea4ac69c-df2a-4293-95c9-226440a1dc02">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>

@@ -1,5 +1,5 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import StateLayout from '../../layouts/StateLayout.astro';
 import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates, normalizeForUrl } from '../../lib/supabase';
 import { supabase } from '../../lib/supabase';
 import type { RecyclingCenter } from '../../types/supabase';
@@ -25,6 +25,9 @@ if (!state) {
   return Astro.redirect('/404');
 }
 
+// Log state data for debugging
+console.log('State page - state data:', state);
+
 // Get all recycling centers for this state
 const centersByCity = await getRecyclingCentersByState(state.id);
 
@@ -33,64 +36,22 @@ const sortedCities = Object.keys(centersByCity).sort();
 
 // Calculate total centers
 const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum + centers.length, 0);
+
+// Prepare city data for the layout
+const cityData = sortedCities.map(city => {
+  const centers = centersByCity[city];
+  const firstCenter = centers[0];
+  return {
+    id: city.toLowerCase().replace(/\s+/g, '-'),
+    name: city,
+    description: `Find electronics recycling centers in ${city}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
+    address: firstCenter.full_address,
+    coordinates: {
+      lat: firstCenter.latitude,
+      lng: firstCenter.longitude
+    }
+  };
+});
 ---
 
-<Layout title={`E-Waste Recycling Centers in ${state.name}`}>
-  <div class="bg-white min-h-screen py-12">
-    <div class="container mx-auto px-4">
-      <div class="max-w-4xl mx-auto">
-        <nav class="flex mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
-          <ol class="flex items-center space-x-2">
-            <li>
-              <a href="/" class="hover:text-primary-600">Home</a>
-            </li>
-            <li>
-              <span class="mx-2">/</span>
-            </li>
-            <li>
-              <a href="/states" class="hover:text-primary-600">States</a>
-            </li>
-            <li>
-              <span class="mx-2">/</span>
-            </li>
-            <li>
-              <span class="text-gray-900 font-medium">{state.name}</span>
-            </li>
-          </ol>
-        </nav>
-
-        <h1 class="text-4xl font-display font-bold text-gray-900 mb-4">
-          E-Waste Recycling Centers in {state.name}
-        </h1>
-        
-        {sortedCities.length > 0 ? (
-          <p class="text-xl text-gray-600 mb-8">
-            Found {totalCenters} recycling centers in {sortedCities.length} {sortedCities.length === 1 ? 'city' : 'cities'} across {state.name}
-          </p>
-        ) : (
-          <p class="text-xl text-gray-600 mb-8">
-            No recycling centers found in {state.name}. Please try another state or check back later.
-          </p>
-        )}
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedCities.map(city => (
-            <a 
-              href={`/states/${state.id}/${city.toLowerCase().replace(/\s+/g, '-')}`}
-              class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
-            >
-              <div class="p-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600">
-                  {city}
-                </h2>
-                <p class="text-gray-600">
-                  {centersByCity[city].length} {centersByCity[city].length === 1 ? 'center' : 'centers'}
-                </p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-    </div>
-  </div>
-</Layout>
+<StateLayout state={state} cityData={cityData} />

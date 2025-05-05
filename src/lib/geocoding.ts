@@ -24,8 +24,8 @@ export class GeocodingError extends Error {
 export async function reverseGeocode(
   coordinates: Coordinates
 ): Promise<Location> {
-  const baseUrl = '/api/geocode';
-  const url = new URL(baseUrl, window.location.origin);
+  // Always use the current origin to ensure API calls work in all environments
+  const url = new URL('/api/geocode', window.location.origin);
   url.searchParams.set('lat', coordinates.lat.toFixed(6));
   url.searchParams.set('lng', coordinates.lng.toFixed(6));
 

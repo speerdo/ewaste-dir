@@ -24,7 +24,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-const handler: APIRoute = async ({ url, request }): Promise<Response> => {
+export const config = {
+  runtime: 'edge',
+};
+
+const handler: APIRoute = async ({ request }): Promise<Response> => {
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -34,35 +38,17 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
   }
 
   try {
-    // Log everything about the request to understand what Vercel sees
-    console.log('Full request details:', {
-      requestUrl: request.url,
-      urlString: url.toString(),
-      urlSearchParams: url.searchParams.toString(),
-      headers: Object.fromEntries(request.headers),
-      method: request.method,
+    // Get the URL parameters directly from the request URL
+    const requestUrl = new URL(request.url);
+    const lat = requestUrl.searchParams.get('lat');
+    const lng = requestUrl.searchParams.get('lng');
+
+    console.log('Request URL and params:', {
+      fullUrl: request.url,
+      params: Object.fromEntries(requestUrl.searchParams),
+      lat,
+      lng,
     });
-
-    // Try getting parameters from the URL object first
-    let lat = url.searchParams.get('lat');
-    let lng = url.searchParams.get('lng');
-
-    // If that fails, try parsing from request.url
-    if (!lat || !lng) {
-      const reqUrl = new URL(request.url);
-      lat = reqUrl.searchParams.get('lat');
-      lng = reqUrl.searchParams.get('lng');
-    }
-
-    // If that fails, try getting from Astro's Req object
-    if (!lat || !lng) {
-      const params = Object.fromEntries(new URL(request.url).searchParams);
-      console.log('URL Params:', params);
-      lat = params.lat;
-      lng = params.lng;
-    }
-
-    console.log('Final parsed coordinates:', { lat, lng });
 
     // Handle missing coordinates
     if (!lat || !lng) {
@@ -72,8 +58,8 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
           details: {
             providedLat: lat,
             providedLng: lng,
-            requestUrl: request.url,
-            urlString: url.toString(),
+            fullUrl: request.url,
+            params: Object.fromEntries(requestUrl.searchParams),
           },
         } satisfies GeocodeErrorResponse),
         {

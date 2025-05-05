@@ -9,6 +9,7 @@ coverage/
 # Production
 dist/
 .output/
+.vercel/
 
 # Astro
 .astro/
@@ -41,3 +42,4 @@ pnpm-debug.log*
 
 # Local Netlify folder
 .netlify
+.vercel

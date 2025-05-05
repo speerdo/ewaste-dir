@@ -1,5 +1,6 @@
 ---
-import { getAllStates, getCitiesByState } from '../lib/supabase';
+import { getAllCityStatePairs, type CityStatePair } from '../lib/cityData';
+import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
 
 interface Props {
   placeholder?: string;
@@ -7,71 +8,99 @@ interface Props {
   variant?: 'hero' | 'nav';
 }
 
-const { placeholder = "Search by city or state...", className = "", variant = "hero" } = Astro.props;
+const { placeholder = "Enter a city or zip code...", className = "", variant = "hero" } = Astro.props;
 
-// Get all states and their cities at build time
-const states = await getAllStates();
-const cityStatePairs = await Promise.all(
-  states.map(async (state) => {
-    const cities = await getCitiesByState(state.id);
-    return cities.map(city => ({
-      city: city.name,
-      state: state.name
-    }));
-  })
-).then(results => results.flat());
+// Get all city-state pairs at build time
+const cityStatePairs = await getAllCityStatePairs();
 
 const id = variant === 'hero' ? 'hero' : 'nav';
 ---
 
 <div class:list={["relative", className]}>
-  <form 
-    id={`search-form-${id}`}
-    class="relative"
-  >
+  <div class="relative flex">
     <input
       type="text"
       id={`search-input-${id}`}
-      name="q"
-      placeholder={placeholder}
       class:list={[
-        "w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent",
+        "block w-full border-0 px-4 py-3 text-gray-900 shadow-sm placeholder:text-gray-400 sm:text-sm sm:leading-6 focus:ring-2 focus:ring-green-500 focus:border-transparent",
         variant === 'hero' 
-          ? "px-4 py-3 rounded-lg" 
-          : "pl-10 pr-4 py-2 rounded-full"
+          ? "rounded-l-lg" 
+          : "rounded-full pl-10"
       ]}
+      placeholder={placeholder}
       autocomplete="off"
     />
-    {variant === 'nav' && (
-      <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    {variant === 'hero' && (
+      <button
+        id={`search-button-${id}`}
+        type="button"
+        class="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
+        <span class="ml-2 font-medium">Search</span>
       </button>
     )}
-  </form>
+    <button
+      id={`use-location-${id}`}
+      type="button"
+      class:list={[
+        "flex items-center text-gray-400 hover:text-gray-500",
+        variant === 'hero' 
+          ? "absolute right-[120px] top-0 bottom-0 pr-3" 
+          : "absolute right-3 top-1/2 -translate-y-1/2"
+      ]}
+      title="Use my location"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    </button>
+  </div>
 
+  <!-- Search Results -->
   <div 
     id={`search-results-${id}`}
-    class="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50 max-h-96 overflow-y-auto"
+    class="absolute left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50 max-h-96 overflow-y-auto"
   >
-    <div class="p-2">
-      <div id={`results-content-${id}`} class="divide-y divide-gray-100"></div>
-    </div>
+    <div id={`results-content-${id}`} class="divide-y divide-gray-100"></div>
   </div>
 </div>
 
+<script>
+  // Import types only
+  type CityStatePair = {
+    city: string;
+    state: string;
+    url: string;
+  };
+</script>
+
 <script define:vars={{ cityStatePairs, id }}>
-  const searchForm = document.getElementById(`search-form-${id}`);
   const searchInput = document.getElementById(`search-input-${id}`);
+  const searchButton = document.getElementById(`search-button-${id}`);
   const searchResults = document.getElementById(`search-results-${id}`);
   const resultsContent = document.getElementById(`results-content-${id}`);
+  const useLocationBtn = document.getElementById(`use-location-${id}`);
   let searchTimeout;
 
   // Function to search through city-state pairs
   function searchLocations(query) {
     query = query.toLowerCase().trim();
     if (!query) return [];
+
+    // Check if query is a zip code
+    const isZipCode = /^\d{5}(-\d{4})?$/.test(query);
+    
+    if (isZipCode) {
+      return [{
+        text: `Find recycling centers near ${query}`,
+        type: 'zip',
+        zip: query
+      }];
+    }
 
     // First try exact matches
     const exactMatches = cityStatePairs.filter(({ city, state }) => {
@@ -88,51 +117,14 @@ const id = variant === 'hero' ? 'hero' : 'nav';
              !exactMatches.find(m => m.city === city && m.state === state);
     });
 
-    // Combine and map to suggestion format
-    return [...exactMatches, ...partialMatches]
-      .slice(0, 10)
-      .map(({ city, state }) => ({
-        text: `${city}, ${state}`,
-        url: `/states/${state.toLowerCase()}/${city.toLowerCase().replace(/\s+/g, '-')}`
-      }));
+    // Combine and format results
+    return [...exactMatches, ...partialMatches].slice(0, 8).map(match => ({
+      ...match,
+      type: 'city'
+    }));
   }
 
-  // Handle form submission
-  searchForm?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const query = searchInput.value.trim();
-    if (!query) return;
-
-    const suggestions = searchLocations(query);
-    console.log(`Search results (${id}):`, suggestions);
-
-    if (suggestions.length > 0) {
-      // If there's an exact match, go to that page
-      const exactMatch = suggestions.find(s => 
-        s.text.toLowerCase() === query.toLowerCase()
-      );
-      if (exactMatch) {
-        window.location.href = exactMatch.url;
-        return;
-      }
-      // If there's only one result, use that
-      if (suggestions.length === 1) {
-        window.location.href = suggestions[0].url;
-        return;
-      }
-      // Otherwise show suggestions
-      showSuggestions(suggestions);
-    } else {
-      resultsContent.innerHTML = `
-        <div class="px-4 py-3 text-gray-500">
-          No locations found matching "${query}"
-        </div>
-      `;
-      searchResults.classList.remove('hidden');
-    }
-  });
-
-  // Handle input changes for autocomplete
+  // Handle input changes
   searchInput?.addEventListener('input', () => {
     clearTimeout(searchTimeout);
     const query = searchInput.value.trim();
@@ -151,29 +143,194 @@ const id = variant === 'hero' ? 'hero' : 'nav';
   function showSuggestions(suggestions) {
     if (suggestions.length > 0) {
       resultsContent.innerHTML = suggestions
-        .map(suggestion => `
-          <button
-            class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
-            data-url="${suggestion.url}"
-            onclick="window.location.href='${suggestion.url}'"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            </svg>
-            <span>${suggestion.text}</span>
-          </button>
-        `)
+        .map(suggestion => {
+          if (suggestion.type === 'zip') {
+            return `
+              <button
+                class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
+                data-zip="${suggestion.zip}"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                <span>${suggestion.text}</span>
+              </button>
+            `;
+          }
+          return `
+            <button
+              class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
+              data-url="${suggestion.url}"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              </svg>
+              <span>${suggestion.city}, ${suggestion.state}</span>
+            </button>
+          `;
+        })
         .join('');
+
+      // Add click handlers
+      resultsContent.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', () => {
+          if (button.dataset.url) {
+            window.location.href = button.dataset.url;
+          } else if (button.dataset.zip) {
+            handleZipCodeSearch(button.dataset.zip);
+          }
+        });
+      });
+
       searchResults.classList.remove('hidden');
     } else {
       searchResults.classList.add('hidden');
     }
   }
 
+  async function handleZipCodeSearch(zipCode) {
+    try {
+      // Show loading state
+      resultsContent.innerHTML = `
+        <div class="px-4 py-3">
+          <svg class="animate-spin h-5 w-5 text-gray-400 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Finding recycling centers near ${zipCode}...</span>
+        </div>
+      `;
+      searchResults.classList.remove('hidden');
+
+      // Call our zip code API
+      const response = await fetch(`/api/zipcode?zip=${zipCode}`);
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Find matching city-state pair
+      const match = cityStatePairs.find(pair => 
+        pair.city.toLowerCase() === data.city.toLowerCase() &&
+        pair.state.toLowerCase() === data.state.toLowerCase()
+      );
+
+      if (match) {
+        window.location.href = match.url;
+      } else {
+        // Try fuzzy matching if exact match fails
+        const cityMatches = cityStatePairs.filter(pair => 
+          pair.state.toLowerCase() === data.state.toLowerCase() &&
+          (
+            pair.city.toLowerCase().includes(data.city.toLowerCase()) ||
+            data.city.toLowerCase().includes(pair.city.toLowerCase())
+          )
+        );
+
+        if (cityMatches.length > 0) {
+          // If we have matches, show them as suggestions
+          resultsContent.innerHTML = `
+            <div class="px-4 py-3 text-gray-600">
+              <p>Found recycling centers near ${zipCode}:</p>
+            </div>
+            ${cityMatches.map(match => `
+              <button
+                class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
+                data-url="${match.url}"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                <span>${match.city}, ${match.state}</span>
+              </button>
+            `).join('')}
+          `;
+
+          // Add click handlers to the new buttons
+          resultsContent.querySelectorAll('button[data-url]').forEach(button => {
+            button.addEventListener('click', () => {
+              window.location.href = button.dataset.url;
+            });
+          });
+        } else {
+          throw new Error(`No recycling centers found near ${zipCode}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error searching by zip:', error);
+      resultsContent.innerHTML = `
+        <div class="px-4 py-3 text-red-500">
+          <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          ${error.message || 'Error searching by zip code. Please try a city name instead.'}
+        </div>
+      `;
+    }
+  }
+
+  // Handle location button click
+  useLocationBtn?.addEventListener('click', async () => {
+    try {
+      // Show loading state
+      useLocationBtn.innerHTML = `
+        <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      `;
+      useLocationBtn.disabled = true;
+
+      // Get current location
+      const coordinates = await getCurrentLocation();
+      
+      // Get city and state from coordinates
+      const location = await reverseGeocode(coordinates);
+
+      if (!location.city || !location.state) {
+        throw new Error('Could not determine your city and state');
+      }
+
+      // Find matching city-state pair
+      const match = cityStatePairs.find(pair => 
+        pair.city.toLowerCase() === location.city.toLowerCase() &&
+        pair.state.toLowerCase() === location.state.toLowerCase()
+      );
+
+      if (match) {
+        window.location.href = match.url;
+      } else {
+        throw new Error('No recycling centers found in your area');
+      }
+    } catch (error) {
+      console.error('Error finding location:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Could not determine your location';
+      
+      resultsContent.innerHTML = `
+        <div class="px-4 py-3 text-red-500">
+          <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          ${errorMessage}
+        </div>
+      `;
+      searchResults.classList.remove('hidden');
+    } finally {
+      // Restore button state
+      useLocationBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      `;
+      useLocationBtn.disabled = false;
+    }
+  });
+
   // Close suggestions when clicking outside
   document.addEventListener('click', (event) => {
-    const target = event.target;
-    if (!searchInput?.contains(target) && !searchResults?.contains(target)) {
+    if (!searchInput?.contains(event.target) && !searchResults?.contains(event.target)) {
       searchResults?.classList.add('hidden');
     }
   });
@@ -181,7 +338,12 @@ const id = variant === 'hero' ? 'hero' : 'nav';
   // Handle keyboard navigation
   searchInput?.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      searchResults.classList.add('hidden');
+      searchResults?.classList.add('hidden');
+    } else if (event.key === 'Enter') {
+      const firstSuggestion = resultsContent?.querySelector('button');
+      if (firstSuggestion) {
+        firstSuggestion.click();
+      }
     }
   });
 </script>

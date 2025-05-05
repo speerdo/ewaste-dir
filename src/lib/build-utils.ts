@@ -2,6 +2,9 @@
  * Utility functions to optimize the build process
  */
 
+import fs from 'fs';
+import path from 'path';
+
 /**
  * Splits an array into chunks of specified size for better memory management
  * and parallel processing.
@@ -185,4 +188,17 @@ export function monitorBuildProcess(intervalMs = 30000): () => void {
     console.log(`⏱️ Total build time: ${totalElapsedMinutes} minutes`);
     console.log(`===========================`);
   };
+}
+
+export async function cleanupBuildArtifacts(directory: string) {
+  const tempFiles = await fs.promises.readdir(directory);
+  for (const file of tempFiles) {
+    const filePath = path.join(directory, file);
+    const stats = await fs.promises.stat(filePath);
+
+    // Remove files older than 1 hour
+    if (stats.isFile() && Date.now() - stats.mtimeMs > 3600000) {
+      await fs.promises.unlink(filePath);
+    }
+  }
 }

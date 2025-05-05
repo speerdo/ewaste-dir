@@ -6,16 +6,16 @@
   "scripts": {
     "dev": "NODE_ENV=development astro dev",
     "build": "NODE_ENV=production astro build",
-    "build:vercel": "NODE_OPTIONS=\"--max-old-space-size=7168\" NODE_ENV=production astro build --verbose",
-    "build:optimized": "NODE_OPTIONS=\"--max-old-space-size=7168\" NODE_ENV=production astro build",
-    "prebuild": "node scripts/prebuild.js || echo 'Prebuild failed, but continuing with build'",
-    "build:full": "npm run prebuild; npm run build:optimized && npm run verify-pages",
-    "build:monitor": "node scripts/build-progress.js",
-    "verify-pages": "node scripts/verify-pages.js",
-    "preview": "astro preview",
+    "build:vercel": "npm run cleanup && NODE_OPTIONS=\"--max-old-space-size=7168 --expose-gc\" NODE_ENV=production astro build --verbose",
+    "build:optimized": "node scripts/optimize-for-build.js && npm run cleanup && NODE_OPTIONS=\"--max-old-space-size=7168 --expose-gc\" NODE_ENV=production astro build",
+    "prebuild": "npm run cleanup",
+    "verify": "npm run verify-ssr",
+    "verify-ssr": "node scripts/verify-ssr.js",
+    "preview": "vercel dev",
     "astro": "astro",
     "import-data": "node scripts/import-data.js",
-    "clean": "rm -rf dist node_modules/.astro node_modules/.vite .vercel/output"
+    "clean": "rm -rf dist node_modules/.astro node_modules/.vite .vercel/output",
+    "cleanup": "rm -rf dist/ .vercel/output/ .temp-build/"
   },
   "dependencies": {
     "@astrojs/node": "^9.2.1",

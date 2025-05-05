@@ -1,182 +1,35 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getState, getCitiesByState, getRecyclingCentersByCity, getRecyclingCentersByState, getAllStates, normalizeForUrl } from '../../../lib/supabase';
+import { getState, getRecyclingCentersByCity, normalizeForUrl } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
-import { supabase } from '../../../lib/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
 import CentersList from '../../../components/recycling-centers/CentersList.astro';
-import { chunkArray, monitorBuildProcess } from '../../../lib/build-utils';
 
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
 
-// Ensure static generation for SEO benefits
-export const prerender = true;
+// Convert to SSR
+export const prerender = false;
 
-// Generate static routes for production build efficiently
-export async function getStaticPaths() {
-  try {
-    console.log('Building static city pages...');
-    
-    // Start the build monitor
-    const stopMonitor = monitorBuildProcess(60000); // Report every minute
-    
-    // Efficiently fetch all states
-    const { data: states, error } = await supabase
-      .from('states')
-      .select('name')
-      .order('name');
-      
-    if (error) {
-      console.error('Error fetching states:', error);
-      stopMonitor();
-      return [];
-    }
-    
-    if (!states || states.length === 0) {
-      console.error('No states found');
-      stopMonitor();
-      return [];
-    }
-    
-    console.log(`Found ${states.length} states, processing in batches for optimal memory usage`);
-    
-    // Process states in batches to avoid memory issues
-    const allPaths = [];
-    const batchSize = 5; // Increased from 3 to 5 states per batch to cover more states
-    const stateBatches = chunkArray(states, batchSize);
-    
-    console.log(`Split into ${stateBatches.length} batches of ${batchSize} states each`);
-    
-    let totalCities = 0;
-    
-    // Process each batch to generate city paths
-    for (let i = 0; i < stateBatches.length; i++) {
-      console.log(`Processing batch ${i+1}/${stateBatches.length}`);
-      const batch = stateBatches[i];
-      
-      // Process states in this batch sequentially to keep memory usage stable
-      for (const stateData of batch) {
-        const stateId = normalizeForUrl(stateData.name);
-        console.log(`Processing state: ${stateData.name} (${stateId})`);
-        
-        // Fetch cities in paginated chunks to handle large states
-        let citiesForState: Set<string> = new Set();
-        let hasMore = true;
-        let page = 0;
-        const pageSize = 1000; // Large enough for most states, but still manageable
-        
-        while (hasMore) {
-          console.log(`Fetching cities for ${stateData.name}, page ${page+1}`);
-          
-          // Directly query for unique cities to avoid loading all centers
-          const { data: cityData, error: cityError } = await supabase
-            .from('recycling_centers')
-            .select('city, state')
-            .eq('state', stateData.name)
-            .not('city', 'is', null)
-            .range(page * pageSize, (page + 1) * pageSize - 1);
-            
-          if (cityError) {
-            console.error(`Error fetching cities for ${stateData.name}, page ${page+1}:`, cityError);
-            break;
-          }
-          
-          if (!cityData || cityData.length === 0) {
-            console.log(`No more cities found for ${stateData.name} on page ${page+1}`);
-            hasMore = false;
-            continue;
-          }
-          
-          // Add unique cities from this page to our set
-          let newCitiesInPage = 0;
-          cityData.forEach(item => {
-            if (item.city && typeof item.city === 'string' && !citiesForState.has(item.city)) {
-              citiesForState.add(item.city);
-              newCitiesInPage++;
-            }
-          });
-          
-          console.log(`Added ${newCitiesInPage} new cities from page ${page+1}`);
-          
-          // Check if we should fetch more pages
-          hasMore = cityData.length === pageSize;
-          page++;
-          
-          // Avoid infinite loops
-          if (page > 10) {
-            console.warn(`Reached maximum page count for ${stateData.name}, stopping pagination`);
-            hasMore = false;
-          }
-        }
-        
-        const uniqueCities = Array.from(citiesForState);
-        console.log(`Found ${uniqueCities.length} unique cities in ${stateData.name}`);
-        totalCities += uniqueCities.length;
-        
-        // Generate paths for this state's cities
-        const statePaths = uniqueCities.map(cityName => ({
-          params: { 
-            state: stateId,
-            city: normalizeForUrl(cityName)
-          },
-          props: { 
-            stateName: stateData.name,
-            cityName
-          }
-        }));
-        
-        allPaths.push(...statePaths);
-        console.log(`Added ${statePaths.length} paths for ${stateData.name}, total paths: ${allPaths.length}/${totalCities}`);
-        
-        // Force garbage collection after each state to free memory
-        try {
-          if (typeof globalThis.gc === 'function') {
-            console.log('Running garbage collection after processing state');
-            globalThis.gc();
-          }
-        } catch (e) {
-          // Ignore if gc is not available
-        }
-      }
-      
-      // Force garbage collection after each batch
-      try {
-        if (typeof globalThis.gc === 'function') {
-          console.log('Running garbage collection after batch');
-          globalThis.gc();
-        }
-      } catch (e) {
-        // Ignore if gc is not available
-      }
-    }
-    
-    console.log(`Generated static paths for ${allPaths.length} city pages`);
-    stopMonitor(); // Stop the monitor when done
-    return allPaths;
-  } catch (error) {
-    console.error('Error generating city pages:', error);
-    return []; // Return empty array to avoid build failure
-  }
-}
+// Set cache control headers for Vercel Edge Caching
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 
 // Get data from params
 const { state: stateParam, city: cityParam } = Astro.params;
-const { stateName, cityName: propCityName } = Astro.props || {};
 
 if (!stateParam || !cityParam) {
   return Astro.redirect('/404');
 }
 
-// Get state data - use props when available to avoid extra DB calls
-const state = stateName ? { name: stateName, id: stateParam } : await getState(stateParam);
+// Get state data
+const state = await getState(stateParam);
 if (!state) {
   return Astro.redirect('/404');
 }
 
-// Convert city param to proper name format or use provided prop
-const cityName = propCityName || cityParam.split('-').map(word => 
+// Convert city param to proper name format
+const cityName = cityParam.split('-').map(word => 
   word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
 ).join(' ');
 

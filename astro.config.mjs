@@ -1,29 +1,27 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import node from '@astrojs/node';
-import vercel from '@astrojs/vercel';
+import vercel from '@astrojs/vercel/serverless';
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [tailwind()],
-  output: 'static',
-  adapter:
-    process.env.NODE_ENV === 'production'
-      ? vercel({
-          analytics: true,
-          imageService: true,
-          speedInsights: true,
-        })
-      : node({
-          mode: 'standalone',
-        }),
+  output: 'server',
+  adapter: vercel({
+    analytics: true,
+    imageService: true,
+    speedInsights: true,
+    webAnalytics: true,
+    isr: {
+      expiration: 3600,
+      allowQuery: false,
+    },
+    edgeMiddleware: true,
+    maxDuration: 8,
+  }),
   build: {
-    // Static site generation performance optimizations
-    format: 'file',
+    inlineStylesheets: 'auto',
     assets: 'assets',
-    // Set build concurrency for large builds
-    concurrentPages: 2, // Limiting concurrent page generation to manage memory
-    // Enable build reporting to monitor progress
+    concurrentPages: 4,
     reporter: {
       config: {
         reportDetailLevel: 'verbose',
@@ -37,18 +35,22 @@ export default defineConfig({
       ),
     },
     build: {
-      // Reduce build log verbosity
       reportCompressedSize: false,
-      // Optimize large chunks
       chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'google-maps': ['@googlemaps/js-api-loader'],
+            supabase: ['@supabase/supabase-js'],
+          },
+        },
+      },
     },
-    // Optimize memory usage
-    optimizeDeps: {
-      force: true,
-    },
-    // Ensure shared dependencies are split properly
     ssr: {
       noExternal: ['@supabase/supabase-js'],
+      optimizeDeps: {
+        include: ['@supabase/supabase-js'],
+      },
     },
   },
   routes: [
@@ -57,6 +59,5 @@ export default defineConfig({
       entryPoint: 'src/api/*.ts',
     },
   ],
-  // Enable HTML compression for smaller file sizes
   compressHTML: true,
 });

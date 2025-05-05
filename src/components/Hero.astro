@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import SearchBar from './SearchBar.astro';
+import SearchInput from './SearchInput.astro';
 import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
 
 // Featured cities data
@@ -50,7 +50,7 @@ const featuredCities = [
       
       <!-- Search Bar -->
       <div class="mb-8">
-        <SearchBar />
+        <SearchInput variant="hero" />
       </div>
 
       <div class="flex flex-wrap gap-4 justify-center">
@@ -133,7 +133,9 @@ const featuredCities = [
       window.location.href = targetUrl;
     } catch (error) {
       console.error('Error finding location:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Could not determine your location';
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error?.toString() || 'Could not determine your location');
       alert(errorMessage + '. Please try searching manually.');
     } finally {
       // Restore button state

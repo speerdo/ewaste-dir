@@ -50,12 +50,6 @@
     }
   ],
   "regions": ["iad1"],
-  "functions": {
-    "src/pages/**/*": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
   "build": {
     "env": {
       "NODE_OPTIONS": "--max-old-space-size=7168 --no-warnings"

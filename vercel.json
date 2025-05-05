@@ -61,7 +61,10 @@
       "NODE_OPTIONS": "--max-old-space-size=7168 --no-warnings"
     }
   },
-  "crons": {
-    "revalidate": "0 */6 * * *"
-  }
+  "crons": [
+    {
+      "path": "/api/revalidate",
+      "schedule": "0 */6 * * *"
+    }
+  ]
 }

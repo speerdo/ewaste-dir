@@ -41,15 +41,37 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
 
     // Handle both GET and POST requests
     if (request.method === 'GET') {
-      // Parse URL parameters in a way that works in both environments
-      const requestUrl = new URL(request.url);
-      zipCode = requestUrl.searchParams.get('zip');
-      console.log('GET request - URL:', requestUrl.toString());
-      console.log('GET request - zip code from URL:', zipCode);
-      console.log(
-        'GET request - all params:',
-        Object.fromEntries(requestUrl.searchParams)
-      );
+      // Get the full URL including query parameters
+      const fullUrl = request.url;
+      console.log('Full request URL:', fullUrl);
+
+      try {
+        // Try multiple ways to get the zip parameter
+        const urlObj = new URL(fullUrl);
+        zipCode = urlObj.searchParams.get('zip');
+
+        // If that didn't work, try parsing the query string manually
+        if (!zipCode && urlObj.search) {
+          const queryParams = new URLSearchParams(urlObj.search);
+          zipCode = queryParams.get('zip');
+        }
+
+        // Log all available information for debugging
+        console.log('URL object:', {
+          href: urlObj.href,
+          origin: urlObj.origin,
+          pathname: urlObj.pathname,
+          search: urlObj.search,
+          searchParams: Object.fromEntries(urlObj.searchParams),
+        });
+      } catch (error) {
+        console.error('Error parsing URL:', error);
+        // If URL parsing fails, try to extract zip parameter manually
+        const match = fullUrl.match(/[?&]zip=([^&]+)/);
+        zipCode = match ? match[1] : null;
+      }
+
+      console.log('GET request - extracted zip code:', zipCode);
     } else if (request.method === 'POST') {
       const body = await request.json();
       zipCode = body.zip?.toString() ?? null;

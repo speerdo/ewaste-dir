@@ -46,10 +46,8 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
       const url = new URL(request.url);
       lat = url.searchParams.get('lat');
       lng = url.searchParams.get('lng');
-      console.log('GET params:', { lat, lng });
     } else if (request.method === 'POST') {
       const body = await request.json();
-      console.log('POST body:', body);
       lat = body.lat?.toString() ?? null;
       lng = body.lng?.toString() ?? null;
     } else {
@@ -130,8 +128,6 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
       6
     )}&lon=${parsedLng.toFixed(6)}&zoom=18&addressdetails=1`;
 
-    console.log('Calling Nominatim:', nominatimUrl);
-
     const response = await fetch(nominatimUrl, {
       headers: {
         'User-Agent': 'Astro-Geocoding-Service/1.0',
@@ -156,7 +152,6 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
     }
 
     const data = await response.json();
-    console.log('Nominatim response:', data);
 
     if (!data.address) {
       return new Response(

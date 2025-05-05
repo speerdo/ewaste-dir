@@ -27,7 +27,7 @@ export const config = {
   runtime: 'edge',
 };
 
-const handler: APIRoute = async ({ request, url }): Promise<Response> => {
+const handler: APIRoute = async ({ request }): Promise<Response> => {
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -41,9 +41,15 @@ const handler: APIRoute = async ({ request, url }): Promise<Response> => {
 
     // Handle both GET and POST requests
     if (request.method === 'GET') {
-      // Use the URL object passed by Astro
-      zipCode = url.searchParams.get('zip');
+      // Parse URL parameters in a way that works in both environments
+      const requestUrl = new URL(request.url);
+      zipCode = requestUrl.searchParams.get('zip');
+      console.log('GET request - URL:', requestUrl.toString());
       console.log('GET request - zip code from URL:', zipCode);
+      console.log(
+        'GET request - all params:',
+        Object.fromEntries(requestUrl.searchParams)
+      );
     } else if (request.method === 'POST') {
       const body = await request.json();
       zipCode = body.zip?.toString() ?? null;
@@ -69,8 +75,8 @@ const handler: APIRoute = async ({ request, url }): Promise<Response> => {
           error: 'Missing zip code',
           details: {
             method: request.method,
-            url: url.toString(),
-            params: Object.fromEntries(url.searchParams),
+            url: request.url,
+            headers: Object.fromEntries(request.headers),
           },
         } satisfies ZipCodeErrorResponse),
         {

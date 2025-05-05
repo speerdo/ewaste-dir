@@ -41,37 +41,41 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
 
     // Handle both GET and POST requests
     if (request.method === 'GET') {
-      // Get the full URL including query parameters
-      const fullUrl = request.url;
-      console.log('Full request URL:', fullUrl);
+      // Log the raw request for debugging
+      console.log('Request object:', {
+        url: request.url,
+        method: request.method,
+        headers: Object.fromEntries(request.headers),
+      });
 
+      // Try multiple methods to get the zip parameter
       try {
-        // Try multiple ways to get the zip parameter
-        const urlObj = new URL(fullUrl);
-        zipCode = urlObj.searchParams.get('zip');
+        // Method 1: Try using URL API
+        const url = new URL(request.url);
+        console.log('Method 1 - URL search:', url.search);
+        zipCode = url.searchParams.get('zip');
 
-        // If that didn't work, try parsing the query string manually
-        if (!zipCode && urlObj.search) {
-          const queryParams = new URLSearchParams(urlObj.search);
-          zipCode = queryParams.get('zip');
+        // Method 2: If that fails, try getting raw query string
+        if (!zipCode) {
+          const rawQuery = request.url.split('?')[1];
+          console.log('Method 2 - Raw query:', rawQuery);
+          if (rawQuery) {
+            const params = new URLSearchParams(rawQuery);
+            zipCode = params.get('zip');
+          }
         }
 
-        // Log all available information for debugging
-        console.log('URL object:', {
-          href: urlObj.href,
-          origin: urlObj.origin,
-          pathname: urlObj.pathname,
-          search: urlObj.search,
-          searchParams: Object.fromEntries(urlObj.searchParams),
-        });
-      } catch (error) {
-        console.error('Error parsing URL:', error);
-        // If URL parsing fails, try to extract zip parameter manually
-        const match = fullUrl.match(/[?&]zip=([^&]+)/);
-        zipCode = match ? match[1] : null;
-      }
+        // Method 3: If that fails, try regex
+        if (!zipCode) {
+          console.log('Method 3 - Using regex');
+          const match = request.url.match(/[?&]zip=([^&]+)/);
+          zipCode = match ? decodeURIComponent(match[1]) : null;
+        }
 
-      console.log('GET request - extracted zip code:', zipCode);
+        console.log('Final extracted zip code:', zipCode);
+      } catch (error) {
+        console.error('Error extracting zip code:', error);
+      }
     } else if (request.method === 'POST') {
       const body = await request.json();
       zipCode = body.zip?.toString() ?? null;

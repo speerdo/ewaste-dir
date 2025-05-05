@@ -20,11 +20,15 @@ export interface GeocodeErrorResponse {
 const corsHeaders = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-const handler: APIRoute = async ({ url, request }): Promise<Response> => {
+export const config = {
+  runtime: 'edge',
+};
+
+const handler: APIRoute = async ({ request }): Promise<Response> => {
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -33,35 +37,41 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
     });
   }
 
-  // Enhanced logging
-  const requestUrl = new URL(request.url);
-  console.log('Geocoding Debug Info:', {
-    fullUrl: url.toString(),
-    requestUrl: request.url,
-    urlSearchParams: Object.fromEntries(url.searchParams),
-    requestSearchParams: Object.fromEntries(requestUrl.searchParams),
-    rawRequest: request,
-  });
-
   try {
-    // Get params from URL first, then fallback to request URL
-    const lat =
-      url.searchParams.get('lat') ?? requestUrl.searchParams.get('lat');
-    const lng =
-      url.searchParams.get('lng') ?? requestUrl.searchParams.get('lng');
+    let lat: string | null = null;
+    let lng: string | null = null;
 
-    console.log('Parsed coordinates:', { lat, lng });
+    // Handle both GET and POST requests
+    if (request.method === 'GET') {
+      const url = new URL(request.url);
+      lat = url.searchParams.get('lat');
+      lng = url.searchParams.get('lng');
+    } else if (request.method === 'POST') {
+      const body = await request.json();
+      lat = body.lat?.toString() ?? null;
+      lng = body.lng?.toString() ?? null;
+    } else {
+      return new Response(
+        JSON.stringify({
+          error: 'Method not allowed',
+          details: { method: request.method },
+        } satisfies GeocodeErrorResponse),
+        {
+          status: 405,
+          headers: corsHeaders,
+        }
+      );
+    }
 
     // Handle missing coordinates
-    if (!lat || !lng) {
+    if (lat == null || lng == null) {
       return new Response(
         JSON.stringify({
           error: 'Missing coordinates',
           details: {
+            method: request.method,
             providedLat: lat,
             providedLng: lng,
-            searchParams: Object.fromEntries(url.searchParams),
-            requestSearchParams: Object.fromEntries(requestUrl.searchParams),
           },
         } satisfies GeocodeErrorResponse),
         {
@@ -118,8 +128,6 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
       6
     )}&lon=${parsedLng.toFixed(6)}&zoom=18&addressdetails=1`;
 
-    console.log('Calling Nominatim:', nominatimUrl);
-
     const response = await fetch(nominatimUrl, {
       headers: {
         'User-Agent': 'Astro-Geocoding-Service/1.0',
@@ -144,7 +152,6 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
     }
 
     const data = await response.json();
-    console.log('Nominatim response:', data);
 
     if (!data.address) {
       return new Response(
@@ -201,6 +208,10 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
     );
   }
 };
+
+// Export both POST and post to handle case sensitivity
+export const POST = handler;
+export const post = handler;
 
 // Export both GET and get to handle case sensitivity
 export const GET = handler;

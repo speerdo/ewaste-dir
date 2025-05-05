@@ -24,28 +24,24 @@ export class GeocodingError extends Error {
 export async function reverseGeocode(
   coordinates: Coordinates
 ): Promise<Location> {
-  const baseUrl = '/api/geocode';
-  const url = new URL(baseUrl, window.location.origin);
-  url.searchParams.set('lat', coordinates.lat.toFixed(6));
-  url.searchParams.set('lng', coordinates.lng.toFixed(6));
+  const params = new URLSearchParams({
+    lat: coordinates.lat.toFixed(6),
+    lng: coordinates.lng.toFixed(6),
+  });
 
-  console.log('Making request to:', url.toString());
+  const url = `${window.location.origin}/api/geocode?${params.toString()}`;
 
   try {
     const response = await fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify(coordinates),
     });
 
     const data = await response.json();
-    console.log('Response:', {
-      ok: response.ok,
-      status: response.status,
-      data,
-    });
 
     if (!response.ok) {
       throw new GeocodingError(

@@ -5,7 +5,7 @@ import vercel from '@astrojs/vercel/serverless';
 // https://astro.build/config
 export default defineConfig({
   integrations: [tailwind()],
-  output: 'hybrid',
+  output: 'server',
   adapter: vercel({
     analytics: true,
     imageService: true,
@@ -17,10 +17,15 @@ export default defineConfig({
     },
     edgeMiddleware: true,
     maxDuration: 8,
+    includeFiles: ['./dist/**/*'],
+    functionPerRoute: true,
   }),
   build: {
     inlineStylesheets: 'auto',
     assets: 'assets',
+    serverEntry: 'entry.mjs',
+    client: './dist/client/',
+    server: './dist/server/',
     concurrentPages: 4,
     reporter: {
       config: {

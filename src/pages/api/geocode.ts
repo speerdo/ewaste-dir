@@ -38,6 +38,17 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
   console.log('Geocoding Debug Info:', {
     fullUrl: url.toString(),
     requestUrl: request.url,
+    rawRequestUrl: request.url,
+    urlObject: {
+      pathname: url.pathname,
+      search: url.search,
+      searchParams: url.search,
+    },
+    requestUrlObject: {
+      pathname: requestUrl.pathname,
+      search: requestUrl.search,
+      searchParams: requestUrl.search,
+    },
     urlSearchParams: Object.fromEntries(url.searchParams),
     requestSearchParams: Object.fromEntries(requestUrl.searchParams),
     rawRequest: {
@@ -47,11 +58,44 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
   });
 
   try {
+    // Log raw URL components
+    console.log('Raw URL components:', {
+      originalUrl: request.url,
+      urlSearch: url.search,
+      requestUrlSearch: requestUrl.search,
+    });
+
+    // Try multiple ways to get the parameters
+    const urlParams = new URLSearchParams(url.search);
+    const requestUrlParams = new URLSearchParams(requestUrl.search);
+    const directUrlParams = new URLSearchParams(
+      request.url.split('?')[1] || ''
+    );
+
+    console.log('Alternative parameter parsing:', {
+      urlParams: {
+        lat: urlParams.get('lat'),
+        lng: urlParams.get('lng'),
+      },
+      requestUrlParams: {
+        lat: requestUrlParams.get('lat'),
+        lng: requestUrlParams.get('lng'),
+      },
+      directUrlParams: {
+        lat: directUrlParams.get('lat'),
+        lng: directUrlParams.get('lng'),
+      },
+    });
+
     // Get params from URL first, then fallback to request URL
-    const lat =
-      url.searchParams.get('lat') ?? requestUrl.searchParams.get('lat');
-    const lng =
-      url.searchParams.get('lng') ?? requestUrl.searchParams.get('lng');
+    let lat = url.searchParams.get('lat') ?? requestUrl.searchParams.get('lat');
+    let lng = url.searchParams.get('lng') ?? requestUrl.searchParams.get('lng');
+
+    // If still null, try alternative parsing
+    if (!lat || !lng) {
+      lat = lat || directUrlParams.get('lat');
+      lng = lng || directUrlParams.get('lng');
+    }
 
     console.log('Parsed coordinates:', {
       lat,

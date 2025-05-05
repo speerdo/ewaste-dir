@@ -1,6 +1,6 @@
 ---
 title: 'The Future of Electronics Recycling: Trends and Innovations'
-pubDate: 2024-01-01
+pubDate: 2024-05-01
 description: 'Explore emerging technologies and trends that are shaping the future of electronics recycling and circular economy.'
 image: '/images/better-tomorrow.jpg'
 ---

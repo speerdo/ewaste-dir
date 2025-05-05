@@ -24,16 +24,18 @@ export class GeocodingError extends Error {
 export async function reverseGeocode(
   coordinates: Coordinates
 ): Promise<Location> {
-  // Always use the current origin to ensure API calls work in all environments
-  const url = new URL('/api/geocode', window.location.origin);
-  url.searchParams.set('lat', coordinates.lat.toFixed(6));
-  url.searchParams.set('lng', coordinates.lng.toFixed(6));
+  // Construct URL with URLSearchParams to ensure proper encoding
+  const params = new URLSearchParams({
+    lat: coordinates.lat.toFixed(6),
+    lng: coordinates.lng.toFixed(6),
+  });
 
-  console.log('Geocoding request details:', {
+  const url = `${window.location.origin}/api/geocode?${params.toString()}`;
+
+  console.log('Making geocoding request:', {
     coordinates,
-    constructedUrl: url.toString(),
-    origin: window.location.origin,
-    searchParams: Object.fromEntries(url.searchParams),
+    constructedUrl: url,
+    params: Object.fromEntries(params),
   });
 
   try {
@@ -45,11 +47,11 @@ export async function reverseGeocode(
       },
     });
 
-    // Log the full response details before parsing
     console.log('Raw response:', {
       status: response.status,
       statusText: response.statusText,
       headers: Object.fromEntries(response.headers),
+      url: response.url,
     });
 
     const data = await response.json();

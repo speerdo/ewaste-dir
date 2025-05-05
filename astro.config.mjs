@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import vercel from '@astrojs/vercel/serverless';
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,19 +14,25 @@ export default defineConfig({
     isr: {
       expiration: 3600,
       allowQuery: false,
+      byRoute: {
+        '/': { expiration: 86400 },
+        '/about': { expiration: 86400 },
+        '/contact': { expiration: 86400 },
+        '/blog': { expiration: 86400 },
+        '/states/*': { expiration: 3600 },
+        '/cities/*': { expiration: 3600 },
+        '/api/*': { expiration: 300 },
+      },
     },
     edgeMiddleware: true,
     maxDuration: 8,
+    functionPerRoute: true,
   }),
   build: {
     inlineStylesheets: 'auto',
     assets: 'assets',
-    concurrentPages: 4,
-    reporter: {
-      config: {
-        reportDetailLevel: 'verbose',
-      },
-    },
+    serverEntry: 'entry.mjs',
+    format: 'directory',
   },
   vite: {
     define: {

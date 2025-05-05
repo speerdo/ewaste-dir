@@ -21,9 +21,31 @@ export class GeocodingError extends Error {
   }
 }
 
+// Cache for geocoding results
+const geocodeCache = new Map<
+  string,
+  {
+    data: Location;
+    timestamp: number;
+  }
+>();
+
+const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+
 export async function reverseGeocode(
   coordinates: Coordinates
 ): Promise<Location> {
+  // Create cache key
+  const cacheKey = `${coordinates.lat.toFixed(6)},${coordinates.lng.toFixed(
+    6
+  )}`;
+
+  // Check cache
+  const cached = geocodeCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+
   const params = new URLSearchParams({
     lat: coordinates.lat.toFixed(6),
     lng: coordinates.lng.toFixed(6),
@@ -55,11 +77,19 @@ export async function reverseGeocode(
       throw new GeocodingError('Invalid response format', data);
     }
 
-    return {
+    const location = {
       city: data.city,
       state: data.state,
       coordinates: data.coordinates,
     };
+
+    // Cache the result
+    geocodeCache.set(cacheKey, {
+      data: location,
+      timestamp: Date.now(),
+    });
+
+    return location;
   } catch (error) {
     if (error instanceof GeocodingError) {
       throw error;

@@ -33,78 +33,17 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
     });
   }
 
-  // Enhanced logging
-  const requestUrl = new URL(request.url);
-  console.log('Geocoding Debug Info:', {
-    fullUrl: url.toString(),
-    requestUrl: request.url,
-    rawRequestUrl: request.url,
-    urlObject: {
-      pathname: url.pathname,
-      search: url.search,
-      searchParams: url.search,
-    },
-    requestUrlObject: {
-      pathname: requestUrl.pathname,
-      search: requestUrl.search,
-      searchParams: requestUrl.search,
-    },
-    urlSearchParams: Object.fromEntries(url.searchParams),
-    requestSearchParams: Object.fromEntries(requestUrl.searchParams),
-    rawRequest: {
-      method: request.method,
-      headers: Object.fromEntries(request.headers),
-    },
-  });
-
   try {
-    // Log raw URL components
-    console.log('Raw URL components:', {
-      originalUrl: request.url,
-      urlSearch: url.search,
-      requestUrlSearch: requestUrl.search,
-    });
+    // Get the raw URL and parse it directly
+    const rawUrl = request.url;
+    console.log('Raw request URL:', rawUrl);
 
-    // Try multiple ways to get the parameters
-    const urlParams = new URLSearchParams(url.search);
-    const requestUrlParams = new URLSearchParams(requestUrl.search);
-    const directUrlParams = new URLSearchParams(
-      request.url.split('?')[1] || ''
-    );
+    // Parse URL parameters directly from the raw URL
+    const searchParams = new URL(rawUrl).searchParams;
+    const lat = searchParams.get('lat');
+    const lng = searchParams.get('lng');
 
-    console.log('Alternative parameter parsing:', {
-      urlParams: {
-        lat: urlParams.get('lat'),
-        lng: urlParams.get('lng'),
-      },
-      requestUrlParams: {
-        lat: requestUrlParams.get('lat'),
-        lng: requestUrlParams.get('lng'),
-      },
-      directUrlParams: {
-        lat: directUrlParams.get('lat'),
-        lng: directUrlParams.get('lng'),
-      },
-    });
-
-    // Get params from URL first, then fallback to request URL
-    let lat = url.searchParams.get('lat') ?? requestUrl.searchParams.get('lat');
-    let lng = url.searchParams.get('lng') ?? requestUrl.searchParams.get('lng');
-
-    // If still null, try alternative parsing
-    if (!lat || !lng) {
-      lat = lat || directUrlParams.get('lat');
-      lng = lng || directUrlParams.get('lng');
-    }
-
-    console.log('Parsed coordinates:', {
-      lat,
-      lng,
-      urlLat: url.searchParams.get('lat'),
-      urlLng: url.searchParams.get('lng'),
-      requestUrlLat: requestUrl.searchParams.get('lat'),
-      requestUrlLng: requestUrl.searchParams.get('lng'),
-    });
+    console.log('Parsed coordinates from raw URL:', { lat, lng });
 
     // Handle missing coordinates
     if (!lat || !lng) {
@@ -114,8 +53,7 @@ const handler: APIRoute = async ({ url, request }): Promise<Response> => {
           details: {
             providedLat: lat,
             providedLng: lng,
-            searchParams: Object.fromEntries(url.searchParams),
-            requestSearchParams: Object.fromEntries(requestUrl.searchParams),
+            rawUrl,
           },
         } satisfies GeocodeErrorResponse),
         {

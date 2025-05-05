@@ -202,8 +202,22 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       `;
       searchResults.classList.remove('hidden');
 
-      // Call our zip code API
-      const response = await fetch(`/api/zipcode?zip=${zipCode}`);
+      // Call our zip code API using current origin
+      const apiUrl = new URL('/api/zipcode', window.location.origin);
+      apiUrl.searchParams.set('zip', zipCode);
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `HTTP error ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.error) {

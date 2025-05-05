@@ -1,70 +1,207 @@
 import type { APIRoute } from 'astro';
 
-interface ZipCodeResponse {
+export const prerender = false;
+
+export interface ZipCodeResponse {
   city: string;
   state: string;
-  error?: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
 }
 
-export const GET: APIRoute = async ({ url }): Promise<Response> => {
-  try {
-    const zipCode = url.searchParams.get('zip');
+export interface ZipCodeErrorResponse {
+  error: string;
+  details?: Record<string, any>;
+}
 
-    if (!zipCode || !/^\d{5}(-\d{4})?$/.test(zipCode)) {
+const corsHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export const config = {
+  runtime: 'edge',
+};
+
+const handler: APIRoute = async ({ request }): Promise<Response> => {
+  // Handle preflight requests
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
+  try {
+    let zipCode: string | null = null;
+
+    // Handle both GET and POST requests
+    if (request.method === 'GET') {
+      const url = new URL(request.url);
+      zipCode = url.searchParams.get('zip');
+    } else if (request.method === 'POST') {
+      const body = await request.json();
+      zipCode = body.zip?.toString() ?? null;
+    } else {
       return new Response(
-        JSON.stringify({ error: 'Invalid zip code format' }),
-        { status: 400 }
+        JSON.stringify({
+          error: 'Method not allowed',
+          details: { method: request.method },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 405,
+          headers: corsHeaders,
+        }
       );
     }
 
-    // Use the Census Bureau API to get city and state from zip code
-    const censusUrl = `https://geocoding.geo.census.gov/geocoder/geographies/address?street=1&zip=${zipCode}&benchmark=2020&vintage=2020&format=json`;
+    // Handle missing zip code
+    if (!zipCode) {
+      return new Response(
+        JSON.stringify({
+          error: 'Missing zip code',
+          details: { method: request.method },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
 
-    const response = await fetch(censusUrl);
-    const data = await response.json();
+    // Validate zip code format
+    if (!/^\d{5}(-\d{4})?$/.test(zipCode)) {
+      return new Response(
+        JSON.stringify({
+          error: 'Invalid zip code format',
+          details: { providedZip: zipCode },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // Extract the 5-digit ZIP code if a 9-digit ZIP was provided
+    const fiveDigitZip = zipCode.slice(0, 5);
+
+    // Use Nominatim's geocoding service (free, no API key required)
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?postalcode=${fiveDigitZip}&country=USA&format=json&addressdetails=1&limit=1`;
+
+    console.log('Fetching location data for ZIP:', fiveDigitZip);
+    const response = await fetch(nominatimUrl, {
+      headers: {
+        'User-Agent': 'E-Waste-Directory/1.0',
+      },
+    });
 
     if (!response.ok) {
-      throw new Error('Census API request failed');
-    }
-
-    const result =
-      data?.result?.addressMatches?.[0]?.geographies?.[
-        '2020 Census Blocks'
-      ]?.[0];
-
-    if (!result) {
-      return new Response(JSON.stringify({ error: 'Location not found' }), {
-        status: 404,
-      });
-    }
-
-    // Extract city (place) and state information
-    const state = result.STATE;
-    const city = result.PLACE || result.COUNTY;
-
-    if (!city || !state) {
+      console.error(
+        'Nominatim API error:',
+        response.status,
+        response.statusText
+      );
       return new Response(
-        JSON.stringify({ error: 'Location data incomplete' }),
-        { status: 404 }
+        JSON.stringify({
+          error: 'Zip code lookup service error',
+          details: {
+            status: response.status,
+            statusText: response.statusText,
+          },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 502,
+          headers: corsHeaders,
+        }
       );
     }
 
-    const responseData: ZipCodeResponse = {
+    const data = await response.json();
+    console.log('Nominatim API response:', JSON.stringify(data, null, 2));
+
+    if (!data.length) {
+      console.error('No location data found in Nominatim API response');
+      return new Response(
+        JSON.stringify({
+          error: 'Location not found',
+          details: { zipCode },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 404,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    const location = data[0];
+    const address = location.address;
+
+    // Try to get the city name from various address fields
+    const city =
+      address.city ||
+      address.town ||
+      address.village ||
+      address.municipality ||
+      address.suburb;
+    const state = address.state;
+
+    if (!city || !state) {
+      console.error('Incomplete location data:', address);
+      return new Response(
+        JSON.stringify({
+          error: 'Incomplete location data',
+          details: { address },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 404,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    const zipCodeResult: ZipCodeResponse = {
       city,
       state,
+      coordinates: {
+        lat: parseFloat(location.lat),
+        lng: parseFloat(location.lon),
+      },
     };
 
-    return new Response(JSON.stringify(responseData), {
+    console.log('Returning location data:', zipCodeResult);
+    return new Response(JSON.stringify(zipCodeResult), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: corsHeaders,
     });
   } catch (error) {
     console.error('Zip code lookup error:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to process zip code' }),
-      { status: 500 }
+      JSON.stringify({
+        error: 'Internal server error',
+        details: {
+          message: error instanceof Error ? error.message : String(error),
+        },
+      } satisfies ZipCodeErrorResponse),
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
     );
   }
 };
+
+// Export both POST and post to handle case sensitivity
+export const POST = handler;
+export const post = handler;
+
+// Export both GET and get to handle case sensitivity
+export const GET = handler;
+export const get = handler;
+
+// Also export as default
+export default handler;

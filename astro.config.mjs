@@ -14,24 +14,25 @@ export default defineConfig({
     isr: {
       expiration: 3600,
       allowQuery: false,
+      byRoute: {
+        '/': { expiration: 86400 },
+        '/about': { expiration: 86400 },
+        '/contact': { expiration: 86400 },
+        '/blog': { expiration: 86400 },
+        '/states/*': { expiration: 3600 },
+        '/cities/*': { expiration: 3600 },
+        '/api/*': { expiration: 300 },
+      },
     },
     edgeMiddleware: true,
     maxDuration: 8,
-    includeFiles: ['./dist/**/*'],
     functionPerRoute: true,
   }),
   build: {
     inlineStylesheets: 'auto',
-    assets: 'assets',
+    assets: './assets',
     serverEntry: 'entry.mjs',
-    client: './dist/client/',
-    server: './dist/server/',
-    concurrentPages: 4,
-    reporter: {
-      config: {
-        reportDetailLevel: 'verbose',
-      },
-    },
+    format: 'directory',
   },
   vite: {
     define: {

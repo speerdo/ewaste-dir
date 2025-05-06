@@ -166,36 +166,34 @@ const mapMarkers: Marker[] = centers.map(center => ({
         window.openDirections = window.showDirections;
       </script>
       
-      <script type="module">
-        // Create a function to handle marker clicks
-        function handleMarkerClick(centerId) {
-          // console.log('Marker clicked:', centerId);
-          
+      <script>
+        interface MarkerClickEvent extends CustomEvent<{ centerId: string }> {
+          type: 'markerClick';
+        }
+
+        function handleMarkerClick(event: MarkerClickEvent) {
           // Remove highlight from all centers
           document.querySelectorAll('[data-center-id]').forEach((el) => {
             el.classList.remove('highlight-center');
           });
           
           // Find and highlight the center card
-          const centerElement = document.getElementById(`center-${centerId}`);
+          const centerElement = document.getElementById(`center-${event.detail.centerId}`);
           if (centerElement) {
             centerElement.classList.add('highlight-center');
             centerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }
         
-        // Create a function to handle center card clicks
-        function handleCenterClick(event) {
+        function handleCenterClick(event: MouseEvent) {
           // Don't trigger if clicking on a button or link
-          if (event.target.closest('button') || event.target.closest('a')) {
+          if ((event.target as Element).closest('button') || (event.target as Element).closest('a')) {
             return;
           }
           
-          const card = event.currentTarget;
+          const card = event.currentTarget as Element;
           const centerId = card.getAttribute('data-center-id');
           if (!centerId) return;
-          
-          // console.log('Center card clicked:', centerId);
           
           // Remove highlight from all centers
           document.querySelectorAll('[data-center-id]').forEach((el) => {
@@ -212,29 +210,30 @@ const mapMarkers: Marker[] = centers.map(center => ({
           document.dispatchEvent(customEvent);
         }
         
-        // Set up the interactions between centers and map
         function setupInteractions() {
-          console.log('Setting up center-map interactions');
-          
           // Handle marker clicks
-          document.addEventListener('markerClick', (event) => {
-            handleMarkerClick(event.detail.centerId);
-          });
+          document.addEventListener('markerClick', handleMarkerClick as EventListener);
           
           // Add click handlers to all center cards
           document.querySelectorAll('[data-center-id]').forEach(card => {
-            card.addEventListener('click', handleCenterClick);
+            card.removeEventListener('click', handleCenterClick as EventListener);
+            card.addEventListener('click', handleCenterClick as EventListener);
           });
         }
         
-        // Initialize when page loads
-        document.addEventListener('astro:page-load', () => {
-          console.log('Page loaded, setting up interactions');
-          setupInteractions();
-        });
-        
-        // Also run immediately for initial page load
+        // Set up interactions on initial page load
         setupInteractions();
+        
+        // Set up interactions after each Astro page transition
+        document.addEventListener('astro:page-load', setupInteractions);
+        
+        // Clean up event listeners before page transitions
+        document.addEventListener('astro:before-preparation', () => {
+          document.removeEventListener('markerClick', handleMarkerClick as EventListener);
+          document.querySelectorAll('[data-center-id]').forEach(card => {
+            card.removeEventListener('click', handleCenterClick as EventListener);
+          });
+        });
       </script>
     </>
   )}

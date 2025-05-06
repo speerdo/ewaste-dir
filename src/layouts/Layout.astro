@@ -14,31 +14,11 @@ const { title, description, ogImage } = Astro.props;
 // Default meta description
 const metaDescription = description || 'Find electronics recycling centers near you. Get directions, contact information, and more.';
 
-// Get the base URL for meta tags - use Astro.url.origin which will be correct in all environments
-const baseUrl = Astro.url.origin;
-
-// Log the URL construction (this will only show during build/development)
-console.log('Environment:', import.meta.env.PROD ? 'production' : 'development');
-console.log('Base URL:', baseUrl);
-console.log('Current URL:', Astro.url.toString());
-
-// Handle OG image URL
-function getAbsoluteUrl(url: string) {
-  try {
-    // If it's already an absolute URL, return it as is
-    new URL(url);
-    return url;
-  } catch {
-    // If it's a relative URL, make it absolute using the current domain
-    const absoluteUrl = new URL(url.startsWith('/') ? url : `/${url}`, baseUrl).toString();
-    console.log(`Converting ${url} to ${absoluteUrl}`);
-    return absoluteUrl;
-  }
-}
-
 // Default OG image
-const defaultOgImage = '/api/og';
-const ogImageUrl = getAbsoluteUrl(ogImage || defaultOgImage);
+const defaultOgImage = '/images/default-og.png';
+
+// Get the current URL
+const currentUrl = Astro.url;
 
 // Get Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -55,17 +35,17 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={getAbsoluteUrl(Astro.url.pathname)} />
+    <meta property="og:url" content={currentUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={metaDescription} />
-    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image" content={new URL(ogImage || defaultOgImage, currentUrl)} />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={getAbsoluteUrl(Astro.url.pathname)} />
+    <meta property="twitter:url" content={currentUrl} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={metaDescription} />
-    <meta property="twitter:image" content={ogImageUrl} />
+    <meta property="twitter:image" content={new URL(ogImage || defaultOgImage, currentUrl)} />
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

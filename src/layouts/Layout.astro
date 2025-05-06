@@ -14,10 +14,8 @@ const { title, description, ogImage } = Astro.props;
 // Default meta description
 const metaDescription = description || 'Find electronics recycling centers near you. Get directions, contact information, and more.';
 
-// Get the base URL for meta tags
-const baseUrl = import.meta.env.PROD 
-  ? `https://${process.env.VERCEL_URL || import.meta.env.VERCEL_URL || Astro.url.host}`
-  : Astro.url.origin;
+// Get the base URL for meta tags - use Astro.url.origin which will be correct in all environments
+const baseUrl = Astro.url.origin;
 
 // Log the URL construction (this will only show during build/development)
 console.log('Environment:', import.meta.env.PROD ? 'production' : 'development');

@@ -37,6 +37,11 @@ const sortedCities = Object.keys(centersByCity).sort();
 // Calculate total centers
 const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum + centers.length, 0);
 
+// Generate OG image URL
+const ogImageUrl = new URL('/api/og', Astro.url);
+ogImageUrl.searchParams.set('state', state.name);
+ogImageUrl.searchParams.set('centers', totalCenters.toString());
+
 // Prepare city data for the layout
 const cityData = sortedCities.map(city => {
   const centers = centersByCity[city];
@@ -52,6 +57,14 @@ const cityData = sortedCities.map(city => {
     }
   };
 });
+
+// Generate description
+const description = `Find ${totalCenters} electronics recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${state.name}. Get directions and information for safe disposal of computers, phones, TVs and other electronic devices.`;
 ---
 
-<StateLayout state={state} cityData={cityData} />
+<StateLayout 
+  state={state} 
+  cityData={cityData}
+  description={description}
+  ogImage={ogImageUrl.toString()}
+/>

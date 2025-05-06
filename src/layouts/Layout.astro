@@ -4,14 +4,19 @@ import Footer from '../components/Footer.astro';
 import '../styles/recycling-centers.css';
 
 interface Props {
-  title?: string;
+  title: string;
   description?: string;
+  ogImage?: string;
 }
 
-const { 
-  title = "Electronics Recycling Near Me – U.S. E‑Waste Directory",
-  description = "Locate electronics recycling drop-off sites across all 50 states. Find safe recycling centers for your old phones, computers, TVs and more, and learn how to recycle electronics responsibly."
-} = Astro.props;
+const { title, description, ogImage } = Astro.props;
+
+// Default meta description
+const metaDescription = description || 'Find electronics recycling centers near you. Get directions, contact information, and more.';
+
+// Default OG image
+const defaultOgImage = new URL('/images/default-og.png', Astro.url);
+const ogImageUrl = ogImage || defaultOgImage.toString();
 
 // Get Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -24,17 +29,21 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:image" content={ogImageUrl} />
     
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={metaDescription} />
+    <meta property="twitter:image" content={ogImageUrl} />
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -11,10 +11,17 @@ interface Props {
     id: string;
     name: string;
     description: string;
+    address: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
   }[];
+  description?: string;
+  ogImage?: string;
 }
 
-const { state, cityData } = Astro.props;
+const { state, cityData, description, ogImage } = Astro.props;
 
 // Get recycling centers data from Supabase with error handling
 let centersByCity: CentersByCity = {};
@@ -47,9 +54,16 @@ const citiesWithCounts = Object.entries(centersByCity).map(([cityName, centers])
 
 // For now, let's use a placeholder image for states until we have proper images
 const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80';
+
+// Default description if not provided
+const metaDescription = description || `Find electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`;
 ---
 
-<Layout title={`Electronics Recycling in ${state.name}`} description={`Find certified electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`}>
+<Layout 
+  title={`Electronics Recycling in ${state.name} – E‑Waste Directory`}
+  description={metaDescription}
+  ogImage={ogImage}
+>
   <!-- State Hero -->
   <div class="pt-16"> <!-- Added padding to account for fixed header -->
     <!-- Hero Image -->

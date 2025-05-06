@@ -16,9 +16,7 @@ const metaDescription = description || 'Find electronics recycling centers near 
 
 // Get the base URL for meta tags
 const baseUrl = import.meta.env.PROD 
-  ? import.meta.env.VERCEL_PROJECT_PRODUCTION_URL 
-    ? `https://${import.meta.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : `https://${import.meta.env.VERCEL_URL}` // Fallback to deployment URL
+  ? `https://${import.meta.env.VERCEL_URL || process.env.VERCEL_URL}`
   : Astro.url.origin;
 
 // Log the URL construction (this will only show during build/development)

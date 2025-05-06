@@ -31,7 +31,7 @@ function getAbsoluteUrl(url: string) {
 
 // Default OG image
 const defaultOgImage = '/images/default-og.png';
-const ogImageUrl = getAbsoluteUrl(ogImage || defaultOgImage);
+const ogImageUrl = new URL('/api/og', Astro.url);
 
 // Get Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;

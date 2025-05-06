@@ -125,8 +125,8 @@ export async function findNearestCity(
   coordinates: Coordinates,
   cities: Location[]
 ): Promise<Location | null> {
-  console.log('Finding nearest city to:', coordinates);
-  console.log('Number of cities to search:', cities.length);
+  // console.log('Finding nearest city to:', coordinates);
+  // console.log('Number of cities to search:', cities.length);
 
   if (!cities.length) {
     console.log('No cities provided to search through');
@@ -135,36 +135,36 @@ export async function findNearestCity(
 
   let nearestCity = cities[0];
   let shortestDistance = calculateDistance(coordinates, cities[0].coordinates);
-  console.log('Initial city:', nearestCity, 'at distance:', shortestDistance);
+  // console.log('Initial city:', nearestCity, 'at distance:', shortestDistance);
 
   for (const city of cities.slice(1)) {
     const distance = calculateDistance(coordinates, city.coordinates);
-    console.log(
-      'Checking city:',
-      city.city,
-      city.state,
-      'at distance:',
-      distance
-    );
+    // console.log(
+    //   'Checking city:',
+    //   city.city,
+    //   city.state,
+    //   'at distance:',
+    //   distance
+    // );
     if (distance < shortestDistance) {
       shortestDistance = distance;
       nearestCity = city;
-      console.log(
-        'New nearest city found:',
-        city.city,
-        city.state,
-        'at distance:',
-        distance
-      );
+      // console.log(
+      //   'New nearest city found:',
+      //   city.city,
+      //   city.state,
+      //   'at distance:',
+      //   distance
+      // );
     }
   }
 
-  console.log(
-    'Final nearest city:',
-    nearestCity,
-    'at distance:',
-    shortestDistance
-  );
+  // console.log(
+  //   'Final nearest city:',
+  //   nearestCity,
+  //   'at distance:',
+  //   shortestDistance
+  // );
   return nearestCity;
 }
 

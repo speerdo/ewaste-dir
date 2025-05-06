@@ -42,23 +42,23 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
     // Handle both GET and POST requests
     if (request.method === 'GET') {
       // Log the raw request for debugging
-      console.log('GET Request object:', {
-        url: request.url,
-        method: request.method,
-        headers: Object.fromEntries(request.headers),
-      });
+      // console.log('GET Request object:', {
+      //   url: request.url,
+      //   method: request.method,
+      //   headers: Object.fromEntries(request.headers),
+      // });
 
       // Try multiple methods to get the zip parameter
       try {
         // Method 1: Try using URL API
         const url = new URL(request.url);
-        console.log('Method 1 - URL search:', url.search);
+        // console.log('Method 1 - URL search:', url.search);
         zipCode = url.searchParams.get('zip');
 
         // Method 2: If that fails, try getting raw query string
         if (!zipCode) {
           const rawQuery = request.url.split('?')[1];
-          console.log('Method 2 - Raw query:', rawQuery);
+          // console.log('Method 2 - Raw query:', rawQuery);
           if (rawQuery) {
             const params = new URLSearchParams(rawQuery);
             zipCode = params.get('zip');
@@ -67,20 +67,20 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
 
         // Method 3: If that fails, try regex
         if (!zipCode) {
-          console.log('Method 3 - Using regex');
+          // console.log('Method 3 - Using regex');
           const match = request.url.match(/[?&]zip=([^&]+)/);
           zipCode = match ? decodeURIComponent(match[1]) : null;
         }
 
-        console.log('Final extracted zip code:', zipCode);
+        // console.log('Final extracted zip code:', zipCode);
       } catch (error) {
         console.error('Error extracting zip code:', error);
       }
     } else if (request.method === 'POST') {
       try {
-        console.log('Processing POST request');
+        // console.log('Processing POST request');
         const contentType = request.headers.get('content-type');
-        console.log('Content-Type:', contentType);
+        // console.log('Content-Type:', contentType);
 
         if (!contentType?.includes('application/json')) {
           return new Response(
@@ -99,9 +99,9 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         }
 
         const body = await request.json();
-        console.log('POST request body:', body);
+        // console.log('POST request body:', body);
         zipCode = body.zip?.toString() ?? null;
-        console.log('POST request - zip code from body:', zipCode);
+        // console.log('POST request - zip code from body:', zipCode);
       } catch (error) {
         console.error('Error parsing POST request body:', error);
         return new Response(
@@ -170,7 +170,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
     // Use Nominatim's geocoding service (free, no API key required)
     const nominatimUrl = `https://nominatim.openstreetmap.org/search?postalcode=${fiveDigitZip}&country=USA&format=json&addressdetails=1&limit=1`;
 
-    console.log('Fetching location data for ZIP:', fiveDigitZip);
+    // console.log('Fetching location data for ZIP:', fiveDigitZip);
     const response = await fetch(nominatimUrl, {
       headers: {
         'User-Agent': 'E-Waste-Directory/1.0',
@@ -199,7 +199,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
     }
 
     const data = await response.json();
-    console.log('Nominatim API response:', JSON.stringify(data, null, 2));
+    // console.log('Nominatim API response:', JSON.stringify(data, null, 2));
 
     if (!data.length) {
       console.error('No location data found in Nominatim API response');
@@ -250,7 +250,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
       },
     };
 
-    console.log('Returning location data:', zipCodeResult);
+    // console.log('Returning location data:', zipCodeResult);
     return new Response(JSON.stringify(zipCodeResult), {
       status: 200,
       headers: corsHeaders,

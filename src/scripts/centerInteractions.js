@@ -1,10 +1,10 @@
 // Handle interactions between map markers and center cards
 export function setupMarkerInteractions() {
-  console.log('Setting up center-map interactions');
+  // console.log('Setting up center-map interactions');
 
   // Highlight a center card when its marker is clicked on the map
   document.addEventListener('markerClick', (event) => {
-    console.log('Marker click event received', event.detail);
+    // console.log('Marker click event received', event.detail);
 
     // Get center ID from the event
     const centerId = event.detail.centerId;
@@ -31,13 +31,13 @@ export function setupMarkerInteractions() {
     // Scroll the center into view
     centerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    console.log('Center highlighted:', centerId);
+    // console.log('Center highlighted:', centerId);
   });
 
   // Set up click handlers for all center cards
   const setupCenterCardListeners = () => {
     const centerCards = document.querySelectorAll('[data-center-id]');
-    console.log(`Setting up listeners for ${centerCards.length} center cards`);
+    // console.log(`Setting up listeners for ${centerCards.length} center cards`);
 
     centerCards.forEach((card) => {
       card.addEventListener('click', (event) => {
@@ -52,7 +52,7 @@ export function setupMarkerInteractions() {
           return;
         }
 
-        console.log('Center card clicked:', centerId);
+        // console.log('Center card clicked:', centerId);
 
         // Remove highlight from all centers
         document.querySelectorAll('[data-center-id]').forEach((el) => {
@@ -68,7 +68,7 @@ export function setupMarkerInteractions() {
         });
         document.dispatchEvent(customEvent);
 
-        console.log('Center select event dispatched for:', centerId);
+        // console.log('Center select event dispatched for:', centerId);
       });
     });
   };

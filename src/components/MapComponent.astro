@@ -139,7 +139,7 @@ declare global {
         throw new Error('Google Maps API key is missing');
       }
 
-      console.log('Initializing map with markers:', markers.length);
+      // console.log('Initializing map with markers:', markers.length);
 
       // Initialize map with first marker as center
       map = new google.maps.Map(mapElement, {
@@ -212,7 +212,7 @@ declare global {
             });
             document.dispatchEvent(event);
             
-            console.log('Marker clicked:', marker.id);
+            // console.log('Marker clicked:', marker.id);
           });
 
           // Store references to markers and info windows
@@ -228,7 +228,7 @@ declare global {
         map.fitBounds(bounds, padding);
       }
 
-      console.log('Map initialized with', validMarkers, 'markers');
+      // console.log('Map initialized with', validMarkers, 'markers');
     } catch (error) {
       handleMapError(error);
     }
@@ -238,7 +238,7 @@ declare global {
   function setupMapListeners() {
     // Listen for center selection events (from card clicks)
     document.addEventListener('centerSelect', (e) => {
-      console.log('Center select event received:', e.detail);
+      // console.log('Center select event received:', e.detail);
       const marker = markerRefs.get(e.detail.centerId);
       if (marker) {
         // Close any existing info window
@@ -265,7 +265,7 @@ declare global {
         map.panTo(marker.getPosition());
         map.setZoom(15);
         
-        console.log('Map centered on marker:', e.detail.centerId);
+        // console.log('Map centered on marker:', e.detail.centerId);
       } else {
         console.error('Marker not found for center:', e.detail.centerId);
       }
@@ -283,10 +283,10 @@ declare global {
 
   // Initialize map when Google Maps API is loaded
   if (typeof google !== 'undefined' && google.maps) {
-    console.log('Google Maps API already loaded, initializing map');
+    // console.log('Google Maps API already loaded, initializing map');
     initMap();
   } else {
-    console.log('Waiting for Google Maps API to load');
+    // console.log('Waiting for Google Maps API to load');
     window.addEventListener('google-maps-ready', initMap);
   }
 </script>

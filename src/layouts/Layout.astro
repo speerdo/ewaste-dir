@@ -20,8 +20,23 @@ const defaultOgImage = '/images/default-og.png';
 // Get the current URL - handle Vercel deployment URLs correctly
 const currentUrl = new URL(Astro.request.url);
 
+// Function to ensure OG image URL is absolute
+const getAbsoluteUrl = (path: string) => {
+  try {
+    // If it's already an absolute URL, return it
+    new URL(path);
+    return path;
+  } catch {
+    // If it's a relative path, make it absolute
+    return new URL(path, currentUrl).toString();
+  }
+};
+
 // Get Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
+
+// Process OG image URL
+const ogImageUrl = ogImage ? getAbsoluteUrl(ogImage) : getAbsoluteUrl(defaultOgImage);
 ---
 
 <!doctype html>
@@ -38,14 +53,14 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
     <meta property="og:url" content={currentUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={metaDescription} />
-    <meta property="og:image" content={new URL(ogImage || defaultOgImage, currentUrl)} />
+    <meta property="og:image" content={ogImageUrl} />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={currentUrl} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={metaDescription} />
-    <meta property="twitter:image" content={new URL(ogImage || defaultOgImage, currentUrl)} />
+    <meta property="twitter:image" content={ogImageUrl} />
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

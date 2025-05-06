@@ -41,11 +41,8 @@ if (!centers || centers.length === 0) {
   return Astro.redirect(`/states/${stateParam}`);
 }
 
-// Generate OG image URL
-const ogImageUrl = new URL('/api/og', Astro.url);
-ogImageUrl.searchParams.set('city', cityName);
-ogImageUrl.searchParams.set('state', state.name);
-ogImageUrl.searchParams.set('centers', centers.length.toString());
+// Generate OG image URL using a static default image
+const ogImageUrl = '/images/default-og.png';
 
 // Convert centers to map markers
 const mapMarkers: Marker[] = centers.map(center => ({
@@ -63,7 +60,7 @@ const mapMarkers: Marker[] = centers.map(center => ({
 <Layout 
   title={`Recycling Centers in ${cityName}, ${state.name}`}
   description={`Find ${centers.length} electronics recycling ${centers.length === 1 ? 'center' : 'centers'} in ${cityName}, ${state.name}. Get directions, contact information, and more.`}
-  ogImage={ogImageUrl.toString()}
+  ogImage={ogImageUrl}
 >
   <div class="bg-white">
     {/* Load Google Maps API directly */}

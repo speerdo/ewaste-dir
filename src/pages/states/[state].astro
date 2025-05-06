@@ -37,10 +37,8 @@ const sortedCities = Object.keys(centersByCity).sort();
 // Calculate total centers
 const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum + centers.length, 0);
 
-// Generate OG image URL
-const ogImageUrl = new URL('/api/og', Astro.url);
-ogImageUrl.searchParams.set('state', state.name);
-ogImageUrl.searchParams.set('centers', totalCenters.toString());
+// Generate OG image URL using a static default image
+const ogImageUrl = '/images/default-og.png';
 
 // Prepare city data for the layout
 const cityData = sortedCities.map(city => {
@@ -66,5 +64,5 @@ const description = `Find ${totalCenters} electronics recycling ${totalCenters =
   state={state} 
   cityData={cityData}
   description={description}
-  ogImage={ogImageUrl.toString()}
+  ogImage={ogImageUrl}
 />

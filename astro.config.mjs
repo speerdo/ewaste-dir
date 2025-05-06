@@ -6,7 +6,7 @@ import vercel from '@astrojs/vercel/serverless';
 const VERCEL_URL = process.env.VERCEL_URL;
 const SITE_URL =
   process.env.SITE_URL ||
-  (VERCEL_URL ? `https://${VERCEL_URL}` : 'http://localhost:3000');
+  (VERCEL_URL ? `https://${VERCEL_URL}` : 'http://localhost:4321');
 
 // https://astro.build/config
 export default defineConfig({
@@ -22,7 +22,7 @@ export default defineConfig({
     speedInsights: true,
     isr: {
       expiration: 3600,
-      allowQuery: false,
+      allowQuery: true,
       byRoute: {
         '/': { expiration: 86400 },
         '/about': { expiration: 86400 },

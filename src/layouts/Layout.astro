@@ -14,9 +14,24 @@ const { title, description, ogImage } = Astro.props;
 // Default meta description
 const metaDescription = description || 'Find electronics recycling centers near you. Get directions, contact information, and more.';
 
+// Handle OG image URL
+function getAbsoluteUrl(url: string) {
+  try {
+    // If it's already an absolute URL, return it as is
+    new URL(url);
+    return url;
+  } catch {
+    // If it's a relative URL, make it absolute using the current domain
+    const baseUrl = import.meta.env.PROD 
+      ? Astro.url.origin // Use the actual domain in production
+      : Astro.url.origin; // Use localhost in development
+    return new URL(url.startsWith('/') ? url : `/${url}`, baseUrl).toString();
+  }
+}
+
 // Default OG image
-const defaultOgImage = new URL('/images/default-og.png', Astro.url);
-const ogImageUrl = ogImage || defaultOgImage.toString();
+const defaultOgImage = '/images/default-og.png';
+const ogImageUrl = getAbsoluteUrl(ogImage || defaultOgImage);
 
 // Get Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;

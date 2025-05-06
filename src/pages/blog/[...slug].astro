@@ -31,8 +31,8 @@ if (!post) {
 
 const { Content } = await post.render();
 
-// Get absolute URL for the post's image
-const ogImage = new URL(post.data.image, Astro.url).toString();
+// We don't need to construct the OG image URL here anymore
+// The BlogPost component handles this correctly with our layout updates
 ---
 
 <BlogPost post={post}>

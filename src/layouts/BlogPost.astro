@@ -8,10 +8,16 @@ type Props = {
 
 const { post } = Astro.props;
 const { title, description, pubDate, image } = post.data;
-const currentUrl = Astro.url.toString();
+
+// Production domain for consistent URLs
+const PRODUCTION_URL = 'https://www.recycleoldtech.com';
+
+// Get the current URL for sharing
+const currentUrl = new URL(Astro.request.url);
+const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_URL).toString() : currentUrl.toString();
 ---
 
-<Layout title={`${title} | E-Waste Hub Blog`} description={description}>
+<Layout title={`${title} | E-Waste Hub Blog`} description={description} ogImage={image}>
   <article class="pt-32">
     <!-- Hero Section -->
     <div class="relative h-[400px] overflow-hidden">
@@ -75,7 +81,7 @@ const currentUrl = Astro.url.toString();
           <h2 class="text-xl font-bold text-gray-900 mb-4">Share this article</h2>
           <div class="flex space-x-4">
             <a 
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(currentUrl)}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(shareUrl)}`}
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-[#1DA1F2] transition-colors"
@@ -87,7 +93,7 @@ const currentUrl = Astro.url.toString();
               </svg>
             </a>
             <a 
-              href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(currentUrl)}&title=${encodeURIComponent(title)}`}
+              href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}`}
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-[#0A66C2] transition-colors"
@@ -99,7 +105,7 @@ const currentUrl = Astro.url.toString();
               </svg>
             </a>
             <a 
-              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`}
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-[#1877F2] transition-colors"

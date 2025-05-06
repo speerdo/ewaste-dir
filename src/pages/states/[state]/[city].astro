@@ -41,8 +41,11 @@ if (!centers || centers.length === 0) {
   return Astro.redirect(`/states/${stateParam}`);
 }
 
-// Generate OG image URL using a static default image
-const ogImageUrl = '/images/default-og.png';
+// Generate OG image URL using a static default image with the production domain
+const PRODUCTION_URL = 'https://www.recycleoldtech.com';
+const ogImageUrl = import.meta.env.PROD 
+  ? new URL('/images/default-og.png', PRODUCTION_URL).toString()
+  : '/images/default-og.png';
 
 // Convert centers to map markers
 const mapMarkers: Marker[] = centers.map(center => ({

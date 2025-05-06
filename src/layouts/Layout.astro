@@ -17,8 +17,12 @@ const metaDescription = description || 'Find electronics recycling centers near 
 // Default OG image
 const defaultOgImage = '/images/default-og.png';
 
+// Production domain - always use this for OG images and URL tags
+const PRODUCTION_URL = 'https://www.recycleoldtech.com';
+
 // Get the current URL - handle Vercel deployment URLs correctly
 const currentUrl = new URL(Astro.request.url);
+const siteUrl = import.meta.env.PROD ? PRODUCTION_URL : currentUrl.origin;
 
 // Function to ensure OG image URL is absolute
 const getAbsoluteUrl = (path: string) => {
@@ -27,8 +31,8 @@ const getAbsoluteUrl = (path: string) => {
     new URL(path);
     return path;
   } catch {
-    // If it's a relative path, make it absolute
-    return new URL(path, currentUrl).toString();
+    // If it's a relative path, make it absolute with the production URL in production
+    return new URL(path, siteUrl).toString();
   }
 };
 
@@ -37,6 +41,9 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
 
 // Process OG image URL
 const ogImageUrl = ogImage ? getAbsoluteUrl(ogImage) : getAbsoluteUrl(defaultOgImage);
+
+// Used for meta tags
+const canonicalUrl = new URL(currentUrl.pathname, siteUrl).toString();
 ---
 
 <!doctype html>
@@ -47,17 +54,18 @@ const ogImageUrl = ogImage ? getAbsoluteUrl(ogImage) : getAbsoluteUrl(defaultOgI
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={metaDescription} />
+    <link rel="canonical" href={canonicalUrl} />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={currentUrl} />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={metaDescription} />
     <meta property="og:image" content={ogImageUrl} />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={currentUrl} />
+    <meta property="twitter:url" content={canonicalUrl} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={metaDescription} />
     <meta property="twitter:image" content={ogImageUrl} />

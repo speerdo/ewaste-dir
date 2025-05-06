@@ -1,5 +1,19 @@
 .highlight-center {
-  @apply ring-2 ring-green-500 transform scale-[1.02] shadow-lg transition-all duration-300 bg-green-50;
+  @apply ring-2 ring-green-500 transform scale-[1.02] shadow-lg transition-all duration-300;
+  background: linear-gradient(to right bottom, #f0fdf4, #dcfce7);
+}
+
+.highlight-center h2 {
+  @apply text-green-800;
+}
+
+.highlight-center svg:not(.text-yellow-400) {
+  @apply text-green-600;
+}
+
+.highlight-center address,
+.highlight-center p {
+  @apply text-green-900;
 }
 
 /* Add smooth transitions for center cards */
@@ -89,4 +103,46 @@
 .map-link:hover {
   color: #047857 !important; /* darker green on hover */
   text-decoration: underline !important;
+}
+
+/* Layout and scrolling styles */
+@media (min-width: 1024px) {
+  .centers-container {
+    height: calc(100vh - 16rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #9ca3af transparent;
+  }
+
+  .centers-container::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .centers-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .centers-container::-webkit-scrollbar-thumb {
+    background-color: #9ca3af;
+    border-radius: 3px;
+  }
+}
+
+/* Scrollbar styles for centers list */
+.centers-container {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af transparent;
+}
+
+.centers-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.centers-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.centers-container::-webkit-scrollbar-thumb {
+  background-color: #9ca3af;
+  border-radius: 3px;
 }

@@ -42,6 +42,14 @@ function formatWorkingHours(hours: any): string {
   data-rating={center.rating ? Number(center.rating).toFixed(1) : "0"}
   data-lat={center.latitude}
   data-lng={center.longitude}
+  onclick={`
+    // Remove highlight from all centers
+    document.querySelectorAll('[data-center-id]').forEach(el => el.classList.remove('highlight-center'));
+    // Add highlight to this center
+    this.classList.add('highlight-center');
+    // Dispatch event for map marker
+    window.dispatchEvent(new CustomEvent('markerClick', { detail: { centerId: '${center.id}' }}));
+  `}
 >
   <div class="p-6">
     <div class="flex items-start justify-between">

@@ -3,13 +3,18 @@ import type { APIRoute } from 'astro';
 
 export const prerender = false;
 
+// Set runtime to edge
+export const config = {
+  runtime: 'edge',
+};
+
 export const GET: APIRoute = async ({ url }) => {
   const params = new URL(url).searchParams;
   const city = params.get('city');
   const state = params.get('state');
   const centerCount = params.get('centers');
 
-  if (!city || !state || !centerCount) {
+  if (!city && !state) {
     return new Response('Missing required parameters', { status: 400 });
   }
 
@@ -70,30 +75,34 @@ export const GET: APIRoute = async ({ url }) => {
               lineHeight: 1.2,
             }}
           >
-            {city}, {state}
+            {city ? `${city}, ${state}` : state}
           </div>
 
           {/* Subtitle */}
-          <div
-            style={{
-              display: 'flex',
-              fontSize: 30,
-              color: '#4B5563',
-              marginBottom: '10px',
-              textAlign: 'center',
-            }}
-          >
-            {centerCount} Electronics Recycling{' '}
-            {parseInt(centerCount) === 1 ? 'Center' : 'Centers'}
-          </div>
+          {centerCount && (
+            <div
+              style={{
+                display: 'flex',
+                fontSize: 30,
+                color: '#4B5563',
+                marginBottom: '10px',
+                textAlign: 'center',
+              }}
+            >
+              {centerCount} Electronics Recycling{' '}
+              {parseInt(centerCount) === 1 ? 'Center' : 'Centers'}
+            </div>
+          )}
         </div>
       ),
       {
         width: 1200,
         height: 630,
+        // Add support for emoji and other special characters
+        emoji: 'twemoji',
       }
     );
-  } catch (e) {
+  } catch (e: any) {
     return new Response(`Failed to generate image: ${e.message}`, {
       status: 500,
     });

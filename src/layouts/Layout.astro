@@ -30,8 +30,8 @@ function getAbsoluteUrl(url: string) {
 }
 
 // Default OG image
-const defaultOgImage = '/images/default-og.png';
-const ogImageUrl = new URL('/api/og', Astro.url);
+const defaultOgImage = '/api/og';
+const ogImageUrl = getAbsoluteUrl(ogImage || defaultOgImage);
 
 // Get Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -48,14 +48,14 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url} />
+    <meta property="og:url" content={getAbsoluteUrl(Astro.url.pathname)} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={metaDescription} />
     <meta property="og:image" content={ogImageUrl} />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:url" content={getAbsoluteUrl(Astro.url.pathname)} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={metaDescription} />
     <meta property="twitter:image" content={ogImageUrl} />

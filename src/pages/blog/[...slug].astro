@@ -35,11 +35,7 @@ const { Content } = await post.render();
 const ogImage = new URL(post.data.image, Astro.url).toString();
 ---
 
-<BlogPost 
-  post={post}
-  ogImage={ogImage}
-  description={post.data.description}
->
+<BlogPost post={post}>
   <Content />
 </BlogPost>
 

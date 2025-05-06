@@ -14,6 +14,18 @@ const { title, description, ogImage } = Astro.props;
 // Default meta description
 const metaDescription = description || 'Find electronics recycling centers near you. Get directions, contact information, and more.';
 
+// Get the base URL for meta tags
+const baseUrl = import.meta.env.PROD 
+  ? import.meta.env.VERCEL_URL 
+    ? `https://${import.meta.env.VERCEL_URL}`
+    : Astro.url.origin // Fallback if VERCEL_URL is not set
+  : Astro.url.origin;
+
+// Log the URL construction (this will only show during build/development)
+console.log('Environment:', import.meta.env.PROD ? 'production' : 'development');
+console.log('Base URL:', baseUrl);
+console.log('Current URL:', Astro.url.toString());
+
 // Handle OG image URL
 function getAbsoluteUrl(url: string) {
   try {
@@ -22,10 +34,9 @@ function getAbsoluteUrl(url: string) {
     return url;
   } catch {
     // If it's a relative URL, make it absolute using the current domain
-    const baseUrl = import.meta.env.PROD 
-      ? Astro.url.origin // Use the actual domain in production
-      : Astro.url.origin; // Use localhost in development
-    return new URL(url.startsWith('/') ? url : `/${url}`, baseUrl).toString();
+    const absoluteUrl = new URL(url.startsWith('/') ? url : `/${url}`, baseUrl).toString();
+    console.log(`Converting ${url} to ${absoluteUrl}`);
+    return absoluteUrl;
   }
 }
 

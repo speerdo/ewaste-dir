@@ -2,8 +2,15 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import vercel from '@astrojs/vercel/serverless';
 
+// Get the site URL from environment variables or use a default for preview deployments
+const VERCEL_URL = process.env.VERCEL_URL;
+const SITE_URL =
+  process.env.SITE_URL ||
+  (VERCEL_URL ? `https://${VERCEL_URL}` : 'http://localhost:3000');
+
 // https://astro.build/config
 export default defineConfig({
+  site: SITE_URL,
   integrations: [tailwind()],
   output: 'server',
   adapter: vercel({

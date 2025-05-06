@@ -17,8 +17,8 @@ const metaDescription = description || 'Find electronics recycling centers near 
 // Default OG image
 const defaultOgImage = '/images/default-og.png';
 
-// Get the current URL
-const currentUrl = Astro.url;
+// Get the current URL - handle Vercel deployment URLs correctly
+const currentUrl = new URL(Astro.request.url);
 
 // Get Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;

@@ -25,6 +25,18 @@ declare global {
 ---
 
 <div class="relative w-full h-full rounded-lg overflow-hidden">
+  <!-- Reset Map Button -->
+  <button
+    id="resetMap"
+    class="absolute top-4 right-4 bg-white rounded-lg shadow-md px-4 py-2 z-10 flex items-center gap-2 text-gray-700 hover:bg-gray-50 transition-colors"
+    style="display: none;"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+    </svg>
+    Reset Map
+  </button>
+  
   <div id="map" class="w-full h-full">
     <!-- Loading state -->
     <div class="absolute inset-0 flex items-center justify-center bg-gray-100">
@@ -114,6 +126,7 @@ declare global {
   let activeInfoWindow = null;
   const markerRefs = new Map();
   const infoWindowRefs = new Map();
+  let initialBounds = null;
 
   function handleMapError(error) {
     console.error('Map error:', error);
@@ -129,6 +142,7 @@ declare global {
   async function initializeMap() {
     try {
       const mapElement = document.getElementById('map');
+      const resetButton = document.getElementById('resetMap');
       if (!mapElement) {
         throw new Error('Map element not found');
       }
@@ -138,8 +152,6 @@ declare global {
       if (!apiKey) {
         throw new Error('Google Maps API key is missing');
       }
-
-      // console.log('Initializing map with markers:', markers.length);
 
       // Initialize map with first marker as center
       map = new google.maps.Map(mapElement, {
@@ -206,13 +218,16 @@ declare global {
             setTimeout(() => markerObj.setAnimation(null), 2100);
             activeMarker = markerObj;
 
+            // Show reset button
+            if (resetButton) {
+              resetButton.style.display = 'flex';
+            }
+
             // Dispatch marker click event
             const event = new CustomEvent('markerClick', {
               detail: { centerId: marker.id }
             });
             document.dispatchEvent(event);
-            
-            // console.log('Marker clicked:', marker.id);
           });
 
           // Store references to markers and info windows
@@ -228,7 +243,41 @@ declare global {
         map.fitBounds(bounds, padding);
       }
 
-      // console.log('Map initialized with', validMarkers, 'markers');
+      // Store initial bounds for reset functionality
+      initialBounds = bounds;
+
+      // Add reset button functionality
+      if (resetButton) {
+        resetButton.addEventListener('click', () => {
+          // Close any open info windows
+          if (activeInfoWindow) {
+            activeInfoWindow.close();
+          }
+          
+          // Stop any bouncing markers
+          if (activeMarker) {
+            activeMarker.setAnimation(null);
+          }
+          
+          // Reset the map view
+          if (validMarkers > 1) {
+            map.fitBounds(initialBounds);
+            const padding = { top: 50, right: 50, bottom: 50, left: 50 };
+            map.fitBounds(initialBounds, padding);
+          } else {
+            map.setCenter(markers[0] ? { lat: Number(markers[0].lat), lng: Number(markers[0].lng) } : { lat: 0, lng: 0 });
+            map.setZoom(initialZoom);
+          }
+          
+          // Hide the reset button
+          resetButton.style.display = 'none';
+          
+          // Remove highlight from all centers
+          document.querySelectorAll('[data-center-id]').forEach((el) => {
+            el.classList.remove('highlight-center');
+          });
+        });
+      }
     } catch (error) {
       handleMapError(error);
     }
@@ -238,8 +287,9 @@ declare global {
   function setupMapListeners() {
     // Listen for center selection events (from card clicks)
     document.addEventListener('centerSelect', (e) => {
-      // console.log('Center select event received:', e.detail);
       const marker = markerRefs.get(e.detail.centerId);
+      const resetButton = document.getElementById('resetMap');
+      
       if (marker) {
         // Close any existing info window
         if (activeInfoWindow) {
@@ -265,9 +315,10 @@ declare global {
         map.panTo(marker.getPosition());
         map.setZoom(15);
         
-        // console.log('Map centered on marker:', e.detail.centerId);
-      } else {
-        console.error('Marker not found for center:', e.detail.centerId);
+        // Show reset button
+        if (resetButton) {
+          resetButton.style.display = 'flex';
+        }
       }
     });
   }
@@ -283,10 +334,8 @@ declare global {
 
   // Initialize map when Google Maps API is loaded
   if (typeof google !== 'undefined' && google.maps) {
-    // console.log('Google Maps API already loaded, initializing map');
     initMap();
   } else {
-    // console.log('Waiting for Google Maps API to load');
     window.addEventListener('google-maps-ready', initMap);
   }
 </script>

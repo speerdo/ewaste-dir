@@ -125,12 +125,17 @@ const mapMarkers: Marker[] = centers.map(center => ({
         </a>
       </div>
 
-      <h1 class="text-4xl font-display font-bold text-gray-900 mb-2">
-        Electronics Recycling in {cityName}
-      </h1>
-      <p class="text-xl text-gray-600 mb-8">
-        {centers.length} recycling {centers.length === 1 ? 'center' : 'centers'} in {cityName}, {state.name}
-      </p>
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-8">
+        <div>
+          <h1 class="text-4xl font-display font-bold text-gray-900 mb-2">
+            Electronics Recycling in {cityName}
+          </h1>
+          <p class="text-xl text-gray-600">
+            {centers.length} recycling {centers.length === 1 ? 'center' : 'centers'} in {cityName}, {state.name}
+          </p>
+        </div>
+        <div id="sort-button-container"></div>
+      </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Map Section -->
@@ -149,9 +154,7 @@ const mapMarkers: Marker[] = centers.map(center => ({
 
         <!-- Recycling Centers List (scrollable) -->
         <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
-          <div class="lg:px-4 lg:py-4">
-            <CentersList centers={centers} defaultLogo={DEFAULT_LOGO} />
-          </div>
+          <CentersList centers={centers} defaultLogo={DEFAULT_LOGO} />
         </div>
       </div>
     </div>

@@ -9,12 +9,92 @@ export interface Props {
 
 const { centers, defaultLogo } = Astro.props;
 
-// Sort centers alphabetically by name
+// Initial sort alphabetically
 const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
 ---
 
-<div>
+<div class="lg:px-4 lg:py-4">
   <div id="centersList" class="space-y-6">
     {sortedCenters.map(center => <CenterCard center={center} defaultLogo={defaultLogo} />)}
   </div>
-</div> 
+</div>
+
+<div id="sort-button" class="hidden">
+  <button
+    id="sortToggle"
+    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+    </svg>
+    <span>Sort by Rating</span>
+  </button>
+</div>
+
+<script>
+  function setupSorting() {
+    const sortToggleElement = document.getElementById('sortToggle');
+    const centersListElement = document.getElementById('centersList');
+    const sortButtonElement = document.getElementById('sort-button');
+    const sortButtonContainer = document.getElementById('sort-button-container');
+
+    // Move sort button to header container
+    if (sortButtonElement?.firstElementChild && sortButtonContainer) {
+      sortButtonContainer.appendChild(sortButtonElement.firstElementChild);
+      sortButtonElement.remove();
+    }
+
+    // Early return if elements don't exist
+    if (!sortToggleElement || !centersListElement) return;
+
+    // Type assertions after null check
+    const sortToggle = sortToggleElement as HTMLButtonElement;
+    const centersList = centersListElement as HTMLDivElement;
+    let isAlphabetical = true;
+
+    function sortCenters() {
+      const centers = Array.from(centersList.children) as HTMLElement[];
+      
+      centers.sort((a, b) => {
+        if (isAlphabetical) {
+          // Sort by rating (highest first)
+          const ratingA = parseFloat(a.getAttribute('data-rating') || '0');
+          const ratingB = parseFloat(b.getAttribute('data-rating') || '0');
+          return ratingB - ratingA;
+        } else {
+          // Sort alphabetically
+          const nameA = a.querySelector('h2')?.textContent?.trim() || '';
+          const nameB = b.querySelector('h2')?.textContent?.trim() || '';
+          return nameA.localeCompare(nameB);
+        }
+      });
+
+      // Update button text and icon
+      const buttonText = sortToggle.querySelector('span');
+      const buttonIcon = sortToggle.querySelector('svg');
+      if (buttonText && buttonIcon) {
+        buttonText.textContent = isAlphabetical ? 'Sort by Name' : 'Sort by Rating';
+        buttonIcon.innerHTML = isAlphabetical 
+          ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />'
+          : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />';
+      }
+
+      // Clear and repopulate the list
+      centersList.innerHTML = '';
+      centers.forEach(center => {
+        centersList.appendChild(center);
+      });
+
+      // Toggle sort state
+      isAlphabetical = !isAlphabetical;
+    }
+
+    sortToggle.addEventListener('click', sortCenters);
+  }
+
+  // Set up sorting on initial load
+  setupSorting();
+
+  // Set up sorting after Astro page transitions
+  document.addEventListener('astro:page-load', setupSorting);
+</script> 

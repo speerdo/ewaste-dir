@@ -30,6 +30,9 @@ if (!post) {
 }
 
 const { Content } = await post.render();
+
+// Get absolute URL for the post's image
+const ogImage = new URL(post.data.image, Astro.url).toString();
 ---
 
 <BlogPost post={post}>
@@ -52,5 +55,4 @@ const { Content } = await post.render();
   p {
     @apply text-gray-600 mb-4;
   }
-  
 </style>

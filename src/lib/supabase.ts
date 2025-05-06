@@ -131,15 +131,22 @@ export async function getAllStates(): Promise<State[]> {
 
 export async function getState(stateId: string): Promise<State | null> {
   try {
+    // Log input for debugging
+    console.log('getState - input stateId:', stateId);
+
     // Check cache first
     if (stateCache.has(stateId)) {
-      return stateCache.get(stateId) || null;
+      const cachedState = stateCache.get(stateId);
+      console.log('getState - found in cache:', cachedState);
+      return cachedState || null;
     }
 
     // Also try with spaces replaced
     const altKey = stateId.replace(/-/g, ' ');
     if (stateCache.has(altKey)) {
-      return stateCache.get(altKey) || null;
+      const cachedState = stateCache.get(altKey);
+      console.log('getState - found in cache with altKey:', cachedState);
+      return cachedState || null;
     }
 
     // First try exact match
@@ -165,6 +172,7 @@ export async function getState(stateId: string): Promise<State | null> {
       stateCache.set(state.id, state);
       stateCache.set(state.name.toLowerCase(), state);
 
+      console.log('getState - found exact match:', state);
       return state;
     }
 
@@ -191,6 +199,7 @@ export async function getState(stateId: string): Promise<State | null> {
       stateCache.set(state.id, state);
       stateCache.set(state.name.toLowerCase(), state);
 
+      console.log('getState - found case-insensitive match:', state);
       return state;
     }
 
@@ -217,9 +226,11 @@ export async function getState(stateId: string): Promise<State | null> {
       stateCache.set(state.id, state);
       stateCache.set(state.name.toLowerCase(), state);
 
+      console.log('getState - found in recycling centers:', state);
       return state;
     }
 
+    console.log('getState - no state found for:', stateId);
     return null;
   } catch (error) {
     console.error('Error in getState:', error);

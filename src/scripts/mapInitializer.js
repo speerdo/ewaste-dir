@@ -15,7 +15,7 @@ export function initializeMap(mapMarkers) {
     }
 
     const apiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
-    console.log('API Key available:', !!apiKey);
+    // console.log('API Key available:', !!apiKey);
 
     if (!apiKey) {
       console.error('Google Maps API key is missing');
@@ -25,10 +25,10 @@ export function initializeMap(mapMarkers) {
     }
 
     try {
-      console.log('Initializing map with center:', {
-        lat: Number(mapMarkers[0].lat) || 0,
-        lng: Number(mapMarkers[0].lng) || 0,
-      });
+      // console.log('Initializing map with center:', {
+      //   lat: Number(mapMarkers[0].lat) || 0,
+      //   lng: Number(mapMarkers[0].lng) || 0,
+      // });
 
       map = new google.maps.Map(mapElement, {
         center: {
@@ -49,7 +49,7 @@ export function initializeMap(mapMarkers) {
       const bounds = new google.maps.LatLngBounds();
       let validMarkers = 0;
 
-      console.log('Adding markers for centers:', mapMarkers.length);
+      // console.log('Adding markers for centers:', mapMarkers.length);
 
       // Add markers for each center
       mapMarkers.forEach((marker, index) => {
@@ -100,7 +100,7 @@ export function initializeMap(mapMarkers) {
         }
       });
 
-      console.log('Valid markers added:', validMarkers);
+      // console.log('Valid markers added:', validMarkers);
 
       // Only fit bounds if we have multiple valid markers
       if (validMarkers > 1) {
@@ -111,7 +111,7 @@ export function initializeMap(mapMarkers) {
       }
 
       isMapInitialized = true;
-      console.log('Map initialization complete');
+      // console.log('Map initialization complete');
     } catch (error) {
       console.error('Error initializing Google Maps:', error);
       mapElement.innerHTML =
@@ -123,10 +123,10 @@ export function initializeMap(mapMarkers) {
 
   // Initialize map when the Google Maps API is loaded
   if (typeof google !== 'undefined' && google.maps) {
-    console.log('Google Maps API already loaded, initializing map');
+    // console.log('Google Maps API already loaded, initializing map');
     initMap();
   } else {
-    console.log('Loading Google Maps API');
+    // console.log('Loading Google Maps API');
     // Load Google Maps API if not already loaded
     if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
       const script = document.createElement('script');

@@ -62,7 +62,7 @@ const mapMarkers: Marker[] = centers.map(center => ({
       
       // Load Google Maps API using the recommended pattern
       function initGoogleMaps() {
-        console.log('Google Maps API loaded');
+        // console.log('Google Maps API loaded');
         window.dispatchEvent(new Event('google-maps-ready'));
       }
       
@@ -169,7 +169,7 @@ const mapMarkers: Marker[] = centers.map(center => ({
       <script type="module">
         // Create a function to handle marker clicks
         function handleMarkerClick(centerId) {
-          console.log('Marker clicked:', centerId);
+          // console.log('Marker clicked:', centerId);
           
           // Remove highlight from all centers
           document.querySelectorAll('[data-center-id]').forEach((el) => {
@@ -195,7 +195,7 @@ const mapMarkers: Marker[] = centers.map(center => ({
           const centerId = card.getAttribute('data-center-id');
           if (!centerId) return;
           
-          console.log('Center card clicked:', centerId);
+          // console.log('Center card clicked:', centerId);
           
           // Remove highlight from all centers
           document.querySelectorAll('[data-center-id]').forEach((el) => {

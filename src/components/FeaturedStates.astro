@@ -26,9 +26,7 @@ const states: State[] = await getFeaturedStates();
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>
           <div class="absolute bottom-0 left-0 right-0 p-6 z-20">
             <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-accent-300 transition-colors">{state.name}</h3>
-            <p class="text-gray-200 text-sm mb-3 line-clamp-2 group-hover:line-clamp-none transition-all">
-              {state.description}
-            </p>
+            
             <span class="inline-flex items-center text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
               View state
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

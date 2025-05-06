@@ -40,7 +40,7 @@ const featuredCities = [
   </div>
 
   <div class="container mx-auto px-4 relative z-10">
-    <div class="max-w-4xl mx-auto text-center mb-16">
+    <div class="max-w-4xl mx-auto text-center mb-16 mt-10">
       <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-6">
         Find Electronics Recycling Centers Near You
       </h1>
@@ -115,11 +115,11 @@ const featuredCities = [
     try {
       // Get current location
       const coordinates = await getCurrentLocation();
-      console.log('Current location:', coordinates);
+      // console.log('Current location:', coordinates);
 
       // Get city and state from coordinates
       const location = await reverseGeocode(coordinates);
-      console.log('Location found:', location);
+      // console.log('Location found:', location);
 
       if (!location.city || !location.state) {
         throw new Error('Could not determine your city and state');
@@ -129,7 +129,7 @@ const featuredCities = [
       const citySlug = location.city.toLowerCase().replace(/\s+/g, '-');
       const stateSlug = location.state.toLowerCase();
       const targetUrl = `/states/${stateSlug}/${citySlug}`;
-      console.log('Redirecting to:', targetUrl);
+      // console.log('Redirecting to:', targetUrl);
       window.location.href = targetUrl;
     } catch (error) {
       console.error('Error finding location:', error);

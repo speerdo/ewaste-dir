@@ -1,0 +1,50 @@
+---
+export const prerender = true;
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout 
+  title="Thank you for your message | E-Waste Hub - Electronics Recycling Directory" 
+  description="Thank you for your message. We'll get back to you as soon as possible."
+>
+  <div class="pt-32 pb-16 bg-gradient-to-b from-green-900 via-green-800 to-green-700">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl md:text-5xl font-display font-bold text-white text-center mb-6">Thank you</h1>
+      <p class="text-xl text-green-50 text-center max-w-3xl mx-auto">
+        We'll get back to you as soon as possible.
+      </p>
+    </div>
+  </div>
+
+  <div class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl mx-auto">
+        <div class="mb-12">
+          <div>
+            <h2 class="text-2xl font-display font-bold text-gray-900 mb-4">Thank You for Your Submission!</h2>
+            <p class="text-gray-900 mb-6">
+              We're glad you're taking the initiative to recycle your old tech responsibly. Your submission has been received, and we're working on matching you with the nearest certified recycling centers.
+            </p>
+            <h3 class="mb-6 font-bold">What Happens Next?</h3>
+            <p class="text-gray-900 mb-6">
+              Our system will review your location and recycling needs to help you find the most convenient and eco-friendly drop-off options. Keep an eye on your email for a follow-up—most users hear back within 24 hours.
+            </p>
+            <h3 class="mb-6 font-bold">Why it matters</h3>
+            <p class="text-gray-900 mb-6">
+              By choosing to recycle, you're helping reduce toxic waste, recover valuable materials, and support a cleaner planet. Every device kept out of a landfill is a step toward a more sustainable future.
+            </p>
+            <h3 class="mb-6 font-bold">Want to do more?</h3>
+            <ul>
+              <li>📢 Share our site with friends and family</li>
+              <li>🔄 Consider donating working tech to local nonprofits</li>
+              <li>📚 <a href="/blog" class="text-green-600 hover:text-green-700">Learn more about e-waste</a></li>
+            </ul>
+            <p class="text-gray-900 my-6">
+              Together, we can give old tech a new purpose.
+            </p>
+          </div>
+        </div>        
+      </div>
+    </div>
+  </div>
+</Layout>

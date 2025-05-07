@@ -184,11 +184,57 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       }
       
       // Fetch city data from the server for client-side search
-      fetch('/api/cities-data')
-        .then(response => response.json())
+      console.log('Starting to fetch city data...');
+      // Add cache buster to avoid cached data
+      const cacheBuster = `?t=${Date.now()}`;
+      console.log(`Using API URL: ${window.location.origin}/api/cities-data${cacheBuster}`);
+      fetch(`/api/cities-data${cacheBuster}`)
+        .then(response => {
+          console.log(`Cities data API response status: ${response.status}`);
+          return response.json();
+        })
         .then(data => {
-          cityStatePairs = data;
+          // Check if we got a wrapped response (for error cases)
+          if (data.data && Array.isArray(data.data)) {
+            console.log('Received wrapped data with message:', data.warning || data.error || 'No message');
+            cityStatePairs = data.data;
+          } else if (Array.isArray(data)) {
+            cityStatePairs = data;
+          } else {
+            console.error('Unexpected data format:', data);
+            return;
+          }
+          
           console.log(`Loaded ${cityStatePairs.length} cities for search`);
+          
+          // Log if we have coordinates data
+          const citiesWithCoords = cityStatePairs.filter(city => city.coordinates && city.coordinates.lat && city.coordinates.lng);
+          console.log(`Cities with coordinates: ${citiesWithCoords.length} of ${cityStatePairs.length}`);
+          
+          // Sample cities by state to check for coordinate distribution
+          const stateStats = {};
+          cityStatePairs.forEach(city => {
+            if (!stateStats[city.state]) {
+              stateStats[city.state] = { total: 0, withCoords: 0 };
+            }
+            stateStats[city.state].total++;
+            if (city.coordinates && city.coordinates.lat && city.coordinates.lng) {
+              stateStats[city.state].withCoords++;
+            }
+          });
+          
+          console.log('Coordinate stats by state:', 
+            Object.entries(stateStats)
+              .map(([state, stats]) => `${state}: ${stats.withCoords}/${stats.total}`)
+              .slice(0, 5)
+              .join(', ') + '...'
+          );
+          
+          if (citiesWithCoords.length > 0) {
+            console.log('First city with coordinates:', citiesWithCoords[0]);
+          } else {
+            console.warn('WARNING: No cities have coordinates data! Distance-based matching will not work.');
+          }
         })
         .catch(error => {
           console.error('Failed to load city data:', error);
@@ -360,8 +406,20 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           }
           searchResults?.classList.remove('hidden');
           
+          // Log number of city pairs available before API call
+          console.log(`Number of city pairs available before API call: ${cityStatePairs.length}`);
+          
+          // Add timestamp for perf troubleshooting
+          console.time('zipcode-api-call');
+          
           // Call our zipcode API
           const apiUrl = new URL('/api/zipcode', window.location.origin);
+          console.log(`Fetching from: ${apiUrl.toString()}`);
+          
+          // Quick environment check - fix for error
+          const isProd = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+          console.log(`Environment check: isProd=${isProd}, hostname=${window.location.hostname}`);
+          
           const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
@@ -371,6 +429,10 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             body: JSON.stringify({ zip: zipCode }),
           });
           
+          console.timeEnd('zipcode-api-call');
+          
+          console.log(`API response status: ${response.status}`);
+          
           if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || `HTTP error ${response.status}`);
@@ -379,11 +441,26 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           const data = await response.json();
           console.log('Zip code API response:', data);
           
+          // Check for empty data
           if (!data || !data.city || !data.state) {
             throw new Error(`Unable to find location data for zip code ${zipCode}`);
           }
           
           console.log(`Zip code ${zipCode} resolves to ${data.city}, ${data.state}`);
+          
+          // Let's check if all the cities have the proper structure
+          console.log(`Checking city data structure for ${cityStatePairs.length} cities`);
+          console.log(`First city data for reference:`, cityStatePairs[0]);
+          
+          // Check if we have city pairs with coordinates
+          const citiesWithCoordinates = cityStatePairs.filter(city => 
+            city.coordinates && city.coordinates.lat && city.coordinates.lng
+          );
+          console.log(`Cities with coordinates: ${citiesWithCoordinates.length} of ${cityStatePairs.length}`);
+          
+          if (citiesWithCoordinates.length > 0) {
+            console.log(`Sample city with coordinates:`, citiesWithCoordinates[0]);
+          }
           
           // First, try to find an exact match based on city and state
           const exactMatch = cityStatePairs.find(pair => 
@@ -445,6 +522,16 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               } else {
                 console.log('No cities with coordinates found in the same state. Using first city in state as fallback.');
                 // If no cities have coordinates, just use the first city in the state
+                if (window.getMajorCitiesInState) {
+                  const majorCities = window.getMajorCitiesInState(data.state, sameStateMatches);
+                  if (majorCities.length > 0) {
+                    console.log(`Found major city in ${data.state}: ${majorCities[0].city}`);
+                    window.location.href = majorCities[0].url;
+                    return;
+                  }
+                }
+                
+                console.log(`Using first city in state: ${sameStateMatches[0].city}`);
                 window.location.href = sameStateMatches[0].url;
                 return;
               }
@@ -705,4 +792,90 @@ const id = variant === 'hero' ? 'hero' : 'nav';
 <script define:vars={{ cityStatePairs }} type="module">
   // Make city data available to client-side scripts
   window.__CITY_STATE_PAIRS__ = cityStatePairs;
+  
+  // Debug output for global data
+  console.log(`Set global city data with ${cityStatePairs.length} cities`);
+  const withCoords = cityStatePairs.filter(city => city.coordinates && city.coordinates.lat && city.coordinates.lng);
+  console.log(`Global city data with coordinates: ${withCoords.length}/${cityStatePairs.length}`);
+</script>
+
+<!-- Helper function to find major cities in a state -->
+<script type="module">
+  // Define the function in the enclosing scope
+  function getMajorCitiesInState(stateName, cities) {
+    // List of known major cities by state
+    const majorCitiesByState = {
+      'alabama': ['birmingham', 'montgomery', 'huntsville', 'mobile'],
+      'alaska': ['anchorage', 'fairbanks', 'juneau'],
+      'arizona': ['phoenix', 'tucson', 'mesa', 'chandler', 'scottsdale'],
+      'arkansas': ['little rock', 'fayetteville', 'fort smith'],
+      'california': ['los angeles', 'san francisco', 'san diego', 'sacramento'],
+      'colorado': ['denver', 'colorado springs', 'boulder', 'fort collins'],
+      'connecticut': ['hartford', 'new haven', 'stamford', 'bridgeport'],
+      'delaware': ['wilmington', 'dover', 'newark'],
+      'florida': ['miami', 'orlando', 'tampa', 'jacksonville'],
+      'georgia': ['atlanta', 'savannah', 'augusta', 'columbus'],
+      'hawaii': ['honolulu', 'hilo', 'kailua'],
+      'idaho': ['boise', 'meridian', 'nampa', 'idaho falls'],
+      'illinois': ['chicago', 'springfield', 'peoria', 'rockford'],
+      'indiana': ['indianapolis', 'fort wayne', 'bloomington', 'south bend'],
+      'iowa': ['des moines', 'cedar rapids', 'davenport', 'iowa city'],
+      'kansas': ['wichita', 'overland park', 'kansas city', 'topeka'],
+      'kentucky': ['louisville', 'lexington', 'bowling green'],
+      'louisiana': ['new orleans', 'baton rouge', 'shreveport', 'lafayette'],
+      'maine': ['portland', 'augusta', 'bangor', 'lewiston'],
+      'maryland': ['baltimore', 'annapolis', 'rockville', 'frederick'],
+      'massachusetts': ['boston', 'cambridge', 'worcester', 'springfield'],
+      'michigan': ['detroit', 'grand rapids', 'ann arbor', 'lansing'],
+      'minnesota': ['minneapolis', 'saint paul', 'rochester', 'duluth'],
+      'mississippi': ['jackson', 'gulfport', 'biloxi', 'hattiesburg'],
+      'missouri': ['kansas city', 'st. louis', 'springfield', 'columbia'],
+      'montana': ['billings', 'missoula', 'great falls', 'bozeman'],
+      'nebraska': ['omaha', 'lincoln', 'bellevue', 'grand island'],
+      'nevada': ['las vegas', 'reno', 'henderson', 'north las vegas'],
+      'new hampshire': ['manchester', 'nashua', 'concord', 'derry'],
+      'new jersey': ['newark', 'jersey city', 'paterson', 'trenton'],
+      'new mexico': ['albuquerque', 'las cruces', 'santa fe', 'roswell'],
+      'new york': ['new york', 'buffalo', 'rochester', 'syracuse', 'albany'],
+      'north carolina': ['charlotte', 'raleigh', 'greensboro', 'durham'],
+      'north dakota': ['fargo', 'bismarck', 'grand forks', 'minot'],
+      'ohio': ['columbus', 'cleveland', 'cincinnati', 'toledo'],
+      'oklahoma': ['oklahoma city', 'tulsa', 'norman', 'broken arrow'],
+      'oregon': ['portland', 'salem', 'eugene', 'bend'],
+      'pennsylvania': ['philadelphia', 'pittsburgh', 'allentown', 'erie'],
+      'rhode island': ['providence', 'warwick', 'cranston', 'pawtucket'],
+      'south carolina': ['columbia', 'charleston', 'greenville', 'myrtle beach'],
+      'south dakota': ['sioux falls', 'rapid city', 'aberdeen', 'brookings'],
+      'tennessee': ['nashville', 'memphis', 'knoxville', 'chattanooga'],
+      'texas': ['houston', 'dallas', 'austin', 'san antonio', 'fort worth'],
+      'utah': ['salt lake city', 'west valley city', 'provo', 'west jordan'],
+      'vermont': ['burlington', 'essex', 'rutland', 'colchester'],
+      'virginia': ['virginia beach', 'norfolk', 'richmond', 'arlington'],
+      'washington': ['seattle', 'spokane', 'tacoma', 'vancouver'],
+      'west virginia': ['charleston', 'huntington', 'morgantown', 'parkersburg'],
+      'wisconsin': ['milwaukee', 'madison', 'green bay', 'kenosha'],
+      'wyoming': ['cheyenne', 'casper', 'laramie', 'gillette'],
+      'district of columbia': ['washington']
+    };
+    
+    // Get the major cities for this state
+    const majorCityNames = majorCitiesByState[stateName.toLowerCase()] || [];
+    
+    if (majorCityNames.length === 0) {
+      return [];
+    }
+    
+    // Find matches in our city list
+    const matches = cities.filter(city => 
+      majorCityNames.some(majorCity => 
+        city.city.toLowerCase().includes(majorCity) || 
+        majorCity.includes(city.city.toLowerCase())
+      )
+    );
+    
+    return matches.length > 0 ? matches : [];
+  }
+  
+  // Make it available globally
+  window.getMajorCitiesInState = getMajorCitiesInState;
 </script>

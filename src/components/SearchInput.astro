@@ -17,8 +17,8 @@ const cityStatePairs = await getAllCityStatePairs();
 const id = variant === 'hero' ? 'hero' : 'nav';
 ---
 
-<div class:list={["relative", className]}>
-  <div class="relative flex">
+<div class:list={["relative", className]} data-search-component={id}>
+  <form id={`search-form-${id}`} class="relative flex" autocomplete="off">
     <input
       type="text"
       id={`search-input-${id}`}
@@ -59,7 +59,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     </button>
-  </div>
+  </form>
 
   <!-- Search Results -->
   <div 
@@ -71,295 +71,407 @@ const id = variant === 'hero' ? 'hero' : 'nav';
 </div>
 
 <script>
-  // Import types only
-  type CityStatePair = {
-    city: string;
-    state: string;
-    url: string;
-  };
-</script>
-
-<script define:vars={{ cityStatePairs, id, PRODUCTION_URL }}>
-  const searchInput = document.getElementById(`search-input-${id}`);
-  const searchButton = document.getElementById(`search-button-${id}`);
-  const searchResults = document.getElementById(`search-results-${id}`);
-  const resultsContent = document.getElementById(`results-content-${id}`);
-  const useLocationBtn = document.getElementById(`use-location-${id}`);
-  let searchTimeout;
-
-  // Function to search through city-state pairs
-  function searchLocations(query) {
-    query = query.toLowerCase().trim();
-    if (!query) return [];
-
-    // Check if query is a zip code
-    const isZipCode = /^\d{5}(-\d{4})?$/.test(query);
-    
-    if (isZipCode) {
-      return [{
-        text: `Find recycling centers near ${query}`,
-        type: 'zip',
-        zip: query
-      }];
+  // Simple test script
+  console.log('Script loaded!');
+  
+  // Add type definition for window
+  declare global {
+    interface Window {
+      __CITY_STATE_PAIRS__: any[];
     }
-
-    // First try exact matches
-    const exactMatches = cityStatePairs.filter(({ city, state }) => {
-      const cityLower = city.toLowerCase();
-      const stateLower = state.toLowerCase();
-      return cityLower === query || stateLower === query;
-    });
-
-    // Then try partial matches
-    const partialMatches = cityStatePairs.filter(({ city, state }) => {
-      const cityLower = city.toLowerCase();
-      const stateLower = state.toLowerCase();
-      return (cityLower.includes(query) || stateLower.includes(query)) && 
-             !exactMatches.find(m => m.city === city && m.state === state);
-    });
-
-    // Combine and format results
-    return [...exactMatches, ...partialMatches].slice(0, 8).map(match => ({
-      ...match,
-      type: 'city'
-    }));
   }
-
-  // Handle input changes
-  searchInput?.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    const query = searchInput.value.trim();
+  
+  // Set up once DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded!');
     
-    if (query.length < 2) {
-      searchResults.classList.add('hidden');
-      return;
-    }
-
-    searchTimeout = setTimeout(() => {
-      const suggestions = searchLocations(query);
-      showSuggestions(suggestions);
-    }, 150);
-  });
-
-  function showSuggestions(suggestions) {
-    if (suggestions.length > 0) {
-      resultsContent.innerHTML = suggestions
-        .map(suggestion => {
-          if (suggestion.type === 'zip') {
-            return `
-              <button
-                class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
-                data-zip="${suggestion.zip}"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                </svg>
-                <span>${suggestion.text}</span>
-              </button>
-            `;
-          }
-          return `
-            <button
-              class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
-              data-url="${suggestion.url}"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              </svg>
-              <span>${suggestion.city}, ${suggestion.state}</span>
-            </button>
-          `;
+    // Find all search components
+    document.querySelectorAll('[data-search-component]').forEach(component => {
+      const id = component.getAttribute('data-search-component');
+      console.log(`Found search component with ID: ${id}`);
+      
+      // Get elements for this search component
+      const searchInput = document.getElementById(`search-input-${id}`) as HTMLInputElement;
+      const searchButton = document.getElementById(`search-button-${id}`);
+      const searchResults = document.getElementById(`search-results-${id}`);
+      const resultsContent = document.getElementById(`results-content-${id}`);
+      const useLocationBtn = document.getElementById(`use-location-${id}`);
+      const searchForm = document.getElementById(`search-form-${id}`);
+      
+      // Exit if required elements not found
+      if (!searchInput || !searchResults || !resultsContent) {
+        console.error(`Missing required elements for search component ${id}`);
+        return;
+      }
+      
+      // Store global vars
+      let searchTimeout: ReturnType<typeof setTimeout> | undefined;
+      let cityStatePairs: any[] = []; // Will be populated from the server
+      
+      // Fetch city data from the server for client-side search
+      fetch('/api/cities-data')
+        .then(response => response.json())
+        .then(data => {
+          cityStatePairs = data;
+          console.log(`Loaded ${cityStatePairs.length} cities for search`);
         })
-        .join('');
-
-      // Add click handlers
-      resultsContent.querySelectorAll('button').forEach(button => {
-        button.addEventListener('click', () => {
-          if (button.dataset.url) {
-            window.location.href = button.dataset.url;
-          } else if (button.dataset.zip) {
-            handleZipCodeSearch(button.dataset.zip);
+        .catch(error => {
+          console.error('Failed to load city data:', error);
+        });
+        
+      // Search for matching cities/states
+      function searchLocations(query: string) {
+        console.log(`Searching for: "${query}"`);
+        query = query.toLowerCase().trim();
+        
+        if (!query) return [];
+        
+        // Check for zip code
+        const isZipCode = /^\d{5}(-\d{4})?$/.test(query);
+        if (isZipCode) {
+          return [{
+            text: `Find recycling centers near ${query}`,
+            type: 'zip',
+            zip: query
+          }];
+        }
+        
+        // Try to find exact and partial matches
+        const exactMatches: any[] = [];
+        const partialMatches: any[] = [];
+        
+        cityStatePairs.forEach(pair => {
+          const cityLower = pair.city.toLowerCase();
+          const stateLower = pair.state.toLowerCase();
+          
+          // Check for exact match
+          if (cityLower === query || stateLower === query) {
+            exactMatches.push({...pair, type: 'city'});
+          }
+          // Check for partial match
+          else if (cityLower.includes(query) || stateLower.includes(query)) {
+            partialMatches.push({...pair, type: 'city'});
           }
         });
-      });
-
-      searchResults.classList.remove('hidden');
-    } else {
-      searchResults.classList.add('hidden');
-    }
-  }
-
-  async function handleZipCodeSearch(zipCode) {
-    try {
-      // Show loading state
-      resultsContent.innerHTML = `
-        <div class="px-4 py-3">
-          <svg class="animate-spin h-5 w-5 text-gray-400 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span>Finding recycling centers near ${zipCode}...</span>
-        </div>
-      `;
-      searchResults.classList.remove('hidden');
-
-      // Call our zip code API using POST instead of GET
-      const apiUrl = new URL('/api/zipcode', import.meta.env.PROD ? PRODUCTION_URL : window.location.origin);
+        
+        // Combine and limit results
+        return [...exactMatches, ...partialMatches].slice(0, 8);
+      }
       
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ zip: zipCode }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || `HTTP error ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // Find matching city-state pair
-      const match = cityStatePairs.find(pair => 
-        pair.city.toLowerCase() === data.city.toLowerCase() &&
-        pair.state.toLowerCase() === data.state.toLowerCase()
-      );
-
-      if (match) {
-        window.location.href = match.url;
-      } else {
-        // Try fuzzy matching if exact match fails
-        const cityMatches = cityStatePairs.filter(pair => 
-          pair.state.toLowerCase() === data.state.toLowerCase() &&
-          (
-            pair.city.toLowerCase().includes(data.city.toLowerCase()) ||
-            data.city.toLowerCase().includes(pair.city.toLowerCase())
-          )
-        );
-
-        if (cityMatches.length > 0) {
-          // If we have matches, show them as suggestions
-          resultsContent.innerHTML = `
-            <div class="px-4 py-3 text-gray-600">
-              <p>Found recycling centers near ${zipCode}:</p>
-            </div>
-            ${cityMatches.map(match => `
-              <button
-                class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
-                data-url="${match.url}"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                </svg>
-                <span>${match.city}, ${match.state}</span>
-              </button>
-            `).join('')}
-          `;
-
-          // Add click handlers to the new buttons
-          resultsContent.querySelectorAll('button[data-url]').forEach(button => {
-            button.addEventListener('click', () => {
-              window.location.href = button.dataset.url;
+      // Display search suggestions
+      function showSuggestions(suggestions: any[]) {
+        console.log(`Found ${suggestions.length} suggestions`);
+        
+        if (suggestions.length === 0) {
+          searchResults?.classList.add('hidden');
+          return;
+        }
+        
+        // Generate suggestion HTML
+        if (resultsContent) {
+          resultsContent.innerHTML = suggestions
+            .map(suggestion => {
+              if (suggestion.type === 'zip') {
+                return `
+                  <button
+                    type="button"
+                    class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group suggestion-item"
+                    data-type="zip"
+                    data-zip="${suggestion.zip}"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    <span>${suggestion.text}</span>
+                  </button>
+                `;
+              }
+              
+              return `
+                <button
+                  type="button"
+                  class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group suggestion-item"
+                  data-type="city" 
+                  data-url="${suggestion.url}"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  </svg>
+                  <span>${suggestion.city}, ${suggestion.state}</span>
+                </button>
+              `;
+            })
+            .join('');
+            
+          // Add click handlers for suggestions
+          resultsContent.querySelectorAll('.suggestion-item').forEach(button => {
+            button.addEventListener('click', (e) => {
+              e.preventDefault();
+              const type = button.getAttribute('data-type');
+              
+              if (type === 'city') {
+                const url = button.getAttribute('data-url');
+                if (url) window.location.href = url;
+              } else if (type === 'zip') {
+                const zip = button.getAttribute('data-zip');
+                if (zip) handleZipSearch(zip);
+              }
             });
           });
-        } else {
-          throw new Error(`No recycling centers found near ${zipCode}`);
+        }
+        
+        // Show results dropdown
+        searchResults?.classList.remove('hidden');
+      }
+      
+      // Handle a zip code search
+      async function handleZipSearch(zipCode: string) {
+        console.log(`Searching for zip code: ${zipCode}`);
+        
+        try {
+          // Show loading state
+          if (resultsContent) {
+            resultsContent.innerHTML = `
+              <div class="px-4 py-3">
+                <svg class="animate-spin h-5 w-5 text-gray-400 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Finding recycling centers near ${zipCode}...</span>
+              </div>
+            `;
+          }
+          searchResults?.classList.remove('hidden');
+          
+          // Call our zipcode API
+          const apiUrl = new URL('/api/zipcode', window.location.origin);
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ zip: zipCode }),
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || `HTTP error ${response.status}`);
+          }
+          
+          const data = await response.json();
+          console.log('Zip code API response:', data);
+          
+          // Find matching city
+          const match = cityStatePairs.find(pair => 
+            pair.city.toLowerCase() === data.city.toLowerCase() &&
+            pair.state.toLowerCase() === data.state.toLowerCase()
+          );
+          
+          if (match) {
+            window.location.href = match.url;
+            return;
+          }
+          
+          // Try fuzzy matching
+          const cityMatches = cityStatePairs.filter(pair => 
+            pair.state.toLowerCase() === data.state.toLowerCase() &&
+            (
+              pair.city.toLowerCase().includes(data.city.toLowerCase()) ||
+              data.city.toLowerCase().includes(pair.city.toLowerCase())
+            )
+          );
+          
+          if (cityMatches.length > 0 && resultsContent) {
+            // Show multiple matches
+            resultsContent.innerHTML = `
+              <div class="px-4 py-3 text-gray-600">
+                <p>Found recycling centers near ${zipCode}:</p>
+              </div>
+              ${cityMatches.map(match => `
+                <button
+                  type="button"
+                  class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
+                  data-url="${match.url}"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  </svg>
+                  <span>${match.city}, ${match.state}</span>
+                </button>
+              `).join('')}
+            `;
+            
+            // Add click handlers
+            resultsContent.querySelectorAll('button[data-url]').forEach(button => {
+              button.addEventListener('click', () => {
+                const url = button.getAttribute('data-url');
+                if (url) window.location.href = url;
+              });
+            });
+          } else {
+            throw new Error(`No recycling centers found near ${zipCode}`);
+          }
+        } catch (error) {
+          console.error('Error searching by zip:', error);
+          if (resultsContent) {
+            resultsContent.innerHTML = `
+              <div class="px-4 py-3 text-red-500">
+                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                ${error instanceof Error ? error.message : 'Error searching by zip code. Please try a city name instead.'}
+              </div>
+            `;
+          }
+          searchResults?.classList.remove('hidden');
         }
       }
-    } catch (error) {
-      console.error('Error searching by zip:', error);
-      resultsContent.innerHTML = `
-        <div class="px-4 py-3 text-red-500">
-          <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          ${error.message || 'Error searching by zip code. Please try a city name instead.'}
-        </div>
-      `;
-    }
-  }
-
-  // Handle location button click
-  useLocationBtn?.addEventListener('click', async () => {
-    try {
-      // Show loading state
-      useLocationBtn.innerHTML = `
-        <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      `;
-      useLocationBtn.disabled = true;
-
-      // Get current location
-      const coordinates = await getCurrentLocation();
       
-      // Get city and state from coordinates
-      const location = await reverseGeocode(coordinates);
-
-      if (!location.city || !location.state) {
-        throw new Error('Could not determine your city and state');
+      // Handle main search submission
+      function handleSearch() {
+        console.log('Search button clicked');
+        const query = searchInput.value.trim();
+        
+        if (query.length < 2) {
+          if (resultsContent) {
+            resultsContent.innerHTML = `<div class="px-4 py-3 text-gray-600">Please enter a city or zip code.</div>`;
+          }
+          searchResults?.classList.remove('hidden');
+          return;
+        }
+        
+        // Check for numeric input that might be a zip code
+        const isAllDigits = /^\d+$/.test(query);
+        if (isAllDigits && query.length !== 5) {
+          if (resultsContent) {
+            resultsContent.innerHTML = `
+              <div class="px-4 py-3 text-red-500">
+                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Zip codes must be 5 digits. Please enter a valid zip code.
+              </div>
+            `;
+          }
+          searchResults?.classList.remove('hidden');
+          return;
+        }
+        
+        // Check for valid zip code
+        const isZipCode = /^\d{5}(-\d{4})?$/.test(query);
+        if (isZipCode) {
+          handleZipSearch(query);
+          return;
+        }
+        
+        // Try to find city match
+        const exactMatch = cityStatePairs.find(pair => 
+          pair.city.toLowerCase() === query.toLowerCase() ||
+          pair.state.toLowerCase() === query.toLowerCase() ||
+          `${pair.city.toLowerCase()}, ${pair.state.toLowerCase()}` === query.toLowerCase()
+        );
+        
+        if (exactMatch) {
+          window.location.href = exactMatch.url;
+          return;
+        }
+        
+        // Show suggestions if any exist
+        const suggestions = searchLocations(query);
+        if (suggestions.length > 0) {
+          showSuggestions(suggestions);
+          return;
+        }
+        
+        // No matches found
+        if (resultsContent) {
+          resultsContent.innerHTML = `
+            <div class="px-4 py-3 text-red-500">
+              <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              No recycling centers found for "${query}". Please try another city or zip code.
+            </div>
+          `;
+        }
+        searchResults?.classList.remove('hidden');
       }
-
-      // Find matching city-state pair
-      const match = cityStatePairs.find(pair => 
-        pair.city.toLowerCase() === location.city.toLowerCase() &&
-        pair.state.toLowerCase() === location.state.toLowerCase()
-      );
-
-      if (match) {
-        window.location.href = match.url;
-      } else {
-        throw new Error('No recycling centers found in your area');
-      }
-    } catch (error) {
-      console.error('Error finding location:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Could not determine your location';
       
-      resultsContent.innerHTML = `
-        <div class="px-4 py-3 text-red-500">
-          <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          ${errorMessage}
-        </div>
-      `;
-      searchResults.classList.remove('hidden');
-    } finally {
-      // Restore button state
-      useLocationBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      `;
-      useLocationBtn.disabled = false;
-    }
-  });
-
-  // Close suggestions when clicking outside
-  document.addEventListener('click', (event) => {
-    if (!searchInput?.contains(event.target) && !searchResults?.contains(event.target)) {
-      searchResults?.classList.add('hidden');
-    }
-  });
-
-  // Handle keyboard navigation
-  searchInput?.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      searchResults?.classList.add('hidden');
-    } else if (event.key === 'Enter') {
-      const firstSuggestion = resultsContent?.querySelector('button');
-      if (firstSuggestion) {
-        firstSuggestion.click();
+      // Set up event listeners
+      
+      // Input change - show suggestions as you type
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          console.log(`Input changed: ${searchInput.value}`);
+          if (searchTimeout) {
+            clearTimeout(searchTimeout);
+          }
+          
+          const query = searchInput.value.trim();
+          if (query.length < 2) {
+            searchResults?.classList.add('hidden');
+            return;
+          }
+          
+          searchTimeout = setTimeout(() => {
+            const suggestions = searchLocations(query);
+            showSuggestions(suggestions);
+          }, 150);
+        });
+        
+        // Handle Enter key press
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSearch();
+          } else if (e.key === 'Escape') {
+            searchResults?.classList.add('hidden');
+          }
+        });
       }
-    }
+      
+      // Search button click
+      if (searchButton) {
+        searchButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          handleSearch();
+        });
+      }
+      
+      // Form submit
+      if (searchForm) {
+        searchForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          handleSearch();
+          return false;
+        });
+      }
+      
+      // Close suggestions when clicking outside
+      document.addEventListener('click', (e) => {
+        const target = e.target as Node;
+        if (searchInput && searchResults && !searchInput.contains(target) && !searchResults.contains(target)) {
+          searchResults.classList.add('hidden');
+        }
+      });
+      
+      // Instead of using imported data, re-use the initial city state pairs that are already defined
+      // in the component.
+      try {
+        if (typeof window !== 'undefined' && window.__CITY_STATE_PAIRS__) {
+          cityStatePairs = window.__CITY_STATE_PAIRS__;
+          console.log(`Using ${cityStatePairs.length} pre-loaded city pairs`);
+        }
+      } catch (e) {
+        console.error('Error accessing city data:', e);
+      }
+    });
   });
+</script>
+
+<!-- Add global data for client-side access -->
+<script define:vars={{ cityStatePairs }}>
+  // Make city data available to client-side scripts
+  window.__CITY_STATE_PAIRS__ = cityStatePairs;
 </script>

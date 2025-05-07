@@ -39,28 +39,8 @@ const featuredStates = await getFeaturedStates();
     </div>
     <div class="border-t border-gray-200">
       <a href="/" class="block px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700">Home</a>
-      <div class="relative">
-        <button 
-          id="mobile-states-button"
-          class="flex items-center justify-between w-full px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700"
-        >
-          <span>States</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <div class="bg-gray-50 relative" id="states-dropdown" style="display: none;">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <a 
-              href={`/states/${['california', 'new-york', 'texas', 'florida'][i]}`} 
-              class="block px-8 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700"
-            >
-              {['California', 'New York', 'Texas', 'Florida'][i]}
-            </a>
-          ))}
-        </div>
-      </div>
       <a href="/about" class="block px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700">About</a>
+      <a href="/blog" class="block px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700">Blog</a>      
       <a href="/contact" class="block px-4 py-3 text-gray-800 hover:bg-primary-50 hover:text-primary-700">Contact</a>
     </div>
   </div>

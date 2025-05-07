@@ -37,8 +37,12 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         type="button"
         class="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg id={`search-icon-${id}`} xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <svg id={`spinner-${id}`} class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
         <span class="ml-2 font-medium">Search</span>
       </button>
@@ -54,11 +58,16 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       ]}
       title="Use my location"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg id={`location-icon-${id}`} xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
+      <svg id={`location-spinner-${id}`} class="animate-spin h-5 w-5 text-gray-400 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
     </button>
+    <div id={`search-error-${id}`} class="absolute -bottom-6 left-0 right-0 text-red-500 text-xs bg-red-50 p-1 rounded hidden"></div>
   </form>
 
   <!-- Search Results -->
@@ -70,15 +79,13 @@ const id = variant === 'hero' ? 'hero' : 'nav';
   </div>
 </div>
 
-<script>
+<script define:vars={{ getCurrentLocation, reverseGeocode }} type="module">
   // Simple test script
   console.log('Script loaded!');
-  
-  // Add type definition for window
-  declare global {
-    interface Window {
-      __CITY_STATE_PAIRS__: any[];
-    }
+
+  // Set up window global
+  if (typeof window !== 'undefined') {
+    window.__CITY_STATE_PAIRS__ = window.__CITY_STATE_PAIRS__ || [];
   }
   
   // Set up once DOM is ready
@@ -91,7 +98,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       console.log(`Found search component with ID: ${id}`);
       
       // Get elements for this search component
-      const searchInput = document.getElementById(`search-input-${id}`) as HTMLInputElement;
+      const searchInput = document.getElementById(`search-input-${id}`);
       const searchButton = document.getElementById(`search-button-${id}`);
       const searchResults = document.getElementById(`search-results-${id}`);
       const resultsContent = document.getElementById(`results-content-${id}`);
@@ -105,8 +112,76 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       }
       
       // Store global vars
-      let searchTimeout: ReturnType<typeof setTimeout> | undefined;
-      let cityStatePairs: any[] = []; // Will be populated from the server
+      let searchTimeout;
+      let cityStatePairs = []; // Will be populated from the server
+      
+      // Helper functions for UI feedback
+      function showLoading(isLoading) {
+        const searchIcon = document.getElementById(`search-icon-${id}`);
+        const spinner = document.getElementById(`spinner-${id}`);
+        const searchButton = document.getElementById(`search-button-${id}`);
+        
+        if (isLoading) {
+          // Show loading state
+          if (searchIcon && spinner) {
+            searchIcon.classList.add('hidden');
+            spinner.classList.remove('hidden');
+          }
+          if (searchButton) {
+            searchButton.setAttribute('disabled', 'true');
+          }
+        } else {
+          // Remove loading state
+          if (searchIcon && spinner) {
+            searchIcon.classList.remove('hidden');
+            spinner.classList.add('hidden');
+          }
+          if (searchButton) {
+            searchButton.removeAttribute('disabled');
+          }
+        }
+      }
+      
+      function showLocationLoading(isLoading) {
+        const locationIcon = document.getElementById(`location-icon-${id}`);
+        const locationSpinner = document.getElementById(`location-spinner-${id}`);
+        const useLocationBtn = document.getElementById(`use-location-${id}`);
+        
+        if (isLoading) {
+          // Show loading state
+          if (locationIcon && locationSpinner) {
+            locationIcon.classList.add('hidden');
+            locationSpinner.classList.remove('hidden');
+          }
+          if (useLocationBtn) {
+            useLocationBtn.setAttribute('disabled', 'true');
+          }
+        } else {
+          // Remove loading state
+          if (locationIcon && locationSpinner) {
+            locationIcon.classList.remove('hidden');
+            locationSpinner.classList.add('hidden');
+          }
+          if (useLocationBtn) {
+            useLocationBtn.removeAttribute('disabled');
+          }
+        }
+      }
+      
+      function showError(message) {
+        const errorEl = document.getElementById(`search-error-${id}`);
+        if (errorEl) {
+          errorEl.textContent = message;
+          errorEl.classList.remove('hidden');
+        }
+      }
+      
+      function hideError() {
+        const errorEl = document.getElementById(`search-error-${id}`);
+        if (errorEl) {
+          errorEl.classList.add('hidden');
+        }
+      }
       
       // Fetch city data from the server for client-side search
       fetch('/api/cities-data')
@@ -118,9 +193,43 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         .catch(error => {
           console.error('Failed to load city data:', error);
         });
-        
+         
+      // Use location button
+      if (useLocationBtn) {
+        useLocationBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          hideError();
+          showLocationLoading(true);
+          
+          try {
+            const location = await getCurrentLocation();
+            if (!location) {
+              throw new Error("Could not determine your location");
+            }
+            
+            const { latitude, longitude } = location;
+            const geoData = await reverseGeocode(latitude, longitude);
+            
+            if (!geoData) {
+              throw new Error("Could not find your location");
+            }
+            
+            // Set the search input to the found location
+            searchInput.value = `${geoData.city}, ${geoData.state}`;
+            
+            // Trigger a search with this location
+            handleSearch();
+          } catch (error) {
+            console.error("Location error:", error);
+            showError(error instanceof Error ? error.message : "Could not access your location");
+          } finally {
+            showLocationLoading(false);
+          }
+        });
+      }
+  
       // Search for matching cities/states
-      function searchLocations(query: string) {
+      function searchLocations(query) {
         console.log(`Searching for: "${query}"`);
         query = query.toLowerCase().trim();
         
@@ -137,8 +246,14 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
         
         // Try to find exact and partial matches
-        const exactMatches: any[] = [];
-        const partialMatches: any[] = [];
+        const exactMatches = [];
+        const partialMatches = [];
+        
+        // Check if cityStatePairs is available and not empty
+        if (!cityStatePairs || cityStatePairs.length === 0) {
+          showError("Search data is still loading. Please try again in a moment.");
+          return [];
+        }
         
         cityStatePairs.forEach(pair => {
           const cityLower = pair.city.toLowerCase();
@@ -159,7 +274,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       }
       
       // Display search suggestions
-      function showSuggestions(suggestions: any[]) {
+      function showSuggestions(suggestions) {
         console.log(`Found ${suggestions.length} suggestions`);
         
         if (suggestions.length === 0) {
@@ -225,8 +340,10 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       }
       
       // Handle a zip code search
-      async function handleZipSearch(zipCode: string) {
+      async function handleZipSearch(zipCode) {
         console.log(`Searching for zip code: ${zipCode}`);
+        showLoading(true);
+        hideError();
         
         try {
           // Show loading state
@@ -325,6 +442,9 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             `;
           }
           searchResults?.classList.remove('hidden');
+          showError(error instanceof Error ? error.message : 'Error searching by zip code');
+        } finally {
+          showLoading(false);
         }
       }
       
@@ -332,12 +452,16 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       function handleSearch() {
         console.log('Search button clicked');
         const query = searchInput.value.trim();
+        hideError();
+        showLoading(true);
         
         if (query.length < 2) {
           if (resultsContent) {
             resultsContent.innerHTML = `<div class="px-4 py-3 text-gray-600">Please enter a city or zip code.</div>`;
           }
           searchResults?.classList.remove('hidden');
+          showError("Please enter at least 2 characters");
+          showLoading(false);
           return;
         }
         
@@ -355,6 +479,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             `;
           }
           searchResults?.classList.remove('hidden');
+          showError("Zip codes must be 5 digits");
+          showLoading(false);
           return;
         }
         
@@ -396,6 +522,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           `;
         }
         searchResults?.classList.remove('hidden');
+        showError(`No recycling centers found for "${query}"`);
+        showLoading(false);
       }
       
       // Set up event listeners
@@ -450,7 +578,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       
       // Close suggestions when clicking outside
       document.addEventListener('click', (e) => {
-        const target = e.target as Node;
+        const target = e.target;
         if (searchInput && searchResults && !searchInput.contains(target) && !searchResults.contains(target)) {
           searchResults.classList.add('hidden');
         }
@@ -471,7 +599,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
 </script>
 
 <!-- Add global data for client-side access -->
-<script define:vars={{ cityStatePairs }}>
+<script define:vars={{ cityStatePairs }} type="module">
   // Make city data available to client-side scripts
   window.__CITY_STATE_PAIRS__ = cityStatePairs;
 </script>

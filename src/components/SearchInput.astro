@@ -373,24 +373,87 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           
           if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || `HTTP error ${response.status}`);
+            throw new Error(error.error || `HTTP error ${response.status}`);
           }
           
           const data = await response.json();
           console.log('Zip code API response:', data);
           
-          // Find matching city
-          const match = cityStatePairs.find(pair => 
+          if (!data || !data.city || !data.state) {
+            throw new Error(`Unable to find location data for zip code ${zipCode}`);
+          }
+          
+          console.log(`Zip code ${zipCode} resolves to ${data.city}, ${data.state}`);
+          
+          // First, try to find an exact match based on city and state
+          const exactMatch = cityStatePairs.find(pair => 
             pair.city.toLowerCase() === data.city.toLowerCase() &&
             pair.state.toLowerCase() === data.state.toLowerCase()
           );
           
-          if (match) {
-            window.location.href = match.url;
+          if (exactMatch) {
+            console.log('Found exact city match:', exactMatch);
+            window.location.href = exactMatch.url;
             return;
           }
           
-          // Try fuzzy matching
+          console.log(`No exact match found for ${data.city}, ${data.state}. Looking for nearest city...`);
+          
+          // If no exact match, find the nearest city based on coordinates
+          if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+            console.log(`Using coordinates: lat=${data.coordinates.lat}, lng=${data.coordinates.lng}`);
+            
+            // First try cities in the same state
+            const sameStateMatches = cityStatePairs.filter(pair => 
+              pair.state.toLowerCase() === data.state.toLowerCase()
+            );
+            
+            console.log(`Found ${sameStateMatches.length} cities in ${data.state}`);
+            
+            if (sameStateMatches.length > 0) {
+              // Find if any cities have coordinates
+              const citiesWithCoords = sameStateMatches.filter(city => city.coordinates && 
+                                                             city.coordinates.lat && 
+                                                             city.coordinates.lng);
+              
+              console.log(`${citiesWithCoords.length} cities have coordinates information`);
+              
+              if (citiesWithCoords.length > 0) {
+                // Find the nearest city in the same state
+                let nearestCity = citiesWithCoords[0];
+                let shortestDistance = calculateDistance(
+                  data.coordinates, 
+                  citiesWithCoords[0].coordinates
+                );
+                
+                console.log(`Initial nearest city: ${nearestCity.city} at ${shortestDistance.toFixed(2)} km`);
+                
+                for (const city of citiesWithCoords.slice(1)) {
+                  const distance = calculateDistance(data.coordinates, city.coordinates);
+                  console.log(`Checking ${city.city}: ${distance.toFixed(2)} km`);
+                  
+                  if (distance < shortestDistance) {
+                    shortestDistance = distance;
+                    nearestCity = city;
+                    console.log(`New nearest city: ${nearestCity.city} at ${shortestDistance.toFixed(2)} km`);
+                  }
+                }
+                
+                console.log(`Redirecting to nearest city: ${nearestCity.city}, ${nearestCity.state} (${shortestDistance.toFixed(2)} km away)`);
+                window.location.href = nearestCity.url;
+                return;
+              } else {
+                console.log('No cities with coordinates found in the same state. Using first city in state as fallback.');
+                // If no cities have coordinates, just use the first city in the state
+                window.location.href = sameStateMatches[0].url;
+                return;
+              }
+            }
+          } else {
+            console.log('No coordinates available in the response. Falling back to fuzzy matching.');
+          }
+          
+          // Fall back to fuzzy name matching
           const cityMatches = cityStatePairs.filter(pair => 
             pair.state.toLowerCase() === data.state.toLowerCase() &&
             (
@@ -399,11 +462,19 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             )
           );
           
-          if (cityMatches.length > 0 && resultsContent) {
+          console.log(`Found ${cityMatches.length} cities with fuzzy name matching`);
+          
+          if (cityMatches.length === 1) {
+            // If only one match, redirect directly
+            console.log(`Single fuzzy match found: ${cityMatches[0].city}. Redirecting.`);
+            window.location.href = cityMatches[0].url;
+            return;
+          } else if (cityMatches.length > 1 && resultsContent) {
             // Show multiple matches
+            console.log(`Multiple matches found. Showing options to user.`);
             resultsContent.innerHTML = `
               <div class="px-4 py-3 text-gray-600">
-                <p>Found recycling centers near ${zipCode}:</p>
+                <p>Found recycling centers near ${zipCode} (${data.city}, ${data.state}):</p>
               </div>
               ${cityMatches.map(match => `
                 <button
@@ -426,8 +497,21 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                 if (url) window.location.href = url;
               });
             });
-          } else {
-            throw new Error(`No recycling centers found near ${zipCode}`);
+          } else if (resultsContent) {
+            // As a last resort, get ANY city in the same state
+            const anyCityInState = cityStatePairs.find(pair => 
+              pair.state.toLowerCase() === data.state.toLowerCase()
+            );
+            
+            if (anyCityInState) {
+              console.log(`No direct matches found but found a city in the same state: ${anyCityInState.city}. Redirecting.`);
+              window.location.href = anyCityInState.url;
+              return;
+            }
+            
+            // If all else fails, tell the user no centers were found for that zip code
+            console.log(`No recycling centers found for zip code ${zipCode}`);
+            throw new Error(`No recycling centers found near ${zipCode} (${data.city}, ${data.state})`);
           }
         } catch (error) {
           console.error('Error searching by zip:', error);
@@ -446,6 +530,25 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         } finally {
           showLoading(false);
         }
+      }
+      
+      // Calculate distance between two coordinate points
+      function calculateDistance(point1, point2) {
+        const R = 6371; // Earth's radius in kilometers
+        const dLat = toRad(point2.lat - point1.lat);
+        const dLon = toRad(point2.lng - point1.lng);
+        const lat1 = toRad(point1.lat);
+        const lat2 = toRad(point2.lat);
+
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+      }
+
+      function toRad(value) {
+        return (value * Math.PI) / 180;
       }
       
       // Handle main search submission

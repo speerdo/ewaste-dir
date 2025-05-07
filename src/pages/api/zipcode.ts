@@ -1,5 +1,4 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../lib/supabase';
 
 export const prerender = false;
 
@@ -7,21 +6,6 @@ export const prerender = false;
 export const config = {
   runtime: 'edge',
 };
-
-export interface ZipCodeResponse {
-  city: string;
-  state: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  source?: string;
-}
-
-export interface ZipCodeErrorResponse {
-  error: string;
-  details?: Record<string, any>;
-}
 
 // CORS headers for the API response
 const corsHeaders = {
@@ -32,300 +16,256 @@ const corsHeaders = {
   'Cache-Control': 'no-cache, no-store, must-revalidate',
   Pragma: 'no-cache',
   Expires: '0',
-  'Surrogate-Control': 'no-store',
-  'X-Content-Type-Options': 'nosniff',
 };
 
-// DEBUGGING FLAG
-const DEBUG = true;
-
-// Enhanced logging function
-function log(...args: any[]) {
-  if (DEBUG) {
-    console.log('[ZIPCODE API]', ...args);
-  }
-}
-
-// Calculate distance between two coordinate points (in kilometers)
-function calculateDistance(
-  point1: { lat: number; lng: number },
-  point2: { lat: number; lng: number }
-) {
-  const R = 6371; // Earth's radius in kilometers
-  const dLat = toRad(point2.lat - point1.lat);
-  const dLon = toRad(point2.lng - point1.lng);
-  const lat1 = toRad(point1.lat);
-  const lat2 = toRad(point2.lat);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-function toRad(value: number) {
-  return (value * Math.PI) / 180;
+// Define a type for our zip code data
+interface ZipCodeData {
+  city: string;
+  state: string;
+  coordinates: { lat: number; lng: number };
+  source: string;
 }
 
 // Special case handlers for known problematic ZIP codes
-const specialZipCodes: Record<string, ZipCodeResponse> = {
+const specialZipCodes: Record<string, ZipCodeData> = {
   // NYC ZIP codes
   '10001': {
     city: 'New York',
-    state: 'New York',
+    state: 'new-york',
     coordinates: { lat: 40.7128, lng: -74.006 },
-    source: 'hardcoded-NYC',
+    source: 'hardcoded',
   },
   '10002': {
     city: 'New York',
-    state: 'New York',
+    state: 'new-york',
     coordinates: { lat: 40.7128, lng: -74.006 },
-    source: 'hardcoded-NYC',
+    source: 'hardcoded',
   },
   // Beverly Hills
   '90210': {
     city: 'Beverly Hills',
-    state: 'California',
+    state: 'california',
     coordinates: { lat: 34.0736, lng: -118.4004 },
-    source: 'hardcoded-beverly',
+    source: 'hardcoded',
   },
-  // Example midwest zipcodes for testing
+  // Indianapolis
   '46268': {
     city: 'Indianapolis',
-    state: 'Indiana',
+    state: 'indiana',
     coordinates: { lat: 39.9064, lng: -86.2403 },
-    source: 'hardcoded-indy',
+    source: 'hardcoded',
   },
+  // Chicago
   '60007': {
     city: 'Chicago',
-    state: 'Illinois',
+    state: 'illinois',
     coordinates: { lat: 41.8781, lng: -87.6298 },
-    source: 'hardcoded-chicago',
+    source: 'hardcoded',
+  },
+  // Additional common ZIP codes
+  '02108': {
+    city: 'Boston',
+    state: 'Massachusetts',
+    coordinates: { lat: 42.3601, lng: -71.0589 },
+    source: 'hardcoded',
+  },
+  '33131': {
+    city: 'Miami',
+    state: 'Florida',
+    coordinates: { lat: 25.7617, lng: -80.1918 },
+    source: 'hardcoded',
+  },
+  '75201': {
+    city: 'Dallas',
+    state: 'Texas',
+    coordinates: { lat: 32.7767, lng: -96.797 },
+    source: 'hardcoded',
+  },
+  '77002': {
+    city: 'Houston',
+    state: 'Texas',
+    coordinates: { lat: 29.7604, lng: -95.3698 },
+    source: 'hardcoded',
+  },
+  '94103': {
+    city: 'San Francisco',
+    state: 'California',
+    coordinates: { lat: 37.7749, lng: -122.4194 },
+    source: 'hardcoded',
+  },
+  '98101': {
+    city: 'Seattle',
+    state: 'Washington',
+    coordinates: { lat: 47.6062, lng: -122.3321 },
+    source: 'hardcoded',
+  },
+  '20001': {
+    city: 'Washington',
+    state: 'District of Columbia',
+    coordinates: { lat: 38.9072, lng: -77.0369 },
+    source: 'hardcoded',
+  },
+  '80202': {
+    city: 'Denver',
+    state: 'Colorado',
+    coordinates: { lat: 39.7392, lng: -104.9903 },
+    source: 'hardcoded',
+  },
+  '85001': {
+    city: 'Phoenix',
+    state: 'Arizona',
+    coordinates: { lat: 33.4484, lng: -112.074 },
+    source: 'hardcoded',
+  },
+  '30301': {
+    city: 'Atlanta',
+    state: 'Georgia',
+    coordinates: { lat: 33.749, lng: -84.388 },
+    source: 'hardcoded',
+  },
+  '19019': {
+    city: 'Philadelphia',
+    state: 'Pennsylvania',
+    coordinates: { lat: 39.9526, lng: -75.1652 },
+    source: 'hardcoded',
+  },
+  '48201': {
+    city: 'Detroit',
+    state: 'Michigan',
+    coordinates: { lat: 42.3314, lng: -83.0458 },
+    source: 'hardcoded',
   },
 };
 
-// Handler for GET requests (required for Vercel)
-export const GET: APIRoute = async ({ request, url }) => {
-  log('Request received:', request.method, url.toString());
+// Mapping of ZIP code prefixes to nearest major cities
+// First 3 digits of ZIP can identify general region
+const zipPrefixToCity: Record<string, { city: string; state: string }> = {
+  // Northeast
+  '100': { city: 'New York', state: 'new-york' }, // NYC
+  '104': { city: 'Bronx', state: 'new-york' },
+  '112': { city: 'Brooklyn', state: 'new-york' },
+  '190': { city: 'Philadelphia', state: 'pennsylvania' },
+  '021': { city: 'Boston', state: 'massachusetts' },
 
+  // Midwest
+  '606': { city: 'Chicago', state: 'illinois' },
+  '482': { city: 'Detroit', state: 'michigan' },
+  '462': { city: 'Indianapolis', state: 'indiana' },
+  '631': { city: 'Saint Louis', state: 'missouri' },
+  '441': { city: 'Cleveland', state: 'ohio' },
+
+  // South
+  '770': { city: 'Atlanta', state: 'georgia' },
+  '752': { city: 'Dallas', state: 'texas' },
+  '330': { city: 'Miami', state: 'florida' },
+  '370': { city: 'Nashville', state: 'tennessee' },
+  '700': { city: 'New Orleans', state: 'louisiana' },
+
+  // West
+  '900': { city: 'Los Angeles', state: 'california' },
+  '941': { city: 'San Francisco', state: 'california' },
+  '980': { city: 'Seattle', state: 'washington' },
+  '970': { city: 'Portland', state: 'oregon' },
+  '891': { city: 'Las Vegas', state: 'nevada' },
+  '850': { city: 'Phoenix', state: 'arizona' },
+  '801': { city: 'Denver', state: 'colorado' },
+};
+
+export const GET = (async ({ request }) => {
   // Support for OPTIONS requests for CORS
   if (request.method === 'OPTIONS') {
-    log('Handling OPTIONS request');
     return new Response(null, {
       status: 204,
       headers: corsHeaders,
     });
   }
 
-  // Get the ZIP code from the query parameters
-  const zipCode = url.searchParams.get('zip');
-  log('ZIP code from query:', zipCode);
-
-  if (!zipCode) {
-    log('Error: No zip code provided');
-    return new Response(JSON.stringify({ error: 'Zip code is required' }), {
-      status: 400,
-      headers: corsHeaders,
-    });
-  }
-
-  // Ensure the ZIP is a 5-digit string
-  const fiveDigitZip = zipCode.toString().padStart(5, '0').substring(0, 5);
-  log(`Processing ZIP code: ${fiveDigitZip}`);
-
   try {
-    // First check our hardcoded special cases
-    // 1. Check if this is a known special case ZIP code
+    // Get the ZIP code from the URL
+    const url = new URL(request.url);
+    const zipCode = url.searchParams.get('zip');
+    console.log(`Processing zipcode API request with params: ${url.search}`);
+
+    if (!zipCode) {
+      console.log('No ZIP code provided');
+      return new Response(
+        JSON.stringify({
+          error: 'Zip code is required',
+        }),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // Ensure the ZIP is a 5-digit string
+    const fiveDigitZip = zipCode.toString().padStart(5, '0').substring(0, 5);
+    console.log(`Processing ZIP code: ${fiveDigitZip}`);
+
+    // Check if this is one of our hardcoded special cases
     if (specialZipCodes[fiveDigitZip]) {
-      log(`Using special case data for ${fiveDigitZip}`);
+      console.log(`Found hardcoded data for ZIP ${fiveDigitZip}`);
       return new Response(JSON.stringify(specialZipCodes[fiveDigitZip]), {
         status: 200,
         headers: corsHeaders,
       });
     }
 
-    // 2. Check NYC ZIP code patterns (common prefix patterns)
-    if (
-      fiveDigitZip.startsWith('100') ||
-      fiveDigitZip.startsWith('101') ||
-      fiveDigitZip.startsWith('102')
-    ) {
-      log(`Detected NYC ZIP pattern: ${fiveDigitZip}`);
-      return new Response(JSON.stringify(specialZipCodes['10001']), {
-        status: 200,
-        headers: corsHeaders,
-      });
-    }
-
-    // 3. Check our database for recycling centers with this ZIP code
-    log(`Checking database for ${fiveDigitZip}`);
-    try {
-      const { data: recyclingCenters, error: dbError } = await supabase
-        .from('recycling_centers')
-        .select('city, state, latitude, longitude')
-        .eq('postal_code', fiveDigitZip)
-        .limit(1);
-
-      if (dbError) {
-        log('Database error:', dbError);
-        throw dbError;
-      }
-
-      if (recyclingCenters && recyclingCenters.length > 0) {
-        log(`Found matching recycling center for ${fiveDigitZip}`);
-        const center = recyclingCenters[0];
-        return new Response(
-          JSON.stringify({
-            city: center.city,
-            state: center.state,
-            coordinates: {
-              lat: center.latitude,
-              lng: center.longitude,
-            },
-            source: 'database',
-          }),
-          { status: 200, headers: corsHeaders }
-        );
-      } else {
-        log(`No centers found in database for ${fiveDigitZip}`);
-      }
-    } catch (supabaseError) {
-      log('Supabase query error:', supabaseError);
-      // Fall through to external APIs
-    }
-
-    // FALLBACK: For testing purposes, let's add a fallback for all ZIP codes
-    // This will make sure the app doesn't break even if other services fail
-    log(`Using fallback data for unknown ZIP: ${fiveDigitZip}`);
-    return new Response(
-      JSON.stringify({
-        city: 'Unknown Location',
-        state: 'State Unknown',
-        coordinates: { lat: 40.0, lng: -98.0 }, // Center of USA
-        source: 'fallback',
-      }),
-      { status: 200, headers: corsHeaders }
-    );
-
-    // 4. Use external API (OpenStreetMap Nominatim) - Commented out for now
-    /*
-    log(`No database match, trying Nominatim for ${fiveDigitZip}`);
-    const nominatimUrl = `https://nominatim.openstreetmap.org/search?postalcode=${fiveDigitZip}&country=USA&format=json&addressdetails=1&limit=1`;
-
-    const response = await fetch(nominatimUrl, {
-      headers: {
-        'User-Agent': 'E-Waste-Directory/1.0',
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `External API returned ${response.status}: ${response.statusText}`
+    // Find the closest city based on ZIP prefix
+    let closestCity = null;
+    if (fiveDigitZip && fiveDigitZip.length >= 3) {
+      const prefix = fiveDigitZip.substring(0, 3);
+      closestCity = zipPrefixToCity[prefix] || null;
+      console.log(
+        `Looking for prefix ${prefix}, found match: ${!!closestCity}`
       );
-    }
 
-    const data = await response.json();
-
-    // Handle case where the ZIP code is valid but not found
-    if (!data || data.length === 0) {
-      // Try an alternative API as final fallback (Maps.co)
-      log(`No Nominatim results, trying Maps.co for ${fiveDigitZip}`);
-      try {
-        const mapscoUrl = `https://geocode.maps.co/search?postalcode=${fiveDigitZip}&country=USA`;
-        const mapscoResponse = await fetch(mapscoUrl);
-
-        if (mapscoResponse.ok) {
-          const mapscoData = await mapscoResponse.json();
-
-          if (mapscoData && mapscoData.length > 0) {
-            const result = mapscoData[0];
-            // Extract city and state from display_name
-            const nameParts = result.display_name.split(', ');
-            // Format is typically: "city, county, state zip, country"
-            let city = nameParts[0] || '';
-            let state = nameParts[nameParts.length - 3] || ''; // Usually state is third from end
-
-            return new Response(
-              JSON.stringify({
-                city,
-                state,
-                coordinates: {
-                  lat: parseFloat(result.lat),
-                  lng: parseFloat(result.lon),
-                },
-                source: 'maps.co',
-              }),
-              { status: 200, headers: corsHeaders }
-            );
+      // If we didn't find a match with 3 digits, try with 2
+      if (!closestCity && fiveDigitZip.length >= 2) {
+        const shortPrefix = fiveDigitZip.substring(0, 2);
+        console.log(`Trying shorter prefix ${shortPrefix}`);
+        // Look for a matching prefix that starts with these digits
+        for (const [key, value] of Object.entries(zipPrefixToCity)) {
+          if (key.startsWith(shortPrefix)) {
+            closestCity = value;
+            console.log(`Found match with key ${key}`);
+            break;
           }
         }
-      } catch (fallbackError) {
-        log(`Fallback geocoding failed: ${fallbackError}`);
       }
+    }
 
-      // If we got here, all lookups failed
-      return new Response(
-        JSON.stringify({
-          error: `No location found for ZIP code ${fiveDigitZip}`,
-          details: { zipCode: fiveDigitZip },
-        }),
-        { status: 404, headers: corsHeaders }
+    // If we still don't have a closest city, default to a major city in the center of the US
+    if (!closestCity) {
+      console.log(`No city match found, using default`);
+      closestCity = { city: 'Chicago', state: 'Illinois' };
+    } else {
+      console.log(
+        `Using closest city: ${closestCity.city}, ${closestCity.state}`
       );
     }
 
-    // Extract city and state from the API response
-    const result = data[0];
-    const address = result.address;
+    const response = {
+      city: 'Unknown Location',
+      state: 'State Unknown',
+      coordinates: { lat: 40.0, lng: -98.0 }, // Center of USA
+      source: 'fallback',
+      closestCity: closestCity, // Include the closest city in the response
+    };
 
-    let city =
-      address.city ||
-      address.town ||
-      address.village ||
-      address.hamlet ||
-      address.municipality ||
-      '';
-    let state = address.state || '';
+    console.log(`Returning response for ZIP ${fiveDigitZip}:`, response);
 
-    // Handle New York City boroughs specifically
-    const nycBoroughs = [
-      'manhattan',
-      'brooklyn',
-      'queens',
-      'bronx',
-      'staten island',
-    ];
-    if (
-      nycBoroughs.includes(city.toLowerCase()) &&
-      state.toLowerCase() === 'new york'
-    ) {
-      city = 'New York';
-    }
-
-    return new Response(
-      JSON.stringify({
-        city,
-        state,
-        coordinates: {
-          lat: parseFloat(result.lat),
-          lng: parseFloat(result.lon),
-        },
-        source: 'nominatim',
-      }),
-      { status: 200, headers: corsHeaders }
-    );
-    */
-  } catch (error: any) {
-    log('Error processing ZIP code:', error.message);
-
-    // Generic fallback for any error
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: corsHeaders,
+    });
+  } catch (error) {
+    console.error(`ZIP API error:`, error);
     return new Response(
       JSON.stringify({
         error: 'Failed to process ZIP code',
-        message: error.message,
-        zipCode: fiveDigitZip,
+        message: error instanceof Error ? error.message : 'Unknown error',
       }),
       {
         status: 500,
@@ -333,7 +273,7 @@ export const GET: APIRoute = async ({ request, url }) => {
       }
     );
   }
-};
+}) satisfies APIRoute;
 
-// Handler for POST requests (for backward compatibility)
+// Also export a POST handler for backward compatibility
 export const POST = GET;

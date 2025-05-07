@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZIP Code API Test</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .input-group {
+        margin-bottom: 20px;
+      }
+      input,
+      button {
+        padding: 8px;
+        font-size: 16px;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 10px;
+        border-radius: 5px;
+        overflow: auto;
+      }
+      .log-entry {
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+      }
+      .section {
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ZIP Code API Test</h1>
+
+    <div class="input-group">
+      <input
+        type="text"
+        id="zipcode"
+        placeholder="Enter ZIP code"
+        value="28370"
+      />
+      <button id="test-btn">Test ZIP Code</button>
+      <button id="clear-btn">Clear Log</button>
+    </div>
+
+    <div class="section">
+      <h2>URL Path Test</h2>
+      <div class="input-group">
+        <input type="text" id="state" placeholder="State (e.g. new-york)" />
+        <input type="text" id="city" placeholder="City (e.g. new-york)" />
+        <button id="test-path-btn">Test Path</button>
+      </div>
+    </div>
+
+    <h2>Test Log</h2>
+    <div id="log"></div>
+
+    <script>
+      const zipInput = document.getElementById('zipcode');
+      const testBtn = document.getElementById('test-btn');
+      const clearBtn = document.getElementById('clear-btn');
+      const logContainer = document.getElementById('log');
+      const stateInput = document.getElementById('state');
+      const cityInput = document.getElementById('city');
+      const testPathBtn = document.getElementById('test-path-btn');
+
+      function log(message, data) {
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+
+        if (typeof message === 'string') {
+          const messageEl = document.createElement('p');
+          messageEl.textContent = message;
+          entry.appendChild(messageEl);
+        }
+
+        if (data !== undefined) {
+          const dataEl = document.createElement('pre');
+          dataEl.textContent =
+            typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+          entry.appendChild(dataEl);
+        }
+
+        logContainer.insertBefore(entry, logContainer.firstChild);
+      }
+
+      async function testZipCode(zipCode) {
+        try {
+          log(`Testing ZIP code: ${zipCode}`);
+
+          const cacheBuster = new Date().getTime();
+          const apiUrl = `${window.location.origin}/api/zipcode?zip=${zipCode}&_cb=${cacheBuster}`;
+          log(`Fetching from: ${apiUrl}`);
+
+          const response = await fetch(apiUrl);
+          log(`Response status: ${response.status}`);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+          }
+
+          const data = await response.json();
+          log(`Response data:`, data);
+
+          if (data.city === 'Unknown Location' && data.closestCity) {
+            const citySlug = data.closestCity.city
+              .toLowerCase()
+              .replace(/\s+/g, '-')
+              .replace(/[^a-z0-9-]/g, '');
+            const stateSlug = data.closestCity.state
+              .toLowerCase()
+              .replace(/\s+/g, '-')
+              .replace(/[^a-z0-9-]/g, '');
+            const redirectUrl = `/states/${stateSlug}/${citySlug}`;
+            log(`Would redirect to: ${redirectUrl}`);
+
+            // Add a link to test the redirect
+            const linkContainer = document.createElement('p');
+            const link = document.createElement('a');
+            link.href = redirectUrl;
+            link.textContent = `Go to ${data.closestCity.city}, ${data.closestCity.state}`;
+            link.target = '_blank';
+            linkContainer.appendChild(link);
+
+            const entry = logContainer.firstChild;
+            entry.appendChild(linkContainer);
+
+            // Check if path exists
+            checkPathExists(stateSlug, citySlug);
+          }
+
+          return data;
+        } catch (error) {
+          log(`Error: ${error.message}`);
+          return null;
+        }
+      }
+
+      async function checkPathExists(state, city) {
+        try {
+          log(`Checking if path exists: /states/${state}/${city}`);
+
+          const response = await fetch(`/states/${state}/${city}`, {
+            method: 'HEAD',
+          });
+
+          if (response.ok) {
+            log(`✅ Path exists: /states/${state}/${city}`);
+          } else {
+            log(
+              `❌ Path does not exist: /states/${state}/${city} (Status: ${response.status})`
+            );
+          }
+
+          // Also check just the state path
+          const stateResponse = await fetch(`/states/${state}`, {
+            method: 'HEAD',
+          });
+          if (stateResponse.ok) {
+            log(`✅ State path exists: /states/${state}`);
+          } else {
+            log(
+              `❌ State path does not exist: /states/${state} (Status: ${stateResponse.status})`
+            );
+          }
+        } catch (error) {
+          log(`Error checking path: ${error.message}`);
+        }
+      }
+
+      testBtn.addEventListener('click', () => {
+        const zipCode = zipInput.value.trim();
+        if (zipCode) {
+          testZipCode(zipCode);
+        } else {
+          log('Please enter a ZIP code');
+        }
+      });
+
+      testPathBtn.addEventListener('click', () => {
+        const state = stateInput.value.trim();
+        const city = cityInput.value.trim();
+
+        if (state && city) {
+          checkPathExists(state, city);
+        } else {
+          log('Please enter both state and city');
+        }
+      });
+
+      clearBtn.addEventListener('click', () => {
+        logContainer.innerHTML = '';
+      });
+
+      // Automatically test on page load
+      window.addEventListener('DOMContentLoaded', () => {
+        testZipCode(zipInput.value.trim());
+      });
+    </script>
+  </body>
+</html>

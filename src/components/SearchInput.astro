@@ -213,14 +213,16 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           return response.json();
         })
         .then(data => {
+          console.log('Cities data received:', typeof data, Array.isArray(data) ? 'array of length ' + data.length : 'not an array');
+          
           // Check if we got a wrapped response (for error cases)
-          if (data.data && Array.isArray(data.data)) {
+          if (data && data.data && Array.isArray(data.data)) {
             console.log('Received wrapped data with message:', data.warning || data.error || 'No message');
             cityStatePairs = data.data;
           } else if (Array.isArray(data)) {
             cityStatePairs = data;
           } else {
-            console.error('Unexpected data format:', data);
+            console.error('Unexpected data format:', typeof data, data);
             return;
           }
           
@@ -232,6 +234,11 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         })
         .catch(error => {
           console.error('Failed to load city data:', error);
+          // Fallback to window.__CITY_STATE_PAIRS__ if available
+          if (window.__CITY_STATE_PAIRS__ && window.__CITY_STATE_PAIRS__.length > 0) {
+            console.log('Using fallback city data from global variable');
+            cityStatePairs = window.__CITY_STATE_PAIRS__;
+          }
         });
       
       // Use location button
@@ -247,8 +254,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               throw new Error("Could not determine your location");
             }
             
-            const { latitude, longitude } = location;
-            const geoData = await reverseGeocode(latitude, longitude);
+            const geoData = await reverseGeocode(location);
             
             if (!geoData) {
               throw new Error("Could not find your location");
@@ -411,13 +417,6 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             return;
           }
 
-          // Fallback data for known ZIP codes in case API fails
-          const fallbackZipData = {
-            '10001': { city: 'New York', state: 'New York', coordinates: { lat: 40.7128, lng: -74.006 } },
-            '10002': { city: 'New York', state: 'New York', coordinates: { lat: 40.7128, lng: -74.006 } },
-            '90210': { city: 'Beverly Hills', state: 'California', coordinates: { lat: 34.0736, lng: -118.4004 } }
-          };
-
           // Use our API to get location data
           const cacheBuster = new Date().getTime();
           const apiUrl = `${window.location.origin}/api/zipcode?zip=${zipCode}&_cb=${cacheBuster}`;
@@ -434,12 +433,15 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             });
             
             if (!response.ok) {
+              console.error(`API request failed with status ${response.status}`);
               throw new Error(`API request failed with status ${response.status}`);
             }
             
             data = await response.json();
+            console.log(`ZIP data received:`, data);
             
-            if (!data || !data.city || !data.state) {
+            if (!data) {
+              console.error(`Invalid ZIP code data:`, data);
               throw new Error(`Invalid data received for ZIP ${zipCode}`);
             }
             
@@ -448,21 +450,13 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               data,
               timestamp: Date.now()
             });
+            
+            // Process the data
+            await processZipCodeData(zipCode, data);
           } catch (error) {
             console.error(`API error for ZIP ${zipCode}:`, error);
-            
-            // If API call fails but we have a fallback for this ZIP, use it
-            if (fallbackZipData[zipCode]) {
-              console.log(`Using fallback data for ZIP ${zipCode}`);
-              data = fallbackZipData[zipCode];
-            } else {
-              // No fallback available, rethrow the error
-              throw error;
-            }
+            throw error;
           }
-          
-          // Process the data (moved to separate function)
-          await processZipCodeData(zipCode, data);
         } catch (error) {
           console.error(`Error searching by zip: ${error.message}`);
           showError("Couldn't find that location. Please try a different search.");
@@ -477,9 +471,30 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           
           // Special case for the fallback "Unknown Location"
           if (data.city === "Unknown Location" && data.state === "State Unknown") {
-            console.log("Got fallback location data, redirecting to search page");
-            window.location.href = `/search?q=${zipCode}`;
-            return;
+            console.log("Got fallback location data");
+            
+            // Check if we have a closest city recommendation
+            if (data.closestCity && data.closestCity.city && data.closestCity.state) {
+              console.log(`Redirecting to closest city: ${data.closestCity.city}, ${data.closestCity.state}`);
+              
+              // Format the URL for the closest city
+              const citySlug = data.closestCity.city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+              const stateSlug = data.closestCity.state.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+              const redirectUrl = `/states/${stateSlug}/${citySlug}`;
+              
+              console.log(`Redirecting to: ${redirectUrl}`);
+              
+              // Force a small delay to ensure logs appear in console before redirect
+              setTimeout(() => {
+                window.location.href = redirectUrl;
+              }, 100);
+              return;
+            } else {
+              // No closest city, fall back to search
+              console.log("No closest city, redirecting to search page");
+              window.location.href = `/search?q=${zipCode}`;
+              return;
+            }
           }
           
           // Format city and state correctly
@@ -716,4 +731,32 @@ const id = variant === 'hero' ? 'hero' : 'nav';
   console.log(`Set global city data with ${cityStatePairs.length} cities`);
   const withCoords = cityStatePairs.filter(city => city.coordinates && city.coordinates.lat && city.coordinates.lng);
   console.log(`Global city data with coordinates: ${withCoords.length}/${cityStatePairs.length}`);
+  
+  // Add a global debug function to test ZIP code functionality
+  window.testZipCode = async function(zipCode) {
+    console.log(`Debug testing ZIP code: ${zipCode}`);
+    try {
+      const cacheBuster = new Date().getTime();
+      const apiUrl = `${window.location.origin}/api/zipcode?zip=${zipCode}&_cb=${cacheBuster}`;
+      console.log(`Fetching from: ${apiUrl}`);
+      
+      const response = await fetch(apiUrl);
+      console.log(`Response status: ${response.status}`);
+      
+      const data = await response.json();
+      console.log(`Response data:`, data);
+      
+      if (data.city === "Unknown Location" && data.closestCity) {
+        const citySlug = data.closestCity.city.toLowerCase().replace(/\s+/g, '-');
+        const stateSlug = data.closestCity.state.toLowerCase().replace(/\s+/g, '-');
+        const redirectUrl = `/states/${stateSlug}/${citySlug}`;
+        console.log(`Would redirect to: ${redirectUrl}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error(`Test failed:`, error);
+      return null;
+    }
+  };
 </script>

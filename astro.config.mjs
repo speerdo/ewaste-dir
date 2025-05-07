@@ -15,7 +15,7 @@ const SITE_URL =
 export default defineConfig({
   site: SITE_URL,
   integrations: [tailwind()],
-  output: 'server',
+  output: 'hybrid',
   adapter: vercel({
     webAnalytics: {
       enabled: true,
@@ -39,6 +39,9 @@ export default defineConfig({
     edgeMiddleware: true,
     maxDuration: 8,
     functionPerRoute: true,
+    includeFiles: [
+      './src/lib/**/*.ts', // Include all library files needed by API functions
+    ],
   }),
   build: {
     inlineStylesheets: 'auto',

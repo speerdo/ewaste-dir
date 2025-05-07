@@ -69,11 +69,11 @@
   "rewrites": [
     {
       "source": "/api/zipcode",
-      "destination": "/api/zipcode.js"
+      "destination": "/.vercel/functions/pages/api/zipcode.func"
     },
     {
       "source": "/api/cities-data",
-      "destination": "/api/cities-data.js"
+      "destination": "/.vercel/functions/pages/api/cities-data.func"
     }
   ],
   "regions": ["iad1"],

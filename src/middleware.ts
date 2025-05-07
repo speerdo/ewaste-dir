@@ -26,10 +26,30 @@ const STATIC_PAGES = new Set(['/', '/about', '/contact', '/blog']);
 // API endpoints that should never be cached
 const NO_CACHE_APIS = new Set(['/api/zipcode', '/api/cities-data']);
 
+// CORS headers for API responses
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Accept, X-Requested-With',
+  'Access-Control-Max-Age': '86400',
+};
+
 export const onRequest = defineMiddleware(async ({ request, url }, next) => {
+  const pathname = url.pathname;
+
+  // Special handling for OPTIONS requests (CORS preflight)
+  if (request.method === 'OPTIONS' && pathname.startsWith('/api/')) {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        ...corsHeaders,
+        'Cache-Control': 'public, max-age=86400',
+      },
+    });
+  }
+
   // Process the request through the rest of the middleware chain and get the response
   const resp = await next();
-  const pathname = url.pathname;
 
   // Set cache headers based on route type
   if (STATIC_PAGES.has(pathname)) {
@@ -77,17 +97,10 @@ export const onRequest = defineMiddleware(async ({ request, url }, next) => {
 
   // Add CORS headers for API endpoints
   if (pathname.startsWith('/api/')) {
-    resp.headers.set('Access-Control-Allow-Origin', '*');
-    resp.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    resp.headers.set('Access-Control-Allow-Headers', 'Content-Type, Accept');
-
-    // Handle OPTIONS requests for CORS preflight
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        status: 204,
-        headers: Object.fromEntries(resp.headers),
-      });
-    }
+    // Apply all CORS headers
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      resp.headers.set(key, value);
+    });
   }
 
   // Add performance headers

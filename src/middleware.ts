@@ -37,15 +37,32 @@ const corsHeaders = {
 export const onRequest = defineMiddleware(async ({ request, url }, next) => {
   const pathname = url.pathname;
 
+  // Enhanced logging for debugging
+  console.log(`Middleware processing: ${request.method} ${pathname}`);
+
   // Special handling for OPTIONS requests (CORS preflight)
-  if (request.method === 'OPTIONS' && pathname.startsWith('/api/')) {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        ...corsHeaders,
-        'Cache-Control': 'public, max-age=86400',
-      },
-    });
+  if (request.method === 'OPTIONS') {
+    console.log(`OPTIONS request detected for: ${pathname}`);
+    if (pathname.startsWith('/api/')) {
+      console.log(`Handling CORS preflight for API endpoint: ${pathname}`);
+      return new Response(null, {
+        status: 204,
+        headers: {
+          ...corsHeaders,
+          'Cache-Control': 'public, max-age=86400',
+        },
+      });
+    }
+  }
+
+  // Special handling for API endpoints
+  if (pathname.startsWith('/api/')) {
+    console.log(`API request detected: ${pathname}`);
+
+    // For zipcode API specifically
+    if (pathname === '/api/zipcode') {
+      console.log(`Processing zipcode API request with params: ${url.search}`);
+    }
   }
 
   // Process the request through the rest of the middleware chain and get the response

@@ -62,8 +62,30 @@
         {
           "key": "Expires",
           "value": "0"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Accept, X-Requested-With"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/zipcode",
+      "destination": "/api/zipcode"
+    },
+    {
+      "source": "/api/cities-data",
+      "destination": "/api/cities-data"
     }
   ],
   "regions": ["iad1"],

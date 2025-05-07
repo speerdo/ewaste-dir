@@ -66,6 +66,16 @@
       ]
     }
   ],
+  "rewrites": [
+    {
+      "source": "/api/zipcode",
+      "destination": "/api/zipcode.js"
+    },
+    {
+      "source": "/api/cities-data",
+      "destination": "/api/cities-data.js"
+    }
+  ],
   "regions": ["iad1"],
   "build": {
     "env": {

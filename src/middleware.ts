@@ -23,6 +23,9 @@ const CACHE_DURATIONS = {
 // Static pages that should be cached longer
 const STATIC_PAGES = new Set(['/', '/about', '/contact', '/blog']);
 
+// API endpoints that should never be cached
+const NO_CACHE_APIS = new Set(['/api/zipcode', '/api/cities-data']);
+
 export const onRequest = defineMiddleware(async ({ request, url }, next) => {
   // Process the request through the rest of the middleware chain and get the response
   const resp = await next();
@@ -50,6 +53,12 @@ export const onRequest = defineMiddleware(async ({ request, url }, next) => {
       `public, s-maxage=${CACHE_DURATIONS.city.maxAge}, stale-while-revalidate=${CACHE_DURATIONS.city.staleWhileRevalidate}`
     );
     resp.headers.set('X-Middleware-Cache', 'city');
+  } else if (NO_CACHE_APIS.has(pathname)) {
+    // Never cache these specific API endpoints
+    resp.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    resp.headers.set('Pragma', 'no-cache');
+    resp.headers.set('Expires', '0');
+    resp.headers.set('X-Middleware-Cache', 'no-cache-api');
   } else if (pathname.startsWith('/api/')) {
     // API endpoints caching
     resp.headers.set(
@@ -65,6 +74,21 @@ export const onRequest = defineMiddleware(async ({ request, url }, next) => {
   resp.headers.set('X-XSS-Protection', '1; mode=block');
   resp.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   resp.headers.set('Permissions-Policy', 'geolocation=self');
+
+  // Add CORS headers for API endpoints
+  if (pathname.startsWith('/api/')) {
+    resp.headers.set('Access-Control-Allow-Origin', '*');
+    resp.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    resp.headers.set('Access-Control-Allow-Headers', 'Content-Type, Accept');
+
+    // Handle OPTIONS requests for CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: Object.fromEntries(resp.headers),
+      });
+    }
+  }
 
   // Add performance headers
   resp.headers.set('X-Vercel-Cache', 'MISS'); // Let Vercel handle the actual cache status

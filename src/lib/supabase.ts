@@ -132,12 +132,12 @@ export async function getAllStates(): Promise<State[]> {
 export async function getState(stateId: string): Promise<State | null> {
   try {
     // Log input for debugging
-    console.log('getState - input stateId:', stateId);
+    // console.log('getState - input stateId:', stateId);
 
     // Check cache first
     if (stateCache.has(stateId)) {
       const cachedState = stateCache.get(stateId);
-      console.log('getState - found in cache:', cachedState);
+      // console.log('getState - found in cache:', cachedState);
       return cachedState || null;
     }
 
@@ -145,7 +145,7 @@ export async function getState(stateId: string): Promise<State | null> {
     const altKey = stateId.replace(/-/g, ' ');
     if (stateCache.has(altKey)) {
       const cachedState = stateCache.get(altKey);
-      console.log('getState - found in cache with altKey:', cachedState);
+      // console.log('getState - found in cache with altKey:', cachedState);
       return cachedState || null;
     }
 
@@ -172,7 +172,7 @@ export async function getState(stateId: string): Promise<State | null> {
       stateCache.set(state.id, state);
       stateCache.set(state.name.toLowerCase(), state);
 
-      console.log('getState - found exact match:', state);
+      // console.log('getState - found exact match:', state);
       return state;
     }
 
@@ -199,7 +199,7 @@ export async function getState(stateId: string): Promise<State | null> {
       stateCache.set(state.id, state);
       stateCache.set(state.name.toLowerCase(), state);
 
-      console.log('getState - found case-insensitive match:', state);
+      // console.log('getState - found case-insensitive match:', state);
       return state;
     }
 
@@ -226,11 +226,11 @@ export async function getState(stateId: string): Promise<State | null> {
       stateCache.set(state.id, state);
       stateCache.set(state.name.toLowerCase(), state);
 
-      console.log('getState - found in recycling centers:', state);
+      // console.log('getState - found in recycling centers:', state);
       return state;
     }
 
-    console.log('getState - no state found for:', stateId);
+    // console.log('getState - no state found for:', stateId);
     return null;
   } catch (error) {
     console.error('Error in getState:', error);
@@ -409,7 +409,7 @@ export async function getRecyclingCentersByCity(
   city: string
 ): Promise<RecyclingCenter[]> {
   try {
-    console.log(`Fetching centers for ${city}, ${stateId}...`);
+    // console.log(`Fetching centers for ${city}, ${stateId}...`);
 
     // First get the state name from the ID
     const state = await getState(stateId);

@@ -39,9 +39,6 @@ export default defineConfig({
     edgeMiddleware: true,
     maxDuration: 8,
     functionPerRoute: true,
-    includeFiles: [
-      './src/lib/**/*.ts', // Include all library files needed by API functions
-    ],
   }),
   build: {
     inlineStylesheets: 'auto',

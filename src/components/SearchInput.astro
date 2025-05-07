@@ -432,13 +432,34 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               }
             });
             
+            const responseData = await response.json();
+            
+            // Even if the status is not 200, try to use any available data
             if (!response.ok) {
               console.error(`API request failed with status ${response.status}`);
-              throw new Error(`API request failed with status ${response.status}`);
+              
+              // Check if we got a fallback in the error response
+              if (responseData && responseData.fallback) {
+                console.log(`Using fallback data from error response:`, responseData.fallback);
+                data = responseData.fallback;
+              } else {
+                // No fallback available, use hardcoded data for this ZIP
+                data = {
+                  city: 'Unknown Location',
+                  state: 'State Unknown',
+                  coordinates: { lat: 40.0, lng: -98.0 },
+                  source: 'client-fallback',
+                  closestCity: { 
+                    city: 'Columbus', 
+                    state: 'Ohio'
+                  }
+                };
+                console.log(`Using hardcoded fallback data:`, data);
+              }
+            } else {
+              data = responseData;
+              console.log(`ZIP data received:`, data);
             }
-            
-            data = await response.json();
-            console.log(`ZIP data received:`, data);
             
             if (!data) {
               console.error(`Invalid ZIP code data:`, data);
@@ -455,7 +476,21 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             await processZipCodeData(zipCode, data);
           } catch (error) {
             console.error(`API error for ZIP ${zipCode}:`, error);
-            throw error;
+            
+            // Hardcoded fallback in case of total failure
+            const fallbackData = {
+              city: 'Unknown Location',
+              state: 'State Unknown',
+              coordinates: { lat: 40.0, lng: -98.0 },
+              source: 'client-error-fallback',
+              closestCity: { 
+                city: 'Columbus', 
+                state: 'Ohio'
+              }
+            };
+            
+            console.log(`Using client-side fallback after error:`, fallbackData);
+            await processZipCodeData(zipCode, fallbackData);
           }
         } catch (error) {
           console.error(`Error searching by zip: ${error.message}`);
@@ -469,6 +504,17 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         try {
           console.log(`Processing data for ZIP ${zipCode}:`, data);
           
+          // If the API response includes a URL, use it directly
+          if (data.url) {
+            console.log(`Using direct URL from API response: ${data.url}`);
+            
+            // Force a small delay to ensure logs appear in console before redirect
+            setTimeout(() => {
+              window.location.href = data.url;
+            }, 100);
+            return;
+          }
+          
           // Special case for the fallback "Unknown Location"
           if (data.city === "Unknown Location" && data.state === "State Unknown") {
             console.log("Got fallback location data");
@@ -476,6 +522,15 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             // Check if we have a closest city recommendation
             if (data.closestCity && data.closestCity.city && data.closestCity.state) {
               console.log(`Redirecting to closest city: ${data.closestCity.city}, ${data.closestCity.state}`);
+              
+              // If closestCity has a URL, use it directly
+              if (data.closestCity.url) {
+                console.log(`Using URL from closestCity: ${data.closestCity.url}`);
+                setTimeout(() => {
+                  window.location.href = data.closestCity.url;
+                }, 100);
+                return;
+              }
               
               // Format the URL for the closest city
               const citySlug = data.closestCity.city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -503,6 +558,34 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           
           if (!cityToFind || !stateToFind) {
             console.error(`Missing city/state data for ZIP ${zipCode}:`, data);
+            
+            // Try using closestCity if available
+            if (data.closestCity && data.closestCity.city && data.closestCity.state) {
+              console.log(`Missing primary city/state, using closestCity instead:`, data.closestCity);
+              
+              // If closestCity has a URL, use it directly
+              if (data.closestCity.url) {
+                console.log(`Using URL from closestCity: ${data.closestCity.url}`);
+                setTimeout(() => {
+                  window.location.href = data.closestCity.url;
+                }, 100);
+                return;
+              }
+              
+              // Format the URL for the closest city
+              const citySlug = data.closestCity.city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+              const stateSlug = data.closestCity.state.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+              const redirectUrl = `/states/${stateSlug}/${citySlug}`;
+              
+              console.log(`Redirecting to: ${redirectUrl}`);
+              
+              // Force a small delay to ensure logs appear in console before redirect
+              setTimeout(() => {
+                window.location.href = redirectUrl;
+              }, 100);
+              return;
+            }
+            
             throw new Error(`Could not extract city/state from data for ZIP ${zipCode}`);
           }
           
@@ -583,8 +666,13 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           if (cityMatch) {
             window.location.href = cityMatch.url;
           } else {
-            showError(`No matching city found for ${cityToFind}, ${stateToFind}. Please try a different search.`);
-            showLoading(false);
+            // Last resort: try to create a URL directly from city and state
+            const citySlug = cityToFind.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            const stateSlug = stateToFind.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            const fallbackUrl = `/states/${stateSlug}/${citySlug}`;
+            
+            console.log(`No match found in cityStatePairs. Trying fallback URL: ${fallbackUrl}`);
+            window.location.href = fallbackUrl;
           }
         } catch (error) {
           console.error(`Error processing ZIP data: ${error.message}`);

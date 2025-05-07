@@ -2,37 +2,167 @@
 /**
  * Test script for the ZIP code API
  *
- * Run with: node scripts/test-zipcode-api.js
+ * This script tests the ZIP code API with a set of test cases to ensure
+ * it's returning the expected results.
  */
 
-// Test multiple ZIP codes to ensure they work correctly
-const testZips = [
-  // NYC special cases
-  { zip: '10001', expectedCity: 'New York', expectedState: 'New York' },
-  { zip: '10002', expectedCity: 'New York', expectedState: 'New York' },
-
-  // Beverly Hills special case
-  { zip: '90210', expectedCity: 'Beverly Hills', expectedState: 'California' },
-
-  // Major cities
-  { zip: '60601', expectedCity: 'Chicago', expectedState: 'Illinois' },
-  {
-    zip: '20001',
-    expectedCity: 'Washington',
-    expectedState: 'District of Columbia',
-  },
-  { zip: '98101', expectedCity: 'Seattle', expectedState: 'Washington' },
-
-  // Edge cases
-  { zip: '33139', expectedCity: 'Miami Beach', expectedState: 'Florida' }, // Should map to Miami
-  { zip: '11201', expectedCity: 'Brooklyn', expectedState: 'New York' }, // NYC borough
-];
-
 const baseUrl = process.env.API_URL || 'http://localhost:4321';
+import chalk from 'chalk';
+
+// Test cases for ZIP codes
+const testCases = [
+  // Test common ZIP codes with direct database matches
+  {
+    zip: '10001',
+    expectedCity: 'New York',
+    expectedState: 'new-york',
+    note: 'Manhattan',
+  },
+  {
+    zip: '90001',
+    expectedCity: 'Los Angeles',
+    expectedState: 'california',
+    note: 'LA',
+  },
+  {
+    zip: '60601',
+    expectedCity: 'Chicago',
+    expectedState: 'illinois',
+    note: 'Chicago',
+  },
+
+  // Test edge cases that previously had issues
+  {
+    zip: '90210',
+    expectedCity: 'Beverly Hills',
+    expectedState: 'california',
+    note: 'Beverly Hills (edge case)',
+  },
+  {
+    zip: '90077',
+    expectedCity: 'Los Angeles',
+    expectedState: 'california',
+    note: 'Bel Air (LA area)',
+  },
+  {
+    zip: '33140',
+    expectedCity: 'Miami',
+    expectedState: 'florida',
+    note: 'Miami Beach',
+  },
+  {
+    zip: '10012',
+    expectedCity: 'New York',
+    expectedState: 'new-york',
+    note: 'SoHo',
+  },
+
+  // Test ZIP codes that might require region-based fallback
+  {
+    zip: '94110',
+    expectedCity: 'San Francisco',
+    expectedState: 'california',
+    note: 'San Francisco Mission',
+  },
+  {
+    zip: '98101',
+    expectedCity: 'Seattle',
+    expectedState: 'washington',
+    note: 'Seattle',
+  },
+  {
+    zip: '89109',
+    expectedCity: 'Las Vegas',
+    expectedState: 'nevada',
+    note: 'Las Vegas Strip',
+  },
+  {
+    zip: '20500',
+    expectedCity: 'Washington',
+    expectedState: 'district-of-columbia',
+    note: 'White House',
+  },
+
+  // Test pattern-based lookups for less common areas
+  {
+    zip: '02108',
+    expectedCity: 'Boston',
+    expectedState: 'massachusetts',
+    note: 'Boston',
+  },
+  {
+    zip: '80202',
+    expectedCity: 'Denver',
+    expectedState: 'colorado',
+    note: 'Denver',
+  },
+  {
+    zip: '75201',
+    expectedCity: 'Dallas',
+    expectedState: 'texas',
+    note: 'Dallas',
+  },
+  {
+    zip: '77002',
+    expectedCity: 'Houston',
+    expectedState: 'texas',
+    note: 'Houston',
+  },
+  {
+    zip: '48226',
+    expectedCity: 'Detroit',
+    expectedState: 'michigan',
+    note: 'Detroit',
+  },
+
+  // Borough tests for NYC
+  {
+    zip: '11201',
+    expectedCity: 'Brooklyn',
+    expectedState: 'new-york',
+    note: 'Brooklyn',
+  },
+  {
+    zip: '10458',
+    expectedCity: 'Bronx',
+    expectedState: 'new-york',
+    note: 'Bronx',
+  },
+  {
+    zip: '11432',
+    expectedCity: 'Queens',
+    expectedState: 'new-york',
+    note: 'Queens',
+  },
+  {
+    zip: '10301',
+    expectedCity: 'Staten Island',
+    expectedState: 'new-york',
+    note: 'Staten Island',
+  },
+
+  // Test non-existent or invalid ZIPs
+  {
+    zip: '00000',
+    expectedCity: 'New York',
+    expectedState: 'new-york',
+    note: 'Invalid ZIP - should fallback',
+  },
+  {
+    zip: '99999',
+    expectedCity: 'Seattle',
+    expectedState: 'washington',
+    note: 'Non-existent ZIP - should use region',
+  },
+];
 
 async function testZipCode(testCase) {
   const url = `${baseUrl}/api/zipcode?zip=${testCase.zip}`;
-  console.log(`Testing ZIP code ${testCase.zip}...`);
+  console.log(
+    `Testing ZIP code ${testCase.zip}${
+      testCase.note ? ` (${testCase.note})` : ''
+    }...`
+  );
 
   try {
     const response = await fetch(url, {
@@ -49,6 +179,7 @@ async function testZipCode(testCase) {
     }
 
     const data = await response.json();
+    console.log(`  Response source: ${data.source || 'unknown'}`);
 
     // Basic validation
     if (!data.city || !data.state) {
@@ -57,7 +188,7 @@ async function testZipCode(testCase) {
 
     // Check coordinates
     if (!data.coordinates || !data.coordinates.lat || !data.coordinates.lng) {
-      console.warn(`⚠️ Missing coordinates for ${testCase.zip}`);
+      console.warn(chalk.yellow(`⚠️ Missing coordinates for ${testCase.zip}`));
     }
 
     // Check expected values
@@ -68,15 +199,19 @@ async function testZipCode(testCase) {
 
     if (cityMatches && stateMatches) {
       console.log(
-        `✅ ${testCase.zip} => ${data.city}, ${data.state} (source: ${
-          data.source || 'unknown'
-        })`
+        chalk.green(
+          `✅ ${testCase.zip} => ${data.city}, ${data.state} (source: ${
+            data.source || 'unknown'
+          })`
+        )
       );
       return { success: true, data };
     } else {
       console.error(
-        `❌ ${testCase.zip} => ${data.city}, ${data.state} ` +
-          `EXPECTED: ${testCase.expectedCity}, ${testCase.expectedState}`
+        chalk.red(
+          `❌ ${testCase.zip} => ${data.city}, ${data.state} ` +
+            `EXPECTED: ${testCase.expectedCity}, ${testCase.expectedState}`
+        )
       );
       return {
         success: false,
@@ -88,63 +223,50 @@ async function testZipCode(testCase) {
       };
     }
   } catch (error) {
-    console.error(`❌ ${testCase.zip} Failed: ${error.message}`);
+    console.error(chalk.red(`❌ ${testCase.zip} Failed: ${error.message}`));
     return { success: false, error: error.message };
   }
 }
 
 async function runTests() {
-  console.log(`Testing ZIP code API at ${baseUrl}...`);
+  console.log(
+    chalk.blue(`\n🚀 Starting ZIP code API tests against ${baseUrl}\n`)
+  );
 
-  let successes = 0;
-  let failures = 0;
-  const results = [];
+  let passed = 0;
+  let failed = 0;
 
-  for (const testCase of testZips) {
+  for (const testCase of testCases) {
     const result = await testZipCode(testCase);
-    results.push({
-      zip: testCase.zip,
-      ...result,
-    });
-
     if (result.success) {
-      successes++;
+      passed++;
     } else {
-      failures++;
+      failed++;
     }
   }
 
-  console.log('\n===== TEST SUMMARY =====');
-  console.log(`Total tests: ${testZips.length}`);
-  console.log(`Passed: ${successes}`);
-  console.log(`Failed: ${failures}`);
+  // Summary
+  console.log(chalk.blue('\n===== Test Summary ====='));
+  console.log(`Total tests: ${testCases.length}`);
+  console.log(chalk.green(`Passed: ${passed}`));
+  console.log(chalk.red(`Failed: ${failed}`));
 
-  if (failures > 0) {
-    console.log('\nFailed tests:');
-    results
-      .filter((r) => !r.success)
-      .forEach((r) => {
-        console.log(
-          `- ZIP ${r.zip}: ${
-            r.error ||
-            `Got ${r.data.city}, ${r.data.state} instead of ${r.expected.city}, ${r.expected.state}`
-          }`
-        );
-      });
-
-    console.log('\nAction needed:');
-    console.log('1. Check if the API endpoint is accessible');
-    console.log('2. Check the special case handling in the zipcode.ts file');
-    console.log('3. Verify all NYC and borough ZIP codes map to New York City');
-    console.log('4. Ensure the fallback mechanism is working correctly');
+  // Exit with appropriate code
+  if (failed > 0) {
+    console.log(
+      chalk.yellow(
+        '\n⚠️ Some tests failed. Check the output above for details.'
+      )
+    );
     process.exit(1);
   } else {
-    console.log('\n🎉 All tests passed!');
+    console.log(chalk.green('\n🎉 All tests passed!'));
     process.exit(0);
   }
 }
 
+// Run the tests
 runTests().catch((error) => {
-  console.error('Test script error:', error);
+  console.error(chalk.red(`Error running tests: ${error.message}`));
   process.exit(1);
 });

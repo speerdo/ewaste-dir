@@ -15,7 +15,8 @@
     "astro": "astro",
     "import-data": "node scripts/import-data.js",
     "clean": "rm -rf dist node_modules/.astro node_modules/.vite .vercel/output",
-    "cleanup": "rm -rf dist/ .vercel/output/ .temp-build/"
+    "cleanup": "rm -rf dist/ .vercel/output/ .temp-build/",
+    "test-api": "node scripts/test-zipcode-api.js"
   },
   "dependencies": {
     "@astrojs/node": "^9.2.1",

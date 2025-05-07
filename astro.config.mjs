@@ -73,8 +73,12 @@ export default defineConfig({
   },
   routes: [
     {
+      pattern: '/api/zipcode',
+      entryPoint: 'src/pages/api/zipcode.ts',
+    },
+    {
       pattern: '/api/*',
-      entryPoint: 'src/api/*.ts',
+      entryPoint: 'src/pages/api/*.ts',
     },
   ],
   compressHTML: true,

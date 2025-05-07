@@ -47,6 +47,23 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        }
+      ]
     }
   ],
   "regions": ["iad1"],
@@ -59,6 +76,13 @@
     {
       "path": "/api/revalidate",
       "schedule": "0 0 * * *"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/zipcode",
+      "methods": ["GET", "POST", "OPTIONS"],
+      "continue": true
     }
   ]
 }

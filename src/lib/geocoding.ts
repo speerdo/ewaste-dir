@@ -2,6 +2,7 @@ import type {
   GeocodeResponse,
   GeocodeErrorResponse,
 } from '../pages/api/geocode';
+import { PRODUCTION_URL } from './url-utils';
 
 export interface Coordinates {
   lat: number;
@@ -47,11 +48,13 @@ export async function reverseGeocode(
   }
 
   const params = new URLSearchParams({
-    lat: coordinates.lat.toFixed(6),
-    lng: coordinates.lng.toFixed(6),
+    lat: coordinates.lat.toString(),
+    lng: coordinates.lng.toString(),
   });
 
-  const url = `${window.location.origin}/api/geocode?${params.toString()}`;
+  const url = import.meta.env.PROD
+    ? new URL(`/api/geocode?${params.toString()}`, PRODUCTION_URL).toString()
+    : `${window.location.origin}/api/geocode?${params.toString()}`;
 
   try {
     const response = await fetch(url, {

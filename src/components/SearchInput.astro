@@ -1,6 +1,7 @@
 ---
 import { getAllCityStatePairs, type CityStatePair } from '../lib/cityData';
 import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
+import { PRODUCTION_URL } from '../lib/url-utils';
 
 interface Props {
   placeholder?: string;
@@ -78,7 +79,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
   };
 </script>
 
-<script define:vars={{ cityStatePairs, id }}>
+<script define:vars={{ cityStatePairs, id, PRODUCTION_URL }}>
   const searchInput = document.getElementById(`search-input-${id}`);
   const searchButton = document.getElementById(`search-button-${id}`);
   const searchResults = document.getElementById(`search-results-${id}`);
@@ -203,7 +204,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       searchResults.classList.remove('hidden');
 
       // Call our zip code API using POST instead of GET
-      const apiUrl = new URL('/api/zipcode', window.location.origin);
+      const apiUrl = new URL('/api/zipcode', import.meta.env.PROD ? PRODUCTION_URL : window.location.origin);
       
       const response = await fetch(apiUrl, {
         method: 'POST',

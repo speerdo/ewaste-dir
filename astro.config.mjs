@@ -2,11 +2,14 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import vercel from '@astrojs/vercel/serverless';
 
+// Production domain
+const PRODUCTION_URL = 'https://www.recycleoldtech.com';
+
 // Get the site URL from environment variables or use a default for preview deployments
 const VERCEL_URL = process.env.VERCEL_URL;
 const SITE_URL =
   process.env.SITE_URL ||
-  (VERCEL_URL ? `https://${VERCEL_URL}` : 'http://localhost:4321');
+  (VERCEL_URL ? `https://${VERCEL_URL}` : PRODUCTION_URL);
 
 // https://astro.build/config
 export default defineConfig({

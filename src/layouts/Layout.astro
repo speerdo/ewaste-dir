@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/recycling-centers.css';
+import { getAbsoluteUrl, getCanonicalUrl } from '../lib/url-utils';
 
 interface Props {
   title: string;
@@ -17,33 +18,17 @@ const metaDescription = description || 'Find electronics recycling centers near 
 // Default OG image
 const defaultOgImage = '/images/default-og.png';
 
-// Production domain - always use this for OG images and URL tags
-const PRODUCTION_URL = 'https://www.recycleoldtech.com';
-
-// Get the current URL - handle Vercel deployment URLs correctly
+// Get the current URL
 const currentUrl = new URL(Astro.request.url);
-const siteUrl = import.meta.env.PROD ? PRODUCTION_URL : currentUrl.origin;
 
-// Function to ensure OG image URL is absolute
-const getAbsoluteUrl = (path: string) => {
-  try {
-    // If it's already an absolute URL, return it
-    new URL(path);
-    return path;
-  } catch {
-    // If it's a relative path, make it absolute with the production URL in production
-    return new URL(path, siteUrl).toString();
-  }
-};
+// Process OG image URL using our utility function
+const ogImageUrl = ogImage ? getAbsoluteUrl(ogImage) : getAbsoluteUrl(defaultOgImage);
+
+// Used for meta tags - get canonical URL
+const canonicalUrl = getCanonicalUrl(currentUrl);
 
 // Get Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
-
-// Process OG image URL
-const ogImageUrl = ogImage ? getAbsoluteUrl(ogImage) : getAbsoluteUrl(defaultOgImage);
-
-// Used for meta tags
-const canonicalUrl = new URL(currentUrl.pathname, siteUrl).toString();
 ---
 
 <!doctype html>

@@ -3,6 +3,11 @@ import { supabase } from '../../lib/supabase';
 
 export const prerender = false;
 
+// Explicitly mark this as an edge function for Vercel
+export const config = {
+  runtime: 'edge',
+};
+
 export interface ZipCodeResponse {
   city: string;
   state: string;

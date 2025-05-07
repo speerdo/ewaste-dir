@@ -52,9 +52,8 @@ export async function reverseGeocode(
     lng: coordinates.lng.toString(),
   });
 
-  const url = import.meta.env.PROD
-    ? new URL(`/api/geocode?${params.toString()}`, PRODUCTION_URL).toString()
-    : `${window.location.origin}/api/geocode?${params.toString()}`;
+  // Always use window.location.origin to ensure the API call goes to the current domain
+  const url = `${window.location.origin}/api/geocode?${params.toString()}`;
 
   try {
     const response = await fetch(url, {

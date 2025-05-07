@@ -33,12 +33,24 @@ export default defineConfig({
         '/blog': { expiration: 86400 },
         '/states/*': { expiration: 3600 },
         '/cities/*': { expiration: 3600 },
-        '/api/*': { expiration: 300 },
+        '/api/*': { expiration: 60 },
       },
     },
     edgeMiddleware: true,
     maxDuration: 8,
     functionPerRoute: true,
+    edges: [
+      {
+        name: 'api',
+        pattern: {
+          static: ['/api/geocode', '/api/cities-data', '/api/zipcode'],
+        },
+        config: {
+          runtime: 'edge',
+          regions: 'all',
+        },
+      },
+    ],
   }),
   build: {
     inlineStylesheets: 'auto',

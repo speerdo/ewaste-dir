@@ -205,8 +205,9 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       console.log('Starting to fetch city data...');
       // Add cache buster to avoid cached data
       const cacheBuster = `?t=${Date.now()}`;
-      console.log(`Using API URL: ${window.location.origin}/api/cities-data${cacheBuster}`);
-      fetch(`/api/cities-data${cacheBuster}`)
+      const citiesDataUrl = `${window.location.origin}/api/cities-data${cacheBuster}`;
+      console.log(`Using API URL: ${citiesDataUrl}`);
+      fetch(citiesDataUrl)
         .then(response => {
           console.log(`Cities data API response status: ${response.status}`);
           return response.json();
@@ -424,6 +425,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           let data;
           
           try {
+            console.log(`Fetching ZIP data from: ${apiUrl}`);
             const response = await fetch(apiUrl, {
               headers: {
                 'Accept': 'application/json',
@@ -471,11 +473,21 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       // Process ZIP code data to find a matching city
       async function processZipCodeData(zipCode, data) {
         try {
+          console.log(`Processing data for ZIP ${zipCode}:`, data);
+          
+          // Special case for the fallback "Unknown Location"
+          if (data.city === "Unknown Location" && data.state === "State Unknown") {
+            console.log("Got fallback location data, redirecting to search page");
+            window.location.href = `/search?q=${zipCode}`;
+            return;
+          }
+          
           // Format city and state correctly
-          const cityToFind = data.city.trim();
-          const stateToFind = data.state.trim();
+          const cityToFind = data.city?.trim() || '';
+          const stateToFind = data.state?.trim() || '';
           
           if (!cityToFind || !stateToFind) {
+            console.error(`Missing city/state data for ZIP ${zipCode}:`, data);
             throw new Error(`Could not extract city/state from data for ZIP ${zipCode}`);
           }
           

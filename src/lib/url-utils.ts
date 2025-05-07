@@ -10,6 +10,11 @@ export const PRODUCTION_URL = 'https://www.recycleoldtech.com';
  * @returns The site URL (production URL in production, origin in development)
  */
 export function getSiteUrl(): string {
+  // Use window.location.origin when in browser environment
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  // Use PRODUCTION_URL for server-side code in production
   return import.meta.env.PROD ? PRODUCTION_URL : '';
 }
 

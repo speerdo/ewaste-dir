@@ -48,6 +48,7 @@ export default defineConfig({
     assets: 'assets',
     serverEntry: 'entry.mjs',
     format: 'directory',
+    outDir: 'dist',
   },
   vite: {
     define: {

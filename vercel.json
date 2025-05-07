@@ -2,7 +2,7 @@
   "github": {
     "silent": true
   },
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build:vercel",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "astro",
@@ -64,16 +64,6 @@
           "value": "0"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/zipcode",
-      "destination": "/.vercel/functions/pages/api/zipcode.func"
-    },
-    {
-      "source": "/api/cities-data",
-      "destination": "/.vercel/functions/pages/api/cities-data.func"
     }
   ],
   "regions": ["iad1"],

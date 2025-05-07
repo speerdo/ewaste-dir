@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import vercel from '@astrojs/vercel/serverless';
+import vercel from '@astrojs/vercel';
 
 // Production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
@@ -15,7 +15,7 @@ const SITE_URL =
 export default defineConfig({
   site: SITE_URL,
   integrations: [tailwind()],
-  output: 'hybrid',
+  output: 'server',
   adapter: vercel({
     webAnalytics: {
       enabled: true,

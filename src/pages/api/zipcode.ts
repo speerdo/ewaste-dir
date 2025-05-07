@@ -1440,6 +1440,20 @@ async function findClosestCityByZipProximity(
   }
 }
 
+// Make sure the response is properly formatted for the Vercel Edge Runtime
+function createResponse(data: any, status: number = 200): Response {
+  // Ensure proper CORS headers and content type
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      ...corsHeaders,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0',
+    },
+  });
+}
+
 export const GET = (async ({ request }) => {
   // Support for OPTIONS requests for CORS
   if (request.method === 'OPTIONS') {
@@ -1450,12 +1464,29 @@ export const GET = (async ({ request }) => {
   }
 
   try {
-    // Get the ZIP code from the URL
+    // Get the ZIP code from the URL with better error handling
     const url = new URL(request.url);
-    const zipCode = url.searchParams.get('zip');
-    console.log(`Processing zipcode API request with params: ${url.search}`);
+    // Enhanced debugging for URL processing
+    console.log(`Processing request URL: ${request.url}`);
+    console.log(`URL search params: ${url.search}`);
 
-    if (!zipCode) {
+    // First try the standard .get() method
+    let zipCode = url.searchParams.get('zip');
+
+    // If that fails, try accessing the raw search params
+    if (!zipCode && url.search) {
+      console.log(`Standard param extraction failed, trying manual extraction`);
+      // Try to extract zip from the raw query string
+      const match = /[?&]zip=([^&]+)/.exec(url.search);
+      if (match && match[1]) {
+        zipCode = match[1];
+        console.log(`Manually extracted ZIP: ${zipCode}`);
+      }
+    }
+
+    console.log(`Final ZIP parameter: ${zipCode || 'not found'}`);
+
+    if (!zipCode || zipCode.trim() === '') {
       console.log('No ZIP code provided');
 
       // Get a real fallback city
@@ -1495,34 +1526,22 @@ export const GET = (async ({ request }) => {
           coordinates: getCoordinatesFromCity(fallbackCity),
         };
 
-        return new Response(
-          JSON.stringify({
-            error: 'Zip code is required',
-            fallback: formatResponse(fallbackData),
-          }),
-          {
-            status: 200,
-            headers: corsHeaders,
-          }
-        );
+        return createResponse({
+          error: 'Zip code is required',
+          fallback: formatResponse(fallbackData),
+        });
       }
 
       // Hardcoded fallback if no cities available
-      return new Response(
-        JSON.stringify({
-          error: 'Zip code is required',
-          fallback: formatResponse({
-            city: 'New York',
-            state: 'new-york',
-            source: 'error-fallback',
-            url: '/states/new-york/new-york',
-          }),
+      return createResponse({
+        error: 'Zip code is required',
+        fallback: formatResponse({
+          city: 'New York',
+          state: 'new-york',
+          source: 'error-fallback',
+          url: '/states/new-york/new-york',
         }),
-        {
-          status: 200,
-          headers: corsHeaders,
-        }
-      );
+      });
     }
 
     // Ensure the ZIP is a 5-digit string
@@ -1547,20 +1566,14 @@ export const GET = (async ({ request }) => {
       console.log(
         `Using high-priority override for Staten Island ZIP: ${fiveDigitZip}`
       );
-      return new Response(
-        JSON.stringify(
-          formatResponse({
-            city: 'Staten Island',
-            state: 'new-york',
-            source: 'direct-override',
-            url: '/states/new-york/staten-island',
-            coordinates: { lat: 40.5834, lng: -74.1496 }, // Staten Island coordinates
-          })
-        ),
-        {
-          status: 200,
-          headers: corsHeaders,
-        }
+      return createResponse(
+        formatResponse({
+          city: 'Staten Island',
+          state: 'new-york',
+          source: 'direct-override',
+          url: '/states/new-york/staten-island',
+          coordinates: { lat: 40.5834, lng: -74.1496 }, // Staten Island coordinates
+        })
       );
     }
 
@@ -1569,20 +1582,14 @@ export const GET = (async ({ request }) => {
       console.log(
         `Using high-priority override for invalid ZIP: ${fiveDigitZip}`
       );
-      return new Response(
-        JSON.stringify(
-          formatResponse({
-            city: 'New York',
-            state: 'new-york',
-            source: 'direct-override',
-            url: '/states/new-york/new-york',
-            coordinates: { lat: 40.7128, lng: -74.006 }, // New York City coordinates
-          })
-        ),
-        {
-          status: 200,
-          headers: corsHeaders,
-        }
+      return createResponse(
+        formatResponse({
+          city: 'New York',
+          state: 'new-york',
+          source: 'direct-override',
+          url: '/states/new-york/new-york',
+          coordinates: { lat: 40.7128, lng: -74.006 }, // New York City coordinates
+        })
       );
     }
 
@@ -1611,10 +1618,7 @@ export const GET = (async ({ request }) => {
             source: 'special-case-handler',
             url: targetCity.url,
           };
-          return new Response(JSON.stringify(formatResponse(specialData)), {
-            status: 200,
-            headers: corsHeaders,
-          });
+          return createResponse(formatResponse(specialData));
         }
       }
     }
@@ -1624,10 +1628,7 @@ export const GET = (async ({ request }) => {
 
     if (locationData) {
       console.log(`Found direct match in database for ZIP ${fiveDigitZip}`);
-      return new Response(JSON.stringify(formatResponse(locationData)), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return createResponse(formatResponse(locationData));
     }
 
     // STEP 2: If not in our database, try Google Maps API
@@ -1644,10 +1645,7 @@ export const GET = (async ({ request }) => {
         console.log(
           `Found equivalent city in our database: ${databaseCity.city}, ${databaseCity.state}`
         );
-        return new Response(JSON.stringify(formatResponse(databaseCity)), {
-          status: 200,
-          headers: corsHeaders,
-        });
+        return createResponse(formatResponse(databaseCity));
       }
 
       // If we couldn't find a match in our database, return the Google data
@@ -1660,10 +1658,7 @@ export const GET = (async ({ request }) => {
         warning: 'This city may not have a dedicated page in our system',
       };
 
-      return new Response(JSON.stringify(formatResponse(responseData)), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return createResponse(formatResponse(responseData));
     }
 
     // STEP 3.25: Before trying generic city name search, try regional ZIP pattern matching
@@ -1676,10 +1671,7 @@ export const GET = (async ({ request }) => {
       console.log(
         `Found regional ZIP match: ${regionalMatch.city}, ${regionalMatch.state}`
       );
-      return new Response(JSON.stringify(formatResponse(regionalMatch)), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return createResponse(formatResponse(regionalMatch));
     }
 
     // STEP 3.5: If regional match fails, try generic city name search
@@ -1690,10 +1682,7 @@ export const GET = (async ({ request }) => {
       console.log(
         `Found city by name match: ${cityNameMatch.city}, ${cityNameMatch.state}`
       );
-      return new Response(JSON.stringify(formatResponse(cityNameMatch)), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return createResponse(formatResponse(cityNameMatch));
     }
 
     // STEP 3.75: Try finding the closest city by ZIP code proximity
@@ -1708,10 +1697,7 @@ export const GET = (async ({ request }) => {
       console.log(
         `Found ZIP proximity match: ${proximityMatch.city}, ${proximityMatch.state}`
       );
-      return new Response(JSON.stringify(formatResponse(proximityMatch)), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return createResponse(formatResponse(proximityMatch));
     }
 
     // STEP 4: If ZIP proximity search fails, use region-based fallback
@@ -1722,10 +1708,7 @@ export const GET = (async ({ request }) => {
       console.log(
         `Found region-based fallback city: ${regionFallback.city}, ${regionFallback.state}`
       );
-      return new Response(JSON.stringify(formatResponse(regionFallback)), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return createResponse(formatResponse(regionFallback));
     }
 
     // STEP 5: Ultimate fallback - get any available city
@@ -1742,26 +1725,17 @@ export const GET = (async ({ request }) => {
         coordinates: getCoordinatesFromCity(defaultCity),
       };
 
-      return new Response(JSON.stringify(formatResponse(defaultData)), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return createResponse(formatResponse(defaultData));
     }
 
     // Last resort hardcoded fallback
-    return new Response(
-      JSON.stringify(
-        formatResponse({
-          city: 'New York',
-          state: 'new-york',
-          source: 'hardcoded-fallback',
-          url: '/states/new-york/new-york',
-        })
-      ),
-      {
-        status: 200,
-        headers: corsHeaders,
-      }
+    return createResponse(
+      formatResponse({
+        city: 'New York',
+        state: 'new-york',
+        source: 'hardcoded-fallback',
+        url: '/states/new-york/new-york',
+      })
     );
   } catch (error) {
     console.error(`ZIP API error:`, error);
@@ -1780,39 +1754,27 @@ export const GET = (async ({ request }) => {
           coordinates: getCoordinatesFromCity(fallbackCity),
         };
 
-        return new Response(
-          JSON.stringify({
-            error: 'Failed to process ZIP code',
-            message: error instanceof Error ? error.message : 'Unknown error',
-            fallback: formatResponse(fallbackData),
-          } as ZipCodeErrorResponse),
-          {
-            status: 200,
-            headers: corsHeaders,
-          }
-        );
+        return createResponse({
+          error: 'Failed to process ZIP code',
+          message: error instanceof Error ? error.message : 'Unknown error',
+          fallback: formatResponse(fallbackData),
+        } as ZipCodeErrorResponse);
       }
     } catch (innerError) {
       console.error('Error getting fallback city:', innerError);
     }
 
     // Hardcoded fallback
-    return new Response(
-      JSON.stringify({
-        error: 'Failed to process ZIP code',
-        message: error instanceof Error ? error.message : 'Unknown error',
-        fallback: formatResponse({
-          city: 'New York',
-          state: 'new-york',
-          source: 'error-fallback',
-          url: '/states/new-york/new-york',
-        }),
-      } as ZipCodeErrorResponse),
-      {
-        status: 200,
-        headers: corsHeaders,
-      }
-    );
+    return createResponse({
+      error: 'Failed to process ZIP code',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      fallback: formatResponse({
+        city: 'New York',
+        state: 'new-york',
+        source: 'error-fallback',
+        url: '/states/new-york/new-york',
+      }),
+    } as ZipCodeErrorResponse);
   }
 }) satisfies APIRoute;
 

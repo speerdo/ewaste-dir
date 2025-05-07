@@ -378,6 +378,10 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         searchResults?.classList.remove('hidden');
       }
       
+      // ZIP code validation cache to reduce API calls
+      const zipCodeCache = new Map();
+      const ZIP_CACHE_DURATION = 1000 * 60 * 15; // 15 minutes
+      
       // Main function for handling ZIP code search
       async function searchByZipCode(zipCode) {
         showLoading(true);
@@ -397,11 +401,20 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             `;
           }
 
+          // Check the cache first
+          const cachedZipData = zipCodeCache.get(zipCode);
+          if (cachedZipData && (Date.now() - cachedZipData.timestamp < ZIP_CACHE_DURATION)) {
+            console.log(`Using cached data for ZIP ${zipCode}`);
+            const data = cachedZipData.data;
+            processZipCodeData(zipCode, data);
+            return;
+          }
+
           // Fallback data for known ZIP codes in case API fails
           const fallbackZipData = {
-            '10001': { city: 'New York', state: 'New York' },
-            '10002': { city: 'New York', state: 'New York' },
-            '90210': { city: 'Beverly Hills', state: 'California' }
+            '10001': { city: 'New York', state: 'New York', coordinates: { lat: 40.7128, lng: -74.006 } },
+            '10002': { city: 'New York', state: 'New York', coordinates: { lat: 40.7128, lng: -74.006 } },
+            '90210': { city: 'Beverly Hills', state: 'California', coordinates: { lat: 34.0736, lng: -118.4004 } }
           };
 
           // Use our API to get location data
@@ -427,7 +440,15 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             if (!data || !data.city || !data.state) {
               throw new Error(`Invalid data received for ZIP ${zipCode}`);
             }
+            
+            // Store in cache for future use
+            zipCodeCache.set(zipCode, {
+              data,
+              timestamp: Date.now()
+            });
           } catch (error) {
+            console.error(`API error for ZIP ${zipCode}:`, error);
+            
             // If API call fails but we have a fallback for this ZIP, use it
             if (fallbackZipData[zipCode]) {
               console.log(`Using fallback data for ZIP ${zipCode}`);
@@ -438,6 +459,18 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             }
           }
           
+          // Process the data (moved to separate function)
+          await processZipCodeData(zipCode, data);
+        } catch (error) {
+          console.error(`Error searching by zip: ${error.message}`);
+          showError("Couldn't find that location. Please try a different search.");
+          showLoading(false);
+        }
+      }
+      
+      // Process ZIP code data to find a matching city
+      async function processZipCodeData(zipCode, data) {
+        try {
           // Format city and state correctly
           const cityToFind = data.city.trim();
           const stateToFind = data.state.trim();
@@ -445,6 +478,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           if (!cityToFind || !stateToFind) {
             throw new Error(`Could not extract city/state from data for ZIP ${zipCode}`);
           }
+          
+          console.log(`Looking for match for ${cityToFind}, ${stateToFind}`);
           
           // Find the matching city in our data
           let cityMatch = null;
@@ -456,6 +491,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           );
           
           if (exactMatch) {
+            console.log(`Found exact match: ${exactMatch.city}, ${exactMatch.state}`);
             cityMatch = exactMatch;
           } else {
             // If no exact match, try just the city name
@@ -464,10 +500,26 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             );
             
             if (cityNameMatch) {
+              console.log(`Found match by city name: ${cityNameMatch.city}, ${cityNameMatch.state}`);
               cityMatch = cityNameMatch;
             } else {
+              // Handle NYC boroughs specifically
+              const nycBoroughs = ['manhattan', 'brooklyn', 'queens', 'bronx', 'staten island'];
+              if (nycBoroughs.includes(cityToFind.toLowerCase()) && stateToFind.toLowerCase() === 'new york') {
+                console.log(`Detected NYC borough: ${cityToFind}`);
+                const nycMatch = cityStatePairs.find(pair => 
+                  pair.city.toLowerCase() === 'new york' && 
+                  pair.state.toLowerCase() === 'new york'
+                );
+                if (nycMatch) {
+                  console.log(`Matched NYC borough to New York City`);
+                  cityMatch = nycMatch;
+                }
+              }
+              
               // If still no match, try to find nearest city using coordinates
-              if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+              if (!cityMatch && data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+                console.log(`Trying distance-based matching with coordinates`);
                 let nearestCity = null;
                 let nearestDistance = Number.MAX_VALUE;
                 
@@ -494,6 +546,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                 });
                 
                 if (nearestCity) {
+                  console.log(`Found nearest city: ${nearestCity.city}, ${nearestCity.state} (${nearestDistance.toFixed(2)} km)`);
                   cityMatch = nearestCity;
                 }
               }
@@ -507,7 +560,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             showLoading(false);
           }
         } catch (error) {
-          console.error(`Error searching by zip: ${error.message}`);
+          console.error(`Error processing ZIP data: ${error.message}`);
           showError("Couldn't find that location. Please try a different search.");
           showLoading(false);
         }

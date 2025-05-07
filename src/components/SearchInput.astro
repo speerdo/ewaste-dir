@@ -1,7 +1,6 @@
 ---
 import { getAllCityStatePairs, type CityStatePair } from '../lib/cityData';
 import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
-import { PRODUCTION_URL } from '../lib/url-utils';
 
 interface Props {
   placeholder?: string;
@@ -183,6 +182,25 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
       }
       
+      // Calculate distance between two coordinate points
+      function calculateDistance(point1, point2) {
+        const R = 6371; // Earth's radius in kilometers
+        const dLat = toRad(point2.lat - point1.lat);
+        const dLon = toRad(point2.lng - point1.lng);
+        const lat1 = toRad(point1.lat);
+        const lat2 = toRad(point2.lat);
+
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+      }
+
+      function toRad(value) {
+        return (value * Math.PI) / 180;
+      }
+      
       // Fetch city data from the server for client-side search
       console.log('Starting to fetch city data...');
       // Add cache buster to avoid cached data
@@ -210,36 +228,11 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           // Log if we have coordinates data
           const citiesWithCoords = cityStatePairs.filter(city => city.coordinates && city.coordinates.lat && city.coordinates.lng);
           console.log(`Cities with coordinates: ${citiesWithCoords.length} of ${cityStatePairs.length}`);
-          
-          // Sample cities by state to check for coordinate distribution
-          const stateStats = {};
-          cityStatePairs.forEach(city => {
-            if (!stateStats[city.state]) {
-              stateStats[city.state] = { total: 0, withCoords: 0 };
-            }
-            stateStats[city.state].total++;
-            if (city.coordinates && city.coordinates.lat && city.coordinates.lng) {
-              stateStats[city.state].withCoords++;
-            }
-          });
-          
-          console.log('Coordinate stats by state:', 
-            Object.entries(stateStats)
-              .map(([state, stats]) => `${state}: ${stats.withCoords}/${stats.total}`)
-              .slice(0, 5)
-              .join(', ') + '...'
-          );
-          
-          if (citiesWithCoords.length > 0) {
-            console.log('First city with coordinates:', citiesWithCoords[0]);
-          } else {
-            console.warn('WARNING: No cities have coordinates data! Distance-based matching will not work.');
-          }
         })
         .catch(error => {
           console.error('Failed to load city data:', error);
         });
-         
+      
       // Use location button
       if (useLocationBtn) {
         useLocationBtn.addEventListener('click', async (e) => {
@@ -273,7 +266,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           }
         });
       }
-  
+      
       // Search for matching cities/states
       function searchLocations(query) {
         console.log(`Searching for: "${query}"`);
@@ -375,7 +368,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                 if (url) window.location.href = url;
               } else if (type === 'zip') {
                 const zip = button.getAttribute('data-zip');
-                if (zip) handleZipSearch(zip);
+                if (zip) searchByZipCode(zip);
               }
             });
           });
@@ -385,14 +378,13 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         searchResults?.classList.remove('hidden');
       }
       
-      // Handle a zip code search
-      async function handleZipSearch(zipCode) {
-        console.log(`Searching for zip code: ${zipCode}`);
+      // Main function for handling ZIP code search
+      async function searchByZipCode(zipCode) {
         showLoading(true);
         hideError();
         
         try {
-          // Show loading state
+          // Show loading indicator
           if (resultsContent) {
             resultsContent.innerHTML = `
               <div class="px-4 py-3">
@@ -404,238 +396,101 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               </div>
             `;
           }
-          searchResults?.classList.remove('hidden');
-          
-          // Log number of city pairs available before API call
-          console.log(`Number of city pairs available before API call: ${cityStatePairs.length}`);
-          
-          // Add timestamp for perf troubleshooting
-          console.time('zipcode-api-call');
-          
-          // Call our zipcode API
-          const apiUrl = new URL('/api/zipcode', window.location.origin);
-          console.log(`Fetching from: ${apiUrl.toString()}`);
-          
-          // Quick environment check - fix for error
-          const isProd = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
-          console.log(`Environment check: isProd=${isProd}, hostname=${window.location.hostname}`);
+
+          // Use our API to get location data
+          const cacheBuster = new Date().getTime();
+          const apiUrl = `${window.location.origin}/api/zipcode?zip=${zipCode}&_cb=${cacheBuster}`;
           
           const response = await fetch(apiUrl, {
-            method: 'POST',
             headers: {
               'Accept': 'application/json',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ zip: zipCode }),
+              'Cache-Control': 'no-cache'
+            }
           });
           
-          console.timeEnd('zipcode-api-call');
-          
-          console.log(`API response status: ${response.status}`);
-          
           if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || `HTTP error ${response.status}`);
+            throw new Error(`API request failed with status ${response.status}`);
           }
           
           const data = await response.json();
-          console.log('Zip code API response:', data);
           
-          // Check for empty data
           if (!data || !data.city || !data.state) {
-            throw new Error(`Unable to find location data for zip code ${zipCode}`);
+            throw new Error(`Invalid data received for ZIP ${zipCode}`);
           }
           
-          console.log(`Zip code ${zipCode} resolves to ${data.city}, ${data.state}`);
+          // Format city and state correctly
+          const cityToFind = data.city.trim();
+          const stateToFind = data.state.trim();
           
-          // Let's check if all the cities have the proper structure
-          console.log(`Checking city data structure for ${cityStatePairs.length} cities`);
-          console.log(`First city data for reference:`, cityStatePairs[0]);
-          
-          // Check if we have city pairs with coordinates
-          const citiesWithCoordinates = cityStatePairs.filter(city => 
-            city.coordinates && city.coordinates.lat && city.coordinates.lng
-          );
-          console.log(`Cities with coordinates: ${citiesWithCoordinates.length} of ${cityStatePairs.length}`);
-          
-          if (citiesWithCoordinates.length > 0) {
-            console.log(`Sample city with coordinates:`, citiesWithCoordinates[0]);
+          if (!cityToFind || !stateToFind) {
+            throw new Error(`Could not extract city/state from API response for ZIP ${zipCode}`);
           }
+          
+          // Find the matching city in our data
+          let cityMatch = null;
           
           // First, try to find an exact match based on city and state
           const exactMatch = cityStatePairs.find(pair => 
-            pair.city.toLowerCase() === data.city.toLowerCase() &&
-            pair.state.toLowerCase() === data.state.toLowerCase()
+            pair.city.toLowerCase() === cityToFind.toLowerCase() &&
+            pair.state.toLowerCase() === stateToFind.toLowerCase()
           );
           
           if (exactMatch) {
-            console.log('Found exact city match:', exactMatch);
-            window.location.href = exactMatch.url;
-            return;
-          }
-          
-          console.log(`No exact match found for ${data.city}, ${data.state}. Looking for nearest city...`);
-          
-          // If no exact match, find the nearest city based on coordinates
-          if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
-            console.log(`Using coordinates: lat=${data.coordinates.lat}, lng=${data.coordinates.lng}`);
-            
-            // First try cities in the same state
-            const sameStateMatches = cityStatePairs.filter(pair => 
-              pair.state.toLowerCase() === data.state.toLowerCase()
+            cityMatch = exactMatch;
+          } else {
+            // If no exact match, try just the city name
+            const cityNameMatch = cityStatePairs.find(pair => 
+              pair.city.toLowerCase() === cityToFind.toLowerCase()
             );
             
-            console.log(`Found ${sameStateMatches.length} cities in ${data.state}`);
-            
-            if (sameStateMatches.length > 0) {
-              // Find if any cities have coordinates
-              const citiesWithCoords = sameStateMatches.filter(city => city.coordinates && 
-                                                             city.coordinates.lat && 
-                                                             city.coordinates.lng);
-              
-              console.log(`${citiesWithCoords.length} cities have coordinates information`);
-              
-              if (citiesWithCoords.length > 0) {
-                // Find the nearest city in the same state
-                let nearestCity = citiesWithCoords[0];
-                let shortestDistance = calculateDistance(
-                  data.coordinates, 
-                  citiesWithCoords[0].coordinates
-                );
+            if (cityNameMatch) {
+              cityMatch = cityNameMatch;
+            } else {
+              // If still no match, try to find nearest city using coordinates
+              if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+                let nearestCity = null;
+                let nearestDistance = Number.MAX_VALUE;
                 
-                console.log(`Initial nearest city: ${nearestCity.city} at ${shortestDistance.toFixed(2)} km`);
-                
-                for (const city of citiesWithCoords.slice(1)) {
-                  const distance = calculateDistance(data.coordinates, city.coordinates);
-                  console.log(`Checking ${city.city}: ${distance.toFixed(2)} km`);
-                  
-                  if (distance < shortestDistance) {
-                    shortestDistance = distance;
-                    nearestCity = city;
-                    console.log(`New nearest city: ${nearestCity.city} at ${shortestDistance.toFixed(2)} km`);
-                  }
-                }
-                
-                console.log(`Redirecting to nearest city: ${nearestCity.city}, ${nearestCity.state} (${shortestDistance.toFixed(2)} km away)`);
-                window.location.href = nearestCity.url;
-                return;
-              } else {
-                console.log('No cities with coordinates found in the same state. Using first city in state as fallback.');
-                // If no cities have coordinates, just use the first city in the state
-                if (window.getMajorCitiesInState) {
-                  const majorCities = window.getMajorCitiesInState(data.state, sameStateMatches);
-                  if (majorCities.length > 0) {
-                    console.log(`Found major city in ${data.state}: ${majorCities[0].city}`);
-                    window.location.href = majorCities[0].url;
+                cityStatePairs.forEach(pair => {
+                  // Skip cities without coordinates
+                  if (!pair.coordinates || !pair.coordinates.lat || !pair.coordinates.lng) {
                     return;
                   }
-                }
+                  
+                  // Skip cities in different states unless we have to
+                  if (pair.state.toLowerCase() !== stateToFind.toLowerCase()) {
+                    return;
+                  }
+                  
+                  const distance = calculateDistance(
+                    data.coordinates,
+                    pair.coordinates
+                  );
+                  
+                  if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestCity = pair;
+                  }
+                });
                 
-                console.log(`Using first city in state: ${sameStateMatches[0].city}`);
-                window.location.href = sameStateMatches[0].url;
-                return;
+                if (nearestCity) {
+                  cityMatch = nearestCity;
+                }
               }
             }
-          } else {
-            console.log('No coordinates available in the response. Falling back to fuzzy matching.');
           }
           
-          // Fall back to fuzzy name matching
-          const cityMatches = cityStatePairs.filter(pair => 
-            pair.state.toLowerCase() === data.state.toLowerCase() &&
-            (
-              pair.city.toLowerCase().includes(data.city.toLowerCase()) ||
-              data.city.toLowerCase().includes(pair.city.toLowerCase())
-            )
-          );
-          
-          console.log(`Found ${cityMatches.length} cities with fuzzy name matching`);
-          
-          if (cityMatches.length === 1) {
-            // If only one match, redirect directly
-            console.log(`Single fuzzy match found: ${cityMatches[0].city}. Redirecting.`);
-            window.location.href = cityMatches[0].url;
-            return;
-          } else if (cityMatches.length > 1 && resultsContent) {
-            // Show multiple matches
-            console.log(`Multiple matches found. Showing options to user.`);
-            resultsContent.innerHTML = `
-              <div class="px-4 py-3 text-gray-600">
-                <p>Found recycling centers near ${zipCode} (${data.city}, ${data.state}):</p>
-              </div>
-              ${cityMatches.map(match => `
-                <button
-                  type="button"
-                  class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group"
-                  data-url="${match.url}"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  </svg>
-                  <span>${match.city}, ${match.state}</span>
-                </button>
-              `).join('')}
-            `;
-            
-            // Add click handlers
-            resultsContent.querySelectorAll('button[data-url]').forEach(button => {
-              button.addEventListener('click', () => {
-                const url = button.getAttribute('data-url');
-                if (url) window.location.href = url;
-              });
-            });
-          } else if (resultsContent) {
-            // As a last resort, get ANY city in the same state
-            const anyCityInState = cityStatePairs.find(pair => 
-              pair.state.toLowerCase() === data.state.toLowerCase()
-            );
-            
-            if (anyCityInState) {
-              console.log(`No direct matches found but found a city in the same state: ${anyCityInState.city}. Redirecting.`);
-              window.location.href = anyCityInState.url;
-              return;
-            }
-            
-            // If all else fails, tell the user no centers were found for that zip code
-            console.log(`No recycling centers found for zip code ${zipCode}`);
-            throw new Error(`No recycling centers found near ${zipCode} (${data.city}, ${data.state})`);
+          if (cityMatch) {
+            window.location.href = cityMatch.url;
+          } else {
+            showError(`No matching city found for ${cityToFind}, ${stateToFind}. Please try a different search.`);
+            showLoading(false);
           }
         } catch (error) {
-          console.error('Error searching by zip:', error);
-          if (resultsContent) {
-            resultsContent.innerHTML = `
-              <div class="px-4 py-3 text-red-500">
-                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                ${error instanceof Error ? error.message : 'Error searching by zip code. Please try a city name instead.'}
-              </div>
-            `;
-          }
-          searchResults?.classList.remove('hidden');
-          showError(error instanceof Error ? error.message : 'Error searching by zip code');
-        } finally {
+          console.error(`Error searching by zip: ${error.message}`);
+          showError("Couldn't find that location. Please try a different search.");
           showLoading(false);
         }
-      }
-      
-      // Calculate distance between two coordinate points
-      function calculateDistance(point1, point2) {
-        const R = 6371; // Earth's radius in kilometers
-        const dLat = toRad(point2.lat - point1.lat);
-        const dLon = toRad(point2.lng - point1.lng);
-        const lat1 = toRad(point1.lat);
-        const lat2 = toRad(point2.lat);
-
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
-      }
-
-      function toRad(value) {
-        return (value * Math.PI) / 180;
       }
       
       // Handle main search submission
@@ -647,72 +502,62 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         
         if (query.length < 2) {
           if (resultsContent) {
-            resultsContent.innerHTML = `<div class="px-4 py-3 text-gray-600">Please enter a city or zip code.</div>`;
+            resultsContent.innerHTML = `
+              <div class="px-4 py-3 text-red-500">
+                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Please enter a city name or ZIP code.
+              </div>
+            `;
           }
           searchResults?.classList.remove('hidden');
-          showError("Please enter at least 2 characters");
           showLoading(false);
           return;
         }
+
+        // Check if this is a ZIP code search
+        const isZipCode = /^\d{5}(-\d{4})?$/.test(query);
+        if (isZipCode) {
+          // Extract just the 5-digit ZIP if a 9-digit ZIP was entered
+          const zipCode = query.substring(0, 5);
+          searchByZipCode(zipCode);
+          return;
+        }
+
+        // Otherwise, handle as a city search
+        const suggestions = searchLocations(query);
         
-        // Check for numeric input that might be a zip code
-        const isAllDigits = /^\d+$/.test(query);
-        if (isAllDigits && query.length !== 5) {
+        if (suggestions.length === 0) {
           if (resultsContent) {
             resultsContent.innerHTML = `
               <div class="px-4 py-3 text-red-500">
                 <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Zip codes must be 5 digits. Please enter a valid zip code.
+                No recycling centers found for "${query}". Try entering a different city or a ZIP code.
               </div>
             `;
           }
           searchResults?.classList.remove('hidden');
-          showError("Zip codes must be 5 digits");
           showLoading(false);
           return;
         }
         
-        // Check for valid zip code
-        const isZipCode = /^\d{5}(-\d{4})?$/.test(query);
-        if (isZipCode) {
-          handleZipSearch(query);
+        // If we have a direct match or only one result, go straight to that location
+        if (suggestions.length === 1 || suggestions[0]?.text.toLowerCase() === query.toLowerCase()) {
+          console.log(`Direct match found: ${suggestions[0].text}`);
+          
+          if (suggestions[0].type === 'zip') {
+            searchByZipCode(suggestions[0].zip);
+          } else {
+            window.location.href = suggestions[0].url;
+          }
           return;
         }
         
-        // Try to find city match
-        const exactMatch = cityStatePairs.find(pair => 
-          pair.city.toLowerCase() === query.toLowerCase() ||
-          pair.state.toLowerCase() === query.toLowerCase() ||
-          `${pair.city.toLowerCase()}, ${pair.state.toLowerCase()}` === query.toLowerCase()
-        );
-        
-        if (exactMatch) {
-          window.location.href = exactMatch.url;
-          return;
-        }
-        
-        // Show suggestions if any exist
-        const suggestions = searchLocations(query);
-        if (suggestions.length > 0) {
-          showSuggestions(suggestions);
-          return;
-        }
-        
-        // No matches found
-        if (resultsContent) {
-          resultsContent.innerHTML = `
-            <div class="px-4 py-3 text-red-500">
-              <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              No recycling centers found for "${query}". Please try another city or zip code.
-            </div>
-          `;
-        }
-        searchResults?.classList.remove('hidden');
-        showError(`No recycling centers found for "${query}"`);
+        // Show multiple suggestions
+        showSuggestions(suggestions);
         showLoading(false);
       }
       
@@ -773,17 +618,6 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           searchResults.classList.add('hidden');
         }
       });
-      
-      // Instead of using imported data, re-use the initial city state pairs that are already defined
-      // in the component.
-      try {
-        if (typeof window !== 'undefined' && window.__CITY_STATE_PAIRS__) {
-          cityStatePairs = window.__CITY_STATE_PAIRS__;
-          console.log(`Using ${cityStatePairs.length} pre-loaded city pairs`);
-        }
-      } catch (e) {
-        console.error('Error accessing city data:', e);
-      }
     });
   });
 </script>
@@ -797,85 +631,4 @@ const id = variant === 'hero' ? 'hero' : 'nav';
   console.log(`Set global city data with ${cityStatePairs.length} cities`);
   const withCoords = cityStatePairs.filter(city => city.coordinates && city.coordinates.lat && city.coordinates.lng);
   console.log(`Global city data with coordinates: ${withCoords.length}/${cityStatePairs.length}`);
-</script>
-
-<!-- Helper function to find major cities in a state -->
-<script type="module">
-  // Define the function in the enclosing scope
-  function getMajorCitiesInState(stateName, cities) {
-    // List of known major cities by state
-    const majorCitiesByState = {
-      'alabama': ['birmingham', 'montgomery', 'huntsville', 'mobile'],
-      'alaska': ['anchorage', 'fairbanks', 'juneau'],
-      'arizona': ['phoenix', 'tucson', 'mesa', 'chandler', 'scottsdale'],
-      'arkansas': ['little rock', 'fayetteville', 'fort smith'],
-      'california': ['los angeles', 'san francisco', 'san diego', 'sacramento'],
-      'colorado': ['denver', 'colorado springs', 'boulder', 'fort collins'],
-      'connecticut': ['hartford', 'new haven', 'stamford', 'bridgeport'],
-      'delaware': ['wilmington', 'dover', 'newark'],
-      'florida': ['miami', 'orlando', 'tampa', 'jacksonville'],
-      'georgia': ['atlanta', 'savannah', 'augusta', 'columbus'],
-      'hawaii': ['honolulu', 'hilo', 'kailua'],
-      'idaho': ['boise', 'meridian', 'nampa', 'idaho falls'],
-      'illinois': ['chicago', 'springfield', 'peoria', 'rockford'],
-      'indiana': ['indianapolis', 'fort wayne', 'bloomington', 'south bend'],
-      'iowa': ['des moines', 'cedar rapids', 'davenport', 'iowa city'],
-      'kansas': ['wichita', 'overland park', 'kansas city', 'topeka'],
-      'kentucky': ['louisville', 'lexington', 'bowling green'],
-      'louisiana': ['new orleans', 'baton rouge', 'shreveport', 'lafayette'],
-      'maine': ['portland', 'augusta', 'bangor', 'lewiston'],
-      'maryland': ['baltimore', 'annapolis', 'rockville', 'frederick'],
-      'massachusetts': ['boston', 'cambridge', 'worcester', 'springfield'],
-      'michigan': ['detroit', 'grand rapids', 'ann arbor', 'lansing'],
-      'minnesota': ['minneapolis', 'saint paul', 'rochester', 'duluth'],
-      'mississippi': ['jackson', 'gulfport', 'biloxi', 'hattiesburg'],
-      'missouri': ['kansas city', 'st. louis', 'springfield', 'columbia'],
-      'montana': ['billings', 'missoula', 'great falls', 'bozeman'],
-      'nebraska': ['omaha', 'lincoln', 'bellevue', 'grand island'],
-      'nevada': ['las vegas', 'reno', 'henderson', 'north las vegas'],
-      'new hampshire': ['manchester', 'nashua', 'concord', 'derry'],
-      'new jersey': ['newark', 'jersey city', 'paterson', 'trenton'],
-      'new mexico': ['albuquerque', 'las cruces', 'santa fe', 'roswell'],
-      'new york': ['new york', 'buffalo', 'rochester', 'syracuse', 'albany'],
-      'north carolina': ['charlotte', 'raleigh', 'greensboro', 'durham'],
-      'north dakota': ['fargo', 'bismarck', 'grand forks', 'minot'],
-      'ohio': ['columbus', 'cleveland', 'cincinnati', 'toledo'],
-      'oklahoma': ['oklahoma city', 'tulsa', 'norman', 'broken arrow'],
-      'oregon': ['portland', 'salem', 'eugene', 'bend'],
-      'pennsylvania': ['philadelphia', 'pittsburgh', 'allentown', 'erie'],
-      'rhode island': ['providence', 'warwick', 'cranston', 'pawtucket'],
-      'south carolina': ['columbia', 'charleston', 'greenville', 'myrtle beach'],
-      'south dakota': ['sioux falls', 'rapid city', 'aberdeen', 'brookings'],
-      'tennessee': ['nashville', 'memphis', 'knoxville', 'chattanooga'],
-      'texas': ['houston', 'dallas', 'austin', 'san antonio', 'fort worth'],
-      'utah': ['salt lake city', 'west valley city', 'provo', 'west jordan'],
-      'vermont': ['burlington', 'essex', 'rutland', 'colchester'],
-      'virginia': ['virginia beach', 'norfolk', 'richmond', 'arlington'],
-      'washington': ['seattle', 'spokane', 'tacoma', 'vancouver'],
-      'west virginia': ['charleston', 'huntington', 'morgantown', 'parkersburg'],
-      'wisconsin': ['milwaukee', 'madison', 'green bay', 'kenosha'],
-      'wyoming': ['cheyenne', 'casper', 'laramie', 'gillette'],
-      'district of columbia': ['washington']
-    };
-    
-    // Get the major cities for this state
-    const majorCityNames = majorCitiesByState[stateName.toLowerCase()] || [];
-    
-    if (majorCityNames.length === 0) {
-      return [];
-    }
-    
-    // Find matches in our city list
-    const matches = cities.filter(city => 
-      majorCityNames.some(majorCity => 
-        city.city.toLowerCase().includes(majorCity) || 
-        majorCity.includes(city.city.toLowerCase())
-      )
-    );
-    
-    return matches.length > 0 ? matches : [];
-  }
-  
-  // Make it available globally
-  window.getMajorCitiesInState = getMajorCitiesInState;
 </script>

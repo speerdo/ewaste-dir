@@ -14,7 +14,8 @@ const corsHeaders = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Accept, X-Requested-With',
+  'Access-Control-Allow-Headers':
+    'Content-Type, Accept, X-Requested-With, X-No-Cache, X-Zip-Code, X-Request-ID',
   'Cache-Control': 'no-cache, no-store, must-revalidate',
   Pragma: 'no-cache',
   Expires: '0',
@@ -216,6 +217,10 @@ async function processZipCodeWithTimeout(
   const timeout = 4000; // 4 seconds max
   let timeoutId: NodeJS.Timeout | undefined;
 
+  // Add a unique timestamp to avoid any caching effects
+  const timestamp = Date.now();
+  console.log(`Processing ZIP ${zipCode} with timestamp ${timestamp}`);
+
   const timeoutPromise = new Promise<null>((resolve) => {
     timeoutId = setTimeout(() => {
       console.log(`Processing timed out after ${timeout}ms, using fallback`);
@@ -226,7 +231,7 @@ async function processZipCodeWithTimeout(
   try {
     console.log(`Starting zip code processing with timeout for ${zipCode}...`);
     const result = await Promise.race([
-      processZipCode(zipCode),
+      processZipCode(zipCode, timestamp),
       timeoutPromise,
     ]);
 
@@ -241,7 +246,10 @@ async function processZipCodeWithTimeout(
 /**
  * Main function to process a zip code
  */
-async function processZipCode(zipCode: string): Promise<LocationData | null> {
+async function processZipCode(
+  zipCode: string,
+  timestamp: number = Date.now()
+): Promise<LocationData | null> {
   try {
     // STEP 1: First check our database for the exact ZIP code with city/state
     // Use a short timeout for this first query
@@ -258,7 +266,9 @@ async function processZipCode(zipCode: string): Promise<LocationData | null> {
     });
 
     try {
-      console.log(`Checking database for ZIP code ${zipCode}`);
+      console.log(
+        `Checking database for ZIP code ${zipCode} (timestamp: ${timestamp})`
+      );
       const { data: zipData, error: zipError } = (await Promise.race([
         zipQueryPromise,
         zipTimeout,
@@ -297,7 +307,7 @@ async function processZipCode(zipCode: string): Promise<LocationData | null> {
                   lng: parseFloat(center.longitude),
                 }
               : undefined,
-          source: 'database-direct-match',
+          source: `database-direct-match-t${timestamp}`,
           url,
         };
       }
@@ -348,7 +358,11 @@ async function processZipCode(zipCode: string): Promise<LocationData | null> {
  * 5. Generic fallback with no hardcoded data
  */
 async function getFallbackCity(source: string): Promise<LocationData> {
-  console.log(`Getting fallback city (source: ${source})`);
+  // Add timestamp to avoid any caching
+  const timestamp = Date.now();
+  console.log(
+    `Getting fallback city (source: ${source}, timestamp: ${timestamp})`
+  );
 
   // Try to get a popular city with most recycling centers from the database
   try {
@@ -413,7 +427,7 @@ async function getFallbackCity(source: string): Promise<LocationData> {
           city: center.city,
           state: center.state,
           coordinates,
-          source: `popular-city-fallback-${source}`,
+          source: `popular-city-fallback-${source}-t${timestamp}`,
           url,
         };
       }
@@ -462,7 +476,7 @@ async function getFallbackCity(source: string): Promise<LocationData> {
                 lng: parseFloat(center.longitude),
               }
             : undefined,
-        source: `random-city-fallback-${source}`,
+        source: `random-city-fallback-${source}-t${timestamp}`,
         url,
       };
     }
@@ -485,7 +499,7 @@ async function getFallbackCity(source: string): Promise<LocationData> {
       return {
         city: city.city,
         state: city.state,
-        source: `city-pairs-fallback-${source}`,
+        source: `city-pairs-fallback-${source}-t${timestamp}`,
         url: city.url,
       };
     }
@@ -512,7 +526,7 @@ async function getFallbackCity(source: string): Promise<LocationData> {
       return {
         city: 'Unknown',
         state: state.name,
-        source: `states-table-fallback-${source}`,
+        source: `states-table-fallback-${source}-t${timestamp}`,
         url: `/states/${state.name.toLowerCase().replace(/\s+/g, '-')}`,
       };
     }
@@ -525,7 +539,7 @@ async function getFallbackCity(source: string): Promise<LocationData> {
   return {
     city: 'Unknown',
     state: 'unknown',
-    source: `complete-failure-${source}`,
+    source: `complete-failure-${source}-t${timestamp}`,
     url: '/',
   };
 }
@@ -584,6 +598,9 @@ function createResponse(data: any, status: number = 200): Response {
     data.requestId = `req_${Date.now()}_${data.requestedZip}`;
   }
 
+  // Add timestamp to response for debugging
+  data.timestamp = new Date().toISOString();
+
   // Ensure proper CORS headers and content type
   return new Response(JSON.stringify(data), {
     status,
@@ -592,6 +609,7 @@ function createResponse(data: any, status: number = 200): Response {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       Pragma: 'no-cache',
       Expires: '0',
+      'X-Response-Time': Date.now().toString(),
     },
   });
 }
@@ -713,10 +731,17 @@ export const POST = (async ({ request }) => {
     }
     console.log('Request headers:', requestHeaders);
 
+    // Check no-cache flag in headers
+    const noCache = requestHeaders['x-no-cache'] === 'true';
+    if (noCache) {
+      console.log('No-cache flag detected in headers');
+    }
+
     // Extract the ZIP code from the POST body
     let zipCode = null;
     let fallbackRequested = false;
     let requestId = null;
+    let noCacheRequested = noCache;
 
     try {
       const body = await request.json();
@@ -726,6 +751,12 @@ export const POST = (async ({ request }) => {
       if (body.requestId) {
         requestId = body.requestId;
         console.log(`Found request ID: ${requestId}`);
+      }
+
+      // Check for no-cache flag in body
+      if (body.noCache) {
+        noCacheRequested = true;
+        console.log('No-cache flag detected in body');
       }
 
       // Check if this is a fallback request
@@ -766,6 +797,12 @@ export const POST = (async ({ request }) => {
           console.log(`Found request ID in form: ${requestId}`);
         }
 
+        // Check for no-cache flag
+        if (formData.has('noCache')) {
+          noCacheRequested = formData.get('noCache') === 'true';
+          console.log(`No-cache flag in form: ${noCacheRequested}`);
+        }
+
         for (const [key, value] of formData.entries()) {
           console.log(`Form field: ${key}=${value}`);
           if (
@@ -785,6 +822,7 @@ export const POST = (async ({ request }) => {
     }
 
     console.log(`Final ZIP code from POST: ${zipCode || 'not found'}`);
+    console.log(`No-cache requested: ${noCacheRequested}`);
 
     if (fallbackRequested) {
       console.log('Processing fallback request from POST body');

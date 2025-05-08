@@ -385,16 +385,6 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         searchResults?.classList.remove('hidden');
       }
       
-      // ZIP code validation cache to reduce API calls
-      const zipCodeCache = new Map();
-      const ZIP_CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
-      
-      // Explicitly clear the cache for testing
-      function clearZipCache() {
-        zipCodeCache.clear();
-        console.log('ZIP code cache cleared');
-      }
-      
       // Main function for handling ZIP code search
       async function searchByZipCode(zipCode) {
         try {
@@ -423,23 +413,6 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             showLoading(false);
             return;
           }
-
-          // Create a unique cache key for this ZIP
-          const cacheKey = `zip_${zipCode}_v2`; // Version suffix helps invalidate old cached data
-          
-          // Check the cache first
-          const cachedZipData = zipCodeCache.get(cacheKey);
-          if (cachedZipData && (Date.now() - cachedZipData.timestamp < ZIP_CACHE_DURATION)) {
-            console.log(`Using cached data for ZIP ${zipCode}`);
-            const data = cachedZipData.data;
-            if (data) {
-              processZipCodeData(zipCode, data);
-              return;
-            } else {
-              console.log(`Cached data for ZIP ${zipCode} is invalid, clearing cache entry`);
-              zipCodeCache.delete(cacheKey);
-            }
-          }
           
           // Generate a unique request ID to avoid caching issues
           const requestId = Date.now() + Math.floor(Math.random() * 1000);
@@ -466,7 +439,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                   'Expires': '0',
                   'X-Requested-With': 'fetch',
                   'X-Zip-Code': zipCode, // Add ZIP to headers for debugging
-                  'X-Request-ID': requestId.toString() // Add a request ID to track
+                  'X-Request-ID': requestId.toString(), // Add a request ID to track
+                  'X-No-Cache': 'true' // Signal to bypass all caching
                 },
                 cache: 'no-store'
               };
@@ -474,37 +448,39 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               // Try a variety of request formats systematically for all ZIP codes
               if (attempts === 1) {
                 // First attempt: using a path parameter (RESTful approach)
-                apiUrl = `${window.location.origin}/api/zipcode/${zipCode}`;
+                apiUrl = `${window.location.origin}/api/zipcode/${zipCode}?_nocache=${requestId}`;
                 console.log(`Attempt 1: Using path parameter URL: ${apiUrl}`);
                 fetchOptions.method = 'GET';
               } else if (attempts === 2) {
                 // Second attempt: Use POST request with ZIP in body
-                apiUrl = `${window.location.origin}/api/zipcode`;
+                apiUrl = `${window.location.origin}/api/zipcode?_nocache=${requestId}`;
                 console.log(`Attempt 2: Using POST request to: ${apiUrl}`);
                 fetchOptions.method = 'POST';
                 fetchOptions.headers['Content-Type'] = 'application/json';
                 fetchOptions.body = JSON.stringify({ 
                   zip: zipCode,
-                  requestId: requestId
+                  requestId: requestId,
+                  noCache: true
                 });
               } else if (attempts === 3) {
                 // Third attempt: Use POST request with form data
-                apiUrl = `${window.location.origin}/api/zipcode`;
+                apiUrl = `${window.location.origin}/api/zipcode?_nocache=${requestId}`;
                 console.log(`Attempt 3: Using POST with form data: ${apiUrl}`);
                 fetchOptions.method = 'POST';
                 delete fetchOptions.headers['Content-Type']; // Let the browser set this for form data
                 const formData = new FormData();
                 formData.append('zip', zipCode);
                 formData.append('requestId', requestId);
+                formData.append('noCache', 'true');
                 fetchOptions.body = formData;
               } else if (attempts === 4) {
                 // Fourth attempt: Use alternative path format
-                apiUrl = `${window.location.origin}/api/zipcode/postal/${zipCode}`;
+                apiUrl = `${window.location.origin}/api/zipcode/postal/${zipCode}?_nocache=${requestId}`;
                 console.log(`Attempt 4: Using alternative path format: ${apiUrl}`);
                 fetchOptions.method = 'GET';
               } else {
                 // Fifth attempt: Use special POST with multiple fields
-                apiUrl = `${window.location.origin}/api/zipcode`;
+                apiUrl = `${window.location.origin}/api/zipcode?_nocache=${requestId}`;
                 console.log(`Attempt 5: Using POST with multiple fields: ${apiUrl}`);
                 fetchOptions.method = 'POST';
                 fetchOptions.headers['Content-Type'] = 'application/json';
@@ -513,7 +489,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                   zipCode: zipCode,
                   postal_code: zipCode,
                   zipcode: zipCode,
-                  requestId: requestId
+                  requestId: requestId,
+                  noCache: true
                 });
               }
               
@@ -612,20 +589,24 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               // Make one final attempt to get a fallback location from the API
               try {
                 console.log(`Making final fallback request to API`);
-                const fallbackUrl = `${window.location.origin}/api/zipcode`;
+                const fallbackUrl = `${window.location.origin}/api/zipcode?_nocache=${Date.now()}`;
                 const fallbackResponse = await fetch(fallbackUrl, {
                   method: 'POST',
                   headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Cache-Control': 'no-cache',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0',
                     'X-Zip-Code': zipCode, // Add ZIP to headers for debugging
-                    'X-Request-ID': requestId.toString() // Add request ID
+                    'X-Request-ID': requestId.toString(), // Add request ID
+                    'X-No-Cache': 'true' // Signal to bypass all caching
                   },
                   body: JSON.stringify({
                     fallback: true,
                     zip: zipCode,
-                    requestId: requestId
+                    requestId: requestId,
+                    noCache: true
                   }),
                   cache: 'no-store'
                 });
@@ -648,15 +629,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             }
           }
           
-          // Store in cache for future use - using the specific ZIP code as key
-          if (data) {
-            zipCodeCache.set(cacheKey, {
-              data,
-              timestamp: Date.now()
-            });
-          }
-          
-          // Process the data
+          // Process the data without caching
           await processZipCodeData(zipCode, data);
         } catch (error) {
           console.error(`Error searching by zip: ${error.message || error}`);

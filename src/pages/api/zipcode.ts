@@ -2,14 +2,6 @@ import type { APIRoute } from 'astro';
 import { supabase } from '../../lib/supabase';
 import { getAllCityStatePairs } from '../../lib/cityData';
 
-// Define our extended version of CityStatePair with coordinates
-interface ExtendedCityData {
-  city: string;
-  state: string;
-  url: string;
-  coordinates?: { lat: number; lng: number };
-}
-
 export const prerender = false;
 
 // Explicitly mark this as an edge function for Vercel
@@ -51,27 +43,6 @@ interface ZipCodeErrorResponse {
   error: string;
   message?: string;
   fallback?: ZipCodeResponse;
-}
-
-/**
- * Helper function to safely access coordinates from a city
- */
-function getCoordinatesFromCity(
-  city: any
-): { lat: number; lng: number } | undefined {
-  if (
-    city &&
-    city.coordinates &&
-    typeof city.coordinates === 'object' &&
-    'lat' in city.coordinates &&
-    'lng' in city.coordinates
-  ) {
-    return {
-      lat: city.coordinates.lat,
-      lng: city.coordinates.lng,
-    };
-  }
-  return undefined;
 }
 
 /**
@@ -145,7 +116,7 @@ async function getCoordinatesFromZipCode(
 /**
  * Find the closest city based on finding the nearest recycling center
  */
-async function findClosestCityByRecyclingCenter(coordinates: {
+async function findClosestRecyclingCenter(coordinates: {
   lat: number;
   lng: number;
 }): Promise<LocationData | null> {
@@ -154,14 +125,15 @@ async function findClosestCityByRecyclingCenter(coordinates: {
       `Finding closest recycling center for coordinates: ${coordinates.lat}, ${coordinates.lng}`
     );
 
-    // Query all recycling centers with coordinates
+    // Optimize the query by adding limits
     const { data: centers, error } = await supabase
       .from('recycling_centers')
       .select('id, city, state, latitude, longitude')
       .not('latitude', 'is', null)
       .not('longitude', 'is', null)
       .not('city', 'is', null)
-      .not('state', 'is', null);
+      .not('state', 'is', null)
+      .limit(1000); // Limit to 1000 centers to avoid timing out
 
     if (error) {
       console.error('Error querying recycling centers:', error);
@@ -216,7 +188,7 @@ async function findClosestCityByRecyclingCenter(coordinates: {
 
       return {
         city: closestCenter.city,
-        state: formattedState,
+        state: closestCenter.state,
         coordinates: {
           lat: parseFloat(closestCenter.latitude),
           lng: parseFloat(closestCenter.longitude),
@@ -234,63 +206,44 @@ async function findClosestCityByRecyclingCenter(coordinates: {
 }
 
 /**
- * First try to find coordinates for the zip code, then find the closest city
+ * Process the ZIP code with a timeout to avoid serverless function timeouts
+ */
+async function processZipCodeWithTimeout(
+  zipCode: string
+): Promise<LocationData | null> {
+  // Set a timeout for the whole operation to avoid Vercel timeouts
+  const timeout = 4000; // 4 seconds max
+  let timeoutId: NodeJS.Timeout | undefined;
+
+  const timeoutPromise = new Promise<null>((resolve) => {
+    timeoutId = setTimeout(() => {
+      console.log(`Processing timed out after ${timeout}ms, using fallback`);
+      resolve(null);
+    }, timeout);
+  });
+
+  try {
+    const result = await Promise.race([
+      processZipCode(zipCode),
+      timeoutPromise,
+    ]);
+
+    if (timeoutId) clearTimeout(timeoutId);
+    return result;
+  } catch (error) {
+    console.error(`Error in timeout wrapper:`, error);
+    return null;
+  }
+}
+
+/**
+ * Main function to process a zip code
  */
 async function processZipCode(zipCode: string): Promise<LocationData | null> {
   try {
-    // Special case handling for specific ZIPs - maintains most important overrides
-    const zipOverrides: Record<string, { city: string; state: string }> = {
-      '33140': { city: 'Miami', state: 'florida' }, // Miami Beach → Miami
-      '33139': { city: 'Miami', state: 'florida' }, // Miami Beach → Miami
-      '33141': { city: 'Miami', state: 'florida' }, // Miami Beach → Miami
-      '10301': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10302': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10303': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10304': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10305': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10306': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10307': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10308': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10309': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10310': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10312': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '10314': { city: 'Staten Island', state: 'new-york' }, // Staten Island
-      '11432': { city: 'Queens', state: 'new-york' }, // Jamaica → Queens
-      '00000': { city: 'New York', state: 'new-york' }, // Invalid → New York
-      '99999': { city: 'Seattle', state: 'washington' }, // Test case → Seattle
-      // Add an override for 28370 (Southern Pines, NC)
-      '28370': { city: 'Southern Pines', state: 'north-carolina' },
-      '28371': { city: 'Southern Pines', state: 'north-carolina' },
-      '28374': { city: 'Southern Pines', state: 'north-carolina' },
-    };
-
-    // Check if we have an override for this ZIP
-    if (zipOverrides[zipCode]) {
-      console.log(`Applying ZIP code override for ${zipCode}`);
-      const override = zipOverrides[zipCode];
-
-      // Format the state to match URL convention
-      const formattedState = override.state.toLowerCase().replace(/\s+/g, '-');
-      const formattedCity = override.city.toLowerCase().replace(/\s+/g, '-');
-
-      // Create URL for this city
-      const url = `/states/${formattedState}/${formattedCity}`;
-
-      // Get coordinates for this city if available
-      const coordinates = getFallbackCoordinates(formattedCity, formattedState);
-
-      return {
-        city: override.city,
-        state: formattedState,
-        coordinates,
-        source: 'override',
-        url,
-      };
-    }
-
     // STEP 1: First check our database for the exact ZIP code with city/state
-    console.log(`Checking database for ZIP code ${zipCode}`);
-    const { data: zipData, error: zipError } = await supabase
+    // Use a short timeout for this first query
+    const zipQueryPromise = supabase
       .from('recycling_centers')
       .select('city, state, latitude, longitude')
       .eq('postal_code', parseInt(zipCode, 10))
@@ -298,16 +251,174 @@ async function processZipCode(zipCode: string): Promise<LocationData | null> {
       .not('state', 'is', null)
       .limit(1);
 
-    if (zipError) {
-      console.error(`Error querying database for ZIP ${zipCode}:`, zipError);
+    const zipTimeout = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Zip query timeout')), 1000);
+    });
+
+    try {
+      console.log(`Checking database for ZIP code ${zipCode}`);
+      const { data: zipData, error: zipError } = (await Promise.race([
+        zipQueryPromise,
+        zipTimeout,
+      ])) as any;
+
+      if (zipError) {
+        console.error(`Error querying database for ZIP ${zipCode}:`, zipError);
+      }
+
+      // If we found a match in our database, use it directly
+      if (
+        zipData &&
+        zipData.length > 0 &&
+        zipData[0].city &&
+        zipData[0].state
+      ) {
+        const center = zipData[0];
+        console.log(
+          `Found direct match in database: ${center.city}, ${center.state}`
+        );
+
+        // Format the state to match URL convention
+        const formattedState = center.state.toLowerCase().replace(/\s+/g, '-');
+        const formattedCity = center.city.toLowerCase().replace(/\s+/g, '-');
+
+        // Create URL for this city
+        const url = `/states/${formattedState}/${formattedCity}`;
+
+        return {
+          city: center.city,
+          state: center.state,
+          coordinates:
+            center.latitude && center.longitude
+              ? {
+                  lat: parseFloat(center.latitude),
+                  lng: parseFloat(center.longitude),
+                }
+              : undefined,
+          source: 'database-direct-match',
+          url,
+        };
+      }
+    } catch (error) {
+      console.log(`ZIP query timed out or failed, continuing with geocoding`);
     }
 
-    // If we found a match in our database, use it directly
-    if (zipData && zipData.length > 0 && zipData[0].city && zipData[0].state) {
-      const center = zipData[0];
-      console.log(
-        `Found direct match in database: ${center.city}, ${center.state}`
-      );
+    // STEP 2: Get coordinates for the ZIP code
+    const coordinates = await getCoordinatesFromZipCode(zipCode);
+
+    if (!coordinates) {
+      console.log(`Could not get coordinates for ZIP ${zipCode}`);
+      return getFallbackCity('zip-coordinate-error');
+    }
+
+    // STEP 3: Find the closest recycling center in our database
+    try {
+      const closestCenterTimeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Center query timeout')), 2000);
+      });
+
+      const closestCenter = (await Promise.race([
+        findClosestRecyclingCenter(coordinates),
+        closestCenterTimeout,
+      ])) as any;
+
+      if (closestCenter) {
+        return closestCenter;
+      }
+    } catch (error) {
+      console.log(`Recycling center query timed out, trying fallback`);
+    }
+
+    return getFallbackCity('no-match-found');
+  } catch (error) {
+    console.error(`Error processing ZIP ${zipCode}:`, error);
+    return getFallbackCity('error-exception');
+  }
+}
+
+/**
+ * Get a fallback city when all else fails - always from the database
+ */
+async function getFallbackCity(source: string): Promise<LocationData> {
+  // Try to get a popular city with most recycling centers from the database
+  try {
+    // Query to find cities with the most recycling centers - without using group
+    const { data: centers } = await supabase
+      .from('recycling_centers')
+      .select('city, state')
+      .not('city', 'is', null)
+      .not('state', 'is', null);
+
+    if (centers && centers.length > 0) {
+      // Count occurrences of each city/state pair
+      const cityCounts = centers.reduce((acc, center) => {
+        const key = `${center.city}-${center.state}`;
+        acc[key] = acc[key] || {
+          city: center.city,
+          state: center.state,
+          count: 0,
+        };
+        acc[key].count++;
+        return acc;
+      }, {} as Record<string, { city: string; state: string; count: number }>);
+
+      // Find the most popular city
+      const popularCities = Object.values(cityCounts)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      if (popularCities.length > 0) {
+        const center = popularCities[0];
+
+        // Now get a specific recycling center for this city/state to get coordinates
+        const { data: centerDetails } = await supabase
+          .from('recycling_centers')
+          .select('latitude, longitude')
+          .eq('city', center.city)
+          .eq('state', center.state)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .limit(1);
+
+        // Format the state to match URL convention
+        const formattedState = center.state.toLowerCase().replace(/\s+/g, '-');
+        const formattedCity = center.city.toLowerCase().replace(/\s+/g, '-');
+
+        // Create URL for this city
+        const url = `/states/${formattedState}/${formattedCity}`;
+
+        let coordinates = undefined;
+        if (centerDetails && centerDetails.length > 0) {
+          coordinates = {
+            lat: parseFloat(centerDetails[0].latitude),
+            lng: parseFloat(centerDetails[0].longitude),
+          };
+        }
+
+        return {
+          city: center.city,
+          state: center.state,
+          coordinates,
+          source: `popular-city-fallback-${source}`,
+          url,
+        };
+      }
+    }
+  } catch (error) {
+    console.error('Failed to get popular city fallback:', error);
+  }
+
+  // Second fallback: get any city from the database
+  try {
+    const { data: centers } = await supabase
+      .from('recycling_centers')
+      .select('city, state, latitude, longitude')
+      .not('city', 'is', null)
+      .not('state', 'is', null)
+      .limit(5);
+
+    if (centers && centers.length > 0) {
+      const center = centers[0];
 
       // Format the state to match URL convention
       const formattedState = center.state.toLowerCase().replace(/\s+/g, '-');
@@ -318,7 +429,7 @@ async function processZipCode(zipCode: string): Promise<LocationData | null> {
 
       return {
         city: center.city,
-        state: formattedState,
+        state: center.state,
         coordinates:
           center.latitude && center.longitude
             ? {
@@ -326,183 +437,60 @@ async function processZipCode(zipCode: string): Promise<LocationData | null> {
                 lng: parseFloat(center.longitude),
               }
             : undefined,
-        source: 'database-direct-match',
+        source: `database-fallback-${source}`,
         url,
       };
     }
-
-    // STEP 2: Get coordinates for the ZIP code
-    const coordinates = await getCoordinatesFromZipCode(zipCode);
-
-    if (!coordinates) {
-      console.log(`Could not get coordinates for ZIP ${zipCode}`);
-      return null;
-    }
-
-    // STEP 3: Find the closest recycling center in our database
-    const closestCenter = await findClosestCityByRecyclingCenter(coordinates);
-
-    if (closestCenter) {
-      return closestCenter;
-    }
-
-    // STEP 4: Try with the original city method as fallback
-    console.log(`No matching recycling center found, trying with city data`);
-    const closestCity = await findClosestCityByCoordinates(coordinates);
-
-    if (closestCity) {
-      return closestCity;
-    }
-
-    // If we couldn't find a city with coordinates, try to get any city
-    console.log(`No cities with coordinates found, trying to get any city`);
-    const allCityStatePairs = await getAllCityStatePairs();
-
-    // Print out the first few cities to debug
-    console.log(
-      `First few cities in database:`,
-      (allCityStatePairs as ExtendedCityData[]).slice(0, 5).map((c) => ({
-        city: c.city,
-        state: c.state,
-        hasCoords: c.coordinates ? true : false,
-      }))
-    );
-
-    // If we have city data but no coordinates, return the first major city
-    if (allCityStatePairs && allCityStatePairs.length > 0) {
-      // Try to find a major city first
-      const majorCities = [
-        'New York',
-        'Los Angeles',
-        'Chicago',
-        'Houston',
-        'Dallas',
-      ];
-      let cityMatch = null;
-
-      for (const cityName of majorCities) {
-        const match = allCityStatePairs.find((c) => c.city === cityName);
-        if (match) {
-          cityMatch = match;
-          break;
-        }
-      }
-
-      // If no major city, use the first one
-      if (!cityMatch) {
-        cityMatch = allCityStatePairs[0];
-      }
-
-      console.log(`Using fallback city: ${cityMatch.city}, ${cityMatch.state}`);
-
-      return {
-        city: cityMatch.city,
-        state: cityMatch.state.toLowerCase().replace(/\s+/g, '-'),
-        coordinates: coordinates, // Use the ZIP coordinates, not the city's
-        source: 'zip-to-major-city-fallback',
-        url: cityMatch.url,
-      };
-    }
-
-    return null;
   } catch (error) {
-    console.error(`Error processing ZIP ${zipCode}:`, error);
-    return null;
+    console.error('Failed to get database fallback city:', error);
   }
-}
 
-/**
- * Find the closest city from our database based on coordinates
- */
-async function findClosestCityByCoordinates(coordinates: {
-  lat: number;
-  lng: number;
-}): Promise<LocationData | null> {
+  // Third fallback - get first city from cityStatePairs
   try {
-    console.log(
-      `Finding closest city for coordinates: ${coordinates.lat}, ${coordinates.lng}`
-    );
-
-    // Get all city-state pairs from our database
-    const cityStatePairs = await getAllCityStatePairs();
-
-    if (!cityStatePairs || cityStatePairs.length === 0) {
-      console.log('No city-state pairs available');
-      return null;
-    }
-
-    // Debug: Log the total number of cities and how many have coordinates
-    const allCities = cityStatePairs.length;
-    const citiesWithCoords = (cityStatePairs as ExtendedCityData[]).filter(
-      (city) =>
-        city.coordinates &&
-        typeof city.coordinates === 'object' &&
-        'lat' in city.coordinates &&
-        'lng' in city.coordinates
-    ).length;
-
-    console.log(
-      `Total cities: ${allCities}, Cities with coordinates: ${citiesWithCoords}`
-    );
-
-    // Filter out cities that don't have coordinates
-    const citiesWithCoordinates = (cityStatePairs as ExtendedCityData[]).filter(
-      (city) => {
-        const coords = getCoordinatesFromCity(city);
-        return coords !== undefined;
-      }
-    );
-
-    if (citiesWithCoordinates.length === 0) {
-      console.log(
-        'No cities with coordinates available for distance calculation'
-      );
-      return null;
-    }
-
-    // Find the closest city
-    let closestCity = null;
-    let closestDistance = Number.MAX_VALUE;
-
-    for (const city of citiesWithCoordinates) {
-      const cityCoords = getCoordinatesFromCity(city);
-      if (!cityCoords) continue;
-
-      // Calculate distance between the two points
-      const distance = calculateDistance(coordinates, cityCoords);
-
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestCity = city;
-      }
-    }
-
-    if (closestCity) {
-      console.log(
-        `Found closest city: ${closestCity.city}, ${
-          closestCity.state
-        } (${closestDistance.toFixed(2)}km away)`
-      );
-
+    const allCities = await getAllCityStatePairs();
+    if (allCities && allCities.length > 0) {
+      const city = allCities[0];
       return {
-        city: closestCity.city,
-        state: closestCity.state.toLowerCase().replace(/\s+/g, '-'),
-        coordinates: getCoordinatesFromCity(closestCity),
-        source: 'closest-by-distance',
-        url: closestCity.url,
+        city: city.city,
+        state: city.state,
+        source: `city-pairs-fallback-${source}`,
+        url: city.url,
       };
     }
-
-    return null;
   } catch (error) {
-    console.error('Error finding closest city by coordinates:', error);
-    return null;
+    console.error('Failed to get city pairs fallback:', error);
   }
+
+  // This should basically never happen, but just in case everything fails
+  // Query the database for any state and construct a fallback
+  try {
+    const { data: states } = await supabase
+      .from('states')
+      .select('name')
+      .limit(1);
+
+    if (states && states.length > 0) {
+      return {
+        city: 'Unknown',
+        state: states[0].name,
+        source: `states-table-fallback-${source}`,
+        url: `/states/${states[0].name.toLowerCase().replace(/\s+/g, '-')}`,
+      };
+    }
+  } catch (error) {
+    console.error('Failed to get states fallback:', error);
+  }
+
+  // Absolute last resort with no database dependency
+  return {
+    city: 'Unknown',
+    state: 'unknown',
+    source: `complete-failure-${source}`,
+    url: '/',
+  };
 }
 
-/**
- * Helper function to calculate distance between two coordinate points
- */
+// Helper function to calculate distance between two coordinate points
 function calculateDistance(
   point1: { lat: number; lng: number },
   point2: { lat: number; lng: number }
@@ -520,80 +508,16 @@ function calculateDistance(
   return R * c;
 }
 
-/**
- * Provide fallback coordinates for major cities when missing
- */
-function getFallbackCoordinates(
-  city: string,
-  state: string
-): { lat: number; lng: number } | undefined {
-  // Map of common cities and their coordinates
-  const cityCoordinates: Record<
-    string,
-    Record<string, { lat: number; lng: number }>
-  > = {
-    'new-york': {
-      'new-york': { lat: 40.7128, lng: -74.006 },
-      brooklyn: { lat: 40.6782, lng: -73.9442 },
-      queens: { lat: 40.7282, lng: -73.7949 },
-      bronx: { lat: 40.8448, lng: -73.8648 },
-      'staten-island': { lat: 40.5834, lng: -74.1496 },
-    },
-    california: {
-      'los-angeles': { lat: 34.0522, lng: -118.2437 },
-      'san-francisco': { lat: 37.7749, lng: -122.4194 },
-      'beverly-hills': { lat: 34.0736, lng: -118.4004 },
-      'san-diego': { lat: 32.7157, lng: -117.1611 },
-      sacramento: { lat: 38.5816, lng: -121.4944 },
-    },
-    florida: {
-      miami: { lat: 25.7617, lng: -80.1918 },
-      orlando: { lat: 28.5383, lng: -81.3792 },
-      tampa: { lat: 27.9506, lng: -82.4572 },
-    },
-    washington: {
-      seattle: { lat: 47.6062, lng: -122.3321 },
-    },
-    massachusetts: {
-      boston: { lat: 42.3601, lng: -71.0589 },
-    },
-    illinois: {
-      chicago: { lat: 41.8781, lng: -87.6298 },
-    },
-    nevada: {
-      'las-vegas': { lat: 36.1699, lng: -115.1398 },
-    },
-    'district-of-columbia': {
-      washington: { lat: 38.9072, lng: -77.0369 },
-    },
-  };
-
-  const normalizedCity = city.toLowerCase();
-  const normalizedState = state.toLowerCase();
-
-  if (
-    cityCoordinates[normalizedState] &&
-    cityCoordinates[normalizedState][normalizedCity]
-  ) {
-    return cityCoordinates[normalizedState][normalizedCity];
-  }
-
-  return undefined;
-}
-
 // Helper function to ensure response is properly formatted
 function formatResponse(data: any): ZipCodeResponse {
   // Ensure we have city and state at a minimum
   if (!data || !data.city || !data.state) {
     console.log('Response missing city/state, adding fallback values:', data);
-
-    // Add fallback values
     return {
-      city: (data && data.city) || 'New York',
-      state: (data && data.state) || 'new-york',
+      city: (data && data.city) || 'Unknown',
+      state: (data && data.state) || 'unknown',
       source: (data && data.source) || 'formatted-fallback',
-      url: (data && data.url) || '/states/new-york/new-york',
-      coordinates: (data && data.coordinates) || { lat: 40.7128, lng: -74.006 },
+      url: (data && data.url) || '/',
     };
   }
 
@@ -635,9 +559,9 @@ export const GET = (async ({ request }) => {
   }
 
   try {
-    // Get the ZIP code from the URL with better error handling
+    // Print request details for debugging
     const url = new URL(request.url);
-    console.log(`Processing request URL: ${request.url}`);
+    console.log(`Processing zipcode API request with params: ${url.search}`);
 
     // First try the standard .get() method
     let zipCode = url.searchParams.get('zip');
@@ -657,43 +581,9 @@ export const GET = (async ({ request }) => {
 
     if (!zipCode || zipCode.trim() === '') {
       console.log('No ZIP code provided');
-
-      // Get a real fallback city
-      const fallbackCities = await getAllCityStatePairs();
-      let fallbackCity = null;
-
-      // Try to find New York as fallback
-      if (fallbackCities && fallbackCities.length > 0) {
-        fallbackCity =
-          fallbackCities.find((c) => c.city === 'New York') ||
-          fallbackCities[0];
-      }
-
-      if (fallbackCity) {
-        const fallbackData = {
-          city: fallbackCity.city,
-          state: fallbackCity.state.toLowerCase().replace(/\s+/g, '-'),
-          source: 'error-fallback',
-          url: fallbackCity.url,
-          coordinates: getCoordinatesFromCity(fallbackCity),
-        };
-
-        return createResponse({
-          error: 'Zip code is required',
-          fallback: formatResponse(fallbackData),
-        });
-      }
-
-      // Hardcoded fallback if no cities available
       return createResponse({
         error: 'Zip code is required',
-        fallback: formatResponse({
-          city: 'New York',
-          state: 'new-york',
-          source: 'error-fallback',
-          url: '/states/new-york/new-york',
-          coordinates: { lat: 40.7128, lng: -74.006 },
-        }),
+        fallback: formatResponse(await getFallbackCity('no-zip-provided')),
       });
     }
 
@@ -701,84 +591,25 @@ export const GET = (async ({ request }) => {
     const fiveDigitZip = zipCode.toString().padStart(5, '0').substring(0, 5);
     console.log(`Processing ZIP code: ${fiveDigitZip}`);
 
-    // Process the ZIP code to find the closest city
-    const locationData = await processZipCode(fiveDigitZip);
+    // Process the ZIP code with a timeout to avoid serverless function timeouts
+    const locationData = await processZipCodeWithTimeout(fiveDigitZip);
 
     if (locationData) {
       return createResponse(formatResponse(locationData));
     }
 
     // If all else fails, return a fallback
-    const fallbackCities = await getAllCityStatePairs();
-    let fallbackCity = null;
-
-    if (fallbackCities && fallbackCities.length > 0) {
-      fallbackCity =
-        fallbackCities.find((c) => c.city === 'New York') || fallbackCities[0];
-    }
-
-    if (fallbackCity) {
-      const fallbackData = {
-        city: fallbackCity.city,
-        state: fallbackCity.state.toLowerCase().replace(/\s+/g, '-'),
-        source: 'ultimate-fallback',
-        url: fallbackCity.url,
-        coordinates: getCoordinatesFromCity(fallbackCity),
-      };
-
-      return createResponse(formatResponse(fallbackData));
-    }
-
-    // Last resort hardcoded fallback
     return createResponse(
-      formatResponse({
-        city: 'New York',
-        state: 'new-york',
-        source: 'hardcoded-fallback',
-        url: '/states/new-york/new-york',
-        coordinates: { lat: 40.7128, lng: -74.006 },
-      })
+      formatResponse(await getFallbackCity('complete-fallback'))
     );
   } catch (error) {
     console.error(`ZIP API error:`, error);
 
-    try {
-      // Get a real fallback city in case of error
-      const fallbackCities = await getAllCityStatePairs();
-      if (fallbackCities && fallbackCities.length > 0) {
-        const fallbackCity =
-          fallbackCities.find((c) => c.city === 'New York') ||
-          fallbackCities[0];
-
-        const fallbackData = {
-          city: fallbackCity.city,
-          state: fallbackCity.state.toLowerCase().replace(/\s+/g, '-'),
-          source: 'error-fallback',
-          url: fallbackCity.url,
-          coordinates: getCoordinatesFromCity(fallbackCity),
-        };
-
-        return createResponse({
-          error: 'Failed to process ZIP code',
-          message: error instanceof Error ? error.message : 'Unknown error',
-          fallback: formatResponse(fallbackData),
-        } as ZipCodeErrorResponse);
-      }
-    } catch (innerError) {
-      console.error('Error getting fallback city:', innerError);
-    }
-
-    // Hardcoded fallback
+    // Return fallback from database
     return createResponse({
       error: 'Failed to process ZIP code',
       message: error instanceof Error ? error.message : 'Unknown error',
-      fallback: formatResponse({
-        city: 'New York',
-        state: 'new-york',
-        source: 'error-fallback',
-        url: '/states/new-york/new-york',
-        coordinates: { lat: 40.7128, lng: -74.006 },
-      }),
+      fallback: formatResponse(await getFallbackCity('error-fallback')),
     } as ZipCodeErrorResponse);
   }
 }) satisfies APIRoute;

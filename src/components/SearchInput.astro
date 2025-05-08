@@ -452,6 +452,31 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
         
         try {
+          // Call the API using POST method which we confirmed is working
+          const response = await fetch(`${window.location.origin}/api/zipcode`, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache'
+            },
+            body: JSON.stringify({ zip: zipCode })
+          });
+          
+          if (!response.ok) {
+            throw new Error(`API returned status ${response.status}`);
+          }
+          
+          const data = await response.json();
+          console.log('API response:', data);
+          
+          if (data && data.city && data.state) {
+            // Success! Redirect to the city page
+            window.location.href = data.url;
+            return;
+          }
+          
+          // If we get here, we didn't find a specific match
           // SIMPLE SOLUTION:
           // Get the first 3 digits of the ZIP code which generally indicates a region
           const zipRegion = zipCode.substring(0, 3);

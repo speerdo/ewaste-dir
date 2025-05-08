@@ -101,14 +101,7 @@
     },
     {
       "source": "/api/zipcode",
-      "destination": "/api/zipcode",
-      "has": [
-        {
-          "type": "header",
-          "key": "X-No-Cache",
-          "value": "true"
-        }
-      ]
+      "destination": "/api/zipcode"
     },
     {
       "source": "/api/zipcode/:zipcode",

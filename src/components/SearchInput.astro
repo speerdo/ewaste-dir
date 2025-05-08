@@ -452,16 +452,18 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
         
         try {
-          // Generate truly unique search parameters to prevent Vercel CDN caching
+          // Generate unique search parameters with multiple entropy sources
           const timestamp = Date.now();
-          const uniqueId = Math.random().toString(36).substring(2, 15);
-          const uniquePath = `${timestamp}_${uniqueId}`;
+          const uniqueId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+          const randomBytes = new Uint8Array(16);
+          window.crypto.getRandomValues(randomBytes);
+          const additionalRandom = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('');
           
-          // Use a dynamic path with timestamp and unique ID to completely avoid caching
-          const uniqueUrl = `${window.location.origin}/api/zipcode/${zipCode}/${uniquePath}`;
+          // Use a combination of all random sources for an extremely unique path
+          const uniquePath = `${timestamp}_${uniqueId}_${additionalRandom}`;
           
-          // Call the API using POST method with unique parameters
-          const response = await fetch(uniqueUrl, {
+          // Use POST method which is less likely to be cached than GET
+          const response = await fetch(`${window.location.origin}/api/zipcode`, {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
@@ -469,8 +471,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               'Cache-Control': 'no-cache, no-store, must-revalidate',
               'Pragma': 'no-cache',
               'Expires': '0',
-              'X-Request-ID': `req_${timestamp}_${uniqueId}`,
-              'X-No-Cache': `${timestamp}_${uniqueId}`,
+              'X-Request-ID': `req_${uniquePath}`,
+              'X-No-Cache': uniquePath,
               'X-Zip-Code': zipCode,
               'X-Unique-Search': uniquePath
             },
@@ -478,6 +480,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               zip: zipCode,
               timestamp: timestamp,
               uniqueId: uniqueId,
+              additionalRandom: additionalRandom,
               nocache: uniquePath
             })
           });
@@ -490,12 +493,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           console.log('API response:', data);
           
           if (data && data.city && data.state) {
-            // Instead of redirecting, LOAD AND DISPLAY RESULTS DIRECTLY IN THE DROPDOWN
+            // Load and display results directly in the dropdown
             console.log(`Found city: ${data.city}, ${data.state}`);
-            
-            // We'll use another API call to get recycling centers for this city
-            const cityQuery = `${data.city}, ${data.state}`;
-            console.log(`Fetching recycling centers for ${cityQuery}`);
             
             // Show that we're loading recycling centers
             if (resultsContent) {
@@ -513,13 +512,16 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             }
             
             try {
-              // Generate new unique values for the centers request
+              // Generate new unique values with enhanced randomness
               const centersTimestamp = Date.now();
-              const centersUniqueId = Math.random().toString(36).substring(2, 15);
-              const centersUniquePath = `${centersTimestamp}_${centersUniqueId}`;
+              const centersUniqueId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+              const centerRandomBytes = new Uint8Array(16);
+              window.crypto.getRandomValues(centerRandomBytes);
+              const centerAdditionalRandom = Array.from(centerRandomBytes, b => b.toString(16).padStart(2, '0')).join('');
+              const centersUniquePath = `${centersTimestamp}_${centersUniqueId}_${centerAdditionalRandom}`;
               
-              // Make a separate call with unique values to get centers for this location
-              const centersResponse = await fetch(`${window.location.origin}/api/recycling-centers?nocache=${centersUniquePath}`, {
+              // Make a POST request to get centers
+              const centersResponse = await fetch(`${window.location.origin}/api/recycling-centers`, {
                 method: 'POST',
                 headers: {
                   'Accept': 'application/json',
@@ -527,8 +529,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                   'Cache-Control': 'no-cache, no-store, must-revalidate',
                   'Pragma': 'no-cache',
                   'Expires': '0',
-                  'X-Request-ID': `req_${centersTimestamp}_${centersUniqueId}`,
-                  'X-No-Cache': `${centersTimestamp}_${centersUniqueId}`
+                  'X-Request-ID': `req_${centersUniquePath}`,
+                  'X-No-Cache': centersUniquePath
                 },
                 body: JSON.stringify({ 
                   city: data.city,
@@ -536,6 +538,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                   zip: zipCode,
                   timestamp: centersTimestamp,
                   uniqueId: centersUniqueId,
+                  additionalRandom: centerAdditionalRandom,
                   nocache: centersUniquePath
                 })
               }).catch(error => {
@@ -545,10 +548,15 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               
               // If we couldn't get a centers response, show a link to the city page instead
               if (!centersResponse || !centersResponse.ok) {
-                const cityUniquePath = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+                // Generate a completely unique URL with maximum entropy
+                const cityUniqueId = Date.now().toString() + '_' + 
+                                    Math.random().toString(36).substring(2) + '_' + 
+                                    Math.random().toString(36).substring(2);
+                
+                // Make sure the URL is completely unique
                 const cityUrl = data.url.includes('?') 
-                  ? `${data.url}&_t=${cityUniquePath}` 
-                  : `${data.url}?_t=${cityUniquePath}`;
+                  ? `${data.url}&_t=${cityUniqueId}`
+                  : `${data.url}?_t=${cityUniqueId}`;
                 
                 if (resultsContent) {
                   resultsContent.innerHTML = `
@@ -585,8 +593,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               
               // Show the centers directly in the results dropdown
               if (resultsContent) {
-                // Even if we have centers data, we'll create a separate variable for the centers HTML
-                // to handle both the case where we have centers and where we don't
+                // Variable for centers HTML
                 let centersHtml = '';
                 
                 if (centersData && centersData.data && Array.isArray(centersData.data) && centersData.data.length > 0) {
@@ -624,12 +631,12 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                   `;
                 }
                 
-                // Generate unique path for view links
-                const viewLinkUniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+                // Generate unique ID for view links that is different for every page view
+                const viewLinkUniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}`;
                 
-                // Main results container with city info and centers
+                // Generate a non-cached URL for the city page
                 const cityUrl = data.url.includes('?') 
-                  ? `${data.url}&_t=${viewLinkUniqueId}` 
+                  ? `${data.url}&_t=${viewLinkUniqueId}`
                   : `${data.url}?_t=${viewLinkUniqueId}`;
                 
                 resultsContent.innerHTML = `
@@ -662,9 +669,9 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             } catch (centersError) {
               console.error('Error processing centers:', centersError);
               
-              // Fallback to showing just the city info
+              // Fallback to showing just the city info with unique URL
               if (resultsContent) {
-                const fallbackUniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+                const fallbackUniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}`;
                 const cityUrl = data.url.includes('?') 
                   ? `${data.url}&_t=${fallbackUniqueId}` 
                   : `${data.url}?_t=${fallbackUniqueId}`;
@@ -699,13 +706,11 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           }
           
           // If we get here, we didn't find a specific match
-          // SIMPLE SOLUTION:
           // Get the first 3 digits of the ZIP code which generally indicates a region
           const zipRegion = zipCode.substring(0, 3);
           console.log(`Searching for cities in ZIP region: ${zipRegion}`);
           
-          // Find a few random cities to suggest (don't depend on postal_code matching)
-          // Instead, we'll pick 8 random cities to show to the user
+          // Pick random cities to suggest
           const totalCities = Math.min(cityStatePairs.length, 1000);
           if (totalCities === 0) {
             throw new Error("No city data available");
@@ -725,7 +730,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             suggestedCities.push(city);
           }
           
-          // Show message with suggested cities
+          // Show message with suggested cities - add unique IDs to each URL
           if (resultsContent) {
             resultsContent.innerHTML = `
               <div class="p-4">
@@ -745,14 +750,18 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                 </div>
                 <div class="mt-3">
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                    ${suggestedCities.map(city => `
-                      <a href="${city.url}?_t=${Date.now()}" class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 hover:border-green-300 transition-colors">
-                        <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        </svg>
-                        <span class="text-sm font-medium">${city.city}, ${city.state}</span>
-                      </a>
-                    `).join('')}
+                    ${suggestedCities.map(city => {
+                      // Generate a unique ID for each city link
+                      const uniqueCityId = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}_${Math.floor(Math.random() * 10000)}`;
+                      return `
+                        <a href="${city.url}?_t=${uniqueCityId}" class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 hover:border-green-300 transition-colors">
+                          <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          </svg>
+                          <span class="text-sm font-medium">${city.city}, ${city.state}</span>
+                        </a>
+                      `;
+                    }).join('')}
                   </div>
                 </div>
               </div>

@@ -4,6 +4,8 @@ export interface CityStatePair {
   city: string;
   state: string;
   url: string;
+  postal_code?: string;
+  coordinates?: { lat: number; lng: number };
 }
 
 let cityDataCache: CityStatePair[] | null = null;
@@ -14,23 +16,37 @@ export async function getAllCityStatePairs(): Promise<CityStatePair[]> {
     return cityDataCache;
   }
 
-  // Get all states and their cities
-  const states = await getAllStates();
-  const cityStatePairs = await Promise.all(
-    states.map(async (state) => {
-      const cities = await getCitiesByState(state.id);
-      return cities.map((city) => ({
-        city: city.name,
-        state: state.name,
-        url: `/states/${state.id}/${city.id}`,
-      }));
-    })
-  ).then((results) => results.flat());
+  try {
+    // Get all states and their cities
+    const states = await getAllStates();
+    const cityStatePairs = await Promise.all(
+      states.map(async (state) => {
+        const cities = await getCitiesByState(state.id);
+        return cities.map((city) => ({
+          city: city.name,
+          state: state.name,
+          url: `/states/${state.id}/${city.id}`,
+          postal_code: /^\d{5}$/.test(city.id) ? city.id : undefined,
+          coordinates:
+            city.lat && city.lng
+              ? {
+                  lat: city.lat,
+                  lng: city.lng,
+                }
+              : undefined,
+        }));
+      })
+    ).then((results) => results.flat());
 
-  // Cache the results
-  cityDataCache = cityStatePairs;
+    // Cache the results
+    cityDataCache = cityStatePairs;
 
-  return cityStatePairs;
+    return cityStatePairs;
+  } catch (error) {
+    console.error('Error loading city data:', error);
+    // Return empty array if something goes wrong
+    return [];
+  }
 }
 
 // Cache for search results
@@ -66,16 +82,35 @@ export function searchLocations(
 
   // Check if query is a zip code
   const isZipCode = /^\d{5}(-\d{4})?$/.test(query);
+  const zipCode = isZipCode ? query.substring(0, 5) : '';
 
   let results;
   if (isZipCode) {
-    results = [
-      {
-        text: `Find recycling centers near ${query}`,
-        type: 'zip' as const,
-        zip: query,
-      },
-    ];
+    // First check if we have this ZIP code in our data
+    const cityWithZip = cityStatePairs.find(
+      (city) => city.postal_code === zipCode
+    );
+
+    if (cityWithZip) {
+      // We have this ZIP code in our data, add it as a direct match
+      results = [
+        {
+          text: `${cityWithZip.city}, ${cityWithZip.state} (${zipCode})`,
+          type: 'city' as const,
+          url: cityWithZip.url,
+          zip: zipCode,
+        },
+      ];
+    } else {
+      // We don't have this ZIP code, still offer it as a search option
+      results = [
+        {
+          text: `Find recycling centers near ${zipCode}`,
+          type: 'zip' as const,
+          zip: zipCode,
+        },
+      ];
+    }
   } else {
     // First try exact matches
     const exactMatches = cityStatePairs.filter(({ city, state }) => {

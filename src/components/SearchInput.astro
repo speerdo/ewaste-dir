@@ -1,5 +1,5 @@
 ---
-import { getAllCityStatePairs, type CityStatePair } from '../lib/cityData';
+import { getAllCityStatePairs, searchLocations, type CityStatePair } from '../lib/cityData';
 import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
 
 interface Props {
@@ -415,101 +415,95 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
         
         try {
-          // Make a simple request to check if this ZIP code exists in our database
-          const apiUrl = `${window.location.origin}/api/zipcode-check?zip=${zipCode}&t=${Date.now()}`;
-          console.log(`Checking if ZIP ${zipCode} exists in database: ${apiUrl}`);
+          // Use our searchLocations function to find cities matching this ZIP
+          console.log(`Looking for ZIP ${zipCode} in city data`);
+          const suggestions = searchLocations(zipCode);
           
-          const response = await fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Cache-Control': 'no-cache, no-store'
-            }
-          });
+          // Check if we found a direct match (first result is a city)
+          if (suggestions.length > 0 && suggestions[0].type === 'city') {
+            console.log(`Found direct match for ZIP ${zipCode}: ${suggestions[0].text}`);
+            window.location.href = suggestions[0].url;
+            return;
+          }
           
-          // Process the response
-          const data = await response.json();
-          console.log(`ZIP check response:`, data);
+          // No direct match in cityState data, try looking for postal_code in the raw data
+          console.log(`No direct match for ZIP ${zipCode} in search results, trying direct city data lookup`);
           
-          if (data.found && data.city && data.state) {
-            // We found this ZIP code in our database
-            console.log(`ZIP ${zipCode} found in database: ${data.city}, ${data.state}`);
-            
-            // Format the URL
-            const stateSlug = data.state.toLowerCase().replace(/\s+/g, '-');
-            const citySlug = data.city.toLowerCase().replace(/\s+/g, '-');
-            const redirectUrl = `/states/${stateSlug}/${citySlug}`;
+          const cityWithZip = cityStatePairs.find(city => city.postal_code === zipCode);
+          
+          if (cityWithZip) {
+            // We found this ZIP code in our data
+            console.log(`ZIP ${zipCode} found in local data: ${cityWithZip.city}, ${cityWithZip.state}`);
             
             // Redirect to the city page
-            window.location.href = redirectUrl;
+            window.location.href = cityWithZip.url;
             return;
-          } else {
-            // ZIP not found in our database
-            console.log(`ZIP ${zipCode} not found in database`);
-            
-            // Show a user-friendly message with the option to search by city
-            if (resultsContent) {
-              resultsContent.innerHTML = `
-                <div class="p-4">
-                  <div class="flex items-start mb-3">
-                    <div class="flex-shrink-0 mt-0.5">
-                      <svg class="h-5 w-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                    </div>
-                    <div class="ml-3">
-                      <h3 class="text-sm font-medium text-yellow-800">ZIP Code Not Found</h3>
-                      <div class="mt-2 text-sm text-gray-700">
-                        <p>We don't have recycling centers for ZIP code <strong>${zipCode}</strong> in our database.</p>
-                        <p class="mt-1">Try searching by city name instead.</p>
-                      </div>
-                    </div>
+          }
+          
+          // ZIP not found in our dataset
+          console.log(`ZIP ${zipCode} not found in local data`);
+          
+          // Show a user-friendly message with the option to search by city
+          if (resultsContent) {
+            resultsContent.innerHTML = `
+              <div class="p-4">
+                <div class="flex items-start mb-3">
+                  <div class="flex-shrink-0 mt-0.5">
+                    <svg class="h-5 w-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                   </div>
-                  <div class="mt-3">
-                    <h4 class="text-sm font-medium text-gray-700">Popular Cities:</h4>
-                    <div class="mt-2 flex flex-wrap gap-2" id="popular-cities-${id}">
-                      <!-- Will be populated with popular cities -->
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">ZIP Code Not Found</h3>
+                    <div class="mt-2 text-sm text-gray-700">
+                      <p>We don't have recycling centers for ZIP code <strong>${zipCode}</strong> in our database.</p>
+                      <p class="mt-1">Try searching by city name instead.</p>
                     </div>
                   </div>
                 </div>
-              `;
+                <div class="mt-3">
+                  <h4 class="text-sm font-medium text-gray-700">Popular Cities:</h4>
+                  <div class="mt-2 flex flex-wrap gap-2" id="popular-cities-${id}">
+                    <!-- Will be populated with popular cities -->
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            // Add popular cities
+            const popularCitiesContainer = document.getElementById(`popular-cities-${id}`);
+            if (popularCitiesContainer) {
+              // Get 6 random cities from our database to suggest
+              const popularCities = [];
+              const totalCities = Math.min(cityStatePairs.length, 100); // Use max 100 cities as the source
               
-              // Add popular cities
-              const popularCitiesContainer = document.getElementById(`popular-cities-${id}`);
-              if (popularCitiesContainer) {
-                // Get 6 random cities from our database to suggest
-                const popularCities = [];
-                const totalCities = Math.min(cityStatePairs.length, 100); // Use max 100 cities as the source
-                
-                // Create a shuffled array of indices
-                const indices = Array.from({ length: totalCities }, (_, i) => i);
-                for (let i = indices.length - 1; i > 0; i--) {
-                  const j = Math.floor(Math.random() * (i + 1));
-                  [indices[i], indices[j]] = [indices[j], indices[i]];
-                }
-                
-                // Take the first 6 cities from the shuffled array
-                for (let i = 0; i < Math.min(6, indices.length); i++) {
-                  const city = cityStatePairs[indices[i]];
-                  popularCities.push(city);
-                }
-                
-                // Add the cities to the container
-                popularCities.forEach(city => {
-                  const cityButton = document.createElement('a');
-                  cityButton.href = city.url;
-                  cityButton.className = 'inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-full text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 hover:text-green-700 hover:border-green-500 transition-colors';
-                  cityButton.textContent = `${city.city}, ${city.state}`;
-                  popularCitiesContainer.appendChild(cityButton);
-                });
+              // Create a shuffled array of indices
+              const indices = Array.from({ length: totalCities }, (_, i) => i);
+              for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
               }
               
-              searchResults?.classList.remove('hidden');
+              // Take the first 6 cities from the shuffled array
+              for (let i = 0; i < Math.min(6, indices.length); i++) {
+                const city = cityStatePairs[indices[i]];
+                popularCities.push(city);
+              }
+              
+              // Add the cities to the container
+              popularCities.forEach(city => {
+                const cityButton = document.createElement('a');
+                cityButton.href = city.url;
+                cityButton.className = 'inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-full text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 hover:text-green-700 hover:border-green-500 transition-colors';
+                cityButton.textContent = `${city.city}, ${city.state}`;
+                popularCitiesContainer.appendChild(cityButton);
+              });
             }
             
-            showLoading(false);
-            return;
+            searchResults?.classList.remove('hidden');
           }
+          
+          showLoading(false);
         } catch (error) {
           console.error(`Error searching by zip: ${error.message || error}`);
           showError("Couldn't find that location. Please try searching by city name instead.");

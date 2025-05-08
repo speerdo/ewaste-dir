@@ -452,37 +452,29 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
         
         try {
-          // Generate unique search parameters with multiple entropy sources
+          // SOLUTION: Use the new pure-JS API endpoint with a completely different approach
+          // 1. Use Math.random() to create a unique query parameter each time
+          // 2. Use variable path structure to defeat path-specific caching
+          // 3. Use a combination of multiple random values
+          const random1 = Math.random().toString(36).substring(2, 15);
+          const random2 = Math.random().toString(36).substring(2, 15);
           const timestamp = Date.now();
-          const uniqueId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-          const randomBytes = new Uint8Array(16);
-          window.crypto.getRandomValues(randomBytes);
-          const additionalRandom = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('');
+          const uniquePathPart = `${timestamp}-${random1}`;
           
-          // Use a combination of all random sources for an extremely unique path
-          const uniquePath = `${timestamp}_${uniqueId}_${additionalRandom}`;
+          // Build URL with unique segments that change with each request
+          const apiUrl = `${window.location.origin}/api/zipfind?zip=${zipCode}&_=${timestamp}&r=${random1}&u=${random2}`;
           
-          // Use POST method which is less likely to be cached than GET
-          const response = await fetch(`${window.location.origin}/api/zipcode`, {
-            method: 'POST',
+          console.log(`Using API URL: ${apiUrl}`);
+          
+          // Make the request
+          const response = await fetch(apiUrl, {
+            method: 'GET',
             headers: {
               'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Cache-Control': 'no-cache, no-store',
               'Pragma': 'no-cache',
-              'Expires': '0',
-              'X-Request-ID': `req_${uniquePath}`,
-              'X-No-Cache': uniquePath,
-              'X-Zip-Code': zipCode,
-              'X-Unique-Search': uniquePath
-            },
-            body: JSON.stringify({ 
-              zip: zipCode,
-              timestamp: timestamp,
-              uniqueId: uniqueId,
-              additionalRandom: additionalRandom,
-              nocache: uniquePath
-            })
+              'X-Requested-With': 'fetch' // Non-standard header to distinguish the request
+            }
           });
           
           if (!response.ok) {
@@ -496,241 +488,44 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             // Load and display results directly in the dropdown
             console.log(`Found city: ${data.city}, ${data.state}`);
             
-            // Show that we're loading recycling centers
+            // Generate a unique URL to defeat link caching
+            const cityUrlUniqueParam = `_=${timestamp}-${Math.random().toString(36).substring(2)}`;
+            const cityUrl = data.url.includes('?') 
+              ? `${data.url}&${cityUrlUniqueParam}` 
+              : `${data.url}?${cityUrlUniqueParam}`;
+            
+            // Display the result
             if (resultsContent) {
               resultsContent.innerHTML = `
                 <div class="p-4">
-                  <div class="flex items-center mb-3">
-                    <svg class="animate-spin h-5 w-5 mr-3 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Loading recycling centers in ${data.city}, ${data.state} for ZIP ${zipCode}...</span>
+                  <div class="flex items-start mb-3">
+                    <div class="flex-shrink-0 mt-0.5">
+                      <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div class="ml-3 flex-grow">
+                      <h3 class="text-sm font-medium text-green-800">ZIP Code ${zipCode} Found</h3>
+                      <div class="mt-2 text-sm text-gray-700">
+                        <p>We found recycling centers in <strong>${data.city}, ${data.state}</strong> for ZIP code <strong>${zipCode}</strong>.</p>
+                      </div>
+                      
+                      <div class="mt-4">
+                        <a href="${cityUrl}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                          View All Centers in ${data.city}
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               `;
-            }
-            
-            try {
-              // Generate new unique values with enhanced randomness
-              const centersTimestamp = Date.now();
-              const centersUniqueId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-              const centerRandomBytes = new Uint8Array(16);
-              window.crypto.getRandomValues(centerRandomBytes);
-              const centerAdditionalRandom = Array.from(centerRandomBytes, b => b.toString(16).padStart(2, '0')).join('');
-              const centersUniquePath = `${centersTimestamp}_${centersUniqueId}_${centerAdditionalRandom}`;
-              
-              // Make a POST request to get centers
-              const centersResponse = await fetch(`${window.location.origin}/api/recycling-centers`, {
-                method: 'POST',
-                headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json',
-                  'Cache-Control': 'no-cache, no-store, must-revalidate',
-                  'Pragma': 'no-cache',
-                  'Expires': '0',
-                  'X-Request-ID': `req_${centersUniquePath}`,
-                  'X-No-Cache': centersUniquePath
-                },
-                body: JSON.stringify({ 
-                  city: data.city,
-                  state: data.state,
-                  zip: zipCode,
-                  timestamp: centersTimestamp,
-                  uniqueId: centersUniqueId,
-                  additionalRandom: centerAdditionalRandom,
-                  nocache: centersUniquePath
-                })
-              }).catch(error => {
-                console.error('Error fetching centers:', error);
-                return null;
-              });
-              
-              // If we couldn't get a centers response, show a link to the city page instead
-              if (!centersResponse || !centersResponse.ok) {
-                // Generate a completely unique URL with maximum entropy
-                const cityUniqueId = Date.now().toString() + '_' + 
-                                    Math.random().toString(36).substring(2) + '_' + 
-                                    Math.random().toString(36).substring(2);
-                
-                // Make sure the URL is completely unique
-                const cityUrl = data.url.includes('?') 
-                  ? `${data.url}&_t=${cityUniqueId}`
-                  : `${data.url}?_t=${cityUniqueId}`;
-                
-                if (resultsContent) {
-                  resultsContent.innerHTML = `
-                    <div class="p-4">
-                      <div class="flex items-start mb-3">
-                        <div class="flex-shrink-0 mt-0.5">
-                          <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <div class="ml-3">
-                          <h3 class="text-sm font-medium text-green-800">ZIP Code ${zipCode} Found</h3>
-                          <div class="mt-2 text-sm text-gray-700">
-                            <p>We found recycling centers in <strong>${data.city}, ${data.state}</strong> for ZIP code <strong>${zipCode}</strong>.</p>
-                          </div>
-                          <div class="mt-3">
-                            <a href="${cityUrl}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                              View All Centers in ${data.city}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  `;
-                }
-                
-                showLoading(false);
-                return;
-              }
-              
-              // Process centers data
-              const centersData = await centersResponse.json();
-              console.log('Centers data:', centersData);
-              
-              // Show the centers directly in the results dropdown
-              if (resultsContent) {
-                // Variable for centers HTML
-                let centersHtml = '';
-                
-                if (centersData && centersData.data && Array.isArray(centersData.data) && centersData.data.length > 0) {
-                  // We have centers to display
-                  const limitedCenters = centersData.data.slice(0, 5); // Limit to first 5 centers
-                  
-                  centersHtml = `
-                    <div class="mt-3">
-                      <h4 class="text-sm font-semibold text-gray-900 mb-2">Recycling Centers:</h4>
-                      <ul class="divide-y divide-gray-200">
-                        ${limitedCenters.map(center => `
-                          <li class="py-2">
-                            <div class="flex items-start">
-                              <div class="flex-shrink-0 pt-1">
-                                <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                              </div>
-                              <div class="ml-2">
-                                <p class="text-sm font-medium text-gray-900">${center.name || 'Recycling Center'}</p>
-                                <p class="text-xs text-gray-500">${center.address || ''} ${center.city || data.city}, ${center.state || data.state}</p>
-                              </div>
-                            </div>
-                          </li>
-                        `).join('')}
-                      </ul>
-                    </div>
-                  `;
-                } else {
-                  // No centers found, provide a generic message
-                  centersHtml = `
-                    <div class="mt-3">
-                      <p class="text-sm text-gray-700">Recycling centers information is available on the city page.</p>
-                    </div>
-                  `;
-                }
-                
-                // Generate unique ID for view links that is different for every page view
-                const viewLinkUniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}`;
-                
-                // Generate a non-cached URL for the city page
-                const cityUrl = data.url.includes('?') 
-                  ? `${data.url}&_t=${viewLinkUniqueId}`
-                  : `${data.url}?_t=${viewLinkUniqueId}`;
-                
-                resultsContent.innerHTML = `
-                  <div class="p-4">
-                    <div class="flex items-start mb-3">
-                      <div class="flex-shrink-0 mt-0.5">
-                        <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div class="ml-3 flex-grow">
-                        <h3 class="text-sm font-medium text-green-800">ZIP Code ${zipCode} Found</h3>
-                        <div class="mt-2 text-sm text-gray-700">
-                          <p>We found recycling centers in <strong>${data.city}, ${data.state}</strong> for ZIP code <strong>${zipCode}</strong>.</p>
-                        </div>
-                        
-                        ${centersHtml}
-                        
-                        <div class="mt-4">
-                          <a href="${cityUrl}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            View All Centers in ${data.city}
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }
-              
-            } catch (centersError) {
-              console.error('Error processing centers:', centersError);
-              
-              // Fallback to showing just the city info with unique URL
-              if (resultsContent) {
-                const fallbackUniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}`;
-                const cityUrl = data.url.includes('?') 
-                  ? `${data.url}&_t=${fallbackUniqueId}` 
-                  : `${data.url}?_t=${fallbackUniqueId}`;
-                
-                resultsContent.innerHTML = `
-                  <div class="p-4">
-                    <div class="flex items-start mb-3">
-                      <div class="flex-shrink-0 mt-0.5">
-                        <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div class="ml-3">
-                        <h3 class="text-sm font-medium text-green-800">ZIP Code ${zipCode} Found</h3>
-                        <div class="mt-2 text-sm text-gray-700">
-                          <p>We found recycling centers in <strong>${data.city}, ${data.state}</strong> for ZIP code <strong>${zipCode}</strong>.</p>
-                        </div>
-                        <div class="mt-3">
-                          <a href="${cityUrl}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            View All Centers in ${data.city}
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }
             }
             
             showLoading(false);
             return;
           }
           
-          // If we get here, we didn't find a specific match
-          // Get the first 3 digits of the ZIP code which generally indicates a region
-          const zipRegion = zipCode.substring(0, 3);
-          console.log(`Searching for cities in ZIP region: ${zipRegion}`);
-          
-          // Pick random cities to suggest
-          const totalCities = Math.min(cityStatePairs.length, 1000);
-          if (totalCities === 0) {
-            throw new Error("No city data available");
-          }
-          
-          // Create a shuffled array of indices
-          const indices = Array.from({ length: totalCities }, (_, i) => i);
-          for (let i = indices.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [indices[i], indices[j]] = [indices[j], indices[i]];
-          }
-          
-          // Take a sample of cities
-          const suggestedCities = [];
-          for (let i = 0; i < Math.min(8, indices.length); i++) {
-            const city = cityStatePairs[indices[i]];
-            suggestedCities.push(city);
-          }
-          
-          // Show message with suggested cities - add unique IDs to each URL
+          // Fallback to a simple message if we couldn't parse the data correctly
           if (resultsContent) {
             resultsContent.innerHTML = `
               <div class="p-4">
@@ -741,27 +536,10 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                     </svg>
                   </div>
                   <div class="ml-3">
-                    <h3 class="text-sm font-medium text-indigo-800">Recycling Centers</h3>
+                    <h3 class="text-sm font-medium text-indigo-800">ZIP Code ${zipCode}</h3>
                     <div class="mt-2 text-sm text-gray-700">
-                      <p>We don't have specific recycling centers listed for ZIP code <strong>${zipCode}</strong>.</p>
-                      <p class="mt-1">Please select a city from the list below to find recycling centers:</p>
+                      <p>Please try searching for a city name instead, or try a different ZIP code.</p>
                     </div>
-                  </div>
-                </div>
-                <div class="mt-3">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                    ${suggestedCities.map(city => {
-                      // Generate a unique ID for each city link
-                      const uniqueCityId = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}_${Math.floor(Math.random() * 10000)}`;
-                      return `
-                        <a href="${city.url}?_t=${uniqueCityId}" class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 hover:border-green-300 transition-colors">
-                          <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          </svg>
-                          <span class="text-sm font-medium">${city.city}, ${city.state}</span>
-                        </a>
-                      `;
-                    }).join('')}
                   </div>
                 </div>
               </div>

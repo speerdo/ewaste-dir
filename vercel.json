@@ -123,6 +123,10 @@
       "destination": "/api/zipcode"
     },
     {
+      "source": "/api/zipcode/check/:zip",
+      "destination": "/api/zipcode/check/[zip]"
+    },
+    {
       "source": "/api/cities-data",
       "destination": "/api/cities-data"
     }

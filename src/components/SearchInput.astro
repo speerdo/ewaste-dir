@@ -417,83 +417,117 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             return;
           }
 
-          // Use our API to get location data
-          const cacheBuster = new Date().getTime();
-          const apiUrl = `${window.location.origin}/api/zipcode?zip=${zipCode}&_cb=${cacheBuster}`;
+          // Generate a random query param to avoid caching issues
+          const cacheBuster = Date.now() + Math.floor(Math.random() * 1000);
           
-          let data;
-          
-          try {
-            console.log(`Fetching ZIP data from: ${apiUrl}`);
-            const response = await fetch(apiUrl, {
-              headers: {
-                'Accept': 'application/json',
-                'Cache-Control': 'no-cache'
-              }
-            });
-            
-            const responseData = await response.json();
-            
-            // Even if the status is not 200, try to use any available data
-            if (!response.ok) {
-              console.error(`API request failed with status ${response.status}`);
+          // Try multiple API request methods with retries
+          let attempts = 0;
+          let maxAttempts = 3;
+          let data = null;
+          let error = null;
+
+          while (attempts < maxAttempts && !data) {
+            attempts++;
+            try {
+              console.log(`ZIP API attempt ${attempts}/${maxAttempts}`);
               
-              // Check if we got a fallback in the error response
-              if (responseData && responseData.fallback) {
-                console.log(`Using fallback data from error response:`, responseData.fallback);
-                data = responseData.fallback;
+              // Build the API URL with different formats to overcome potential Vercel quirks
+              let apiUrl;
+              if (attempts === 1) {
+                // First attempt: standard query parameter
+                apiUrl = `${window.location.origin}/api/zipcode?zip=${zipCode}&_cb=${cacheBuster}`;
+                console.log(`Trying standard URL: ${apiUrl}`);
+              } else if (attempts === 2) {
+                // Second attempt: zipcode as path parameter
+                apiUrl = `${window.location.origin}/api/zipcode/${zipCode}?_cb=${cacheBuster}`;
+                console.log(`Trying path parameter URL: ${apiUrl}`);
               } else {
-                // No fallback available, use hardcoded data for this ZIP
-                data = {
-                  city: 'Unknown Location',
-                  state: 'State Unknown',
-                  coordinates: { lat: 40.0, lng: -98.0 },
-                  source: 'client-fallback',
-                  closestCity: { 
-                    city: 'Columbus', 
-                    state: 'Ohio'
-                  }
-                };
-                console.log(`Using hardcoded fallback data:`, data);
+                // Third attempt: add timestamp to URL path to avoid caching
+                apiUrl = `${window.location.origin}/api/zipcode?zip=${zipCode}&t=${Date.now()}&nocache=1&_=${cacheBuster}`;
+                console.log(`Trying no-cache URL: ${apiUrl}`);
               }
-            } else {
-              data = responseData;
-              console.log(`ZIP data received:`, data);
+              
+              console.log(`Fetching ZIP data from: ${apiUrl}`);
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+              
+              try {
+                const response = await fetch(apiUrl, {
+                  method: 'GET',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0',
+                    'X-Requested-With': 'fetch'
+                  },
+                  cache: 'no-store',
+                  signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                // Even if status is not 200, try to parse the response
+                const responseData = await response.json();
+                console.log(`ZIP data received:`, responseData);
+                
+                // Check if we got a valid response or at least a fallback
+                if (responseData && (responseData.city || (responseData.fallback && responseData.fallback.city))) {
+                  // Use the main response or fallback if provided
+                  data = responseData.city ? responseData : responseData.fallback;
+                  break; // Success! Exit the retry loop
+                } else {
+                  console.log(`Invalid response format, will retry:`, responseData);
+                  error = new Error(`Invalid response format on attempt ${attempts}`);
+                }
+              } catch (fetchError) {
+                clearTimeout(timeoutId);
+                console.error(`Fetch error on attempt ${attempts}:`, fetchError);
+                error = fetchError;
+                // Continue to next attempt
+              }
+            } catch (attemptError) {
+              console.error(`Error in attempt ${attempts}:`, attemptError);
+              error = attemptError;
             }
             
-            if (!data) {
-              console.error(`Invalid ZIP code data:`, data);
-              throw new Error(`Invalid data received for ZIP ${zipCode}`);
+            // Small delay between retries
+            if (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 500));
             }
-            
-            // Store in cache for future use
-            zipCodeCache.set(zipCode, {
-              data,
-              timestamp: Date.now()
-            });
-            
-            // Process the data
-            await processZipCodeData(zipCode, data);
-          } catch (error) {
-            console.error(`API error for ZIP ${zipCode}:`, error);
-            
-            // Hardcoded fallback in case of total failure
-            const fallbackData = {
-              city: 'Unknown Location',
-              state: 'State Unknown',
-              coordinates: { lat: 40.0, lng: -98.0 },
-              source: 'client-error-fallback',
-              closestCity: { 
-                city: 'Columbus', 
-                state: 'Ohio'
-              }
-            };
-            
-            console.log(`Using client-side fallback after error:`, fallbackData);
-            await processZipCodeData(zipCode, fallbackData);
           }
+          
+          // If we've run out of attempts without success
+          if (!data) {
+            console.error(`All ${maxAttempts} API attempts failed:`, error);
+            
+            // See if we have any fallback data from previous errors
+            if (error && error.fallback) {
+              console.log(`Using fallback from error response:`, error.fallback);
+              data = error.fallback;
+            } else {
+              // Use a hardcoded fallback location
+              data = {
+                city: 'New York',
+                state: 'New York',
+                coordinates: { lat: 40.7128, lng: -74.006 },
+                source: 'client-fallback-after-retries',
+                url: '/states/new-york/new-york'
+              };
+              console.log(`Using hardcoded fallback data:`, data);
+            }
+          }
+          
+          // Store in cache for future use
+          zipCodeCache.set(zipCode, {
+            data,
+            timestamp: Date.now()
+          });
+          
+          // Process the data
+          await processZipCodeData(zipCode, data);
         } catch (error) {
-          console.error(`Error searching by zip: ${error.message}`);
+          console.error(`Error searching by zip: ${error.message || error}`);
           showError("Couldn't find that location. Please try a different search.");
           showLoading(false);
         }

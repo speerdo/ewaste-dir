@@ -482,10 +482,12 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             // Success! Redirect to the city page
             // Add cache busting parameter to the URL too if it's not already there
             const url = data.url.includes('?') 
-              ? `${data.url}&_t=${Date.now()}` 
-              : `${data.url}?_t=${Date.now()}`;
+              ? `${data.url}&_zipsearch=${zipCode}_${Date.now()}` 
+              : `${data.url}?_zipsearch=${zipCode}_${Date.now()}`;
               
-            window.location.href = url;
+            // Use replace instead of href to avoid browser back button issues
+            console.log(`Redirecting to: ${url}`);
+            window.location.replace(url);
             return;
           }
           

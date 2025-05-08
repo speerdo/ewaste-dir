@@ -58,6 +58,7 @@ const searchCache = new Map<
       type: 'city' | 'zip';
       url?: string;
       zip?: string;
+      timestamp?: number;
     }>;
     timestamp: number;
   }
@@ -73,19 +74,26 @@ export function searchLocations(
   query = query.toLowerCase().trim();
   if (!query) return [];
 
-  // Check cache first
-  const cacheKey = query;
-  const cached = searchCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.data;
-  }
-
   // Check if query is a zip code
   const isZipCode = /^\d{5}(-\d{4})?$/.test(query);
+
+  // Skip cache lookup for ZIP code searches to prevent caching issues
+  if (!isZipCode) {
+    // Check cache first for non-zip searches
+    const cacheKey = query;
+    const cached = searchCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.data;
+    }
+  }
+
   const zipCode = isZipCode ? query.substring(0, 5) : '';
 
   let results;
   if (isZipCode) {
+    // Always add a timestamp to ZIP searches to prevent caching
+    const timestamp = Date.now();
+
     // First check if we have this ZIP code in our data - with more flexible matching
     const cityWithZip = cityStatePairs.find((city) => {
       if (!city.postal_code) return false;
@@ -106,24 +114,31 @@ export function searchLocations(
 
     if (cityWithZip) {
       // We have this ZIP code in our data, add it as a direct match
+      // Add timestamp to the text to ensure uniqueness
       results = [
         {
           text: `${cityWithZip.city}, ${cityWithZip.state} (${zipCode})`,
           type: 'city' as const,
-          url: cityWithZip.url,
+          url: `${cityWithZip.url}?_t=${timestamp}`,
           zip: zipCode,
+          timestamp: timestamp,
         },
       ];
     } else {
       // We don't have this ZIP code, still offer it as a search option
+      // Add timestamp to ensure uniqueness
       results = [
         {
           text: `Find recycling centers near ${zipCode}`,
           type: 'zip' as const,
           zip: zipCode,
+          timestamp: timestamp,
         },
       ];
     }
+
+    // Don't cache ZIP code searches
+    return results;
   } else {
     // First try exact matches
     const exactMatches = cityStatePairs.filter(({ city, state }) => {
@@ -153,7 +168,7 @@ export function searchLocations(
   }
 
   // Cache the results
-  searchCache.set(cacheKey, {
+  searchCache.set(query, {
     data: results,
     timestamp: Date.now(),
   });

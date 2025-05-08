@@ -636,21 +636,26 @@ function formatResponse(data: any, requestedZip?: string): ZipCodeResponse {
       city: (data && data.city) || 'Unknown',
       state: (data && data.state) || 'unknown',
       source: (data && data.source) || 'formatted-fallback',
-      url: (data && data.url) || '/',
+      url: data && data.url ? `${data.url}?_t=${Date.now()}` : '/',
       requestedZip: requestedZip,
     };
   }
+
+  // Add a timestamp to the URL to make it unique for every request
+  const uniqueUrl = data.url
+    ? data.url.includes('?')
+      ? `${data.url}&_t=${Date.now()}`
+      : `${data.url}?_t=${Date.now()}`
+    : `/states/${data.state.toLowerCase().replace(/\s+/g, '-')}/${data.city
+        .toLowerCase()
+        .replace(/\s+/g, '-')}?_t=${Date.now()}`;
 
   // Ensure the response has the correct structure
   return {
     city: data.city,
     state: data.state,
     source: data.source || 'unknown',
-    url:
-      data.url ||
-      `/states/${data.state.toLowerCase().replace(/\s+/g, '-')}/${data.city
-        .toLowerCase()
-        .replace(/\s+/g, '-')}`,
+    url: uniqueUrl,
     coordinates: data.coordinates,
     requestedZip: requestedZip,
   };

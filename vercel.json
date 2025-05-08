@@ -53,7 +53,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
+          "value": "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate"
         },
         {
           "key": "Pragma",
@@ -73,7 +73,23 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Accept, X-Requested-With"
+          "value": "Content-Type, Accept, X-Requested-With, X-No-Cache, X-Zip-Code, X-Request-ID"
+        },
+        {
+          "key": "Surrogate-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "Edge-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "Vary",
+          "value": "*"
+        },
+        {
+          "key": "X-Vercel-Skip-Cache",
+          "value": "true"
         }
       ]
     }
@@ -81,6 +97,29 @@
   "rewrites": [
     {
       "source": "/api/zipcode",
+      "destination": "/api/zipcode",
+      "has": [
+        {
+          "type": "header",
+          "key": "X-No-Cache",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "source": "/api/zipcode/:zipcode",
+      "destination": "/api/zipcode"
+    },
+    {
+      "source": "/api/zipcode/:zipcode/:cachebuster",
+      "destination": "/api/zipcode"
+    },
+    {
+      "source": "/api/zipcode/postal/:zipcode",
+      "destination": "/api/zipcode"
+    },
+    {
+      "source": "/api/zipcode/postal/:zipcode/unique/:cachebuster",
       "destination": "/api/zipcode"
     },
     {

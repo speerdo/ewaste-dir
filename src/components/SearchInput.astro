@@ -419,7 +419,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           
           // Try multiple API request methods with retries
           let attempts = 0;
-          const maxAttempts = 5; // Try all methods for all ZIP codes
+          const maxAttempts = 3; // Reduce attempts to focus on the most reliable methods
           let data = null;
           let error = null;
           let attemptResponses = []; // Track response info for debugging
@@ -445,53 +445,34 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                 cache: 'no-store'
               };
               
-              // Try a variety of request formats systematically for all ZIP codes
+              // Try a variety of request formats, but focus on most reliable methods
               if (attempts === 1) {
-                // First attempt: using a path parameter (RESTful approach)
-                apiUrl = `${window.location.origin}/api/zipcode/${zipCode}?_nocache=${requestId}`;
-                console.log(`Attempt 1: Using path parameter URL: ${apiUrl}`);
+                // First attempt: Direct path parameter with multiple cache-busting techniques
+                const cacheBuster = `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+                apiUrl = `${window.location.origin}/api/zipcode/${zipCode}/${cacheBuster}`;
+                console.log(`Attempt 1: Using direct path parameter URL: ${apiUrl}`);
                 fetchOptions.method = 'GET';
               } else if (attempts === 2) {
-                // Second attempt: Use POST request with ZIP in body
-                apiUrl = `${window.location.origin}/api/zipcode?_nocache=${requestId}`;
+                // Second attempt: POST with unique body properties
+                apiUrl = `${window.location.origin}/api/zipcode`;
                 console.log(`Attempt 2: Using POST request to: ${apiUrl}`);
                 fetchOptions.method = 'POST';
                 fetchOptions.headers['Content-Type'] = 'application/json';
+                // Include multiple random values to ensure uniqueness
                 fetchOptions.body = JSON.stringify({ 
                   zip: zipCode,
                   requestId: requestId,
-                  noCache: true
+                  noCache: true,
+                  timestamp: Date.now(),
+                  random: Math.random().toString(36).substring(2, 15),
+                  uniqueKey: `${zipCode}_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
                 });
-              } else if (attempts === 3) {
-                // Third attempt: Use POST request with form data
-                apiUrl = `${window.location.origin}/api/zipcode?_nocache=${requestId}`;
-                console.log(`Attempt 3: Using POST with form data: ${apiUrl}`);
-                fetchOptions.method = 'POST';
-                delete fetchOptions.headers['Content-Type']; // Let the browser set this for form data
-                const formData = new FormData();
-                formData.append('zip', zipCode);
-                formData.append('requestId', requestId);
-                formData.append('noCache', 'true');
-                fetchOptions.body = formData;
-              } else if (attempts === 4) {
-                // Fourth attempt: Use alternative path format
-                apiUrl = `${window.location.origin}/api/zipcode/postal/${zipCode}?_nocache=${requestId}`;
-                console.log(`Attempt 4: Using alternative path format: ${apiUrl}`);
-                fetchOptions.method = 'GET';
               } else {
-                // Fifth attempt: Use special POST with multiple fields
-                apiUrl = `${window.location.origin}/api/zipcode?_nocache=${requestId}`;
-                console.log(`Attempt 5: Using POST with multiple fields: ${apiUrl}`);
-                fetchOptions.method = 'POST';
-                fetchOptions.headers['Content-Type'] = 'application/json';
-                fetchOptions.body = JSON.stringify({ 
-                  zip: zipCode,
-                  zipCode: zipCode,
-                  postal_code: zipCode,
-                  zipcode: zipCode,
-                  requestId: requestId,
-                  noCache: true
-                });
+                // Third attempt: Alternative path format with extended path
+                const cacheBuster = `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+                apiUrl = `${window.location.origin}/api/zipcode/postal/${zipCode}/unique/${cacheBuster}`;
+                console.log(`Attempt 3: Using alternative path format: ${apiUrl}`);
+                fetchOptions.method = 'GET';
               }
               
               console.log(`Fetching ZIP data from: ${apiUrl} (method: ${fetchOptions.method})`);
@@ -641,15 +622,105 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       // Process ZIP code data to find a matching city
       async function processZipCodeData(zipCode, data) {
         try {
-          console.log(`Processing data for ZIP ${zipCode}:`, data);
+          // Add unique identifier to detect if we're getting cached results
+          const searchTimestamp = Date.now();
+          console.log(`Processing data for ZIP ${zipCode} at ${searchTimestamp}:`, data);
+          
+          // Check for potential cached response
+          let cacheDetected = false;
+          
+          if (data && data.timestamp) {
+            const responseTime = new Date(data.timestamp).getTime();
+            const age = searchTimestamp - responseTime;
+            console.log(`Response age: ${age}ms`);
+            
+            // Age threshold reduced to be more aggressive in detecting stale responses
+            if (age > 2000) {
+              // Response is suspiciously old
+              console.warn(`WARNING: Response for ZIP ${zipCode} appears to be older than 2 seconds (${age}ms). Possible caching issue.`);
+              cacheDetected = true;
+            }
+          }
+
+          // Verify the response is actually for the requested ZIP code
+          if (data.requestedZip && data.requestedZip !== zipCode) {
+            console.error(`CACHE DETECTED! Response ZIP mismatch. Requested: ${zipCode}, Got: ${data.requestedZip}`);
+            cacheDetected = true;
+          }
+          
+          // Store this search in sessionStorage to detect repeated redirects
+          let previousSearches = [];
+          let isFirstSearch = false;
+          
+          try {
+            const storedSearches = sessionStorage.getItem('recent_searches');
+            if (storedSearches) {
+              previousSearches = JSON.parse(storedSearches);
+            } else {
+              isFirstSearch = true;
+              console.log("This is the first search in this session");
+            }
+          } catch (e) {
+            console.error('Failed to read sessionStorage:', e);
+          }
+          
+          // Record this search
+          const currentSearch = {
+            zip: zipCode,
+            timestamp: searchTimestamp,
+            city: data?.city,
+            state: data?.state,
+            url: data?.url
+          };
+          
+          // Check if we're being redirected to the same place repeatedly with different ZIP codes
+          if (previousSearches.length > 0) {
+            const lastSearch = previousSearches[previousSearches.length - 1];
+            if (zipCode !== lastSearch.zip && data?.url === lastSearch.url) {
+              console.error(`CACHE DETECTED! Different ZIP codes (${zipCode} vs ${lastSearch.zip}) resulting in same URL: ${data.url}`);
+              cacheDetected = true;
+              
+              // For the second search, if we detect caching, force a reload of the page to clear any in-memory caches
+              window.location.href = `/search?q=${zipCode}&t=${searchTimestamp}&cache_detected=true`;
+              return;
+            }
+          }
+          
+          // If first search and cache not detected, store it
+          // If cache detected, don't store this search as it's not reliable
+          if (!cacheDetected) {
+            // Add to search history
+            previousSearches.push(currentSearch);
+            if (previousSearches.length > 5) {
+              previousSearches = previousSearches.slice(-5);
+            }
+            try {
+              sessionStorage.setItem('recent_searches', JSON.stringify(previousSearches));
+            } catch (e) {
+              console.error('Failed to write to sessionStorage:', e);
+            }
+          } else {
+            console.log("Cache detected, not storing this search in history");
+            // If cache detected, force a clean approach - reload with search page
+            if (!isFirstSearch) {
+              window.location.href = `/search?q=${zipCode}&t=${searchTimestamp}&cache_reset=true`;
+              return;
+            }
+          }
           
           // If the API response includes a URL, use it directly
           if (data.url) {
             console.log(`Using direct URL from API response: ${data.url}`);
             
+            // Add cache busting to URL to avoid browser cache - include ZIP code in the parameter
+            // to make it uniquely identifiable for each ZIP code request
+            const redirectUrl = data.url.includes('?') 
+              ? `${data.url}&_=${searchTimestamp}&zip=${zipCode}` 
+              : `${data.url}?_=${searchTimestamp}&zip=${zipCode}`;
+            
             // Force a small delay to ensure logs appear in console before redirect
             setTimeout(() => {
-              window.location.href = data.url;
+              window.location.href = redirectUrl;
             }, 100);
             return;
           }
@@ -665,8 +736,13 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               // If closestCity has a URL, use it directly
               if (data.closestCity.url) {
                 console.log(`Using URL from closestCity: ${data.closestCity.url}`);
+                // Add cache busting
+                const redirectUrl = data.closestCity.url.includes('?')
+                  ? `${data.closestCity.url}&_=${searchTimestamp}`
+                  : `${data.closestCity.url}?_=${searchTimestamp}`;
+                
                 setTimeout(() => {
-                  window.location.href = data.closestCity.url;
+                  window.location.href = redirectUrl;
                 }, 100);
                 return;
               }
@@ -674,7 +750,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               // Format the URL for the closest city
               const citySlug = data.closestCity.city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
               const stateSlug = data.closestCity.state.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-              const redirectUrl = `/states/${stateSlug}/${citySlug}`;
+              const baseUrl = `/states/${stateSlug}/${citySlug}`;
+              const redirectUrl = `${baseUrl}?_=${searchTimestamp}`;
               
               console.log(`Redirecting to: ${redirectUrl}`);
               
@@ -686,7 +763,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             } else {
               // No closest city, fall back to search
               console.log("No closest city, redirecting to search page");
-              window.location.href = `/search?q=${zipCode}`;
+              window.location.href = `/search?q=${zipCode}&t=${searchTimestamp}`;
               return;
             }
           }
@@ -705,8 +782,13 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               // If closestCity has a URL, use it directly
               if (data.closestCity.url) {
                 console.log(`Using URL from closestCity: ${data.closestCity.url}`);
+                // Add cache busting
+                const redirectUrl = data.closestCity.url.includes('?')
+                  ? `${data.closestCity.url}&_=${searchTimestamp}`
+                  : `${data.closestCity.url}?_=${searchTimestamp}`;
+                
                 setTimeout(() => {
-                  window.location.href = data.closestCity.url;
+                  window.location.href = redirectUrl;
                 }, 100);
                 return;
               }
@@ -714,7 +796,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               // Format the URL for the closest city
               const citySlug = data.closestCity.city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
               const stateSlug = data.closestCity.state.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-              const redirectUrl = `/states/${stateSlug}/${citySlug}`;
+              const baseUrl = `/states/${stateSlug}/${citySlug}`;
+              const redirectUrl = `${baseUrl}?_=${searchTimestamp}`;
               
               console.log(`Redirecting to: ${redirectUrl}`);
               
@@ -803,12 +886,19 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           }
           
           if (cityMatch) {
-            window.location.href = cityMatch.url;
+            // Add cache busting to the URL
+            const redirectUrl = cityMatch.url.includes('?')
+              ? `${cityMatch.url}&_=${searchTimestamp}`
+              : `${cityMatch.url}?_=${searchTimestamp}`;
+              
+            console.log(`Redirecting to: ${redirectUrl}`);
+            window.location.href = redirectUrl;
           } else {
             // Last resort: try to create a URL directly from city and state
             const citySlug = cityToFind.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
             const stateSlug = stateToFind.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-            const fallbackUrl = `/states/${stateSlug}/${citySlug}`;
+            const baseUrl = `/states/${stateSlug}/${citySlug}`;
+            const fallbackUrl = `${baseUrl}?_=${searchTimestamp}`;
             
             console.log(`No match found in cityStatePairs. Trying fallback URL: ${fallbackUrl}`);
             window.location.href = fallbackUrl;

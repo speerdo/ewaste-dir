@@ -7,6 +7,17 @@ export const prerender = false;
 // Explicitly mark this as an edge function for Vercel
 export const config = {
   runtime: 'edge',
+  // Bypass Vercel's edge cache completely
+  cache: 'no-store',
+  maxDuration: 60,
+  regions: ['iad1'], // Use a consistent region
+  unstable_allowDynamic: ['**/*.node'],
+  // Explicitly disable all caching mechanisms
+  caching: {
+    edge: false,
+    browser: false,
+    header: 'no-cache, no-store, must-revalidate',
+  },
 };
 
 // CORS headers for the API response
@@ -16,9 +27,15 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers':
     'Content-Type, Accept, X-Requested-With, X-No-Cache, X-Zip-Code, X-Request-ID',
-  'Cache-Control': 'no-cache, no-store, must-revalidate',
+  'Cache-Control':
+    'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate',
   Pragma: 'no-cache',
   Expires: '0',
+  'Surrogate-Control': 'no-store',
+  'Edge-Control': 'no-store',
+  'Vercel-CDN-Cache-Control': 'no-cache',
+  'Surrogate-Key': 'zipcode-api',
+  Vary: '*',
 };
 
 // Define a type for location data
@@ -38,6 +55,11 @@ interface ZipCodeResponse {
   source: string;
   url?: string;
   requestedZip?: string;
+  requestId?: string;
+  clientRequestId?: string;
+  timestamp?: string;
+  unixTime?: number;
+  parsedBody?: any;
 }
 
 // Interface for error responses
@@ -599,17 +621,39 @@ function createResponse(data: any, status: number = 200): Response {
   }
 
   // Add timestamp to response for debugging
-  data.timestamp = new Date().toISOString();
+  const responseTime = new Date();
+  data.timestamp = responseTime.toISOString();
+  data.unixTime = responseTime.getTime();
+
+  // Generate a unique nonce for each response to prevent collisions
+  const nonce =
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15);
 
   // Ensure proper CORS headers and content type
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       ...corsHeaders,
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Cache-Control':
+        'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate',
       Pragma: 'no-cache',
       Expires: '0',
-      'X-Response-Time': Date.now().toString(),
+      'Surrogate-Control': 'no-store',
+      'Edge-Control': 'no-store',
+      'Vercel-CDN-Cache-Control': 'no-cache',
+      'CDN-Cache-Control': 'no-cache',
+      'X-Response-Time': responseTime.getTime().toString(),
+      'X-Response-Id': `res_${responseTime.getTime()}_${Math.floor(
+        Math.random() * 1000
+      )}`,
+      'X-Response-Nonce': nonce,
+      'X-Accel-Expires': '0',
+      'X-Cache-Control': 'no-cache',
+      'X-Vercel-Skip-Cache': 'true',
+      'X-Middleware-Cache': 'no-cache',
+      'X-Zip-Requested': data.requestedZip || '',
+      Vary: '*',
     },
   });
 }
@@ -624,29 +668,31 @@ export const GET = (async ({ request }) => {
   }
 
   try {
-    // Print request details for debugging
-    console.log(`Processing zipcode API request: ${request.url}`);
+    // Generate a unique ID for this request
+    const requestId = `req_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    console.log(`Processing zipcode API request ${requestId}: ${request.url}`);
 
     // Log headers for debugging
     const requestHeaders: Record<string, string> = {};
     for (const [key, value] of request.headers.entries()) {
       requestHeaders[key] = value;
     }
-    console.log('Request headers:', requestHeaders);
+    console.log(`Request ${requestId} headers:`, requestHeaders);
 
     // Get the URL and parameters - more robust parsing
     let url: URL;
     try {
       url = new URL(request.url);
-      console.log(`URL parsed: ${url.toString()}`);
-      console.log(`URL pathname: ${url.pathname}`);
+      console.log(`URL parsed ${requestId}: ${url.toString()}`);
+      console.log(`URL pathname ${requestId}: ${url.pathname}`);
     } catch (error) {
-      console.error(`Error parsing URL: ${error}`);
+      console.error(`Error parsing URL ${requestId}:`, error);
       return createResponse(
         {
           error: 'Invalid URL',
           message: 'Could not parse the request URL',
           fallback: formatResponse(await getFallbackCity('invalid-url')),
+          requestId,
         } as ZipCodeErrorResponse,
         400
       );
@@ -655,46 +701,64 @@ export const GET = (async ({ request }) => {
     // Extract the ZIP code from path parameters - highest priority
     let zipCode = null;
 
-    // Look for patterns like /zipcode/{zipcode} or /zipcode/postal/{zipcode}
-    const pathRegex = /\/(?:zipcode|api\/zipcode)\/(?:postal\/)?(\d{5})\/?$/i;
+    // Look for patterns like:
+    // /zipcode/{zipcode}
+    // /zipcode/{zipcode}/{cachebuster}
+    // /zipcode/postal/{zipcode}
+    // /zipcode/postal/{zipcode}/unique/{cachebuster}
+    const pathRegex =
+      /\/(?:zipcode|api\/zipcode)(?:\/postal)?\/(\d{5})(?:\/.*)?$/i;
     const pathMatch = pathRegex.exec(url.pathname);
 
     if (pathMatch && pathMatch[1]) {
       zipCode = pathMatch[1];
-      console.log(`Found ZIP in pathname: ${zipCode}`);
+      console.log(`Found ZIP in pathname ${requestId}: ${zipCode}`);
     }
 
     if (!zipCode) {
-      console.log('No ZIP code found in path. Using fallback.');
+      console.log(`No ZIP code found in path ${requestId}. Using fallback.`);
       return createResponse(
-        formatResponse(await getFallbackCity('no-zip-in-path'))
+        {
+          error: 'No ZIP code found',
+          message: 'Could not extract ZIP code from path',
+          fallback: formatResponse(await getFallbackCity('no-zip-in-path')),
+          requestId,
+        },
+        400
       );
     }
 
     // Sanitize the ZIP code - any non-digits are removed
     zipCode = zipCode.replace(/\D/g, '');
-    console.log(`Sanitized ZIP code: ${zipCode}`);
+    console.log(`Sanitized ZIP code ${requestId}: ${zipCode}`);
 
     // Ensure the ZIP is a 5-digit string
     const fiveDigitZip = zipCode.toString().padStart(5, '0').substring(0, 5);
-    console.log(`Formatted 5-digit ZIP: ${fiveDigitZip}`);
+    console.log(`Formatted 5-digit ZIP ${requestId}: ${fiveDigitZip}`);
 
     // Process the ZIP code with a timeout to avoid serverless function timeouts
     const locationData = await processZipCodeWithTimeout(fiveDigitZip);
 
     if (locationData) {
       console.log(
-        `Found location for ZIP ${fiveDigitZip}:`,
+        `Found location for ZIP ${fiveDigitZip} ${requestId}:`,
         JSON.stringify(locationData)
       );
-      return createResponse(formatResponse(locationData, fiveDigitZip));
+      const response = formatResponse(locationData, fiveDigitZip);
+      response.requestId = requestId;
+      return createResponse(response);
     }
 
     // If all else fails, return a fallback
-    console.log(`No location data for ZIP ${fiveDigitZip}, using fallback`);
-    return createResponse(
-      formatResponse(await getFallbackCity('complete-fallback'), fiveDigitZip)
+    console.log(
+      `No location data for ZIP ${fiveDigitZip} ${requestId}, using fallback`
     );
+    const fallbackResponse = formatResponse(
+      await getFallbackCity('complete-fallback'),
+      fiveDigitZip
+    );
+    fallbackResponse.requestId = requestId;
+    return createResponse(fallbackResponse);
   } catch (error) {
     console.error(`ZIP API error:`, error);
 
@@ -704,6 +768,7 @@ export const GET = (async ({ request }) => {
         error: 'Failed to process ZIP code',
         message: error instanceof Error ? error.message : 'Unknown error',
         fallback: formatResponse(await getFallbackCity('error-fallback')),
+        requestId: `err_${Date.now()}`,
       } as ZipCodeErrorResponse,
       500
     );
@@ -721,47 +786,64 @@ export const POST = (async ({ request }) => {
   }
 
   try {
-    // Print request details for debugging
-    console.log(`Processing POST zipcode API request: ${request.url}`);
+    // Generate a unique ID for this request
+    const requestId = `req_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    console.log(
+      `Processing POST zipcode API request ${requestId}: ${request.url}`
+    );
 
     // Log headers for debugging
     const requestHeaders: Record<string, string> = {};
     for (const [key, value] of request.headers.entries()) {
       requestHeaders[key] = value;
     }
-    console.log('Request headers:', requestHeaders);
+    console.log(`Request ${requestId} headers:`, requestHeaders);
 
     // Check no-cache flag in headers
     const noCache = requestHeaders['x-no-cache'] === 'true';
     if (noCache) {
-      console.log('No-cache flag detected in headers');
+      console.log(`No-cache flag detected in headers ${requestId}`);
     }
+
+    // Get URL for path inspection
+    let url = new URL('about:blank'); // Initialize with a default value
+    try {
+      url = new URL(request.url);
+    } catch (error) {
+      console.error(`Error parsing URL in POST ${requestId}:`, error);
+    }
+
+    // Clone the request for multiple parsing attempts
+    const requestClone = request.clone();
 
     // Extract the ZIP code from the POST body
     let zipCode = null;
     let fallbackRequested = false;
-    let requestId = null;
+    let bodyRequestId = null;
     let noCacheRequested = noCache;
+    let bodyData = null; // Store the body data for debugging
 
+    // First try JSON
     try {
       const body = await request.json();
-      console.log(`POST body:`, JSON.stringify(body));
+      bodyData = body; // Store for debugging
+      console.log(`POST body ${requestId}:`, JSON.stringify(body));
 
       // Get the request ID if present
       if (body.requestId) {
-        requestId = body.requestId;
-        console.log(`Found request ID: ${requestId}`);
+        bodyRequestId = body.requestId;
+        console.log(`Found request ID in body ${requestId}: ${bodyRequestId}`);
       }
 
       // Check for no-cache flag in body
       if (body.noCache) {
         noCacheRequested = true;
-        console.log('No-cache flag detected in body');
+        console.log(`No-cache flag detected in body ${requestId}`);
       }
 
       // Check if this is a fallback request
       if (body.fallback) {
-        console.log('Explicit fallback requested in POST body');
+        console.log(`Explicit fallback requested in POST body ${requestId}`);
         fallbackRequested = true;
       }
 
@@ -778,67 +860,80 @@ export const POST = (async ({ request }) => {
         if (body[field]) {
           zipCode = body[field];
           console.log(
-            `Found ZIP in POST body with field '${field}': ${zipCode}`
+            `Found ZIP in POST body with field '${field}' ${requestId}: ${zipCode}`
           );
           break;
         }
       }
     } catch (error) {
-      console.error(`Failed to parse POST body as JSON:`, error);
+      console.error(`Failed to parse POST body as JSON ${requestId}:`, error);
 
       // Try to fallback to form data
       try {
-        const formData = await request.formData();
-        console.log(`Attempting to parse as form data`);
+        const formData = await requestClone.formData();
+        console.log(`Attempting to parse as form data ${requestId}`);
 
         // Check for request ID
         if (formData.has('requestId')) {
-          requestId = formData.get('requestId');
-          console.log(`Found request ID in form: ${requestId}`);
+          bodyRequestId = formData.get('requestId');
+          console.log(
+            `Found request ID in form ${requestId}: ${bodyRequestId}`
+          );
         }
 
         // Check for no-cache flag
         if (formData.has('noCache')) {
           noCacheRequested = formData.get('noCache') === 'true';
-          console.log(`No-cache flag in form: ${noCacheRequested}`);
+          console.log(
+            `No-cache flag in form ${requestId}: ${noCacheRequested}`
+          );
         }
 
         for (const [key, value] of formData.entries()) {
-          console.log(`Form field: ${key}=${value}`);
+          console.log(`Form field ${requestId}: ${key}=${value}`);
           if (
             key.toLowerCase().includes('zip') ||
             key.toLowerCase().includes('postal')
           ) {
             zipCode = value;
             console.log(
-              `Found ZIP in form data with field '${key}': ${zipCode}`
+              `Found ZIP in form data with field '${key}' ${requestId}: ${zipCode}`
             );
             break;
           }
         }
       } catch (formError) {
-        console.error(`Failed to parse as form data:`, formError);
+        console.error(`Failed to parse as form data ${requestId}:`, formError);
       }
     }
 
-    console.log(`Final ZIP code from POST: ${zipCode || 'not found'}`);
-    console.log(`No-cache requested: ${noCacheRequested}`);
+    console.log(
+      `Final ZIP code from POST ${requestId}: ${zipCode || 'not found'}`
+    );
+    console.log(`No-cache requested ${requestId}: ${noCacheRequested}`);
 
     if (fallbackRequested) {
-      console.log('Processing fallback request from POST body');
-      const fallbackData = await getFallbackCity('explicit-fallback-post-body');
-      return createResponse(formatResponse(fallbackData, zipCode));
+      console.log(`Processing fallback request from POST body ${requestId}`);
+      const fallbackData = await getFallbackCity(
+        `explicit-fallback-post-body-${requestId}`
+      );
+      const response = formatResponse(fallbackData, zipCode);
+      response.requestId = requestId;
+      response.parsedBody = bodyData;
+      return createResponse(response);
     }
 
     if (!zipCode || zipCode.toString().trim() === '') {
-      console.log('No ZIP code provided in POST');
+      console.log(`No ZIP code provided in POST ${requestId}`);
       return createResponse(
         {
           error: 'Zip code is required',
           fallback: formatResponse(
-            await getFallbackCity('no-zip-provided-post')
+            await getFallbackCity(`no-zip-provided-post-${requestId}`)
           ),
           requestId,
+          parsedBody: bodyData,
+          url: url?.toString(),
         },
         400
       );
@@ -846,33 +941,39 @@ export const POST = (async ({ request }) => {
 
     // Sanitize the ZIP code - any non-digits are removed
     zipCode = zipCode.toString().replace(/\D/g, '');
-    console.log(`Sanitized ZIP code from POST: ${zipCode}`);
+    console.log(`Sanitized ZIP code from POST ${requestId}: ${zipCode}`);
 
     // Ensure the ZIP is a 5-digit string
     const fiveDigitZip = zipCode.toString().padStart(5, '0').substring(0, 5);
-    console.log(`Formatted 5-digit ZIP from POST: ${fiveDigitZip}`);
+    console.log(
+      `Formatted 5-digit ZIP from POST ${requestId}: ${fiveDigitZip}`
+    );
 
     // Process the ZIP code with a timeout to avoid serverless function timeouts
     const locationData = await processZipCodeWithTimeout(fiveDigitZip);
 
     if (locationData) {
       console.log(
-        `Found location for ZIP ${fiveDigitZip} via POST:`,
+        `Found location for ZIP ${fiveDigitZip} via POST ${requestId}:`,
         JSON.stringify(locationData)
       );
-      return createResponse(formatResponse(locationData, fiveDigitZip));
+      const response = formatResponse(locationData, fiveDigitZip);
+      response.requestId = requestId;
+      response.clientRequestId = bodyRequestId;
+      return createResponse(response);
     }
 
     // If all else fails, return a fallback
     console.log(
-      `No location data for ZIP ${fiveDigitZip} from POST, using fallback`
+      `No location data for ZIP ${fiveDigitZip} from POST ${requestId}, using fallback`
     );
-    return createResponse(
-      formatResponse(
-        await getFallbackCity('complete-fallback-post'),
-        fiveDigitZip
-      )
+    const fallbackResponse = formatResponse(
+      await getFallbackCity(`complete-fallback-post-${requestId}`),
+      fiveDigitZip
     );
+    fallbackResponse.requestId = requestId;
+    fallbackResponse.clientRequestId = bodyRequestId;
+    return createResponse(fallbackResponse);
   } catch (error) {
     console.error(`ZIP API POST error:`, error);
 
@@ -882,6 +983,7 @@ export const POST = (async ({ request }) => {
         error: 'Failed to process ZIP code',
         message: error instanceof Error ? error.message : 'Unknown error',
         fallback: formatResponse(await getFallbackCity('error-fallback-post')),
+        requestId: `err_${Date.now()}`,
       } as ZipCodeErrorResponse,
       500
     );

@@ -1,12 +1,40 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../lib/supabase';
 
-// Include CORS headers for all responses
+// Explicitly mark this as an edge function for Vercel
+export const config = {
+  runtime: 'edge',
+  // Bypass Vercel's edge cache completely
+  cache: 'no-store',
+  maxDuration: 60,
+  regions: ['iad1'], // Use a consistent region
+  unstable_allowDynamic: ['**/*.node'],
+  // Explicitly disable all caching mechanisms
+  caching: {
+    edge: false,
+    browser: false,
+    header: 'no-cache, no-store, must-revalidate',
+  },
+};
+
+// Include CORS headers for all responses with no-cache directives
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-No-Cache',
   'Content-Type': 'application/json',
+  'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0',
+  Pragma: 'no-cache',
+  Expires: '0',
+  'Surrogate-Control': 'no-store',
+  'Edge-Control': 'no-store',
+  'Vercel-CDN-Cache-Control': 'no-cache, bypass',
+  'CDN-Cache-Control': 'no-cache',
+  'Cloudflare-CDN-Cache-Control': 'no-cache, no-store',
+  'X-Vercel-Cache': 'BYPASS',
+  'X-Middleware-Cache': 'no-cache',
+  'X-Vercel-Skip-Cache': 'true',
+  'X-Cache-Buster': new Date().toISOString(),
 };
 
 // Process a POST request with city/state parameters
@@ -20,29 +48,25 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   try {
+    // Generate request ID for tracking
+    const requestId = `req_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
     // Parse the request body
     const body = await request.json();
     const { city, state, zip } = body;
 
     console.log(
-      `Fetching recycling centers for ${city}, ${state} (ZIP: ${zip})`
+      `Fetching recycling centers for ${city}, ${state} (ZIP: ${zip}, Request ID: ${requestId})`
     );
 
     if (!city || !state) {
-      return new Response(
-        JSON.stringify({
+      return createResponse(
+        {
           error: 'Missing city or state parameter',
           timestamp: Date.now(),
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            Pragma: 'no-cache',
-            Expires: '0',
-          },
-        }
+          requestId,
+        },
+        400
       );
     }
 
@@ -78,48 +102,74 @@ export const POST: APIRoute = async ({ request }) => {
         throw fuzzyError;
       }
 
-      // Return the fuzzy results
-      return new Response(JSON.stringify(fuzzyResults || [], null, 2), {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-          Expires: '0',
+      // Return the fuzzy results with dynamic cache prevention
+      return createResponse(
+        {
+          data: fuzzyResults || [],
+          fuzzy: true,
+          count: fuzzyResults?.length || 0,
+          requestId,
+          timestamp: Date.now(),
+          requestedCity: city,
+          requestedState: state,
+          requestedZip: zip,
         },
-      });
+        200
+      );
     }
 
-    // Return the centers
-    return new Response(JSON.stringify(centers, null, 2), {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache',
-        Expires: '0',
+    // Return the centers with dynamic cache prevention
+    return createResponse(
+      {
+        data: centers,
+        fuzzy: false,
+        count: centers.length,
+        requestId,
+        timestamp: Date.now(),
+        requestedCity: city,
+        requestedState: state,
+        requestedZip: zip,
       },
-    });
+      200
+    );
   } catch (error) {
     console.error('Error processing request:', error);
-    return new Response(
-      JSON.stringify({
+    return createResponse(
+      {
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now(),
-      }),
-      {
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-          Expires: '0',
-        },
-      }
+        noCacheFlag: Math.random().toString(36).substring(2),
+      },
+      500
     );
   }
 };
+
+// Helper function to create a response with dynamic cache prevention headers
+function createResponse(data: any, status: number = 200): Response {
+  // Add dynamic timestamp and cache busters
+  if (typeof data === 'object' && data !== null) {
+    data.timestamp = new Date().toISOString();
+    data.unixTime = Date.now();
+    data.cacheHash = Math.random().toString(36).substring(2, 15);
+  }
+
+  // Generate dynamic headers for each response
+  const dynamicHeaders = {
+    ...corsHeaders,
+    'X-Cache-Buster': Date.now().toString(),
+    'X-Request-Time': Date.now().toString(),
+    'X-No-Cache': Math.random().toString(36).substring(2),
+    Vary: '*',
+    Age: '0',
+  };
+
+  return new Response(JSON.stringify(data, null, 2), {
+    status,
+    headers: dynamicHeaders,
+  });
+}
 
 // Support for OPTIONS requests for CORS
 export const OPTIONS: APIRoute = async ({ request }) => {

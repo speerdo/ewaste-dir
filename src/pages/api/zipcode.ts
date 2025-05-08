@@ -33,9 +33,14 @@ const corsHeaders = {
   Expires: '0',
   'Surrogate-Control': 'no-store',
   'Edge-Control': 'no-store',
-  'Vercel-CDN-Cache-Control': 'no-cache',
-  'Surrogate-Key': 'zipcode-api',
+  'Vercel-CDN-Cache-Control': 'no-cache, must-revalidate',
+  'CDN-Cache-Control': 'no-cache',
+  'Cloudflare-CDN-Cache-Control': 'no-cache, no-store',
+  'Surrogate-Key': `zipcode-api-${Date.now()}`,
   Vary: '*',
+  'X-Vercel-Cache': 'BYPASS',
+  'X-Middleware-Cache': 'no-cache',
+  'X-Vercel-Skip-Cache': 'true',
 };
 
 // Define a type for location data
@@ -60,6 +65,8 @@ interface ZipCodeResponse {
   timestamp?: string;
   unixTime?: number;
   parsedBody?: any;
+  currentTime?: number;
+  noCacheFlag?: string;
 }
 
 // Interface for error responses
@@ -670,19 +677,27 @@ function createResponse(data: any, status: number = 200): Response {
     data.cacheHash = Math.random().toString(36).substring(2, 15);
   }
 
+  // Generate dynamic cache-busting headers
+  const dynamicCorsHeaders = {
+    ...corsHeaders,
+    'Cache-Control':
+      'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate',
+    Pragma: 'no-cache',
+    Expires: '0',
+    'Surrogate-Control': 'no-store',
+    'Edge-Control': 'no-store',
+    'X-Cache-Buster': Date.now().toString(),
+    'X-Request-Time': Date.now().toString(),
+    'X-No-Cache': Math.random().toString(36).substring(2),
+    'Vercel-CDN-Cache-Control': 'bypass, no-cache',
+    'CDN-Cache-Control': 'bypass, no-cache',
+    Age: '0',
+    'Cloudflare-CDN-Cache-Control': 'no-cache',
+  };
+
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      ...corsHeaders,
-      // Double-down on cache prevention
-      'Cache-Control':
-        'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate',
-      Pragma: 'no-cache',
-      Expires: '0',
-      'Surrogate-Control': 'no-store',
-      'Edge-Control': 'no-store',
-      'X-Cache-Buster': Date.now().toString(),
-    },
+    headers: dynamicCorsHeaders,
   });
 }
 
@@ -827,6 +842,7 @@ export const POST = (async ({ request }) => {
           message: 'The request body could not be parsed as JSON',
           timestamp: new Date().toISOString(),
           requestId: requestId,
+          uniqueRequestTime: Date.now(),
         },
         400
       );
@@ -840,6 +856,7 @@ export const POST = (async ({ request }) => {
             'Please provide a ZIP code in the request body as { "zip": "12345" }',
           timestamp: new Date().toISOString(),
           requestId: requestId,
+          uniqueRequestTime: Date.now(),
         },
         400
       );
@@ -848,6 +865,9 @@ export const POST = (async ({ request }) => {
     console.log(
       `Processing POST ZIP code request: ${zipCode} (request ID: ${requestId})`
     );
+
+    // Force a new processing timestamp for each request
+    const processingTimestamp = Date.now();
     const result = await processZipCodeWithTimeout(zipCode);
 
     if (result) {
@@ -856,10 +876,12 @@ export const POST = (async ({ request }) => {
       response.clientRequestId = clientRequestId;
       response.timestamp = new Date().toISOString();
       response.parsedBody = { ...body };
+      response.currentTime = Date.now();
+      response.noCacheFlag = Math.random().toString(36).substring(2);
       return createResponse(response);
     } else {
       console.log(`No result found for ZIP code ${zipCode}`);
-      const fallback = await getFallbackCity('api-fallback');
+      const fallback = await getFallbackCity(`api-fallback-${Date.now()}`);
 
       const response = {
         error: 'No city found for the provided ZIP code',
@@ -870,6 +892,8 @@ export const POST = (async ({ request }) => {
         clientRequestId: clientRequestId,
         timestamp: new Date().toISOString(),
         parsedBody: { ...body },
+        currentTime: Date.now(),
+        noCacheFlag: Math.random().toString(36).substring(2),
       };
 
       return createResponse(response, 404);
@@ -882,6 +906,8 @@ export const POST = (async ({ request }) => {
         message:
           error instanceof Error ? error.message : 'An unknown error occurred',
         timestamp: new Date().toISOString(),
+        currentTime: Date.now(),
+        noCacheFlag: Math.random().toString(36).substring(2),
       },
       500
     );

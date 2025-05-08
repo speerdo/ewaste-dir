@@ -24,17 +24,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-No-Cache',
   'Content-Type': 'application/json',
   'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0',
+  'Vercel-CDN-Cache-Control': 'no-cache, no-store, bypass',
+  'CDN-Cache-Control': 'no-cache, no-store',
   Pragma: 'no-cache',
   Expires: '0',
   'Surrogate-Control': 'no-store',
   'Edge-Control': 'no-store',
-  'Vercel-CDN-Cache-Control': 'no-cache, bypass',
-  'CDN-Cache-Control': 'no-cache',
-  'Cloudflare-CDN-Cache-Control': 'no-cache, no-store',
+  Vary: '*',
   'X-Vercel-Cache': 'BYPASS',
   'X-Middleware-Cache': 'no-cache',
   'X-Vercel-Skip-Cache': 'true',
   'X-Cache-Buster': new Date().toISOString(),
+  'X-No-Cache': `${Date.now()}_${Math.random().toString(36).substring(2)}`,
 };
 
 // Process a POST request with city/state parameters
@@ -153,6 +154,7 @@ function createResponse(data: any, status: number = 200): Response {
     data.timestamp = new Date().toISOString();
     data.unixTime = Date.now();
     data.cacheHash = Math.random().toString(36).substring(2, 15);
+    data.nocache = `${Date.now()}_${Math.random().toString(36).substring(2)}`;
   }
 
   // Generate dynamic headers for each response
@@ -160,7 +162,9 @@ function createResponse(data: any, status: number = 200): Response {
     ...corsHeaders,
     'X-Cache-Buster': Date.now().toString(),
     'X-Request-Time': Date.now().toString(),
-    'X-No-Cache': Math.random().toString(36).substring(2),
+    'X-No-Cache': `${Date.now()}_${Math.random().toString(36).substring(2)}`,
+    'Vercel-CDN-Cache-Control': 'no-cache, no-store, bypass',
+    'CDN-Cache-Control': 'no-cache, no-store',
     Vary: '*',
     Age: '0',
   };

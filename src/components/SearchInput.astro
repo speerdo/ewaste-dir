@@ -452,12 +452,16 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
         
         try {
-          // Use a unique timestamp for each request to prevent caching
+          // Generate truly unique search parameters to prevent Vercel CDN caching
           const timestamp = Date.now();
           const uniqueId = Math.random().toString(36).substring(2, 15);
+          const uniquePath = `${timestamp}_${uniqueId}`;
           
-          // Call the API using POST method which we confirmed is working
-          const response = await fetch(`${window.location.origin}/api/zipcode?nocache=${timestamp}_${uniqueId}`, {
+          // Use a dynamic path with timestamp and unique ID to completely avoid caching
+          const uniqueUrl = `${window.location.origin}/api/zipcode/${zipCode}/${uniquePath}`;
+          
+          // Call the API using POST method with unique parameters
+          const response = await fetch(uniqueUrl, {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
@@ -465,12 +469,16 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               'Cache-Control': 'no-cache, no-store, must-revalidate',
               'Pragma': 'no-cache',
               'Expires': '0',
-              'X-Request-ID': `req_${timestamp}_${uniqueId}`
+              'X-Request-ID': `req_${timestamp}_${uniqueId}`,
+              'X-No-Cache': `${timestamp}_${uniqueId}`,
+              'X-Zip-Code': zipCode,
+              'X-Unique-Search': uniquePath
             },
             body: JSON.stringify({ 
               zip: zipCode,
               timestamp: timestamp,
-              uniqueId: uniqueId
+              uniqueId: uniqueId,
+              nocache: uniquePath
             })
           });
           
@@ -505,19 +513,30 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             }
             
             try {
-              // Make a separate call with no cache to get centers for this location
-              const centersResponse = await fetch(`${window.location.origin}/api/recycling-centers?nocache=${Date.now()}`, {
+              // Generate new unique values for the centers request
+              const centersTimestamp = Date.now();
+              const centersUniqueId = Math.random().toString(36).substring(2, 15);
+              const centersUniquePath = `${centersTimestamp}_${centersUniqueId}`;
+              
+              // Make a separate call with unique values to get centers for this location
+              const centersResponse = await fetch(`${window.location.origin}/api/recycling-centers?nocache=${centersUniquePath}`, {
                 method: 'POST',
                 headers: {
                   'Accept': 'application/json',
                   'Content-Type': 'application/json',
-                  'Cache-Control': 'no-cache, no-store, must-revalidate'
+                  'Cache-Control': 'no-cache, no-store, must-revalidate',
+                  'Pragma': 'no-cache',
+                  'Expires': '0',
+                  'X-Request-ID': `req_${centersTimestamp}_${centersUniqueId}`,
+                  'X-No-Cache': `${centersTimestamp}_${centersUniqueId}`
                 },
                 body: JSON.stringify({ 
                   city: data.city,
                   state: data.state,
                   zip: zipCode,
-                  timestamp: Date.now()
+                  timestamp: centersTimestamp,
+                  uniqueId: centersUniqueId,
+                  nocache: centersUniquePath
                 })
               }).catch(error => {
                 console.error('Error fetching centers:', error);
@@ -526,9 +545,10 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               
               // If we couldn't get a centers response, show a link to the city page instead
               if (!centersResponse || !centersResponse.ok) {
+                const cityUniquePath = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
                 const cityUrl = data.url.includes('?') 
-                  ? `${data.url}&_t=${Date.now()}` 
-                  : `${data.url}?_t=${Date.now()}`;
+                  ? `${data.url}&_t=${cityUniquePath}` 
+                  : `${data.url}?_t=${cityUniquePath}`;
                 
                 if (resultsContent) {
                   resultsContent.innerHTML = `
@@ -569,9 +589,9 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                 // to handle both the case where we have centers and where we don't
                 let centersHtml = '';
                 
-                if (centersData && Array.isArray(centersData) && centersData.length > 0) {
+                if (centersData && centersData.data && Array.isArray(centersData.data) && centersData.data.length > 0) {
                   // We have centers to display
-                  const limitedCenters = centersData.slice(0, 5); // Limit to first 5 centers
+                  const limitedCenters = centersData.data.slice(0, 5); // Limit to first 5 centers
                   
                   centersHtml = `
                     <div class="mt-3">
@@ -604,10 +624,13 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                   `;
                 }
                 
+                // Generate unique path for view links
+                const viewLinkUniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+                
                 // Main results container with city info and centers
                 const cityUrl = data.url.includes('?') 
-                  ? `${data.url}&_t=${Date.now()}` 
-                  : `${data.url}?_t=${Date.now()}`;
+                  ? `${data.url}&_t=${viewLinkUniqueId}` 
+                  : `${data.url}?_t=${viewLinkUniqueId}`;
                 
                 resultsContent.innerHTML = `
                   <div class="p-4">
@@ -641,9 +664,10 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               
               // Fallback to showing just the city info
               if (resultsContent) {
+                const fallbackUniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
                 const cityUrl = data.url.includes('?') 
-                  ? `${data.url}&_t=${Date.now()}` 
-                  : `${data.url}?_t=${Date.now()}`;
+                  ? `${data.url}&_t=${fallbackUniqueId}` 
+                  : `${data.url}?_t=${fallbackUniqueId}`;
                 
                 resultsContent.innerHTML = `
                   <div class="p-4">
@@ -656,11 +680,11 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                       <div class="ml-3">
                         <h3 class="text-sm font-medium text-green-800">ZIP Code ${zipCode} Found</h3>
                         <div class="mt-2 text-sm text-gray-700">
-                          <p>We found <strong>${data.city}, ${data.state}</strong> for ZIP code <strong>${zipCode}</strong>.</p>
+                          <p>We found recycling centers in <strong>${data.city}, ${data.state}</strong> for ZIP code <strong>${zipCode}</strong>.</p>
                         </div>
                         <div class="mt-3">
                           <a href="${cityUrl}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            View Recycling Centers in ${data.city}
+                            View All Centers in ${data.city}
                           </a>
                         </div>
                       </div>

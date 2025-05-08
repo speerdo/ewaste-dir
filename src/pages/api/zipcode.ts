@@ -29,18 +29,17 @@ const corsHeaders = {
     'Content-Type, Accept, X-Requested-With, X-No-Cache, X-Zip-Code, X-Request-ID',
   'Cache-Control':
     'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate',
+  'Vercel-CDN-Cache-Control': 'no-cache, no-store, bypass',
+  'CDN-Cache-Control': 'no-cache, no-store',
   Pragma: 'no-cache',
   Expires: '0',
   'Surrogate-Control': 'no-store',
   'Edge-Control': 'no-store',
-  'Vercel-CDN-Cache-Control': 'no-cache, must-revalidate',
-  'CDN-Cache-Control': 'no-cache',
-  'Cloudflare-CDN-Cache-Control': 'no-cache, no-store',
-  'Surrogate-Key': `zipcode-api-${Date.now()}`,
   Vary: '*',
   'X-Vercel-Cache': 'BYPASS',
   'X-Middleware-Cache': 'no-cache',
   'X-Vercel-Skip-Cache': 'true',
+  'X-No-Cache': `${Date.now()}_${Math.random().toString(36).substring(2)}`,
 };
 
 // Define a type for location data
@@ -670,34 +669,29 @@ function formatResponse(data: any, requestedZip?: string): ZipCodeResponse {
 
 // Make sure the response is properly formatted for the Vercel Edge Runtime
 function createResponse(data: any, status: number = 200): Response {
-  // Ensure we always include the timestamp and a cache-busting hash in the response
+  // Add dynamic timestamp and cache busters
   if (typeof data === 'object' && data !== null) {
     data.timestamp = new Date().toISOString();
     data.unixTime = Date.now();
     data.cacheHash = Math.random().toString(36).substring(2, 15);
+    data.nocache = `${Date.now()}_${Math.random().toString(36).substring(2)}`;
   }
 
-  // Generate dynamic cache-busting headers
-  const dynamicCorsHeaders = {
+  // Generate dynamic headers for each response
+  const dynamicHeaders = {
     ...corsHeaders,
-    'Cache-Control':
-      'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate',
-    Pragma: 'no-cache',
-    Expires: '0',
-    'Surrogate-Control': 'no-store',
-    'Edge-Control': 'no-store',
     'X-Cache-Buster': Date.now().toString(),
     'X-Request-Time': Date.now().toString(),
-    'X-No-Cache': Math.random().toString(36).substring(2),
-    'Vercel-CDN-Cache-Control': 'bypass, no-cache',
-    'CDN-Cache-Control': 'bypass, no-cache',
+    'X-No-Cache': `${Date.now()}_${Math.random().toString(36).substring(2)}`,
+    'Vercel-CDN-Cache-Control': 'no-cache, no-store, bypass',
+    'CDN-Cache-Control': 'no-cache, no-store',
+    Vary: '*',
     Age: '0',
-    'Cloudflare-CDN-Cache-Control': 'no-cache',
   };
 
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(data, null, 2), {
     status,
-    headers: dynamicCorsHeaders,
+    headers: dynamicHeaders,
   });
 }
 

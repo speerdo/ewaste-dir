@@ -2,6 +2,11 @@
 export function onRequest({ request, next }) {
   const url = new URL(request.url);
 
+  // Skip middleware for zipfind to avoid conflicts
+  if (url.pathname === '/api/zipfind') {
+    return next();
+  }
+
   // Only apply to API routes
   if (url.pathname.startsWith('/api/')) {
     // Create a unique request identifier

@@ -10,45 +10,6 @@
   "cleanUrls": true,
   "headers": [
     {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
-      ]
-    },
-    {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/_astro/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
       "source": "/api/zipfind",
       "headers": [
         {
@@ -157,27 +118,7 @@
       "destination": "/api/zipfind"
     },
     {
-      "source": "/api/zipcode/check/:zip",
-      "destination": "/api/zipcode/check/[zip]"
-    },
-    {
       "source": "/api/zipcode",
-      "destination": "/api/zipcode"
-    },
-    {
-      "source": "/api/zipcode/:zipcode",
-      "destination": "/api/zipcode"
-    },
-    {
-      "source": "/api/zipcode/:zipcode/:cachebuster",
-      "destination": "/api/zipcode"
-    },
-    {
-      "source": "/api/zipcode/postal/:zipcode",
-      "destination": "/api/zipcode"
-    },
-    {
-      "source": "/api/zipcode/postal/:zipcode/unique/:cachebuster",
       "destination": "/api/zipcode"
     },
     {
@@ -189,26 +130,6 @@
   "build": {
     "env": {
       "NODE_OPTIONS": "--max-old-space-size=7168 --no-warnings"
-    }
-  },
-  "crons": [
-    {
-      "path": "/api/revalidate",
-      "schedule": "0 0 * * *"
-    }
-  ],
-  "functions": {
-    "api/zipfind.js": {
-      "maxDuration": 15
-    },
-    "api/zipcode.ts": {
-      "maxDuration": 15
-    },
-    "api/cities-data.js": {
-      "maxDuration": 10
-    },
-    "api/**/*.{js,ts}": {
-      "maxDuration": 10
     }
   }
 }

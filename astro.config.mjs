@@ -38,30 +38,9 @@ export default defineConfig({
       },
     },
     edgeMiddleware: true,
-    maxDuration: 8,
+    maxDuration: 15,
     functionPerRoute: true,
-    edges: [
-      {
-        name: 'api',
-        pattern: {
-          static: ['/api/geocode', '/api/cities-data', '/api/zipcode'],
-        },
-        config: {
-          runtime: 'edge',
-          regions: 'all',
-        },
-      },
-      {
-        name: 'zipfind-api',
-        pattern: {
-          static: ['/api/zipfind'],
-        },
-        config: {
-          runtime: 'nodejs18.x',
-          regions: 'all',
-        },
-      },
-    ],
+    includeFiles: ['src/pages/api/**/*'],
     analytics: true,
   }),
   build: {

@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Configure the runtime for Vercel
 export const config = {
-  runtime: 'edge',
+  runtime: 'nodejs18.x',
   regions: ['iad1'], // Use a consistent region for stability
   cache: 'no-store', // Completely disable caching at the edge
   maxDuration: 15, // Increase the timeout to 15 seconds
@@ -375,8 +375,13 @@ try {
     // First try Census.gov API
     try {
       log(`Trying Census.gov API for ZIP ${zipCode}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
       const url = `https://geocoding.geo.census.gov/geocoder/locations/address?zip=${zipCode}&benchmark=Public_AR_Current&format=json`;
-      const response = await fetch(url, { signal: AbortSignal.timeout(2000) });
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       const result = await response.json();
 
       if (
@@ -397,13 +402,18 @@ try {
     // Then try OpenStreetMap
     try {
       log(`Trying OpenStreetMap for ZIP ${zipCode}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
       const nominatimUrl = `https://nominatim.openstreetmap.org/search?postalcode=${zipCode}&country=USA&format=json`;
       const nominatimResponse = await fetch(nominatimUrl, {
         headers: {
           'User-Agent': 'Astro-Geocoding-Service/1.0',
         },
-        signal: AbortSignal.timeout(2000),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
+
       const nominatimData = await nominatimResponse.json();
 
       if (nominatimData && nominatimData.length > 0) {
@@ -628,3 +638,6 @@ try {
 
 // Export handlers
 export { GET, POST, OPTIONS };
+
+// Add a default export for better compatibility with various serverless environments
+export default { GET, POST, OPTIONS };

@@ -44,15 +44,20 @@ export default defineConfig({
       {
         name: 'api',
         pattern: {
-          static: [
-            '/api/zipfind',
-            '/api/geocode',
-            '/api/cities-data',
-            '/api/zipcode',
-          ],
+          static: ['/api/geocode', '/api/cities-data', '/api/zipcode'],
         },
         config: {
           runtime: 'edge',
+          regions: 'all',
+        },
+      },
+      {
+        name: 'zipfind-api',
+        pattern: {
+          static: ['/api/zipfind'],
+        },
+        config: {
+          runtime: 'nodejs18.x',
           regions: 'all',
         },
       },

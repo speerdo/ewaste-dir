@@ -1,58 +1,62 @@
 // Simple API endpoint with extreme cache prevention
-export default function handler(req, res) {
+export const GET = async (context) => {
+  const { request } = context;
+  const url = new URL(request.url);
+  const zipCode = url.searchParams.get('zip');
+
+  // Create response object to return
+  const headers = new Headers();
+
   // Allow CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader(
+  headers.set('Access-Control-Allow-Origin', '*');
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  headers.set(
     'Access-Control-Allow-Headers',
     'Content-Type, Accept, X-Requested-With'
   );
-  res.setHeader('Access-Control-Max-Age', '86400');
+  headers.set('Access-Control-Max-Age', '86400');
 
   // Set most aggressive anti-cache headers possible
-  res.setHeader(
+  headers.set(
     'Cache-Control',
     'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0'
   );
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  res.setHeader('Surrogate-Control', 'no-store');
+  headers.set('Pragma', 'no-cache');
+  headers.set('Expires', '0');
+  headers.set('Surrogate-Control', 'no-store');
 
   // Vercel-specific cache headers
-  res.setHeader('CDN-Cache-Control', 'no-store');
-  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
-  res.setHeader('X-Vercel-Cache', 'BYPASS');
-  res.setHeader('X-Vercel-Skip-Cache', 'true');
-  res.setHeader('Edge-Control', 'no-store');
-  res.setHeader('X-Middleware-Cache', 'no-cache');
+  headers.set('CDN-Cache-Control', 'no-store');
+  headers.set('Vercel-CDN-Cache-Control', 'no-store');
+  headers.set('X-Vercel-Cache', 'BYPASS');
+  headers.set('X-Vercel-Skip-Cache', 'true');
+  headers.set('Edge-Control', 'no-store');
+  headers.set('X-Middleware-Cache', 'no-cache');
 
   // Set Vary header to all to prevent cache sharing
-  res.setHeader('Vary', '*');
+  headers.set('Vary', '*');
 
-  // Handle OPTIONS request for CORS
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  // Add content type for JSON response
+  headers.set('Content-Type', 'application/json');
 
-  // Get ZIP code from query parameters or body
-  let zipCode;
-  const timestamp = Date.now();
-  const requestId = `req_${timestamp}_${Math.floor(Math.random() * 10000)}`;
-
+  // Handle the request
   try {
-    if (req.method === 'GET') {
-      zipCode = req.query.zip;
-    } else if (req.method === 'POST') {
-      zipCode = req.body?.zip;
-    }
+    const timestamp = Date.now();
+    const requestId = `req_${timestamp}_${Math.floor(Math.random() * 10000)}`;
 
     if (!zipCode) {
-      return res.status(400).json({
-        error: 'Missing ZIP code',
-        timestamp,
-        requestId,
-        nocache: `${timestamp}_${Math.random().toString(36).substring(2)}`,
-      });
+      return new Response(
+        JSON.stringify({
+          error: 'Missing ZIP code',
+          timestamp,
+          requestId,
+          nocache: `${timestamp}_${Math.random().toString(36).substring(2)}`,
+        }),
+        {
+          status: 400,
+          headers,
+        }
+      );
     }
 
     // Use the search functionality to find a matching location from the global data
@@ -61,25 +65,85 @@ export default function handler(req, res) {
 
     // Since we can't directly access window.__CITY_STATE_PAIRS__, we'll return
     // a response that instructs the client to look up the data locally
-    return res.status(200).json({
-      status: 'success',
-      action: 'client_lookup',
-      requestedZip: zipCode,
-      requestId,
-      timestamp: new Date().toISOString(),
-      unixTime: timestamp,
-      nocache: `${timestamp}_${Math.random().toString(36).substring(2)}`,
-      uniqueValue: Math.random().toString(36).substring(2),
-    });
+    return new Response(
+      JSON.stringify({
+        status: 'success',
+        action: 'client_lookup',
+        requestedZip: zipCode,
+        requestId,
+        timestamp: new Date().toISOString(),
+        unixTime: timestamp,
+        nocache: `${timestamp}_${Math.random().toString(36).substring(2)}`,
+        uniqueValue: Math.random().toString(36).substring(2),
+      }),
+      {
+        status: 200,
+        headers,
+      }
+    );
   } catch (error) {
     console.error('Error processing request:', error);
 
-    return res.status(500).json({
-      error: 'Internal server error',
-      message: error.message || 'Unknown error',
-      timestamp: new Date().toISOString(),
-      requestId,
-      nocache: `${timestamp}_${Math.random().toString(36).substring(2)}`,
-    });
+    return new Response(
+      JSON.stringify({
+        error: 'Internal server error',
+        message: error.message || 'Unknown error',
+        timestamp: new Date().toISOString(),
+        requestId: `req_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+        nocache: `${Date.now()}_${Math.random().toString(36).substring(2)}`,
+      }),
+      {
+        status: 500,
+        headers,
+      }
+    );
   }
-}
+};
+
+// Handle OPTIONS request for CORS
+export const OPTIONS = async () => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers':
+        'Content-Type, Accept, X-Requested-With, X-No-Cache',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+};
+
+// Also add POST handler for backward compatibility
+export const POST = async (context) => {
+  const { request } = context;
+  let zipCode;
+
+  try {
+    const body = await request.json();
+    zipCode = body?.zip;
+  } catch (e) {
+    // If JSON parse fails, try reading as form data
+    try {
+      const formData = await request.formData();
+      zipCode = formData.get('zip');
+    } catch (formError) {
+      zipCode = null;
+    }
+  }
+
+  // Create a new URL with the zip as query parameter
+  const url = new URL(request.url);
+  if (zipCode) {
+    url.searchParams.set('zip', zipCode);
+  }
+
+  // Create a new request with the updated URL
+  const newRequest = new Request(url, {
+    method: 'GET',
+    headers: request.headers,
+  });
+
+  // Reuse the GET handler
+  return GET({ request: newRequest });
+};

@@ -53,6 +53,14 @@ export function onRequest({ request, next }) {
       newHeaders.set('X-Vercel-Skip-Cache', 'true');
       newHeaders.set('Vary', '*');
 
+      // Set content type for API responses if not already set
+      if (
+        res.headers.get('content-type') === null &&
+        url.pathname.includes('/api/')
+      ) {
+        newHeaders.set('Content-Type', 'application/json');
+      }
+
       return new Response(res.body, {
         status: res.status,
         statusText: res.statusText,

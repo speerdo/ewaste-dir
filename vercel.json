@@ -98,6 +98,10 @@
         {
           "key": "X-Vercel-Skip-Cache",
           "value": "true"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/json"
         }
       ]
     },
@@ -149,8 +153,8 @@
   ],
   "rewrites": [
     {
-      "source": "/api/zipfind(.*)",
-      "destination": "/api/zipfind.js"
+      "source": "/api/zipfind",
+      "destination": "/api/zipfind"
     },
     {
       "source": "/api/zipcode/check/:zip",

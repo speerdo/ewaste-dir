@@ -3,205 +3,106 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ZIP Code API Test</title>
+    <title>Test ZIP Code API</title>
     <style>
       body {
-        font-family: sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif;
+        padding: 20px;
         max-width: 800px;
         margin: 0 auto;
-        padding: 20px;
       }
-      .input-group {
-        margin-bottom: 20px;
-      }
-      input,
       button {
+        padding: 8px 16px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      input {
         padding: 8px;
-        font-size: 16px;
+        margin-right: 10px;
+        width: 100px;
       }
       pre {
-        background: #f4f4f4;
-        padding: 10px;
-        border-radius: 5px;
-        overflow: auto;
-      }
-      .log-entry {
-        margin-bottom: 10px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 5px;
-      }
-      .section {
-        margin-top: 30px;
+        background-color: #f5f5f5;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
       }
     </style>
   </head>
   <body>
     <h1>ZIP Code API Test</h1>
 
-    <div class="input-group">
-      <input
-        type="text"
-        id="zipcode"
-        placeholder="Enter ZIP code"
-        value="28370"
-      />
-      <button id="test-btn">Test ZIP Code</button>
-      <button id="clear-btn">Clear Log</button>
+    <div>
+      <input type="text" id="zipInput" placeholder="ZIP code" value="90210" />
+      <button onclick="testZipCode()">Test ZIP</button>
     </div>
 
-    <div class="section">
-      <h2>URL Path Test</h2>
-      <div class="input-group">
-        <input type="text" id="state" placeholder="State (e.g. new-york)" />
-        <input type="text" id="city" placeholder="City (e.g. new-york)" />
-        <button id="test-path-btn">Test Path</button>
-      </div>
-    </div>
-
-    <h2>Test Log</h2>
-    <div id="log"></div>
+    <h2>Result:</h2>
+    <pre id="result">Results will appear here...</pre>
 
     <script>
-      const zipInput = document.getElementById('zipcode');
-      const testBtn = document.getElementById('test-btn');
-      const clearBtn = document.getElementById('clear-btn');
-      const logContainer = document.getElementById('log');
-      const stateInput = document.getElementById('state');
-      const cityInput = document.getElementById('city');
-      const testPathBtn = document.getElementById('test-path-btn');
+      async function testZipCode() {
+        const zipCode = document.getElementById('zipInput').value;
+        const resultElement = document.getElementById('result');
 
-      function log(message, data) {
-        const entry = document.createElement('div');
-        entry.className = 'log-entry';
+        resultElement.textContent = 'Loading...';
 
-        if (typeof message === 'string') {
-          const messageEl = document.createElement('p');
-          messageEl.textContent = message;
-          entry.appendChild(messageEl);
-        }
-
-        if (data !== undefined) {
-          const dataEl = document.createElement('pre');
-          dataEl.textContent =
-            typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
-          entry.appendChild(dataEl);
-        }
-
-        logContainer.insertBefore(entry, logContainer.firstChild);
-      }
-
-      async function testZipCode(zipCode) {
         try {
-          log(`Testing ZIP code: ${zipCode}`);
+          // Add cache-busting parameters to avoid Vercel caching
+          const timestamp = Date.now();
+          const random = Math.random().toString(36).substring(2);
+          const url = `https://ewaste-dir-git-bugfix-search-zip-creative-bandit-projects.vercel.app/api/zipfind?zip=${zipCode}&_=${timestamp}&r=${random}`;
 
-          const cacheBuster = new Date().getTime();
-          const apiUrl = `${window.location.origin}/api/zipcode?zip=${zipCode}&_cb=${cacheBuster}`;
-          log(`Fetching from: ${apiUrl}`);
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+              'Cache-Control': 'no-cache, no-store',
+              Pragma: 'no-cache',
+            },
+          });
 
-          const response = await fetch(apiUrl);
-          log(`Response status: ${response.status}`);
+          // Get response headers for debugging
+          const headers = {};
+          response.headers.forEach((value, key) => {
+            headers[key] = value;
+          });
 
           if (!response.ok) {
-            throw new Error(`HTTP error ${response.status}`);
+            throw new Error(`API returned status ${response.status}`);
           }
 
-          const data = await response.json();
-          log(`Response data:`, data);
+          const contentType = response.headers.get('content-type');
+          let data;
 
-          if (data.city === 'Unknown Location' && data.closestCity) {
-            const citySlug = data.closestCity.city
-              .toLowerCase()
-              .replace(/\s+/g, '-')
-              .replace(/[^a-z0-9-]/g, '');
-            const stateSlug = data.closestCity.state
-              .toLowerCase()
-              .replace(/\s+/g, '-')
-              .replace(/[^a-z0-9-]/g, '');
-            const redirectUrl = `/states/${stateSlug}/${citySlug}`;
-            log(`Would redirect to: ${redirectUrl}`);
-
-            // Add a link to test the redirect
-            const linkContainer = document.createElement('p');
-            const link = document.createElement('a');
-            link.href = redirectUrl;
-            link.textContent = `Go to ${data.closestCity.city}, ${data.closestCity.state}`;
-            link.target = '_blank';
-            linkContainer.appendChild(link);
-
-            const entry = logContainer.firstChild;
-            entry.appendChild(linkContainer);
-
-            // Check if path exists
-            checkPathExists(stateSlug, citySlug);
+          if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+          } else {
+            // If not JSON, get text preview
+            const text = await response.text();
+            data = {
+              error: 'Response is not JSON',
+              contentType,
+              textPreview: text.substring(0, 500) + '...',
+            };
           }
 
-          return data;
+          const result = {
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+            data,
+          };
+
+          resultElement.textContent = JSON.stringify(result, null, 2);
         } catch (error) {
-          log(`Error: ${error.message}`);
-          return null;
+          resultElement.textContent = `Error: ${error.message}`;
         }
       }
-
-      async function checkPathExists(state, city) {
-        try {
-          log(`Checking if path exists: /states/${state}/${city}`);
-
-          const response = await fetch(`/states/${state}/${city}`, {
-            method: 'HEAD',
-          });
-
-          if (response.ok) {
-            log(`✅ Path exists: /states/${state}/${city}`);
-          } else {
-            log(
-              `❌ Path does not exist: /states/${state}/${city} (Status: ${response.status})`
-            );
-          }
-
-          // Also check just the state path
-          const stateResponse = await fetch(`/states/${state}`, {
-            method: 'HEAD',
-          });
-          if (stateResponse.ok) {
-            log(`✅ State path exists: /states/${state}`);
-          } else {
-            log(
-              `❌ State path does not exist: /states/${state} (Status: ${stateResponse.status})`
-            );
-          }
-        } catch (error) {
-          log(`Error checking path: ${error.message}`);
-        }
-      }
-
-      testBtn.addEventListener('click', () => {
-        const zipCode = zipInput.value.trim();
-        if (zipCode) {
-          testZipCode(zipCode);
-        } else {
-          log('Please enter a ZIP code');
-        }
-      });
-
-      testPathBtn.addEventListener('click', () => {
-        const state = stateInput.value.trim();
-        const city = cityInput.value.trim();
-
-        if (state && city) {
-          checkPathExists(state, city);
-        } else {
-          log('Please enter both state and city');
-        }
-      });
-
-      clearBtn.addEventListener('click', () => {
-        logContainer.innerHTML = '';
-      });
-
-      // Automatically test on page load
-      window.addEventListener('DOMContentLoaded', () => {
-        testZipCode(zipInput.value.trim());
-      });
     </script>
   </body>
 </html>

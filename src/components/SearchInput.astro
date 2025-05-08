@@ -452,15 +452,23 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
         
         try {
+          // Add cache buster to prevent caching issues
+          const cacheBuster = `?t=${Date.now()}`;
+          
           // Call the API using POST method which we confirmed is working
-          const response = await fetch(`${window.location.origin}/api/zipcode`, {
+          const response = await fetch(`${window.location.origin}/api/zipcode${cacheBuster}`, {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache'
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
             },
-            body: JSON.stringify({ zip: zipCode })
+            body: JSON.stringify({ 
+              zip: zipCode,
+              _t: Date.now() // Add timestamp to body as well to prevent caching
+            })
           });
           
           if (!response.ok) {
@@ -472,7 +480,12 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           
           if (data && data.city && data.state) {
             // Success! Redirect to the city page
-            window.location.href = data.url;
+            // Add cache busting parameter to the URL too if it's not already there
+            const url = data.url.includes('?') 
+              ? `${data.url}&_t=${Date.now()}` 
+              : `${data.url}?_t=${Date.now()}`;
+              
+            window.location.href = url;
             return;
           }
           

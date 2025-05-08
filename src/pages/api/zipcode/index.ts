@@ -15,11 +15,15 @@ export interface ZipCodeErrorResponse {
   details?: Record<string, any>;
 }
 
-const corsHeaders = {
+const responseHeaders = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Accept',
+  'Cache-Control':
+    'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  Pragma: 'no-cache',
+  Expires: '0',
 };
 
 export const config = {
@@ -36,7 +40,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
   if (request.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
-      headers: corsHeaders,
+      headers: responseHeaders,
     });
   }
 
@@ -50,7 +54,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         } satisfies ZipCodeErrorResponse),
         {
           status: 405,
-          headers: corsHeaders,
+          headers: responseHeaders,
         }
       );
     }
@@ -68,7 +72,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         } satisfies ZipCodeErrorResponse),
         {
           status: 415,
-          headers: corsHeaders,
+          headers: responseHeaders,
         }
       );
     }
@@ -86,7 +90,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         } satisfies ZipCodeErrorResponse),
         {
           status: 400,
-          headers: corsHeaders,
+          headers: responseHeaders,
         }
       );
     }
@@ -100,7 +104,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         } satisfies ZipCodeErrorResponse),
         {
           status: 400,
-          headers: corsHeaders,
+          headers: responseHeaders,
         }
       );
     }
@@ -124,7 +128,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         } satisfies ZipCodeErrorResponse),
         {
           status: 500,
-          headers: corsHeaders,
+          headers: responseHeaders,
         }
       );
     }
@@ -143,7 +147,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         } satisfies ZipCodeResponse),
         {
           status: 200,
-          headers: corsHeaders,
+          headers: responseHeaders,
         }
       );
     }
@@ -168,7 +172,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         } satisfies ZipCodeErrorResponse),
         {
           status: 502,
-          headers: corsHeaders,
+          headers: responseHeaders,
         }
       );
     }
@@ -183,7 +187,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         } satisfies ZipCodeErrorResponse),
         {
           status: 404,
-          headers: corsHeaders,
+          headers: responseHeaders,
         }
       );
     }
@@ -203,12 +207,12 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
     if (!city || !state) {
       return new Response(
         JSON.stringify({
-          error: 'Incomplete location data',
-          details: { address },
+          error: 'Could not determine city or state for the given ZIP code.',
+          details: { zipCode, address },
         } satisfies ZipCodeErrorResponse),
         {
           status: 404,
-          headers: corsHeaders,
+          headers: responseHeaders,
         }
       );
     }
@@ -242,25 +246,22 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
       } satisfies ZipCodeResponse),
       {
         status: 200,
-        headers: corsHeaders,
+        headers: responseHeaders,
       }
     );
-  } catch (error) {
-    console.error('Zip code lookup error:', error);
+  } catch (error: any) {
+    console.error('Unexpected error:', error);
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        details: {
-          message: error instanceof Error ? error.message : String(error),
-        },
+        error: 'An unexpected error occurred.',
+        details: { message: error.message },
       } satisfies ZipCodeErrorResponse),
       {
         status: 500,
-        headers: corsHeaders,
+        headers: responseHeaders,
       }
     );
   }
 };
 
-export const POST = handler;
-export default handler;
+export { handler as POST, handler as GET, handler as OPTIONS };

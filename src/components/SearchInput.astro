@@ -275,7 +275,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       }
       
       // Search for matching cities/states
-      function searchLocations(query) {
+      function searchLocations(query, cityStatePairs) {
         console.log(`Searching for: "${query}"`);
         query = query.toLowerCase().trim();
         
@@ -284,16 +284,13 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         // Check for zip code
         const isZipCode = /^\d{5}(-\d{4})?$/.test(query);
         if (isZipCode) {
+          const zipCode = query.substring(0, 5);
           return [{
-            text: `Find recycling centers near ${query}`,
+            text: `Find recycling centers near ${zipCode}`,
             type: 'zip',
-            zip: query
+            zip: zipCode
           }];
         }
-        
-        // Try to find exact and partial matches
-        const exactMatches = [];
-        const partialMatches = [];
         
         // Check if cityStatePairs is available and not empty
         if (!cityStatePairs || cityStatePairs.length === 0) {
@@ -301,22 +298,32 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           return [];
         }
         
+        // Try to find exact and partial matches
+        const exactMatches = [];
+        const partialMatches = [];
+        
         cityStatePairs.forEach(pair => {
           const cityLower = pair.city.toLowerCase();
           const stateLower = pair.state.toLowerCase();
           
           // Check for exact match
           if (cityLower === query || stateLower === query) {
-            exactMatches.push({...pair, type: 'city'});
+            exactMatches.push(pair);
           }
           // Check for partial match
           else if (cityLower.includes(query) || stateLower.includes(query)) {
-            partialMatches.push({...pair, type: 'city'});
+            partialMatches.push(pair);
           }
         });
         
-        // Combine and limit results
-        return [...exactMatches, ...partialMatches].slice(0, 8);
+        // Combine, format, and limit results to match server-side format
+        return [...exactMatches, ...partialMatches]
+          .slice(0, 8)
+          .map(({ city, state, url }) => ({
+            text: `${city}, ${state}`,
+            type: 'city',
+            url
+          }));
       }
       
       // Display search suggestions
@@ -348,6 +355,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                 `;
               }
               
+              // For city type suggestions
               return `
                 <button
                   type="button"
@@ -358,7 +366,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   </svg>
-                  <span>${suggestion.city}, ${suggestion.state}</span>
+                  <span>${suggestion.text}</span>
                 </button>
               `;
             })
@@ -417,7 +425,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         try {
           // Use our searchLocations function to find cities matching this ZIP
           console.log(`Looking for ZIP ${zipCode} in city data`);
-          const suggestions = searchLocations(zipCode);
+          const suggestions = searchLocations(zipCode, cityStatePairs);
           
           // Check if we found a direct match (first result is a city)
           if (suggestions.length > 0 && suggestions[0].type === 'city') {
@@ -544,7 +552,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
 
         // Otherwise, handle as a city search
-        const suggestions = searchLocations(query);
+        const suggestions = searchLocations(query, cityStatePairs);
         
         if (suggestions.length === 0) {
           if (resultsContent) {
@@ -596,7 +604,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
           }
           
           searchTimeout = setTimeout(() => {
-            const suggestions = searchLocations(query);
+            const suggestions = searchLocations(query, cityStatePairs);
             showSuggestions(suggestions);
           }, 150);
         });

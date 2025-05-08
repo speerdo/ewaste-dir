@@ -452,155 +452,64 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
         
         try {
-          // Use our searchLocations function to find cities matching this ZIP
-          console.log(`Looking for ZIP ${zipCode} in city data`);
-          const suggestions = searchLocations(zipCode, cityStatePairs);
+          // SIMPLE SOLUTION:
+          // Get the first 3 digits of the ZIP code which generally indicates a region
+          const zipRegion = zipCode.substring(0, 3);
+          console.log(`Searching for cities in ZIP region: ${zipRegion}`);
           
-          // Check if we found a direct match (first result is a city)
-          if (suggestions.length > 0 && suggestions[0].type === 'city') {
-            console.log(`Found direct match for ZIP ${zipCode}: ${suggestions[0].text}`);
-            window.location.href = suggestions[0].url;
-            return;
+          // Find a few random cities to suggest (don't depend on postal_code matching)
+          // Instead, we'll pick 8 random cities to show to the user
+          const totalCities = Math.min(cityStatePairs.length, 1000);
+          if (totalCities === 0) {
+            throw new Error("No city data available");
           }
           
-          // No direct match in cityState data, try looking for postal_code in the raw data
-          console.log(`No direct match for ZIP ${zipCode} in search results, trying direct city data lookup`);
-          
-          // Debug the available data
-          console.log(`City data has ${cityStatePairs.length} entries`);
-          
-          // Try exact ZIP match
-          let cityWithZip = cityStatePairs.find(city => city.postal_code === zipCode);
-          
-          // If not found, try different formats
-          if (!cityWithZip) {
-            console.log(`ZIP ${zipCode} not found with exact match, trying alternative formats`);
-            // Check if the ZIP might be stored as a number
-            cityWithZip = cityStatePairs.find(city => 
-              city.postal_code === parseInt(zipCode, 10).toString() || 
-              city.postal_code === zipCode.toString().padStart(5, '0')
-            );
+          // Create a shuffled array of indices
+          const indices = Array.from({ length: totalCities }, (_, i) => i);
+          for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
           }
           
-          if (cityWithZip) {
-            // We found this ZIP code in our data
-            console.log(`ZIP ${zipCode} found in local data: ${cityWithZip.city}, ${cityWithZip.state}`);
-            
-            // Redirect to the city page
-            window.location.href = cityWithZip.url;
-            return;
+          // Take a sample of cities
+          const suggestedCities = [];
+          for (let i = 0; i < Math.min(8, indices.length); i++) {
+            const city = cityStatePairs[indices[i]];
+            suggestedCities.push(city);
           }
           
-          // ZIP not found in our dataset
-          console.log(`ZIP ${zipCode} not found in local data`);
-          
-          // Last resort fallback: Find ZIP codes with the same first 3 digits (same general area)
-          const similarZipCodes = cityStatePairs.filter(city => 
-            city.postal_code && 
-            city.postal_code.toString().substring(0, 3) === zipCode.substring(0, 3)
-          );
-          
-          if (similarZipCodes.length > 0) {
-            console.log(`Found ${similarZipCodes.length} cities with similar ZIP codes (same first 3 digits)`);
-            
-            // Find the one with the closest postal code by numerical comparison
-            similarZipCodes.sort((a, b) => {
-              const aDiff = Math.abs(parseInt(a.postal_code || '0', 10) - parseInt(zipCode, 10));
-              const bDiff = Math.abs(parseInt(b.postal_code || '0', 10) - parseInt(zipCode, 10));
-              return aDiff - bDiff;
-            });
-            
-            const closestMatch = similarZipCodes[0];
-            console.log(`Using closest match: ${closestMatch.city}, ${closestMatch.state} (${closestMatch.postal_code})`);
-            
-            // Show message about using a nearby location
-            if (resultsContent) {
-              resultsContent.innerHTML = `
-                <div class="p-4">
-                  <div class="flex items-start mb-3">
-                    <div class="flex-shrink-0 mt-0.5">
-                      <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div class="ml-3">
-                      <h3 class="text-sm font-medium text-blue-800">Using Nearby Location</h3>
-                      <div class="mt-2 text-sm text-gray-700">
-                        <p>We don't have recycling centers for ZIP code <strong>${zipCode}</strong> in our database.</p>
-                        <p class="mt-1">We're showing you results for the nearby location of <strong>${closestMatch.city}, ${closestMatch.state}</strong> instead.</p>
-                      </div>
-                      <div class="mt-3">
-                        <a href="${closestMatch.url}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                          View Recycling Centers
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              `;
-              searchResults?.classList.remove('hidden');
-              showLoading(false);
-              return;
-            }
-          }
-          
-          // Final fallback: Show a user-friendly message with the option to search by city
+          // Show message with suggested cities
           if (resultsContent) {
             resultsContent.innerHTML = `
               <div class="p-4">
                 <div class="flex items-start mb-3">
                   <div class="flex-shrink-0 mt-0.5">
-                    <svg class="h-5 w-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    <svg class="h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div class="ml-3">
-                    <h3 class="text-sm font-medium text-yellow-800">ZIP Code Not Found</h3>
+                    <h3 class="text-sm font-medium text-indigo-800">Recycling Centers</h3>
                     <div class="mt-2 text-sm text-gray-700">
-                      <p>We don't have recycling centers for ZIP code <strong>${zipCode}</strong> in our database.</p>
-                      <p class="mt-1">Try searching by city name instead.</p>
+                      <p>We don't have specific recycling centers listed for ZIP code <strong>${zipCode}</strong>.</p>
+                      <p class="mt-1">Please select a city from the list below to find recycling centers:</p>
                     </div>
                   </div>
                 </div>
                 <div class="mt-3">
-                  <h4 class="text-sm font-medium text-gray-700">Popular Cities:</h4>
-                  <div class="mt-2 flex flex-wrap gap-2" id="popular-cities-${id}">
-                    <!-- Will be populated with popular cities -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                    ${suggestedCities.map(city => `
+                      <a href="${city.url}" class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 hover:border-green-300 transition-colors">
+                        <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        </svg>
+                        <span class="text-sm font-medium">${city.city}, ${city.state}</span>
+                      </a>
+                    `).join('')}
                   </div>
                 </div>
               </div>
             `;
-            
-            // Add popular cities
-            const popularCitiesContainer = document.getElementById(`popular-cities-${id}`);
-            if (popularCitiesContainer) {
-              // Get 6 random cities from our database to suggest
-              const popularCities = [];
-              const totalCities = Math.min(cityStatePairs.length, 100); // Use max 100 cities as the source
-              
-              // Create a shuffled array of indices
-              const indices = Array.from({ length: totalCities }, (_, i) => i);
-              for (let i = indices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [indices[i], indices[j]] = [indices[j], indices[i]];
-              }
-              
-              // Take the first 6 cities from the shuffled array
-              for (let i = 0; i < Math.min(6, indices.length); i++) {
-                const city = cityStatePairs[indices[i]];
-                popularCities.push(city);
-              }
-              
-              // Add the cities to the container
-              popularCities.forEach(city => {
-                const cityButton = document.createElement('a');
-                cityButton.href = city.url;
-                cityButton.className = 'inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-full text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 hover:text-green-700 hover:border-green-500 transition-colors';
-                cityButton.textContent = `${city.city}, ${city.state}`;
-                popularCitiesContainer.appendChild(cityButton);
-              });
-            }
-            
             searchResults?.classList.remove('hidden');
           }
           

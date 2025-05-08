@@ -33,7 +33,6 @@ export default defineConfig({
         '/blog': { expiration: 86400 },
         '/states/*': { expiration: 3600 },
         '/cities/*': { expiration: 3600 },
-        '/api/*': { expiration: 0 },
       },
     },
     edgeMiddleware: true,

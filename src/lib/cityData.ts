@@ -86,10 +86,23 @@ export function searchLocations(
 
   let results;
   if (isZipCode) {
-    // First check if we have this ZIP code in our data
-    const cityWithZip = cityStatePairs.find(
-      (city) => city.postal_code === zipCode
-    );
+    // First check if we have this ZIP code in our data - with more flexible matching
+    const cityWithZip = cityStatePairs.find((city) => {
+      if (!city.postal_code) return false;
+
+      // Try different postal code formats for comparison
+      const cityZip = city.postal_code.toString();
+      const queryZip = zipCode.toString();
+
+      return (
+        cityZip === queryZip ||
+        // Handle leading zeros
+        cityZip === queryZip.padStart(5, '0') ||
+        // Handle integer conversion
+        cityZip === parseInt(queryZip, 10).toString() ||
+        parseInt(cityZip, 10) === parseInt(queryZip, 10)
+      );
+    });
 
     if (cityWithZip) {
       // We have this ZIP code in our data, add it as a direct match

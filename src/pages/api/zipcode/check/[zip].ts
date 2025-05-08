@@ -29,14 +29,29 @@ export const GET: APIRoute = async ({ params, request }) => {
   }
 
   try {
-    // Check our database for this ZIP code
-    const { data, error } = await supabase
+    // Check our database for this ZIP code - try both integer and string forms
+    // First, try as integer
+    const { data: intData, error: intError } = await supabase
       .from('recycling_centers')
       .select('city, state')
       .eq('postal_code', parseInt(zipCode, 10))
       .not('city', 'is', null)
       .not('state', 'is', null)
       .limit(1);
+
+    // If no results found as integer, try as string
+    const { data: strData, error: strError } = !intData?.length
+      ? await supabase
+          .from('recycling_centers')
+          .select('city, state')
+          .eq('postal_code', zipCode)
+          .not('city', 'is', null)
+          .not('state', 'is', null)
+          .limit(1)
+      : { data: null, error: null };
+
+    const data = intData?.length ? intData : strData;
+    const error = intError || strError;
 
     if (error) {
       console.error(`Error querying database for ZIP ${zipCode}:`, error);

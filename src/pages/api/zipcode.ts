@@ -78,14 +78,29 @@ async function getCoordinatesFromZipCode(
   try {
     console.log(`Getting coordinates for ZIP code ${zipCode}`);
 
-    // First check if we have coordinates in our database
-    const { data, error } = await supabase
+    // First check if we have coordinates in our database - try both integer and string forms
+    // First, try as integer
+    const { data: intData, error: intError } = await supabase
       .from('recycling_centers')
       .select('latitude, longitude')
       .eq('postal_code', parseInt(zipCode, 10))
       .not('latitude', 'is', null)
       .not('longitude', 'is', null)
       .limit(1);
+
+    // If no results found as integer, try as string
+    const { data: strData, error: strError } = !intData?.length
+      ? await supabase
+          .from('recycling_centers')
+          .select('latitude, longitude')
+          .eq('postal_code', zipCode)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .limit(1)
+      : { data: null, error: null };
+
+    const data = intData?.length ? intData : strData;
+    const error = intError || strError;
 
     if (data && data.length > 0 && data[0].latitude && data[0].longitude) {
       return {
@@ -274,11 +289,19 @@ async function processZipCode(
 ): Promise<LocationData | null> {
   try {
     // STEP 1: First check our database for the exact ZIP code with city/state
-    // Use a short timeout for this first query
-    const zipQueryPromise = supabase
+    // Use a short timeout for this first query - try both integer and string forms
+    const intQueryPromise = supabase
       .from('recycling_centers')
       .select('city, state, latitude, longitude')
       .eq('postal_code', parseInt(zipCode, 10))
+      .not('city', 'is', null)
+      .not('state', 'is', null)
+      .limit(1);
+
+    const strQueryPromise = supabase
+      .from('recycling_centers')
+      .select('city, state, latitude, longitude')
+      .eq('postal_code', zipCode)
       .not('city', 'is', null)
       .not('state', 'is', null)
       .limit(1);
@@ -291,10 +314,30 @@ async function processZipCode(
       console.log(
         `Checking database for ZIP code ${zipCode} (timestamp: ${timestamp})`
       );
-      const { data: zipData, error: zipError } = (await Promise.race([
-        zipQueryPromise,
+
+      // Try integer version first with timeout
+      const { data: intZipData, error: intZipError } = (await Promise.race([
+        intQueryPromise,
         zipTimeout,
       ])) as any;
+
+      // If integer version failed or returned no results, try string version
+      let zipData = intZipData;
+      let zipError = intZipError;
+
+      if (!intZipData || intZipData.length === 0) {
+        try {
+          const { data: strZipData, error: strZipError } = (await Promise.race([
+            strQueryPromise,
+            zipTimeout,
+          ])) as any;
+
+          zipData = strZipData;
+          zipError = strZipError;
+        } catch (strErr) {
+          console.log(`String ZIP query timed out or failed`);
+        }
+      }
 
       if (zipError) {
         console.error(`Error querying database for ZIP ${zipCode}:`, zipError);

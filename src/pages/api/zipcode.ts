@@ -568,8 +568,8 @@ export const GET = (async ({ request }) => {
     try {
       url = new URL(request.url);
       console.log(`URL parsed: ${url.toString()}`);
+      console.log(`URL pathname: ${url.pathname}`);
       console.log(`Search params: ${url.search}`);
-      console.log(`Raw search string: ${url.search}`);
     } catch (error) {
       console.error(`Error parsing URL: ${error}`);
       return createResponse(
@@ -585,12 +585,25 @@ export const GET = (async ({ request }) => {
     // Extract the ZIP code - multiple methods with detailed logging
     let zipCode = null;
 
-    // Method 1: Try direct parameter access
-    const directZip = url.searchParams.get('zip');
-    console.log(`Direct parameter 'zip': ${directZip || 'not found'}`);
-    if (directZip) zipCode = directZip;
+    // Method 1: Check pathname for embedded ZIP (higher priority than query params)
+    console.log(`Checking pathname: ${url.pathname}`);
+    // Look for patterns like /zipcode/12345
+    const pathMatch = /\/(?:zipcode|zip|postal)\/(\d{5})\/?/i.exec(
+      url.pathname
+    );
+    if (pathMatch && pathMatch[1]) {
+      zipCode = pathMatch[1];
+      console.log(`Found ZIP in pathname: ${zipCode}`);
+    }
 
-    // Method 2: Case-insensitive parameter search
+    // Method 2: Try direct parameter access
+    if (!zipCode) {
+      const directZip = url.searchParams.get('zip');
+      console.log(`Direct parameter 'zip': ${directZip || 'not found'}`);
+      if (directZip) zipCode = directZip;
+    }
+
+    // Method 3: Case-insensitive parameter search
     if (!zipCode) {
       for (const [key, value] of url.searchParams.entries()) {
         console.log(`Found parameter: ${key}=${value}`);
@@ -602,7 +615,7 @@ export const GET = (async ({ request }) => {
       }
     }
 
-    // Method 3: Raw query string parsing
+    // Method 4: Raw query string parsing
     if (!zipCode && url.search) {
       console.log(`Attempting raw query parsing of: ${url.search}`);
 
@@ -624,19 +637,6 @@ export const GET = (async ({ request }) => {
           );
           break;
         }
-      }
-    }
-
-    // Method 4: Check pathname for embedded ZIP
-    if (!zipCode) {
-      console.log(`Checking pathname: ${url.pathname}`);
-      // Look for patterns like /zipcode/12345
-      const pathMatch = /\/(?:zipcode|zip|postal)\/(\d{5})\/?/i.exec(
-        url.pathname
-      );
-      if (pathMatch && pathMatch[1]) {
-        zipCode = pathMatch[1];
-        console.log(`Found ZIP in pathname: ${zipCode}`);
       }
     }
 
@@ -693,4 +693,161 @@ export const GET = (async ({ request }) => {
 }) satisfies APIRoute;
 
 // Also export a POST handler for backward compatibility
-export const POST = GET;
+export const POST = (async ({ request }) => {
+  // Support for OPTIONS requests for CORS
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
+  try {
+    // Print request details for debugging
+    console.log(`Processing POST zipcode API request: ${request.url}`);
+
+    // Extract the ZIP code from the POST body
+    let zipCode = null;
+
+    try {
+      const body = await request.json();
+      console.log(`POST body:`, JSON.stringify(body));
+
+      // Check for various possible field names
+      const possibleFields = [
+        'zip',
+        'zipCode',
+        'zipcode',
+        'postal',
+        'postalCode',
+        'postal_code',
+      ];
+      for (const field of possibleFields) {
+        if (body[field]) {
+          zipCode = body[field];
+          console.log(
+            `Found ZIP in POST body with field '${field}': ${zipCode}`
+          );
+          break;
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to parse POST body as JSON:`, error);
+
+      // Try to fallback to form data
+      try {
+        const formData = await request.formData();
+        console.log(`Attempting to parse as form data`);
+
+        for (const [key, value] of formData.entries()) {
+          console.log(`Form field: ${key}=${value}`);
+          if (
+            key.toLowerCase().includes('zip') ||
+            key.toLowerCase().includes('postal')
+          ) {
+            zipCode = value;
+            console.log(
+              `Found ZIP in form data with field '${key}': ${zipCode}`
+            );
+            break;
+          }
+        }
+      } catch (formError) {
+        console.error(`Failed to parse as form data:`, formError);
+      }
+    }
+
+    // If we couldn't find zip in body, try URL parameters as fallback
+    if (!zipCode) {
+      // Fallback to URL parameters
+      const url = new URL(request.url);
+      console.log(`Falling back to URL params in POST: ${url.search}`);
+
+      for (const [key, value] of url.searchParams.entries()) {
+        console.log(`URL parameter: ${key}=${value}`);
+        if (
+          key.toLowerCase().includes('zip') ||
+          key.toLowerCase().includes('postal')
+        ) {
+          zipCode = value;
+          console.log(`Found ZIP in URL params with key '${key}': ${zipCode}`);
+          break;
+        }
+      }
+
+      // Try raw search string as last resort
+      if (!zipCode && url.search) {
+        const possibleParamNames = [
+          'zip',
+          'zipcode',
+          'postal',
+          'postalcode',
+          'postal_code',
+        ];
+        for (const param of possibleParamNames) {
+          const regex = new RegExp(`[?&]${param}=([^&]+)`, 'i');
+          const match = regex.exec(url.search);
+          if (match && match[1]) {
+            zipCode = match[1];
+            console.log(`Extracted ${param} from search string: ${zipCode}`);
+            break;
+          }
+        }
+      }
+    }
+
+    console.log(`Final ZIP code from POST: ${zipCode || 'not found'}`);
+
+    if (!zipCode || zipCode.toString().trim() === '') {
+      console.log('No ZIP code provided in POST');
+      return createResponse(
+        {
+          error: 'Zip code is required',
+          fallback: formatResponse(
+            await getFallbackCity('no-zip-provided-post')
+          ),
+        },
+        400
+      );
+    }
+
+    // Sanitize the ZIP code - any non-digits are removed
+    zipCode = zipCode.toString().replace(/\D/g, '');
+    console.log(`Sanitized ZIP code from POST: ${zipCode}`);
+
+    // Ensure the ZIP is a 5-digit string
+    const fiveDigitZip = zipCode.toString().padStart(5, '0').substring(0, 5);
+    console.log(`Formatted 5-digit ZIP from POST: ${fiveDigitZip}`);
+
+    // Process the ZIP code with a timeout to avoid serverless function timeouts
+    const locationData = await processZipCodeWithTimeout(fiveDigitZip);
+
+    if (locationData) {
+      console.log(
+        `Found location for ZIP ${fiveDigitZip} via POST:`,
+        JSON.stringify(locationData)
+      );
+      return createResponse(formatResponse(locationData));
+    }
+
+    // If all else fails, return a fallback
+    console.log(
+      `No location data for ZIP ${fiveDigitZip} from POST, using fallback`
+    );
+    return createResponse(
+      formatResponse(await getFallbackCity('complete-fallback-post'))
+    );
+  } catch (error) {
+    console.error(`ZIP API POST error:`, error);
+
+    // Return fallback from database
+    return createResponse(
+      {
+        error: 'Failed to process ZIP code',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        fallback: formatResponse(await getFallbackCity('error-fallback-post')),
+      } as ZipCodeErrorResponse,
+      500
+    );
+  }
+}) satisfies APIRoute;

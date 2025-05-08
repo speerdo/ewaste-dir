@@ -30,7 +30,7 @@ export const config = {
   runtime: 'edge',
 };
 
-// Initialize Supabase client
+// Initialize Supabase client testing for build
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);

@@ -36,6 +36,7 @@ interface ZipCodeResponse {
   coordinates?: { lat: number; lng: number };
   source: string;
   url?: string;
+  requestedZip?: string;
 }
 
 // Interface for error responses
@@ -548,7 +549,7 @@ function calculateDistance(
 }
 
 // Helper function to ensure response is properly formatted
-function formatResponse(data: any): ZipCodeResponse {
+function formatResponse(data: any, requestedZip?: string): ZipCodeResponse {
   // Ensure we have city and state at a minimum
   if (!data || !data.city || !data.state) {
     console.log('Response missing city/state, adding fallback values:', data);
@@ -557,6 +558,7 @@ function formatResponse(data: any): ZipCodeResponse {
       state: (data && data.state) || 'unknown',
       source: (data && data.source) || 'formatted-fallback',
       url: (data && data.url) || '/',
+      requestedZip: requestedZip,
     };
   }
 
@@ -571,11 +573,17 @@ function formatResponse(data: any): ZipCodeResponse {
         .toLowerCase()
         .replace(/\s+/g, '-')}`,
     coordinates: data.coordinates,
+    requestedZip: requestedZip,
   };
 }
 
 // Make sure the response is properly formatted for the Vercel Edge Runtime
 function createResponse(data: any, status: number = 200): Response {
+  // Add request ID to response if available
+  if (data && !data.requestId && data.requestedZip) {
+    data.requestId = `req_${Date.now()}_${data.requestedZip}`;
+  }
+
   // Ensure proper CORS headers and content type
   return new Response(JSON.stringify(data), {
     status,
@@ -600,6 +608,13 @@ export const GET = (async ({ request }) => {
   try {
     // Print request details for debugging
     console.log(`Processing zipcode API request: ${request.url}`);
+
+    // Log headers for debugging
+    const requestHeaders: Record<string, string> = {};
+    for (const [key, value] of request.headers.entries()) {
+      requestHeaders[key] = value;
+    }
+    console.log('Request headers:', requestHeaders);
 
     // Get the URL and parameters - more robust parsing
     let url: URL;
@@ -654,13 +669,13 @@ export const GET = (async ({ request }) => {
         `Found location for ZIP ${fiveDigitZip}:`,
         JSON.stringify(locationData)
       );
-      return createResponse(formatResponse(locationData));
+      return createResponse(formatResponse(locationData, fiveDigitZip));
     }
 
     // If all else fails, return a fallback
     console.log(`No location data for ZIP ${fiveDigitZip}, using fallback`);
     return createResponse(
-      formatResponse(await getFallbackCity('complete-fallback'))
+      formatResponse(await getFallbackCity('complete-fallback'), fiveDigitZip)
     );
   } catch (error) {
     console.error(`ZIP API error:`, error);
@@ -691,13 +706,27 @@ export const POST = (async ({ request }) => {
     // Print request details for debugging
     console.log(`Processing POST zipcode API request: ${request.url}`);
 
+    // Log headers for debugging
+    const requestHeaders: Record<string, string> = {};
+    for (const [key, value] of request.headers.entries()) {
+      requestHeaders[key] = value;
+    }
+    console.log('Request headers:', requestHeaders);
+
     // Extract the ZIP code from the POST body
     let zipCode = null;
     let fallbackRequested = false;
+    let requestId = null;
 
     try {
       const body = await request.json();
       console.log(`POST body:`, JSON.stringify(body));
+
+      // Get the request ID if present
+      if (body.requestId) {
+        requestId = body.requestId;
+        console.log(`Found request ID: ${requestId}`);
+      }
 
       // Check if this is a fallback request
       if (body.fallback) {
@@ -731,6 +760,12 @@ export const POST = (async ({ request }) => {
         const formData = await request.formData();
         console.log(`Attempting to parse as form data`);
 
+        // Check for request ID
+        if (formData.has('requestId')) {
+          requestId = formData.get('requestId');
+          console.log(`Found request ID in form: ${requestId}`);
+        }
+
         for (const [key, value] of formData.entries()) {
           console.log(`Form field: ${key}=${value}`);
           if (
@@ -753,9 +788,8 @@ export const POST = (async ({ request }) => {
 
     if (fallbackRequested) {
       console.log('Processing fallback request from POST body');
-      return createResponse(
-        formatResponse(await getFallbackCity('explicit-fallback-post-body'))
-      );
+      const fallbackData = await getFallbackCity('explicit-fallback-post-body');
+      return createResponse(formatResponse(fallbackData, zipCode));
     }
 
     if (!zipCode || zipCode.toString().trim() === '') {
@@ -766,6 +800,7 @@ export const POST = (async ({ request }) => {
           fallback: formatResponse(
             await getFallbackCity('no-zip-provided-post')
           ),
+          requestId,
         },
         400
       );
@@ -787,7 +822,7 @@ export const POST = (async ({ request }) => {
         `Found location for ZIP ${fiveDigitZip} via POST:`,
         JSON.stringify(locationData)
       );
-      return createResponse(formatResponse(locationData));
+      return createResponse(formatResponse(locationData, fiveDigitZip));
     }
 
     // If all else fails, return a fallback
@@ -795,7 +830,10 @@ export const POST = (async ({ request }) => {
       `No location data for ZIP ${fiveDigitZip} from POST, using fallback`
     );
     return createResponse(
-      formatResponse(await getFallbackCity('complete-fallback-post'))
+      formatResponse(
+        await getFallbackCity('complete-fallback-post'),
+        fiveDigitZip
+      )
     );
   } catch (error) {
     console.error(`ZIP API POST error:`, error);

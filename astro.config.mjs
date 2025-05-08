@@ -71,11 +71,5 @@ export default defineConfig({
       },
     },
   },
-  routes: [
-    {
-      pattern: '/api/*',
-      entryPoint: 'src/api/*.ts',
-    },
-  ],
   compressHTML: true,
 });

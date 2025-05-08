@@ -60,12 +60,5 @@
       "path": "/api/revalidate",
       "schedule": "0 0 * * *"
     }
-  ],
-  "functions": {
-    "api/zipcode/**": {
-      "runtime": "@vercel/edge@1.1.0",
-      "memory": 256,
-      "maxDuration": 10
-    }
-  }
+  ]
 }

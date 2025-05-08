@@ -149,7 +149,7 @@
   ],
   "rewrites": [
     {
-      "source": "/api/zipfind",
+      "source": "/api/zipfind(.*)",
       "destination": "/api/zipfind.js"
     },
     {

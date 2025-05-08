@@ -3,7 +3,11 @@ export default function handler(req, res) {
   // Allow CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Accept, X-Requested-With'
+  );
+  res.setHeader('Access-Control-Max-Age', '86400');
 
   // Set most aggressive anti-cache headers possible
   res.setHeader(
@@ -18,6 +22,12 @@ export default function handler(req, res) {
   res.setHeader('CDN-Cache-Control', 'no-store');
   res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
   res.setHeader('X-Vercel-Cache', 'BYPASS');
+  res.setHeader('X-Vercel-Skip-Cache', 'true');
+  res.setHeader('Edge-Control', 'no-store');
+  res.setHeader('X-Middleware-Cache', 'no-cache');
+
+  // Set Vary header to all to prevent cache sharing
+  res.setHeader('Vary', '*');
 
   // Handle OPTIONS request for CORS
   if (req.method === 'OPTIONS') {
@@ -45,46 +55,15 @@ export default function handler(req, res) {
       });
     }
 
-    // Hardcoded responses for different ZIP codes to demonstrate it's working
-    // In a real application, you would fetch this data from your database
-    const zipData = {
-      90210: {
-        city: 'Beverly Hills',
-        state: 'California',
-        url: '/states/california/beverly-hills',
-      },
-      10001: {
-        city: 'New York',
-        state: 'New York',
-        url: '/states/new-york/new-york',
-      },
-      60601: {
-        city: 'Chicago',
-        state: 'Illinois',
-        url: '/states/illinois/chicago',
-      },
-      33101: {
-        city: 'Miami',
-        state: 'Florida',
-        url: '/states/florida/miami',
-      },
-      77001: {
-        city: 'Houston',
-        state: 'Texas',
-        url: '/states/texas/houston',
-      },
-    };
+    // Use the search functionality to find a matching location from the global data
+    // In a real implementation, you would query a database or external API here
+    // We're using the client-side data that's already loaded globally in the frontend
 
-    // Default fallback if ZIP not found
-    const defaultResponse = {
-      city: 'Los Angeles',
-      state: 'California',
-      url: '/states/california/los-angeles',
-    };
-
-    // Return response with cache-busting unique values
+    // Since we can't directly access window.__CITY_STATE_PAIRS__, we'll return
+    // a response that instructs the client to look up the data locally
     return res.status(200).json({
-      ...(zipData[zipCode] || defaultResponse),
+      status: 'success',
+      action: 'client_lookup',
       requestedZip: zipCode,
       requestId,
       timestamp: new Date().toISOString(),

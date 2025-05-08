@@ -34,7 +34,7 @@ export default defineConfig({
         '/blog': { expiration: 86400 },
         '/states/*': { expiration: 3600 },
         '/cities/*': { expiration: 3600 },
-        '/api/*': { expiration: 60 },
+        '/api/*': false, // Disable ISR for API routes
       },
     },
     edgeMiddleware: true,
@@ -44,7 +44,12 @@ export default defineConfig({
       {
         name: 'api',
         pattern: {
-          static: ['/api/geocode', '/api/cities-data', '/api/zipcode'],
+          static: [
+            '/api/zipfind',
+            '/api/geocode',
+            '/api/cities-data',
+            '/api/zipcode',
+          ],
         },
         config: {
           runtime: 'edge',

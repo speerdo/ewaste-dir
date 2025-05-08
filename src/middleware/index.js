@@ -11,32 +11,54 @@ export function onRequest({ request, next }) {
 
     // Add a unique parameter to the URL to force cache miss
     url.searchParams.set('_nocache', uniqueId);
+    url.searchParams.set('_t', timestamp);
+    url.searchParams.set('_r', randomValue);
 
     // Create a new request with the modified URL
     const newRequest = new Request(url.toString(), {
       method: request.method,
-      headers: request.headers,
+      headers: new Headers(request.headers),
       body: request.body,
       redirect: request.redirect,
       signal: request.signal,
     });
 
-    // Add cache prevention headers
+    // Add cache-busting headers to the request
+    newRequest.headers.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate'
+    );
+    newRequest.headers.set('Pragma', 'no-cache');
+    newRequest.headers.set('Expires', '0');
+    newRequest.headers.set('X-No-Cache', uniqueId);
+
+    // Make the request
     const response = next(newRequest);
 
     // Add cache prevention headers to the response
-    response.headers.set(
-      'Cache-Control',
-      'no-store, no-cache, must-revalidate, proxy-revalidate'
-    );
-    response.headers.set('CDN-Cache-Control', 'no-store');
-    response.headers.set('Vercel-CDN-Cache-Control', 'no-store');
-    response.headers.set('Surrogate-Control', 'no-store');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('X-No-Cache', uniqueId);
+    return response.then((res) => {
+      const newHeaders = new Headers(res.headers);
 
-    return response;
+      newHeaders.set(
+        'Cache-Control',
+        'no-store, no-cache, must-revalidate, proxy-revalidate'
+      );
+      newHeaders.set('CDN-Cache-Control', 'no-store');
+      newHeaders.set('Vercel-CDN-Cache-Control', 'no-store');
+      newHeaders.set('Surrogate-Control', 'no-store');
+      newHeaders.set('Edge-Control', 'no-store');
+      newHeaders.set('Pragma', 'no-cache');
+      newHeaders.set('Expires', '0');
+      newHeaders.set('X-No-Cache', uniqueId);
+      newHeaders.set('X-Vercel-Skip-Cache', 'true');
+      newHeaders.set('Vary', '*');
+
+      return new Response(res.body, {
+        status: res.status,
+        statusText: res.statusText,
+        headers: newHeaders,
+      });
+    });
   }
 
   // Continue for non-API routes

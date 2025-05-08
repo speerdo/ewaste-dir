@@ -416,7 +416,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         
         try {
           // Make a simple request to check if this ZIP code exists in our database
-          const apiUrl = `${window.location.origin}/api/zipcode/check/${zipCode}?t=${Date.now()}`;
+          const apiUrl = `${window.location.origin}/api/zipcode-check?zip=${zipCode}&t=${Date.now()}`;
           console.log(`Checking if ZIP ${zipCode} exists in database: ${apiUrl}`);
           
           const response = await fetch(apiUrl, {

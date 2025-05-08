@@ -96,6 +96,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/zipcode/check/:zip",
+      "destination": "/api/zipcode/check/[zip]"
+    },
+    {
       "source": "/api/zipcode",
       "destination": "/api/zipcode",
       "has": [
@@ -121,10 +125,6 @@
     {
       "source": "/api/zipcode/postal/:zipcode/unique/:cachebuster",
       "destination": "/api/zipcode"
-    },
-    {
-      "source": "/api/zipcode/check/:zip",
-      "destination": "/api/zipcode/check/[zip]"
     },
     {
       "source": "/api/cities-data",

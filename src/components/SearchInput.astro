@@ -391,11 +391,12 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       
       // Main function for handling ZIP code search
       async function searchByZipCode(zipCode) {
-        showLoading(true);
-        hideError();
-        
         try {
-          // Show loading indicator
+          console.log(`Searching by ZIP code: ${zipCode}`);
+          hideError();
+          showLoading(true);
+
+          // Show loading indicator in search results
           if (resultsContent) {
             resultsContent.innerHTML = `
               <div class="px-4 py-3">
@@ -416,13 +417,13 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             processZipCodeData(zipCode, data);
             return;
           }
-
+          
           // Generate a random query param to avoid caching issues
           const cacheBuster = Date.now() + Math.floor(Math.random() * 1000);
           
           // Try multiple API request methods with retries
           let attempts = 0;
-          let maxAttempts = 3;
+          const maxAttempts = 5; // Try all methods for all ZIP codes
           let data = null;
           let error = null;
           let attemptResponses = []; // Track response info for debugging
@@ -445,28 +446,50 @@ const id = variant === 'hero' ? 'hero' : 'nav';
                 cache: 'no-store'
               };
               
+              // Try a variety of request formats systematically for all ZIP codes
               if (attempts === 1) {
-                // First attempt: standard query parameter
-                apiUrl = `${window.location.origin}/api/zipcode?zip=${zipCode}&_cb=${cacheBuster}`;
-                console.log(`Attempt 1: Using standard URL: ${apiUrl}`);
+                // First attempt: using a path parameter (RESTful approach)
+                apiUrl = `${window.location.origin}/api/zipcode/${zipCode}`;
+                console.log(`Attempt 1: Using path parameter URL: ${apiUrl}`);
                 fetchOptions.method = 'GET';
               } else if (attempts === 2) {
-                // Second attempt: zipcode as path parameter
-                apiUrl = `${window.location.origin}/api/zipcode/${zipCode}?_cb=${cacheBuster}`;
-                console.log(`Attempt 2: Using path parameter URL: ${apiUrl}`);
-                fetchOptions.method = 'GET';
-              } else {
-                // Third attempt: Use POST request with ZIP in body
+                // Second attempt: Use POST request with ZIP in body
                 apiUrl = `${window.location.origin}/api/zipcode`;
-                console.log(`Attempt 3: Using POST request to: ${apiUrl}`);
+                console.log(`Attempt 2: Using POST request to: ${apiUrl}`);
                 fetchOptions.method = 'POST';
                 fetchOptions.headers['Content-Type'] = 'application/json';
-                fetchOptions.body = JSON.stringify({ zip: zipCode, _cb: cacheBuster });
+                fetchOptions.body = JSON.stringify({ zip: zipCode });
+              } else if (attempts === 3) {
+                // Third attempt: Use POST request with form data
+                apiUrl = `${window.location.origin}/api/zipcode`;
+                console.log(`Attempt 3: Using POST with form data: ${apiUrl}`);
+                fetchOptions.method = 'POST';
+                delete fetchOptions.headers['Content-Type']; // Let the browser set this for form data
+                const formData = new FormData();
+                formData.append('zip', zipCode);
+                fetchOptions.body = formData;
+              } else if (attempts === 4) {
+                // Fourth attempt: Use alternative path format
+                apiUrl = `${window.location.origin}/api/zipcode/postal/${zipCode}`;
+                console.log(`Attempt 4: Using alternative path format: ${apiUrl}`);
+                fetchOptions.method = 'GET';
+              } else {
+                // Fifth attempt: Use special POST with multiple fields
+                apiUrl = `${window.location.origin}/api/zipcode`;
+                console.log(`Attempt 5: Using POST with multiple fields: ${apiUrl}`);
+                fetchOptions.method = 'POST';
+                fetchOptions.headers['Content-Type'] = 'application/json';
+                fetchOptions.body = JSON.stringify({ 
+                  zip: zipCode,
+                  zipCode: zipCode,
+                  postal_code: zipCode,
+                  zipcode: zipCode
+                });
               }
               
               console.log(`Fetching ZIP data from: ${apiUrl} (method: ${fetchOptions.method})`);
               const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+              const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout for all requests
               
               try {
                 fetchOptions.signal = controller.signal;
@@ -531,7 +554,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             
             // Small delay between retries
             if (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, 500));
+              const delayMs = 600; // Standard delay for all requests
+              await new Promise(resolve => setTimeout(resolve, delayMs));
             }
           }
           
@@ -547,15 +571,39 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               console.log(`Using fallback from error response:`, error.fallback);
               data = error.fallback;
             } else {
-              // Use a hardcoded fallback location
-              data = {
-                city: 'New York',
-                state: 'New York',
-                coordinates: { lat: 40.7128, lng: -74.006 },
-                source: 'client-fallback-after-retries',
-                url: '/states/new-york/new-york'
-              };
-              console.log(`Using hardcoded fallback data:`, data);
+              // Make one final attempt to get a fallback location from the API
+              try {
+                console.log(`Making final fallback request to API`);
+                const fallbackUrl = `${window.location.origin}/api/zipcode`;
+                const fallbackResponse = await fetch(fallbackUrl, {
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache'
+                  },
+                  body: JSON.stringify({
+                    fallback: true,
+                    zip: zipCode
+                  }),
+                  cache: 'no-store'
+                });
+                
+                const fallbackData = await fallbackResponse.json();
+                if (fallbackData && fallbackData.city) {
+                  console.log(`Using API fallback data:`, fallbackData);
+                  data = fallbackData;
+                } else {
+                  console.log(`Couldn't get fallback from API, redirecting to search page`);
+                  window.location.href = `/search?q=${zipCode}`;
+                  return;
+                }
+              } catch (fallbackError) {
+                console.error(`Error getting fallback:`, fallbackError);
+                // Redirect to search page as last resort
+                window.location.href = `/search?q=${zipCode}`;
+                return;
+              }
             }
           }
           
@@ -904,10 +952,10 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       // Test all three methods
       const results = [];
       
-      // Method 1: GET with query parameter
+      // Method 1: GET with path parameter
       try {
-        const url1 = `${window.location.origin}/api/zipcode?zip=${zipCode}&_cb=${cacheBuster}`;
-        console.log(`Method 1 - GET with query parameter: ${url1}`);
+        const url1 = `${window.location.origin}/api/zipcode/${zipCode}`;
+        console.log(`Method 1 - GET with path parameter: ${url1}`);
         
         const response1 = await fetch(url1, {
           method: 'GET',
@@ -926,16 +974,16 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         
         const data1 = await response1.json();
         console.log(`Method 1 response data:`, data1);
-        results.push({ method: 'GET query', status: response1.status, data: data1 });
+        results.push({ method: 'GET path', status: response1.status, data: data1 });
       } catch (error1) {
         console.error(`Method 1 failed:`, error1);
-        results.push({ method: 'GET query', error: error1.message });
+        results.push({ method: 'GET path', error: error1.message });
       }
       
-      // Method 2: GET with path parameter
+      // Method 2: GET with alternative path format
       try {
-        const url2 = `${window.location.origin}/api/zipcode/${zipCode}?_cb=${cacheBuster}`;
-        console.log(`Method 2 - GET with path parameter: ${url2}`);
+        const url2 = `${window.location.origin}/api/zipcode/postal/${zipCode}`;
+        console.log(`Method 2 - GET with alternative path: ${url2}`);
         
         const response2 = await fetch(url2, {
           method: 'GET',
@@ -948,10 +996,10 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         console.log(`Method 2 response status: ${response2.status}`);
         const data2 = await response2.json();
         console.log(`Method 2 response data:`, data2);
-        results.push({ method: 'GET path', status: response2.status, data: data2 });
+        results.push({ method: 'GET alt path', status: response2.status, data: data2 });
       } catch (error2) {
         console.error(`Method 2 failed:`, error2);
-        results.push({ method: 'GET path', error: error2.message });
+        results.push({ method: 'GET alt path', error: error2.message });
       }
       
       // Method 3: POST with JSON body

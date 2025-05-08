@@ -339,18 +339,31 @@ async function processZipCode(zipCode: string): Promise<LocationData | null> {
 
 /**
  * Get a fallback city when all else fails - always from the database
+ * This function tries multiple sources to get a fallback city in priority order:
+ * 1. Popular city with most recycling centers
+ * 2. Any city from the database
+ * 3. First city from cityStatePairs
+ * 4. Any state from states table
+ * 5. Generic fallback with no hardcoded data
  */
 async function getFallbackCity(source: string): Promise<LocationData> {
+  console.log(`Getting fallback city (source: ${source})`);
+
   // Try to get a popular city with most recycling centers from the database
   try {
-    // Query to find cities with the most recycling centers - without using group
-    const { data: centers } = await supabase
+    // Query to find cities with the most recycling centers
+    const { data: centers, error } = await supabase
       .from('recycling_centers')
-      .select('city, state')
+      .select('city, state, latitude, longitude')
       .not('city', 'is', null)
-      .not('state', 'is', null);
+      .not('state', 'is', null)
+      .limit(1000);
 
-    if (centers && centers.length > 0) {
+    if (error) {
+      console.error(`Error querying recycling centers for fallback:`, error);
+    } else if (centers && centers.length > 0) {
+      console.log(`Found ${centers.length} centers for fallback calculation`);
+
       // Count occurrences of each city/state pair
       const cityCounts = centers.reduce((acc, center) => {
         const key = `${center.city}-${center.state}`;
@@ -358,28 +371,27 @@ async function getFallbackCity(source: string): Promise<LocationData> {
           city: center.city,
           state: center.state,
           count: 0,
+          latitude: center.latitude,
+          longitude: center.longitude,
         };
         acc[key].count++;
         return acc;
-      }, {} as Record<string, { city: string; state: string; count: number }>);
+      }, {} as Record<string, { city: string; state: string; count: number; latitude?: string; longitude?: string }>);
 
-      // Find the most popular city
+      // Find the most popular cities
       const popularCities = Object.values(cityCounts)
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
       if (popularCities.length > 0) {
-        const center = popularCities[0];
-
-        // Now get a specific recycling center for this city/state to get coordinates
-        const { data: centerDetails } = await supabase
-          .from('recycling_centers')
-          .select('latitude, longitude')
-          .eq('city', center.city)
-          .eq('state', center.state)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
-          .limit(1);
+        // Select a city randomly from the top 5 to provide variety
+        const randomIndex = Math.floor(
+          Math.random() * Math.min(5, popularCities.length)
+        );
+        const center = popularCities[randomIndex];
+        console.log(
+          `Using popular city fallback: ${center.city}, ${center.state} (${center.count} recycling centers)`
+        );
 
         // Format the state to match URL convention
         const formattedState = center.state.toLowerCase().replace(/\s+/g, '-');
@@ -389,10 +401,10 @@ async function getFallbackCity(source: string): Promise<LocationData> {
         const url = `/states/${formattedState}/${formattedCity}`;
 
         let coordinates = undefined;
-        if (centerDetails && centerDetails.length > 0) {
+        if (center.latitude && center.longitude) {
           coordinates = {
-            lat: parseFloat(centerDetails[0].latitude),
-            lng: parseFloat(centerDetails[0].longitude),
+            lat: parseFloat(center.latitude),
+            lng: parseFloat(center.longitude),
           };
         }
 
@@ -409,17 +421,28 @@ async function getFallbackCity(source: string): Promise<LocationData> {
     console.error('Failed to get popular city fallback:', error);
   }
 
-  // Second fallback: get any city from the database
+  // Second fallback: get any city from the database with a random selection
   try {
-    const { data: centers } = await supabase
+    console.log(`Trying random city fallback`);
+    const { data: centers, error } = await supabase
       .from('recycling_centers')
       .select('city, state, latitude, longitude')
       .not('city', 'is', null)
       .not('state', 'is', null)
-      .limit(5);
+      .limit(20); // Get more options for randomization
 
-    if (centers && centers.length > 0) {
-      const center = centers[0];
+    if (error) {
+      console.error(
+        `Error querying recycling centers for random fallback:`,
+        error
+      );
+    } else if (centers && centers.length > 0) {
+      // Select a random center
+      const randomIndex = Math.floor(Math.random() * centers.length);
+      const center = centers[randomIndex];
+      console.log(
+        `Using random city fallback: ${center.city}, ${center.state}`
+      );
 
       // Format the state to match URL convention
       const formattedState = center.state.toLowerCase().replace(/\s+/g, '-');
@@ -438,19 +461,26 @@ async function getFallbackCity(source: string): Promise<LocationData> {
                 lng: parseFloat(center.longitude),
               }
             : undefined,
-        source: `database-fallback-${source}`,
+        source: `random-city-fallback-${source}`,
         url,
       };
     }
   } catch (error) {
-    console.error('Failed to get database fallback city:', error);
+    console.error('Failed to get random city fallback:', error);
   }
 
   // Third fallback - get first city from cityStatePairs
   try {
+    console.log(`Trying cityStatePairs fallback`);
     const allCities = await getAllCityStatePairs();
     if (allCities && allCities.length > 0) {
-      const city = allCities[0];
+      // Get a random city from the list
+      const randomIndex = Math.floor(
+        Math.random() * Math.min(10, allCities.length)
+      );
+      const city = allCities[randomIndex];
+      console.log(`Using city pairs fallback: ${city.city}, ${city.state}`);
+
       return {
         city: city.city,
         state: city.state,
@@ -462,27 +492,35 @@ async function getFallbackCity(source: string): Promise<LocationData> {
     console.error('Failed to get city pairs fallback:', error);
   }
 
-  // This should basically never happen, but just in case everything fails
-  // Query the database for any state and construct a fallback
+  // Fourth fallback - Query the database for any state and construct a fallback
   try {
-    const { data: states } = await supabase
+    console.log(`Trying states table fallback`);
+    const { data: states, error } = await supabase
       .from('states')
       .select('name')
-      .limit(1);
+      .limit(10);
 
-    if (states && states.length > 0) {
+    if (error) {
+      console.error(`Error querying states for fallback:`, error);
+    } else if (states && states.length > 0) {
+      // Get a random state
+      const randomIndex = Math.floor(Math.random() * states.length);
+      const state = states[randomIndex];
+      console.log(`Using states table fallback: ${state.name}`);
+
       return {
         city: 'Unknown',
-        state: states[0].name,
+        state: state.name,
         source: `states-table-fallback-${source}`,
-        url: `/states/${states[0].name.toLowerCase().replace(/\s+/g, '-')}`,
+        url: `/states/${state.name.toLowerCase().replace(/\s+/g, '-')}`,
       };
     }
   } catch (error) {
     console.error('Failed to get states fallback:', error);
   }
 
-  // Absolute last resort with no database dependency
+  // Absolute last resort with no database dependency and no hardcoded city
+  console.log(`Using generic fallback - all other methods failed`);
   return {
     city: 'Unknown',
     state: 'unknown',
@@ -569,7 +607,6 @@ export const GET = (async ({ request }) => {
       url = new URL(request.url);
       console.log(`URL parsed: ${url.toString()}`);
       console.log(`URL pathname: ${url.pathname}`);
-      console.log(`Search params: ${url.search}`);
     } catch (error) {
       console.error(`Error parsing URL: ${error}`);
       return createResponse(
@@ -582,74 +619,22 @@ export const GET = (async ({ request }) => {
       );
     }
 
-    // Extract the ZIP code - multiple methods with detailed logging
+    // Extract the ZIP code from path parameters - highest priority
     let zipCode = null;
 
-    // Method 1: Check pathname for embedded ZIP (higher priority than query params)
-    console.log(`Checking pathname: ${url.pathname}`);
-    // Look for patterns like /zipcode/12345
-    const pathMatch = /\/(?:zipcode|zip|postal)\/(\d{5})\/?/i.exec(
-      url.pathname
-    );
+    // Look for patterns like /zipcode/{zipcode} or /zipcode/postal/{zipcode}
+    const pathRegex = /\/(?:zipcode|api\/zipcode)\/(?:postal\/)?(\d{5})\/?$/i;
+    const pathMatch = pathRegex.exec(url.pathname);
+
     if (pathMatch && pathMatch[1]) {
       zipCode = pathMatch[1];
       console.log(`Found ZIP in pathname: ${zipCode}`);
     }
 
-    // Method 2: Try direct parameter access
     if (!zipCode) {
-      const directZip = url.searchParams.get('zip');
-      console.log(`Direct parameter 'zip': ${directZip || 'not found'}`);
-      if (directZip) zipCode = directZip;
-    }
-
-    // Method 3: Case-insensitive parameter search
-    if (!zipCode) {
-      for (const [key, value] of url.searchParams.entries()) {
-        console.log(`Found parameter: ${key}=${value}`);
-        if (key.toLowerCase() === 'zip') {
-          zipCode = value;
-          console.log(`Found ZIP with case-insensitive key: ${key}=${zipCode}`);
-          break;
-        }
-      }
-    }
-
-    // Method 4: Raw query string parsing
-    if (!zipCode && url.search) {
-      console.log(`Attempting raw query parsing of: ${url.search}`);
-
-      // Try multiple possible parameter names
-      const zipMatches = [
-        /[?&]zip=([^&]+)/i,
-        /[?&]zipcode=([^&]+)/i,
-        /[?&]postal=([^&]+)/i,
-        /[?&]postalcode=([^&]+)/i,
-        /[?&]postal_code=([^&]+)/i,
-      ];
-
-      for (const regex of zipMatches) {
-        const match = regex.exec(url.search);
-        if (match && match[1]) {
-          zipCode = match[1];
-          console.log(
-            `Extracted ZIP with regex: ${regex.toString()} = ${zipCode}`
-          );
-          break;
-        }
-      }
-    }
-
-    console.log(`Final ZIP code extracted: ${zipCode || 'none'}`);
-
-    if (!zipCode || zipCode.trim() === '') {
-      console.log('No ZIP code found after all extraction attempts');
+      console.log('No ZIP code found in path. Using fallback.');
       return createResponse(
-        {
-          error: 'Zip code is required',
-          fallback: formatResponse(await getFallbackCity('no-zip-provided')),
-        } as ZipCodeErrorResponse,
-        400
+        formatResponse(await getFallbackCity('no-zip-in-path'))
       );
     }
 
@@ -708,10 +693,17 @@ export const POST = (async ({ request }) => {
 
     // Extract the ZIP code from the POST body
     let zipCode = null;
+    let fallbackRequested = false;
 
     try {
       const body = await request.json();
       console.log(`POST body:`, JSON.stringify(body));
+
+      // Check if this is a fallback request
+      if (body.fallback) {
+        console.log('Explicit fallback requested in POST body');
+        fallbackRequested = true;
+      }
 
       // Check for various possible field names
       const possibleFields = [
@@ -757,46 +749,14 @@ export const POST = (async ({ request }) => {
       }
     }
 
-    // If we couldn't find zip in body, try URL parameters as fallback
-    if (!zipCode) {
-      // Fallback to URL parameters
-      const url = new URL(request.url);
-      console.log(`Falling back to URL params in POST: ${url.search}`);
-
-      for (const [key, value] of url.searchParams.entries()) {
-        console.log(`URL parameter: ${key}=${value}`);
-        if (
-          key.toLowerCase().includes('zip') ||
-          key.toLowerCase().includes('postal')
-        ) {
-          zipCode = value;
-          console.log(`Found ZIP in URL params with key '${key}': ${zipCode}`);
-          break;
-        }
-      }
-
-      // Try raw search string as last resort
-      if (!zipCode && url.search) {
-        const possibleParamNames = [
-          'zip',
-          'zipcode',
-          'postal',
-          'postalcode',
-          'postal_code',
-        ];
-        for (const param of possibleParamNames) {
-          const regex = new RegExp(`[?&]${param}=([^&]+)`, 'i');
-          const match = regex.exec(url.search);
-          if (match && match[1]) {
-            zipCode = match[1];
-            console.log(`Extracted ${param} from search string: ${zipCode}`);
-            break;
-          }
-        }
-      }
-    }
-
     console.log(`Final ZIP code from POST: ${zipCode || 'not found'}`);
+
+    if (fallbackRequested) {
+      console.log('Processing fallback request from POST body');
+      return createResponse(
+        formatResponse(await getFallbackCity('explicit-fallback-post-body'))
+      );
+    }
 
     if (!zipCode || zipCode.toString().trim() === '') {
       console.log('No ZIP code provided in POST');

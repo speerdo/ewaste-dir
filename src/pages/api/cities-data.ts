@@ -19,10 +19,9 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Accept',
-};
-
-export const config = {
-  runtime: 'edge',
+  'Cache-Control':
+    'public, max-age=0, s-maxage=300, stale-while-revalidate=600',
+  'CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
 };
 
 const handler: APIRoute = async ({ request }): Promise<Response> => {

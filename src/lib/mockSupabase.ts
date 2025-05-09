@@ -21,14 +21,39 @@ const mockStates: State[] = [
   },
 ];
 
+// Create mock cities with correct interface properties
 const mockCities: Record<string, City[]> = {
   'new-york': [
-    { id: 'new-york-city', name: 'New York City', state: 'New York' },
-    { id: 'albany', name: 'Albany', state: 'New York' },
+    {
+      id: 'new-york-city',
+      name: 'New York City',
+      state_id: 'new-york',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: 'albany',
+      name: 'Albany',
+      state_id: 'new-york',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
   ],
   california: [
-    { id: 'los-angeles', name: 'Los Angeles', state: 'California' },
-    { id: 'san-francisco', name: 'San Francisco', state: 'California' },
+    {
+      id: 'los-angeles',
+      name: 'Los Angeles',
+      state_id: 'california',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: 'san-francisco',
+      name: 'San Francisco',
+      state_id: 'california',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
   ],
 };
 
@@ -38,30 +63,36 @@ const mockRecyclingCenters: Record<string, RecyclingCenter[]> = {
     {
       id: '1',
       name: 'NYC E-Waste Center',
-      address: '123 Example St',
       city: 'New York City',
       state: 'New York',
-      zip: '10001',
+      state_id: 'new-york',
+      city_id: 'new-york-city',
+      postal_code: 10001,
       phone: '555-123-4567',
-      website: 'https://example.com',
       description: 'E-waste recycling center in NYC',
       latitude: 40.7128,
       longitude: -74.006,
+      full_address: '123 Example St, New York City, NY 10001',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     },
   ],
   california: [
     {
       id: '2',
       name: 'LA E-Waste Center',
-      address: '456 Sample Blvd',
       city: 'Los Angeles',
       state: 'California',
-      zip: '90001',
+      state_id: 'california',
+      city_id: 'los-angeles',
+      postal_code: 90001,
       phone: '555-987-6543',
-      website: 'https://example.com',
       description: 'E-waste recycling center in LA',
       latitude: 34.0522,
       longitude: -118.2437,
+      full_address: '456 Sample Blvd, Los Angeles, CA 90001',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     },
   ],
 };

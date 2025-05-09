@@ -13,6 +13,10 @@ echo "Cleaning up previous build..."
 rm -rf dist/
 rm -rf .netlify/functions/
 
+# Install dependencies with the legacy-peer-deps flag to avoid conflicts
+echo "Installing dependencies with legacy peer deps flag..."
+npm install --legacy-peer-deps
+
 # Build the project
 echo "Building project..."
 npm run build

@@ -202,6 +202,9 @@ async function realGetCitiesByState(stateId: string): Promise<City[]> {
     ).map((cityName) => ({
       id: normalizeForUrl(cityName),
       name: cityName,
+      state_id: stateId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }));
 
     return uniqueCities;

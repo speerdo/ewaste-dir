@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import netlify from '@astrojs/netlify/functions';
+import netlify from '@astrojs/netlify';
 
 // Production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';

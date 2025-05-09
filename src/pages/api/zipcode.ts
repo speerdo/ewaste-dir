@@ -21,6 +21,10 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Accept',
+  'Cache-Control':
+    'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  Pragma: 'no-cache',
+  Expires: '0',
 };
 
 export const config = {
@@ -99,8 +103,16 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         }
 
         const body = await request.json();
-        // console.log('POST request body:', body);
-        zipCode = body.zip?.toString() ?? null;
+        // Remove timestamp if present (used for cache busting)
+        const { _timestamp, ...actualBody } = body;
+        console.log(
+          `Processing zipcode request at ${new Date().toISOString()}`,
+          {
+            zipCode: actualBody.zip,
+            timestamp: _timestamp,
+          }
+        );
+        zipCode = actualBody.zip?.toString() ?? null;
         // console.log('POST request - zip code from body:', zipCode);
       } catch (error) {
         console.error('Error parsing POST request body:', error);

@@ -367,8 +367,11 @@ const id = variant === 'hero' ? 'hero' : 'nav';
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache'
             },
-            body: JSON.stringify({ zip: zipCode }),
+            cache: 'no-store',
+            body: JSON.stringify({ zip: zipCode, _timestamp: Date.now() }),
           });
           
           if (!response.ok) {

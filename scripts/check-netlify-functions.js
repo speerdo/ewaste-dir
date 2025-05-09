@@ -59,33 +59,42 @@ if (!functionsDir) {
 
 // If we have a functions directory, check for entry.js
 if (functionsDir) {
-  const entryFunctionPaths = [
+  // Check for SSR function in various possible locations based on Astro+Netlify adapter pattern
+  const ssrFunctionPaths = [
     path.join(functionsDir, 'entry.js'),
     path.join(functionsDir, 'entry.mjs'),
     path.join(functionsDir, 'entry', 'index.js'),
+    path.join(functionsDir, 'ssr', 'ssr.js'),
+    path.join(functionsDir, 'ssr', 'ssr.mjs'),
+    path.join(functionsDir, 'ssr.js'),
+    path.join(functionsDir, 'ssr.mjs'),
   ];
 
   let entryFound = false;
   let entryPath = '';
 
-  for (const path of entryFunctionPaths) {
+  for (const path of ssrFunctionPaths) {
     if (fs.existsSync(path)) {
       entryFound = true;
       entryPath = path;
-      console.log(`✅ Found entry function at: ${path}`);
+      console.log(`✅ Found SSR function at: ${path}`);
       break;
     }
   }
 
   if (!entryFound) {
-    console.warn('⚠️ Entry function not found, but continuing build');
+    console.warn('⚠️ SSR function not found, but continuing build');
   } else {
     // Check if the function contains references to API routes
-    const entryContent = fs.readFileSync(entryPath, 'utf8');
-    if (!entryContent.includes('/api/')) {
-      console.warn(
-        '⚠️ Entry function might not be handling API routes properly.'
-      );
+    try {
+      const entryContent = fs.readFileSync(entryPath, 'utf8');
+      if (!entryContent.includes('/api/')) {
+        console.warn(
+          '⚠️ SSR function might not be handling API routes properly.'
+        );
+      }
+    } catch (err) {
+      console.warn(`⚠️ Could not read SSR function content: ${err.message}`);
     }
 
     // List all functions
@@ -95,6 +104,16 @@ if (functionsDir) {
         `\nFound ${functions.length} items in functions directory:`,
         functions
       );
+
+      // If there's an ssr directory, list its contents
+      const ssrDir = path.join(functionsDir, 'ssr');
+      if (fs.existsSync(ssrDir) && fs.statSync(ssrDir).isDirectory()) {
+        const ssrFiles = fs.readdirSync(ssrDir);
+        console.log(
+          `Found SSR directory with ${ssrFiles.length} files:`,
+          ssrFiles
+        );
+      }
     } catch (err) {
       console.warn(
         `⚠️ Could not list functions in ${functionsDir}: ${err.message}`

@@ -30,21 +30,21 @@
 # Handle API routes - higher priority
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/entry"
+  to = "/.netlify/functions/ssr/ssr"
   status = 200
   force = true
 
 # Handle SSR routes for states pages - medium priority
 [[redirects]]
   from = "/states/*"
-  to = "/.netlify/functions/entry"
+  to = "/.netlify/functions/ssr/ssr"
   status = 200
   force = true
 
 # Fallback for any other dynamic routes that should be handled by SSR - low priority
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/entry"
+  to = "/.netlify/functions/ssr/ssr"
   status = 200
   force = false
   conditions = {SSR = true}

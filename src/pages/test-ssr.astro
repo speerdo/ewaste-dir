@@ -1,0 +1,86 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Mark this page as SSR
+export const prerender = false;
+
+// Get request info
+const requestUrl = Astro.request.url;
+const headers = Object.fromEntries(Astro.request.headers.entries());
+const timestamp = new Date().toISOString();
+
+// Add diagnostic headers
+Astro.response.headers.set('X-SSR-Test', 'true');
+Astro.response.headers.set('X-Request-Time', timestamp);
+---
+
+<Layout title="SSR Test Page">
+  <div class="container mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-green-600 mb-6">SSR Test Page</h1>
+    
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Request Information</h2>
+      <div class="grid grid-cols-1 gap-4">
+        <div class="border-b pb-2">
+          <span class="font-medium">URL:</span> {requestUrl}
+        </div>
+        <div class="border-b pb-2">
+          <span class="font-medium">Time:</span> {timestamp}
+        </div>
+        <div class="border-b pb-2">
+          <span class="font-medium">SSR Enabled:</span> Yes (this page is rendered on the server)
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Request Headers</h2>
+      <pre class="bg-gray-100 p-4 rounded overflow-auto max-h-60 text-sm">
+        {JSON.stringify(headers, null, 2)}
+      </pre>
+    </div>
+    
+    <div class="bg-white shadow-lg rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Environment</h2>
+      <pre class="bg-gray-100 p-4 rounded overflow-auto max-h-60 text-sm">
+        NODE_ENV: {import.meta.env.MODE}
+        PROD: {import.meta.env.PROD ? 'true' : 'false'}
+        DEV: {import.meta.env.DEV ? 'true' : 'false'}
+        BASE_URL: {import.meta.env.BASE_URL}
+        SITE: {import.meta.env.SITE}
+      </pre>
+    </div>
+    
+    <div class="mt-8">
+      <a 
+        href="/"
+        class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition"
+      >
+        Back to Home
+      </a>
+      <a 
+        href="/states/new-york"
+        class="ml-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition"
+      >
+        Test States Page
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Log client-side information for debugging
+    console.log('Client-side rendering check');
+    console.log('Current URL:', window.location.href);
+    console.log('Page was rendered at:', '{timestamp}');
+    
+    // Add a visual indicator that client-side JS is running
+    const indicator = document.createElement('div');
+    indicator.textContent = '✅ Client-side JavaScript is running';
+    indicator.style.backgroundColor = '#d1fae5';
+    indicator.style.color = '#065f46';
+    indicator.style.padding = '1rem';
+    indicator.style.borderRadius = '0.375rem';
+    indicator.style.marginTop = '1rem';
+    document.querySelector('.container')?.appendChild(indicator);
+  </script>
+</Layout> 

@@ -18,6 +18,8 @@ export default defineConfig({
   adapter: netlify({
     imageCDN: true,
     dist: new URL('./dist/', import.meta.url),
+    functionPerRoute: false,
+    edgeMiddleware: true,
   }),
   build: {
     inlineStylesheets: 'auto',

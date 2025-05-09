@@ -39,7 +39,7 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
 
     // Get route params from URL
     const url = new URL(request.url);
-    const zipCode = url.searchParams.get('zip');
+    let zipCode = url.searchParams.get('zip');
 
     // Handle preflight requests
     if (request.method === 'OPTIONS') {
@@ -237,7 +237,6 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
       Expires: '0',
       'Surrogate-Control': 'no-store',
       'X-Vercel-Cache-Control-Override': 'no-store',
-      'X-Request-Nonce': requestNonce,
     };
 
     return new Response(JSON.stringify(zipCodeResult), {
@@ -428,7 +427,6 @@ export const POST: APIRoute = async ({ request }): Promise<Response> => {
       Expires: '0',
       'Surrogate-Control': 'no-store',
       'X-Vercel-Cache-Control-Override': 'no-store',
-      'X-Request-Nonce': requestNonce,
     };
 
     return new Response(JSON.stringify(zipCodeResult), {

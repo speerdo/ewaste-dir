@@ -31,17 +31,23 @@ export const config = {
   runtime: 'edge',
 };
 
-const handler: APIRoute = async ({ request }): Promise<Response> => {
-  // Handle preflight requests
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
-    });
-  }
-
+export const GET: APIRoute = async ({ request }): Promise<Response> => {
   try {
-    let zipCode: string | null = null;
+    // Generate a unique nonce for this request
+    const requestNonce =
+      Date.now().toString() + '-' + Math.random().toString(36).substring(2);
+
+    // Get route params from URL
+    const url = new URL(request.url);
+    const zipCode = url.searchParams.get('zip');
+
+    // Handle preflight requests
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
+    }
 
     // Handle both GET and POST requests
     if (request.method === 'GET') {
@@ -55,12 +61,9 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
       // Try multiple methods to get the zip parameter
       try {
         // Method 1: Try using URL API
-        const url = new URL(request.url);
         // console.log('Method 1 - URL search:', url.search);
-        zipCode = url.searchParams.get('zip');
-
-        // Method 2: If that fails, try getting raw query string
         if (!zipCode) {
+          // Method 2: If that fails, try getting raw query string
           const rawQuery = request.url.split('?')[1];
           // console.log('Method 2 - Raw query:', rawQuery);
           if (rawQuery) {
@@ -81,54 +84,16 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
         console.error('Error extracting zip code:', error);
       }
     } else if (request.method === 'POST') {
-      try {
-        // console.log('Processing POST request');
-        const contentType = request.headers.get('content-type');
-        // console.log('Content-Type:', contentType);
-
-        if (!contentType?.includes('application/json')) {
-          return new Response(
-            JSON.stringify({
-              error: 'Invalid Content-Type',
-              details: {
-                expected: 'application/json',
-                received: contentType,
-              },
-            } satisfies ZipCodeErrorResponse),
-            {
-              status: 415,
-              headers: corsHeaders,
-            }
-          );
+      return new Response(
+        JSON.stringify({
+          error: 'Method not allowed',
+          details: { method: request.method },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 405,
+          headers: corsHeaders,
         }
-
-        const body = await request.json();
-        // Remove timestamp if present (used for cache busting)
-        const { _timestamp, ...actualBody } = body;
-        console.log(
-          `Processing zipcode request at ${new Date().toISOString()}`,
-          {
-            zipCode: actualBody.zip,
-            timestamp: _timestamp,
-          }
-        );
-        zipCode = actualBody.zip?.toString() ?? null;
-        // console.log('POST request - zip code from body:', zipCode);
-      } catch (error) {
-        console.error('Error parsing POST request body:', error);
-        return new Response(
-          JSON.stringify({
-            error: 'Invalid request body',
-            details: {
-              message: error instanceof Error ? error.message : String(error),
-            },
-          } satisfies ZipCodeErrorResponse),
-          {
-            status: 400,
-            headers: corsHeaders,
-          }
-        );
-      }
+      );
     } else {
       return new Response(
         JSON.stringify({
@@ -263,9 +228,212 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
     };
 
     // console.log('Returning location data:', zipCodeResult);
+    // Enhance the corsHeaders with more cache prevention
+    const responseHeaders = {
+      ...corsHeaders,
+      'Cache-Control':
+        'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      Pragma: 'no-cache',
+      Expires: '0',
+      'Surrogate-Control': 'no-store',
+      'X-Vercel-Cache-Control-Override': 'no-store',
+      'X-Request-Nonce': requestNonce,
+    };
+
     return new Response(JSON.stringify(zipCodeResult), {
       status: 200,
-      headers: corsHeaders,
+      headers: responseHeaders,
+    });
+  } catch (error) {
+    console.error('Zip code lookup error:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Internal server error',
+        details: {
+          message: error instanceof Error ? error.message : String(error),
+        },
+      } satisfies ZipCodeErrorResponse),
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
+    );
+  }
+};
+
+export const POST: APIRoute = async ({ request }): Promise<Response> => {
+  try {
+    let zipCode: string | null = null;
+
+    try {
+      // Generate a unique nonce for this request
+      const requestNonce =
+        Date.now().toString() + '-' + Math.random().toString(36).substring(2);
+
+      const body = await request.json();
+      // Remove timestamp if present (used for cache busting)
+      const { _timestamp, ...actualBody } = body;
+
+      console.log(`Processing zipcode request at ${new Date().toISOString()}`, {
+        zipCode: actualBody.zip,
+        timestamp: _timestamp,
+        nonce: requestNonce,
+      });
+
+      zipCode = actualBody.zip?.toString() ?? null;
+      // console.log('POST request - zip code from body:', zipCode);
+    } catch (error) {
+      console.error('Error parsing POST request body:', error);
+      return new Response(
+        JSON.stringify({
+          error: 'Invalid request body',
+          details: {
+            message: error instanceof Error ? error.message : String(error),
+          },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // Handle missing zip code
+    if (!zipCode) {
+      console.error('Missing zip code parameter');
+      return new Response(
+        JSON.stringify({
+          error: 'Missing zip code',
+          details: {
+            method: request.method,
+            url: request.url,
+            headers: Object.fromEntries(request.headers),
+          },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // Validate zip code format
+    if (!/^\d{5}(-\d{4})?$/.test(zipCode)) {
+      console.error('Invalid zip code format:', zipCode);
+      return new Response(
+        JSON.stringify({
+          error: 'Invalid zip code format',
+          details: { providedZip: zipCode },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // Extract the 5-digit ZIP code if a 9-digit ZIP was provided
+    const fiveDigitZip = zipCode.slice(0, 5);
+
+    // Use Nominatim's geocoding service (free, no API key required)
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?postalcode=${fiveDigitZip}&country=USA&format=json&addressdetails=1&limit=1`;
+
+    // console.log('Fetching location data for ZIP:', fiveDigitZip);
+    const response = await fetch(nominatimUrl, {
+      headers: {
+        'User-Agent': 'E-Waste-Directory/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      console.error(
+        'Nominatim API error:',
+        response.status,
+        response.statusText
+      );
+      return new Response(
+        JSON.stringify({
+          error: 'Zip code lookup service error',
+          details: {
+            status: response.status,
+            statusText: response.statusText,
+          },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 502,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    const data = await response.json();
+    // console.log('Nominatim API response:', JSON.stringify(data, null, 2));
+
+    if (!data.length) {
+      console.error('No location data found in Nominatim API response');
+      return new Response(
+        JSON.stringify({
+          error: 'Location not found',
+          details: { zipCode },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 404,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    const location = data[0];
+    const address = location.address;
+
+    // Try to get the city name from various address fields
+    const city =
+      address.city ||
+      address.town ||
+      address.village ||
+      address.municipality ||
+      address.suburb;
+    const state = address.state;
+
+    if (!city || !state) {
+      console.error('Incomplete location data:', address);
+      return new Response(
+        JSON.stringify({
+          error: 'Incomplete location data',
+          details: { address },
+        } satisfies ZipCodeErrorResponse),
+        {
+          status: 404,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    const zipCodeResult: ZipCodeResponse = {
+      city,
+      state,
+      coordinates: {
+        lat: parseFloat(location.lat),
+        lng: parseFloat(location.lon),
+      },
+    };
+
+    // console.log('Returning location data:', zipCodeResult);
+    // Enhance the corsHeaders with more cache prevention
+    const responseHeaders = {
+      ...corsHeaders,
+      'Cache-Control':
+        'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      Pragma: 'no-cache',
+      Expires: '0',
+      'Surrogate-Control': 'no-store',
+      'X-Vercel-Cache-Control-Override': 'no-store',
+      'X-Request-Nonce': requestNonce,
+    };
+
+    return new Response(JSON.stringify(zipCodeResult), {
+      status: 200,
+      headers: responseHeaders,
     });
   } catch (error) {
     console.error('Zip code lookup error:', error);
@@ -285,12 +453,12 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
 };
 
 // Export both POST and post to handle case sensitivity
-export const POST = handler;
-export const post = handler;
+// export const POST = POST; // This creates a circular reference
+export const post = POST;
 
 // Export both GET and get to handle case sensitivity
-export const GET = handler;
-export const get = handler;
+// export const GET = GET; // This creates a circular reference
+export const get = GET;
 
 // Also export as default
-export default handler;
+export default GET;

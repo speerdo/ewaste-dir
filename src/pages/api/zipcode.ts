@@ -33,13 +33,42 @@ export const config = {
 
 export const GET: APIRoute = async ({ request }): Promise<Response> => {
   try {
-    // Generate a unique nonce for this request
-    const requestNonce =
-      Date.now().toString() + '-' + Math.random().toString(36).substring(2);
+    let zipCode: string | null = null;
 
-    // Get route params from URL
-    const url = new URL(request.url);
-    let zipCode = url.searchParams.get('zip');
+    // Method 1 - Using searchParams
+    try {
+      const url = new URL(request.url);
+      zipCode = url.searchParams.get('zip');
+    } catch (e) {
+      console.error('Error parsing URL:', e);
+    }
+
+    // Method 2 - Raw query string parsing
+    if (!zipCode) {
+      try {
+        const url = new URL(request.url);
+        const rawQuery = url.search.substring(1);
+
+        if (rawQuery) {
+          const params = new URLSearchParams(rawQuery);
+          zipCode = params.get('zip');
+        }
+      } catch (e) {
+        console.error('Error with raw query parsing:', e);
+      }
+    }
+
+    // Method 3 - Using regex as a fallback
+    if (!zipCode) {
+      try {
+        const match = request.url.match(/[?&]zip=([^&]+)/);
+        if (match) {
+          zipCode = decodeURIComponent(match[1]);
+        }
+      } catch (e) {
+        console.error('Error with regex parsing:', e);
+      }
+    }
 
     // Handle preflight requests
     if (request.method === 'OPTIONS') {
@@ -57,32 +86,7 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
       //   method: request.method,
       //   headers: Object.fromEntries(request.headers),
       // });
-
-      // Try multiple methods to get the zip parameter
-      try {
-        // Method 1: Try using URL API
-        // console.log('Method 1 - URL search:', url.search);
-        if (!zipCode) {
-          // Method 2: If that fails, try getting raw query string
-          const rawQuery = request.url.split('?')[1];
-          // console.log('Method 2 - Raw query:', rawQuery);
-          if (rawQuery) {
-            const params = new URLSearchParams(rawQuery);
-            zipCode = params.get('zip');
-          }
-        }
-
-        // Method 3: If that fails, try regex
-        if (!zipCode) {
-          // console.log('Method 3 - Using regex');
-          const match = request.url.match(/[?&]zip=([^&]+)/);
-          zipCode = match ? decodeURIComponent(match[1]) : null;
-        }
-
-        // console.log('Final extracted zip code:', zipCode);
-      } catch (error) {
-        console.error('Error extracting zip code:', error);
-      }
+      // console.log('Final extracted zip code:', zipCode);
     } else if (request.method === 'POST') {
       return new Response(
         JSON.stringify({
@@ -263,12 +267,11 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
 export const POST: APIRoute = async ({ request }): Promise<Response> => {
   try {
     let zipCode: string | null = null;
+    // Generate a unique nonce for this request
+    const requestNonce =
+      Date.now().toString() + '-' + Math.random().toString(36).substring(2);
 
     try {
-      // Generate a unique nonce for this request
-      const requestNonce =
-        Date.now().toString() + '-' + Math.random().toString(36).substring(2);
-
       const body = await request.json();
       // Remove timestamp if present (used for cache busting)
       const { _timestamp, ...actualBody } = body;

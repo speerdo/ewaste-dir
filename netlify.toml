@@ -1,0 +1,38 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[dev]
+  command = "npm run dev"
+  port = 4322
+  targetPort = 4322
+
+[[plugins]]
+  package = "./netlify/plugins/cache-control"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, s-maxage=60, stale-while-revalidate=300"
+    CDN-Cache-Control = "public, s-maxage=60, stale-while-revalidate=300"
+
+# Handle API routes
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/entry"
+  status = 200
+  force = true
+
+# Redirect to prevent 404 on page refresh
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  conditions = {Role = ["anonymous"]} 

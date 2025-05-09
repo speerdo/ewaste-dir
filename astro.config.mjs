@@ -1,49 +1,27 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import vercel from '@astrojs/vercel/serverless';
+import netlify from '@astrojs/netlify/functions';
 
 // Production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
 
 // Get the site URL from environment variables or use a default for preview deployments
-const VERCEL_URL = process.env.VERCEL_URL;
+const NETLIFY_URL = process.env.NETLIFY_URL || process.env.URL;
 const SITE_URL =
-  process.env.SITE_URL ||
-  (VERCEL_URL ? `https://${VERCEL_URL}` : PRODUCTION_URL);
+  process.env.SITE_URL || (NETLIFY_URL ? NETLIFY_URL : PRODUCTION_URL);
 
 // https://astro.build/config
 export default defineConfig({
   site: SITE_URL,
   integrations: [tailwind()],
   output: 'server',
-  adapter: vercel({
-    webAnalytics: {
-      enabled: true,
-    },
-    imageService: true,
-    devImageService: 'sharp',
-    speedInsights: true,
-    isr: {
-      expiration: 3600,
-      allowQuery: true,
-      byRoute: {
-        '/': { expiration: 86400 },
-        '/about': { expiration: 86400 },
-        '/contact': { expiration: 86400 },
-        '/blog': { expiration: 86400 },
-        '/states/*': { expiration: 3600 },
-        '/cities/*': { expiration: 3600 },
-        '/api/*': { expiration: 300 },
-      },
-    },
-    edgeMiddleware: true,
-    maxDuration: 8,
-    functionPerRoute: true,
+  adapter: netlify({
+    imageCDN: true,
+    dist: new URL('./dist/', import.meta.url),
   }),
   build: {
     inlineStylesheets: 'auto',
     assets: 'assets',
-    serverEntry: 'entry.mjs',
     format: 'directory',
   },
   vite: {
@@ -71,11 +49,5 @@ export default defineConfig({
       },
     },
   },
-  routes: [
-    {
-      pattern: '/api/*',
-      entryPoint: 'src/api/*.ts',
-    },
-  ],
   compressHTML: true,
 });

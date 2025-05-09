@@ -28,6 +28,9 @@ export default defineConfig({
       'application/pdf',
       'application/octet-stream',
     ],
+    functionName: (original) => {
+      return original.replace(/[^a-zA-Z0-9-_]/g, '_');
+    },
   }),
   build: {
     inlineStylesheets: 'auto',

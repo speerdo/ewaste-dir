@@ -2,6 +2,22 @@
 
 This document outlines the steps for deploying this application to Netlify with proper SSR support.
 
+## Function Naming Fix
+
+This project includes a fix for a common issue with the Astro Netlify adapter where function files with `@` characters in their names cause deployment failures. The error looks like this:
+
+```
+Error: Serverless function `_@astrojs-ssr-adapter` has an invalid name. The name should only contain alphanumeric characters, hyphens, or underscores.
+```
+
+Our solution:
+
+1. We've added a `functionName` callback in `astro.config.mjs` to sanitize function names.
+2. We've created a post-build script that:
+   - Finds and renames problematic files with `@` characters
+   - Updates all references to these renamed files
+   - Works recursively through all build directories
+
 ## Deployment Configuration
 
 ### Build Settings
@@ -55,14 +71,24 @@ If you encounter issues with SSR routes not working:
 3. Make sure all environment variables are properly set
 4. Verify that the Netlify adapter is correctly configured in `astro.config.mjs`
 
+### Common Issues
+
+1. **Invalid function names**: Our build process includes automatic fixing of invalid function names (containing `@` symbols). If you see this error, ensure our post-build script ran correctly.
+
+2. **Missing dependencies**: Verify that all required dependencies are properly installed.
+
+3. **Redirect issues**: Check the Netlify logs to ensure that requests are being properly routed to the SSR function.
+
 ## Key Files
 
 The following files are critical for proper Netlify deployment:
 
 - `netlify.toml`: Contains redirect rules and build configuration
 - `netlify/functions/ssr.js`: The entry point for SSR functions
-- `astro.config.mjs`: Contains the Netlify adapter configuration
+- `netlify/functions/cities-data.js`: Fallback function for city data API
+- `astro.config.mjs`: Contains the Netlify adapter configuration with function name sanitization
 - `scripts/setup-netlify.js`: Sets up necessary files for Netlify deployment
+- `scripts/postbuild-netlify.js`: Fixes invalid function names
 - `src/data/generatedCityData.json`: Pre-generated city data for fallback
 
 ## Notes

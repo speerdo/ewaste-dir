@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development astro dev",
-    "build": "NODE_ENV=production node scripts/setup-netlify.js && astro build",
-    "build:netlify": "NODE_ENV=production node scripts/setup-netlify.js && astro build",
+    "build": "NODE_ENV=production node scripts/setup-netlify.js && astro build && node scripts/postbuild-netlify.js",
+    "build:netlify": "NODE_ENV=production node scripts/setup-netlify.js && astro build && node scripts/postbuild-netlify.js",
     "build:optimized": "node scripts/optimize-for-build.js && npm run prepare && NODE_OPTIONS=\"--max-old-space-size=7168 --expose-gc\" NODE_ENV=production astro build",
     "prebuild": "node scripts/setup-netlify.js && npm run prepare",
     "prepare": "rm -rf .netlify/functions/ .temp-build/ node_modules/.astro node_modules/.vite",
@@ -26,6 +26,7 @@
     "@supabase/supabase-js": "^2.39.8",
     "@types/google.maps": "^3.55.4",
     "astro": "^5.7.2",
+    "glob": "^10.4.5",
     "tailwindcss": "^3.4.1"
   },
   "engines": {

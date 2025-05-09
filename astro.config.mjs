@@ -36,7 +36,7 @@ export default defineConfig({
       },
     },
     edgeMiddleware: true,
-    maxDuration: 8,
+    maxDuration: 15,
     functionPerRoute: true,
   }),
   build: {

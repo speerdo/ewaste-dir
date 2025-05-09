@@ -1,4 +1,4 @@
-import { getAllStates, getCitiesByState } from './supabase';
+import { supabase, normalizeForUrl } from './supabase';
 
 export interface CityStatePair {
   city: string;
@@ -14,23 +14,66 @@ export async function getAllCityStatePairs(): Promise<CityStatePair[]> {
     return cityDataCache;
   }
 
-  // Get all states and their cities
-  const states = await getAllStates();
-  const cityStatePairs = await Promise.all(
-    states.map(async (state) => {
-      const cities = await getCitiesByState(state.id);
-      return cities.map((city) => ({
-        city: city.name,
-        state: state.name,
-        url: `/states/${state.id}/${city.id}`,
-      }));
-    })
-  ).then((results) => results.flat());
+  try {
+    const { data, error } = await supabase
+      .from('recycling_centers')
+      .select('city, state')
+      .not('city', 'is', null)
+      .not('state', 'is', null);
 
-  // Cache the results
-  cityDataCache = cityStatePairs;
+    if (error) {
+      console.error(
+        'Error fetching city/state pairs from recycling_centers:',
+        error
+      );
+      throw error; // Or return an empty array / handle error as appropriate
+    }
 
-  return cityStatePairs;
+    if (!data) {
+      cityDataCache = [];
+      return [];
+    }
+
+    // Create unique pairs and construct the CityStatePair objects
+    const uniquePairs = new Map<string, CityStatePair>();
+    data.forEach((item) => {
+      if (item.city && item.state) {
+        // Ensure city and state are not null
+        const city = item.city.trim();
+        const state = item.state.trim();
+        const pairKey = `${city.toLowerCase()}|${state.toLowerCase()}`;
+
+        if (!uniquePairs.has(pairKey)) {
+          const stateId = normalizeForUrl(state);
+          const cityId = normalizeForUrl(city);
+          uniquePairs.set(pairKey, {
+            city: city,
+            state: state,
+            url: `/states/${stateId}/${cityId}`,
+          });
+        }
+      }
+    });
+
+    const cityStatePairs = Array.from(uniquePairs.values());
+
+    // Sort for consistency, e.g., by state then by city
+    cityStatePairs.sort((a, b) => {
+      if (a.state < b.state) return -1;
+      if (a.state > b.state) return 1;
+      if (a.city < b.city) return -1;
+      if (a.city > b.city) return 1;
+      return 0;
+    });
+
+    // Cache the results
+    cityDataCache = cityStatePairs;
+    return cityStatePairs;
+  } catch (e) {
+    console.error('Exception in getAllCityStatePairs:', e);
+    // In case of an exception, return empty or previously cached (if any part succeeded)
+    return cityDataCache || [];
+  }
 }
 
 // Cache for search results

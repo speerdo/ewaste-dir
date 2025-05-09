@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Build optimization script for Vercel deployments
+ * Build optimization script for Netlify deployments
  * This script helps with large static site generation by:
  * 1. Setting appropriate Node.js options for memory management
  * 2. Clearing any build caches to ensure a clean state
@@ -18,7 +18,7 @@ const __dirname = path.dirname(__filename);
 
 console.log('🚀 Running build optimization script...');
 
-// Ensure that we're using the max memory available in Vercel
+// Ensure that we're using the max memory available in Netlify
 process.env.NODE_OPTIONS =
   process.env.NODE_OPTIONS || '--max-old-space-size=7168';
 console.log(`ℹ️ NODE_OPTIONS: ${process.env.NODE_OPTIONS}`);
@@ -32,7 +32,7 @@ const clearCaches = () => {
   const dirs = [
     'node_modules/.astro',
     'node_modules/.vite',
-    '.vercel/output',
+    '.netlify/functions',
     'dist',
   ];
 

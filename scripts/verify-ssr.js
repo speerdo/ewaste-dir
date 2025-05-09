@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * SSR verification script to check if the Vercel build output is correct
+ * SSR verification script to check if the Netlify build output is correct
  * This helps catch build issues before deploying to production
  *
  * Usage: node scripts/verify-ssr.js
@@ -10,17 +10,16 @@
 import fs from 'fs';
 import path from 'path';
 
-const VERCEL_OUTPUT_DIR = '.vercel/output';
-const FUNCTIONS_DIR = path.join(VERCEL_OUTPUT_DIR, 'functions');
-const STATIC_DIR = path.join(VERCEL_OUTPUT_DIR, 'static');
-const CONFIG_FILE = path.join(VERCEL_OUTPUT_DIR, 'config.json');
+const NETLIFY_OUTPUT_DIR = 'dist';
+const FUNCTIONS_DIR = path.join('.netlify', 'functions');
+const STATIC_DIR = path.join(NETLIFY_OUTPUT_DIR);
 
 // Required files and directories for a valid SSR build
 const REQUIRED_PATHS = [
   {
-    path: VERCEL_OUTPUT_DIR,
+    path: NETLIFY_OUTPUT_DIR,
     type: 'directory',
-    name: 'Vercel output directory',
+    name: 'Netlify output directory',
   },
   {
     path: FUNCTIONS_DIR,
@@ -28,33 +27,18 @@ const REQUIRED_PATHS = [
     name: 'Serverless functions directory',
   },
   {
-    path: STATIC_DIR,
-    type: 'directory',
-    name: 'Static assets directory',
-  },
-  {
-    path: CONFIG_FILE,
+    path: path.join(FUNCTIONS_DIR, 'entry.js'),
     type: 'file',
-    name: 'Vercel config file',
-  },
-  {
-    path: path.join(FUNCTIONS_DIR, '_render.func'),
-    type: 'directory',
     name: 'Main SSR function',
   },
   {
-    path: path.join(FUNCTIONS_DIR, '_middleware.func'),
+    path: path.join(STATIC_DIR, '_astro'),
     type: 'directory',
-    name: 'Edge middleware',
-  },
-  {
-    path: path.join(FUNCTIONS_DIR, '_isr.func'),
-    type: 'directory',
-    name: 'ISR function',
+    name: 'Static assets directory',
   },
 ];
 
-console.log('🔍 Verifying SSR build output...');
+console.log('🔍 Verifying Netlify SSR build output...');
 
 // Check if all required paths exist
 let missingPaths = [];
@@ -72,29 +56,6 @@ for (const { path: pathToCheck, type, name } of REQUIRED_PATHS) {
   } else {
     missingPaths.push(name);
     console.error(`❌ Missing ${name} (expected at ${pathToCheck})`);
-  }
-}
-
-// Verify config.json if it exists
-if (fs.existsSync(CONFIG_FILE)) {
-  try {
-    const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-
-    // Check for required configuration
-    const hasVersion = config.version === 3;
-    const hasRoutes = Array.isArray(config.routes);
-
-    if (hasVersion && hasRoutes) {
-      console.log('✅ Valid Vercel configuration found');
-    } else {
-      console.error('❌ Invalid Vercel configuration:');
-      if (!hasVersion)
-        console.error('   - Missing or invalid version (should be 3)');
-      if (!hasRoutes)
-        console.error('   - Missing or invalid routes configuration');
-    }
-  } catch (error) {
-    console.error('❌ Error parsing Vercel configuration:', error.message);
   }
 }
 
@@ -118,9 +79,9 @@ if (missingPaths.length === 0) {
   // Suggest next steps
   console.log('\n=== SUGGESTED FIXES ===');
   console.log(
-    '1. Check if astro.config.mjs is correctly configured for Vercel SSR'
+    '1. Check if astro.config.mjs is correctly configured for Netlify SSR'
   );
-  console.log('2. Verify @astrojs/vercel adapter is properly installed');
+  console.log('2. Verify @astrojs/netlify adapter is properly installed');
   console.log('3. Make sure all environment variables are set');
   console.log('4. Try running build with --verbose flag for more details');
   console.log('5. Check for any build errors in the console output');

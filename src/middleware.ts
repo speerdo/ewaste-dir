@@ -67,7 +67,11 @@ export const onRequest = defineMiddleware(async ({ request, url }, next) => {
   resp.headers.set('Permissions-Policy', 'geolocation=self');
 
   // Add performance headers
-  resp.headers.set('X-Vercel-Cache', 'MISS'); // Let Vercel handle the actual cache status
+  resp.headers.set('X-Cache-Status', 'MISS'); // Netlify cache status header
+  resp.headers.set(
+    'CDN-Cache-Control',
+    `public, s-maxage=${CACHE_DURATIONS.api.maxAge}, stale-while-revalidate=${CACHE_DURATIONS.api.staleWhileRevalidate}`
+  );
   resp.headers.set('Server-Timing', 'miss, db;dur=53, app;dur=47.2');
   resp.headers.set('Vary', 'Accept-Encoding');
 

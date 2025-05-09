@@ -8,9 +8,6 @@
   port = 4322
   targetPort = 4322
 
-[[plugins]]
-  package = "./netlify/plugins/cache-control"
-
 [[headers]]
   for = "/*"
   [headers.values]

@@ -27,10 +27,6 @@ const corsHeaders = {
   Expires: '0',
 };
 
-export const config = {
-  runtime: 'edge',
-};
-
 export const GET: APIRoute = async ({ request }): Promise<Response> => {
   try {
     let zipCode: string | null = null;
@@ -239,8 +235,7 @@ export const GET: APIRoute = async ({ request }): Promise<Response> => {
         'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
       Pragma: 'no-cache',
       Expires: '0',
-      'Surrogate-Control': 'no-store',
-      'X-Vercel-Cache-Control-Override': 'no-store',
+      'CDN-Cache-Control': 'no-store',
     };
 
     return new Response(JSON.stringify(zipCodeResult), {
@@ -428,8 +423,7 @@ export const POST: APIRoute = async ({ request }): Promise<Response> => {
         'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
       Pragma: 'no-cache',
       Expires: '0',
-      'Surrogate-Control': 'no-store',
-      'X-Vercel-Cache-Control-Override': 'no-store',
+      'CDN-Cache-Control': 'no-store',
     };
 
     return new Response(JSON.stringify(zipCodeResult), {

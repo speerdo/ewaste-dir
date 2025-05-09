@@ -12,8 +12,9 @@ const DEFAULT_LOGO = '/images/recycling.webp';
 // Convert to SSR
 export const prerender = false;
 
-// Set cache control headers for Vercel Edge Caching
+// Set cache control headers for Netlify Edge Functions
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+Astro.response.headers.set('CDN-Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 
 // Get data from params
 const { state: stateParam, city: cityParam } = Astro.params;

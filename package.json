@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development astro dev",
-    "build": "NODE_ENV=production astro build",
-    "build:netlify": "NODE_ENV=production astro build",
+    "build": "NODE_ENV=production node scripts/setup-netlify.js && astro build",
+    "build:netlify": "NODE_ENV=production node scripts/setup-netlify.js && astro build",
     "build:optimized": "node scripts/optimize-for-build.js && npm run prepare && NODE_OPTIONS=\"--max-old-space-size=7168 --expose-gc\" NODE_ENV=production astro build",
     "prebuild": "node scripts/setup-netlify.js && npm run prepare",
     "prepare": "rm -rf .netlify/functions/ .temp-build/ node_modules/.astro node_modules/.vite",

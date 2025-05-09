@@ -36,7 +36,7 @@
 # Debug routes - highest priority
 [[redirects]]
   from = "/debug-request"
-  to = "/.netlify/functions/debug-request"
+  to = "/.netlify/functions/ssr"
   status = 200
   force = true
 
@@ -46,10 +46,14 @@
   status = 200
   force = true
 
-# Note: Netlify renders Astro SSR pages directly without redirects
-# The redirects below are only needed for explicit function routing
+# Specific API route for cities data - highest priority
+[[redirects]]
+  from = "/api/cities-data"
+  to = "/.netlify/functions/cities-data"
+  status = 200
+  force = true
 
-# Handle API routes - higher priority 
+# API routes - higher priority
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/ssr"
@@ -70,15 +74,22 @@
   status = 200
   force = true
 
-# For Single Page Application fallbacks - lowest priority 
+# For search page
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/search"
+  to = "/.netlify/functions/ssr"
   status = 200
-  force = false
+  force = true
 
 # For any 404 pages, redirect to the custom 404 page - lowest priority
 [[redirects]]
   from = "/*"
   to = "/404.html"
   status = 404 
+
+# For Single Page Application fallbacks - lowest priority 
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false 

@@ -1,6 +1,7 @@
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -58,5 +59,45 @@ const redirectsContent = `
 
 console.log('Writing Netlify redirects file...');
 writeFileSync(redirectsPath, redirectsContent.trim());
+
+// Ensure netlify/functions directory exists
+const functionsDir = path.join(rootDir, 'netlify', 'functions');
+if (!fs.existsSync(functionsDir)) {
+  console.log('Creating netlify/functions directory...');
+  fs.mkdirSync(functionsDir, { recursive: true });
+}
+
+// Check if ssr.js exists and create it if it doesn't
+const ssrFile = path.join(functionsDir, 'ssr.js');
+if (!fs.existsSync(ssrFile)) {
+  console.log('Creating ssr.js file...');
+  const ssrContent = `// netlify/functions/ssr.js
+// This file is the entry point for all SSR functions.
+// It imports and runs the Astro SSR handler.
+
+import { handler as ssrHandler } from '../../dist/server/entry.mjs';
+
+// Export a function for handling Netlify Function requests
+export async function handler(event, context) {
+  // Process SSR request with Astro
+  const response = await ssrHandler(event, context);
+  return response;
+}`;
+
+  fs.writeFileSync(ssrFile, ssrContent, 'utf8');
+}
+
+// Ensure data directory exists and create empty city data file if it doesn't exist
+const dataDir = path.join(rootDir, 'src', 'data');
+if (!fs.existsSync(dataDir)) {
+  console.log('Creating src/data directory...');
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+const cityDataFile = path.join(dataDir, 'generatedCityData.json');
+if (!fs.existsSync(cityDataFile)) {
+  console.log('Creating empty city data file...');
+  fs.writeFileSync(cityDataFile, '[]', 'utf8');
+}
 
 console.log('Netlify setup complete!');

@@ -1,0 +1,99 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Diagnostic information
+export const prerender = false;
+
+// Get environment and request info
+const url = Astro.url;
+const pathname = url.pathname;
+const headers = Object.fromEntries(Astro.request.headers.entries());
+const timestamp = new Date().toISOString();
+
+// All environment variables
+const envVars: Record<string, string> = {};
+for (const key in import.meta.env) {
+  // Filter out sensitive information
+  if (!key.includes('KEY') && !key.includes('SECRET') && !key.includes('TOKEN')) {
+    envVars[key] = import.meta.env[key as keyof typeof import.meta.env] as string;
+  } else {
+    envVars[key] = '[REDACTED]';
+  }
+}
+
+// Set diagnostic headers
+Astro.response.headers.set('X-Debug-Page', 'true');
+Astro.response.headers.set('X-Rendered-At', timestamp);
+---
+
+<Layout title="Environment Debug">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-blue-600 mb-6">Environment Diagnostics</h1>
+    
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Request Information</h2>
+      <div class="grid grid-cols-1 gap-4">
+        <div class="border-b pb-2">
+          <span class="font-medium">URL:</span> {url.toString()}
+        </div>
+        <div class="border-b pb-2">
+          <span class="font-medium">Pathname:</span> {pathname}
+        </div>
+        <div class="border-b pb-2">
+          <span class="font-medium">Time:</span> {timestamp}
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Request Headers</h2>
+      <pre class="bg-gray-100 p-4 rounded overflow-auto max-h-60 text-sm">
+        {JSON.stringify(headers, null, 2)}
+      </pre>
+    </div>
+    
+    <div class="bg-white shadow rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Environment Variables</h2>
+      <pre class="bg-gray-100 p-4 rounded overflow-auto max-h-60 text-sm">
+        {JSON.stringify(envVars, null, 2)}
+      </pre>
+    </div>
+    
+    <div class="mt-8 space-x-4">
+      <a 
+        href="/"
+        class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition"
+      >
+        Home
+      </a>
+      <a 
+        href="/test-ssr"
+        class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition"
+      >
+        Test SSR
+      </a>
+      <a 
+        href="/debug-request"
+        class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition"
+      >
+        Function Debug
+      </a>
+      <a 
+        href="/states/new-york"
+        class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition"
+      >
+        Test States
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Add client-side diagnostics
+    console.log('Client-side diagnostics:', {
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      timeRendered: '{timestamp}',
+      timeNow: new Date().toISOString()
+    });
+  </script>
+</Layout> 

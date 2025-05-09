@@ -27,29 +27,44 @@
     Cache-Control = "public, max-age=0, s-maxage=60, stale-while-revalidate=300"
     CDN-Cache-Control = "public, s-maxage=60, stale-while-revalidate=300"
 
-# Handle API routes - higher priority
+# Debug routes - highest priority
+[[redirects]]
+  from = "/debug-request"
+  to = "/.netlify/functions/debug-request"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/env-debug"
+  to = "/.netlify/functions/ssr"
+  status = 200
+  force = true
+
+# Note: Netlify renders Astro SSR pages directly without redirects
+# The redirects below are only needed for explicit function routing
+
+# Handle API routes - higher priority 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/ssr/ssr"
+  to = "/.netlify/functions/ssr"
   status = 200
   force = true
 
 # Handle SSR routes for states pages - medium priority
 [[redirects]]
   from = "/states/*"
-  to = "/.netlify/functions/ssr/ssr"
+  to = "/.netlify/functions/ssr"
   status = 200
   force = true
 
-# Fallback for any other dynamic routes that should be handled by SSR - low priority
+# For test SSR page
 [[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/ssr/ssr"
+  from = "/test-ssr"
+  to = "/.netlify/functions/ssr"
   status = 200
-  force = false
-  conditions = {SSR = true}
+  force = true
 
-# For Single Page Application fallbacks - lowest priority
+# For Single Page Application fallbacks - lowest priority 
 [[redirects]]
   from = "/*"
   to = "/index.html"

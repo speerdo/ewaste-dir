@@ -20,6 +20,14 @@ export default defineConfig({
     dist: new URL('./dist/', import.meta.url),
     functionPerRoute: false,
     edgeMiddleware: true,
+    binaryMediaTypes: [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'application/pdf',
+      'application/octet-stream',
+    ],
   }),
   build: {
     inlineStylesheets: 'auto',

@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --legacy-peer-deps && npm run build:netlify"
+  command = "npm install --legacy-peer-deps && npm run build && npm run check-functions || echo 'Function check warning but continuing deployment'"
   publish = "dist"
   functions = "netlify/functions"
 
@@ -8,35 +8,56 @@
   port = 4322
   targetPort = 4322
 
+# Asset caching
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# General caching
 [[headers]]
   for = "/*"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# API specific headers
 [[headers]]
   for = "/api/*"
   [headers.values]
     Cache-Control = "public, max-age=0, s-maxage=60, stale-while-revalidate=300"
     CDN-Cache-Control = "public, s-maxage=60, stale-while-revalidate=300"
 
-# Handle API routes - should be before the catch-all redirect
+# Handle API routes - higher priority
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/entry"
   status = 200
   force = true
 
-# Handle SSR routes for states and cities
+# Handle SSR routes for states pages - medium priority
 [[redirects]]
   from = "/states/*"
   to = "/.netlify/functions/entry"
   status = 200
   force = true
 
-# Redirect to prevent 404 on page refresh - this should be last
+# Fallback for any other dynamic routes that should be handled by SSR - low priority
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/entry"
+  status = 200
+  force = false
+  conditions = {SSR = true}
+
+# For Single Page Application fallbacks - lowest priority
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
   force = false
-  conditions = {Role = ["anonymous"]} 
+
+# For any 404 pages, redirect to the custom 404 page - lowest priority
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404 

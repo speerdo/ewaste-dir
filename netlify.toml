@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --legacy-peer-deps && NODE_ENV=production astro build && node scripts/postbuild-netlify.js && test -d dist || exit 1"
+  command = "npm install --legacy-peer-deps && NODE_ENV=production astro build && node scripts/postbuild-netlify.js && cp -f netlify/functions/ssr.js .netlify/functions/_astrojs-ssr-adapter.js && test -d dist || exit 1"
   publish = "dist"
   functions = "netlify/functions"
 

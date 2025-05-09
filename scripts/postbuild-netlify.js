@@ -155,6 +155,73 @@ async function main() {
     }
   }
 
+  // Create direct replacement function file with valid name
+  try {
+    // Ensure the functions directory exists
+    const netlifyFunctionsDir = path.join(rootDir, '.netlify', 'functions');
+    if (!fs.existsSync(netlifyFunctionsDir)) {
+      fs.mkdirSync(netlifyFunctionsDir, { recursive: true });
+    }
+
+    // Create a direct replacement for _@astrojs-ssr-adapter.js
+    const directReplacementContent = `
+// Direct replacement for _@astrojs-ssr-adapter.js
+// This file has a valid name that Netlify can deploy
+
+// Import the handler from the renamed file
+export async function handler(event, context) {
+  try {
+    // Try to import the handler from various possible locations
+    let ssrHandler;
+    
+    try {
+      // Try importing from renamed file
+      const { handler } = await import('./__astrojs-ssr-adapter.mjs');
+      ssrHandler = handler;
+    } catch (err1) {
+      console.log('Failed to import from renamed file, trying entry.mjs');
+      try {
+        // Try importing from entry.mjs
+        const { handler } = await import('./entry.mjs');
+        ssrHandler = handler;
+      } catch (err2) {
+        console.log('Failed to import from entry.mjs, trying direct adapter import');
+        try {
+          // Try direct path to our own ssr.js file
+          const { handler } = await import('./ssr');
+          ssrHandler = handler;
+        } catch (err3) {
+          throw new Error('Failed to import handler from any location');
+        }
+      }
+    }
+    
+    // Call the handler
+    return await ssrHandler(event, context);
+  } catch (error) {
+    console.error('Error in _astrojs-ssr-adapter:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: 'Internal Server Error',
+        message: 'Failed to process the request'
+      })
+    };
+  }
+}
+`;
+
+    // Write the replacement file
+    const replacementPath = path.join(
+      netlifyFunctionsDir,
+      '_astrojs-ssr-adapter.js'
+    );
+    fs.writeFileSync(replacementPath, directReplacementContent, 'utf8');
+    console.log(`Created direct replacement file: ${replacementPath}`);
+  } catch (error) {
+    console.error('Error creating direct replacement file:', error);
+  }
+
   console.log('Netlify post-build fixes completed.');
 }
 

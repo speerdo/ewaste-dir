@@ -43,3 +43,6 @@ pnpm-debug.log*
 # Local Netlify folder
 .netlify
 .vercel
+
+# Netlify function build directory
+.netlify/

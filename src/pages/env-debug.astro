@@ -15,15 +15,17 @@ const envVars: Record<string, string> = {};
 for (const key in import.meta.env) {
   // Filter out sensitive information
   if (!key.includes('KEY') && !key.includes('SECRET') && !key.includes('TOKEN')) {
-    envVars[key] = import.meta.env[key as keyof typeof import.meta.env] as string;
+    envVars[key] = String(import.meta.env[key]);
   } else {
     envVars[key] = '[REDACTED]';
   }
 }
 
-// Set diagnostic headers
-Astro.response.headers.set('X-Debug-Page', 'true');
-Astro.response.headers.set('X-Rendered-At', timestamp);
+// Debug information for headers in meta
+export const meta = {
+  'X-Debug-Page': 'true',
+  'X-Rendered-At': timestamp
+};
 ---
 
 <Layout title="Environment Debug">

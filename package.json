@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "NODE_ENV=development astro dev",
     "build": "NODE_ENV=production astro build",
-    "build:netlify": "NODE_ENV=production astro build && node scripts/check-netlify-functions.js",
-    "build:optimized": "node scripts/optimize-for-build.js && npm run cleanup && NODE_OPTIONS=\"--max-old-space-size=7168 --expose-gc\" NODE_ENV=production astro build",
-    "prebuild": "node scripts/setup-netlify.js && npm run cleanup",
+    "build:netlify": "NODE_ENV=production astro build",
+    "build:optimized": "node scripts/optimize-for-build.js && npm run prepare && NODE_OPTIONS=\"--max-old-space-size=7168 --expose-gc\" NODE_ENV=production astro build",
+    "prebuild": "node scripts/setup-netlify.js && npm run prepare",
+    "prepare": "rm -rf .netlify/functions/ .temp-build/ node_modules/.astro node_modules/.vite",
     "verify": "npm run verify-ssr",
     "verify-ssr": "node scripts/verify-ssr.js",
     "check-functions": "node scripts/check-netlify-functions.js",
@@ -16,7 +17,7 @@
     "astro": "astro",
     "import-data": "node scripts/import-data.js",
     "clean": "rm -rf dist node_modules/.astro node_modules/.vite .netlify/functions",
-    "cleanup": "rm -rf dist/ .netlify/functions/ .temp-build/"
+    "cleanup": "rm -rf .netlify/functions/ .temp-build/"
   },
   "dependencies": {
     "@astrojs/netlify": "^6.3.2",

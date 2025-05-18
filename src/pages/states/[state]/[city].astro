@@ -9,8 +9,12 @@ import CentersList from '../../../components/recycling-centers/CentersList.astro
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
 
-// Convert to SSR
-export const prerender = false;
+// Use Incremental Static Regeneration (ISR) on Vercel
+export const prerender = { entries: [] };
+
+// Set revalidation time for ISR (1 hour)
+// This is a Vercel-specific header for ISR
+Astro.response.headers.set('x-vercel-revalidate', '3600');
 
 // Set cache control headers for Vercel Edge Caching
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');

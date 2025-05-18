@@ -3,6 +3,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/recycling-centers.css';
 import { getAbsoluteUrl, getCanonicalUrl } from '../lib/url-utils';
+import { Analytics } from '@vercel/analytics/react';
 
 interface Props {
   title: string;
@@ -98,6 +99,9 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
       </svg>
       <span class="sr-only">Back to top</span>
     </button>
+
+    <!-- Vercel Analytics -->
+    <Analytics />
 
     <script>
       // Back to top button

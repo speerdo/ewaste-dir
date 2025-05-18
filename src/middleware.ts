@@ -1,22 +1,22 @@
 import { defineMiddleware } from 'astro:middleware';
 
-// Cache durations
+// Cache durations - Increased to reduce regeneration frequency
 const CACHE_DURATIONS = {
   static: {
-    maxAge: 86400, // 24 hours
-    staleWhileRevalidate: 604800, // 7 days
+    maxAge: 604800, // 7 days (increased from 24 hours)
+    staleWhileRevalidate: 2592000, // 30 days (increased from 7 days)
   },
   state: {
-    maxAge: 3600, // 1 hour
-    staleWhileRevalidate: 86400, // 24 hours
+    maxAge: 86400, // 24 hours (increased from 1 hour)
+    staleWhileRevalidate: 604800, // 7 days (increased from 24 hours)
   },
   city: {
-    maxAge: 3600, // 1 hour
-    staleWhileRevalidate: 86400, // 24 hours
+    maxAge: 86400, // 24 hours (increased from 1 hour)
+    staleWhileRevalidate: 604800, // 7 days (increased from 24 hours)
   },
   api: {
-    maxAge: 300, // 5 minutes
-    staleWhileRevalidate: 3600, // 1 hour
+    maxAge: 3600, // 1 hour (increased from 5 minutes)
+    staleWhileRevalidate: 86400, // 24 hours (increased from 1 hour)
   },
 };
 
@@ -28,6 +28,9 @@ export const onRequest = defineMiddleware(async ({ request, url }, next) => {
   const resp = await next();
   const pathname = url.pathname;
 
+  // Check if this is a revalidation request from Vercel
+  const isRevalidate = request.headers.get('x-vercel-revalidate') === 'true';
+
   // Set cache headers based on route type
   if (STATIC_PAGES.has(pathname)) {
     // Static pages caching with ISR
@@ -37,26 +40,31 @@ export const onRequest = defineMiddleware(async ({ request, url }, next) => {
     );
     resp.headers.set('X-Middleware-Cache', 'static');
   } else if (pathname.match(/^\/states\/[^/]+$/)) {
-    // State pages caching (SSR)
+    // State pages caching (SSR with background revalidation)
     resp.headers.set(
       'Cache-Control',
       `public, s-maxage=${CACHE_DURATIONS.state.maxAge}, stale-while-revalidate=${CACHE_DURATIONS.state.staleWhileRevalidate}`
     );
     resp.headers.set('X-Middleware-Cache', 'state');
   } else if (pathname.match(/^\/states\/[^/]+\/[^/]+$/)) {
-    // City pages caching (SSR)
+    // City pages caching (SSR with background revalidation)
     resp.headers.set(
       'Cache-Control',
       `public, s-maxage=${CACHE_DURATIONS.city.maxAge}, stale-while-revalidate=${CACHE_DURATIONS.city.staleWhileRevalidate}`
     );
     resp.headers.set('X-Middleware-Cache', 'city');
   } else if (pathname.startsWith('/api/')) {
-    // API endpoints caching
+    // API endpoints caching - shorter duration but still with background revalidation
     resp.headers.set(
       'Cache-Control',
       `public, s-maxage=${CACHE_DURATIONS.api.maxAge}, stale-while-revalidate=${CACHE_DURATIONS.api.staleWhileRevalidate}`
     );
     resp.headers.set('X-Middleware-Cache', 'api');
+  }
+
+  // For revalidation requests, avoid writing cache unnecessarily
+  if (isRevalidate) {
+    resp.headers.set('X-Revalidate-Type', 'background');
   }
 
   // Add security headers
@@ -67,7 +75,7 @@ export const onRequest = defineMiddleware(async ({ request, url }, next) => {
   resp.headers.set('Permissions-Policy', 'geolocation=self');
 
   // Add performance headers
-  resp.headers.set('X-Vercel-Cache', 'MISS'); // Let Vercel handle the actual cache status
+  resp.headers.set('X-Vercel-Cache', isRevalidate ? 'REVALIDATED' : 'MISS');
   resp.headers.set('Server-Timing', 'miss, db;dur=53, app;dur=47.2');
   resp.headers.set('Vary', 'Accept-Encoding');
 

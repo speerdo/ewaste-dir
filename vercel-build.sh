@@ -34,6 +34,17 @@ echo "Performing initial cleanup..."
 rm -rf node_modules "$ACCUMULATED_DIST_DIR" .vercel/output dist .temp-build scripts/restore-files.sh
 mkdir -p "$ACCUMULATED_DIST_DIR" "$FINAL_VERCEL_OUTPUT_DIR" dist # Ensure dist exists for Astro
 
+# --- Install rsync ---
+echo "Installing rsync..."
+if apt-get update && apt-get install -y rsync; then
+  echo "rsync installed successfully."
+else
+  echo "Warning: Failed to install rsync. Build might fail if rsync is required."
+  # Optionally, exit here if rsync is absolutely critical:
+  # exit 1
+fi
+echo "---------------------------"
+
 # --- Dependency Installation ---
 if [ -f "package-lock.json" ]; then
   echo "Installing dependencies with npm ci..."

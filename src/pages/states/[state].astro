@@ -1,43 +1,27 @@
 ---
 import StateLayout from '../../layouts/StateLayout.astro';
-import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates, normalizeForUrl } from '../../lib/supabase';
-import type { RecyclingCenter, State } from '../../types/supabase';
-import { monitorBuildProcess } from '../../lib/build-utils';
+import { getRecyclingCentersByState, getState, getAllStates } from '../../lib/supabase';
+import type { State } from '../../types/supabase';
+// import { monitorBuildProcess } from '../../lib/build-utils'; // This was unused
 
-// Switch to static generation
+// Static generation for state pages
 export async function getStaticPaths() {
-  // Get all states with pagination to ensure we get everything
-  const allStates: State[] = [];
-  let page = 0;
-  const pageSize = 50;
-  
-  while (true) {
-    const states = await getAllStates();
-    if (!states || states.length === 0) break;
-    allStates.push(...states);
-    break; // getAllStates already returns all states
+  const allStates: State[] = await getAllStates();
+  if (!allStates || allStates.length === 0) {
+    console.warn("No states found for getStaticPaths in [state].astro");
+    return [];
   }
 
-  // For each state, get all centers with pagination
   return await Promise.all(allStates.map(async (state) => {
+    // Fetch centers and prepare city data within getStaticPaths
+    // This data will be passed as props
     const centersByCity = await getRecyclingCentersByState(state.id);
-
-    // Sort cities by name
     const sortedCities = Object.keys(centersByCity).sort();
-
-    // Calculate total centers
     const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum + centers.length, 0);
 
-    // Generate OG image URL
-    const PRODUCTION_URL = 'https://www.recycleoldtech.com';
-    const ogImageUrl = import.meta.env.PROD 
-      ? new URL('/images/default-og.png', PRODUCTION_URL).toString()
-      : '/images/default-og.png';
-
-    // Prepare city data
-    const cityData = sortedCities.map(city => {
+    const cityDataForProps = sortedCities.map(city => {
       const centers = centersByCity[city];
-      const firstCenter = centers[0];
+      const firstCenter = centers && centers.length > 0 ? centers[0] : { full_address: 'N/A', latitude: 0, longitude: 0 }; // Handle empty centers
       return {
         id: city.toLowerCase().replace(/\s+/g, '-'),
         name: city,
@@ -50,98 +34,39 @@ export async function getStaticPaths() {
       };
     });
 
-    // Generate description
-    const description = `Find ${totalCenters} electronics recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${state.name}. Get directions and information for safe disposal of computers, phones, TVs and other electronic devices.`;
+    const descriptionForProps = `Find ${totalCenters} electronics recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${state.name}. Get directions and information for safe disposal of computers, phones, TVs and other electronic devices.`;
+    
+    const PRODUCTION_URL = 'https://www.recycleoldtech.com';
+    const ogImageUrlForProps = import.meta.env.PROD 
+      ? new URL('/images/default-og.png', PRODUCTION_URL).toString()
+      : '/images/default-og.png';
 
     return {
       params: { state: state.id },
       props: { 
-        state,
-        cityData,
-        description,
-        ogImage: ogImageUrl
+        stateDetails: state, // Pass the full state object as stateDetails
+        cityData: cityDataForProps,
+        description: descriptionForProps,
+        ogImage: ogImageUrlForProps
       }
     };
   }));
 }
 
-const { state, cityData, description, ogImage } = Astro.props;
+// Props are populated by getStaticPaths
+const { stateDetails, cityData, description, ogImage } = Astro.props;
 
-// Use hybrid approach with ISR
-export const prerender = false;
-
-// Get the state parameter from the URL
-const { state: stateParam } = Astro.params;
-
-// Set cache control headers for browser - always check freshness
-Astro.response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
-
-// Set Vercel-specific CDN cache headers with durable caching
-// Include URL parameters in cache key
-Astro.response.headers.set('Vercel-CDN-Cache-Control', 
-  'public, s-maxage=3600, stale-while-revalidate=86400'
-);
-
-// Ensure each URL gets its own cache entry
-Astro.response.headers.set('CDN-Cache-Control', 'public, must-revalidate');
-Astro.response.headers.set('Vary', 'x-vercel-id, x-forwarded-proto, x-vercel-proxy-signature, accept');
-
-// Add cache tag for targeted invalidation
-const cacheTag = `state-${stateParam}`;
-Astro.response.headers.set('Cache-Tag', cacheTag);
-
-if (!stateParam) {
-  return Astro.redirect('/404');
-}
-
-// Get the state details
-const stateDetails = await getState(stateParam);
-
+// Ensure props are available, if not, this would indicate an issue with getStaticPaths
 if (!stateDetails) {
-  return Astro.redirect('/404');
+  console.error(`Error: stateDetails prop is missing for a state page. This might indicate an issue in getStaticPaths of [state].astro.`);
+  // Optionally, redirect to 404 or render an error state
+  // return Astro.redirect('/404'); 
 }
-
-// Log state data for debugging
-// console.log('State page - state data:', stateDetails);
-
-// Get all recycling centers for this state
-const centersByCity = await getRecyclingCentersByState(stateDetails.id);
-
-// Sort cities by name
-const sortedCities = Object.keys(centersByCity).sort();
-
-// Calculate total centers
-const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum + centers.length, 0);
-
-// Generate OG image URL using a static default image with the production domain
-const PRODUCTION_URL = 'https://www.recycleoldtech.com';
-const ogImageUrl = import.meta.env.PROD 
-  ? new URL('/images/default-og.png', PRODUCTION_URL).toString()
-  : '/images/default-og.png';
-
-// Prepare city data for the layout
-const cityDataForLayout = sortedCities.map(city => {
-  const centers = centersByCity[city];
-  const firstCenter = centers[0];
-  return {
-    id: city.toLowerCase().replace(/\s+/g, '-'),
-    name: city,
-    description: `Find electronics recycling centers in ${city}, ${stateDetails.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
-    address: firstCenter.full_address,
-    coordinates: {
-      lat: firstCenter.latitude,
-      lng: firstCenter.longitude
-    }
-  };
-});
-
-// Generate description
-const descriptionForLayout = `Find ${totalCenters} electronics recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${stateDetails.name}. Get directions and information for safe disposal of computers, phones, TVs and other electronic devices.`;
 ---
 
 <StateLayout 
   state={stateDetails} 
-  cityData={cityDataForLayout}
-  description={descriptionForLayout}
-  ogImage={ogImageUrl}
+  cityData={cityData}
+  description={description}
+  ogImage={ogImage}
 />

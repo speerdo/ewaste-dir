@@ -36,7 +36,7 @@ mkdir -p "$ACCUMULATED_DIST_DIR" "$FINAL_VERCEL_OUTPUT_DIR" dist # Ensure dist e
 
 # --- Install rsync ---
 echo "Installing rsync..."
-if apt-get update && apt-get install -y rsync; then
+if yum update -y && yum install -y rsync; then
   echo "rsync installed successfully."
 else
   echo "Warning: Failed to install rsync. Build might fail if rsync is required."

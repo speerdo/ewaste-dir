@@ -58,7 +58,6 @@ fi
 # --- Build Chunks --- 
 echo "Starting chunked Astro build process..."
 for i in $(seq 0 $((NUM_CHUNKS - 1)))
-_CHUNKS - 1)))
 do
   echo ""
   echo "--- Building Chunk $((i + 1)) / $NUM_CHUNKS ---"
@@ -74,7 +73,7 @@ do
   if NODE_OPTIONS="--max-old-space-size=4096" NODE_ENV=production npx astro build; then
     echo "Astro build for chunk $((i + 1)) completed successfully."
     
-    echo "Moving contents of dist to $ACCUMULATED_DIST_DIR/client and $ACCUMULATED_DIST_DIR/server ..."
+    echo "Moving contents of dist to $ACCUMULATED_DIST_DIR ..."
     # Astro output structure has client/server subdirs in `dist` for static output too.
     # We need to merge them carefully.
     mkdir -p "$ACCUMULATED_DIST_DIR/client"
@@ -88,7 +87,7 @@ do
       rsync -av --ignore-existing dist/server/ "$ACCUMULATED_DIST_DIR/server/"
     fi
     # Copy other top-level files/dirs from dist (like index.html, 404.html, assets, etc.)
-    # Exclude client/server as they are handled above. If other specific top-level files are expected, copy them.
+    # Exclude client/server as they are handled above.
     find dist -maxdepth 1 -mindepth 1 -not -name "client" -not -name "server" -exec rsync -av --ignore-existing {} "$ACCUMULATED_DIST_DIR/" \;
 
     echo "Contents of $ACCUMULATED_DIST_DIR after chunk $((i + 1)) :"
@@ -97,8 +96,6 @@ do
     df -h
   else
     echo "Error: Astro build for chunk $((i + 1)) failed!"
-    # Decide if you want to exit or try to continue. For now, let's exit.
-    # Consider creating fallback pages here if you want to deploy something minimal.
     exit 1 # Exit on first chunk failure
   fi
 done
@@ -114,19 +111,17 @@ fi
 
 # --- Finalize Output for Vercel ---
 echo "Running post-build.js script to finalize output for Vercel from $ACCUMULATED_DIST_DIR..."
-# We need to tell post-build.js to use the accumulated directory
 export SOURCE_DIST_DIR="$ACCUMULATED_DIST_DIR"
 node scripts/post-build.js
 if [ $? -ne 0 ]; then
   echo "Error: post-build.js script failed!"
-  # Even if post-build fails, try to ensure a minimal Vercel config and fallback exist
   echo "Ensuring minimal Vercel config and fallback pages due to post-build.js error..."
   mkdir -p .vercel/output
   echo '{"version": 3, "routes": [{ "handle": "filesystem" }, { "src": "/.*", "status": 404, "dest": "/404.html" }], "cleanUrls": true}' > .vercel/output/config.json
   mkdir -p "$FINAL_VERCEL_OUTPUT_DIR"
   echo "<!DOCTYPE html><html><head><title>Site Update</title></head><body>Site is currently being updated. Please check back soon.</body></html>" > "$FINAL_VERCEL_OUTPUT_DIR/index.html"
   echo "<!DOCTYPE html><html><head><title>Not Found</title></head><body>404 - Page Not Found</body></html>" > "$FINAL_VERCEL_OUTPUT_DIR/404.html"
-  exit 1 # Exit with error code if post-build failed
+  exit 1
 fi
 
 # --- Final Report ---

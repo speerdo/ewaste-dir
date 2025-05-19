@@ -1,7 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getState, getRecyclingCentersByCity, normalizeForUrl } from '../../../lib/supabase';
-import type { RecyclingCenter } from '../../../types/supabase';
+import { getState, getRecyclingCentersByCity, getAllStates, normalizeForUrl, getRecyclingCentersByState } from '../../../lib/supabase';
+import type { RecyclingCenter, State } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
 import CentersList from '../../../components/recycling-centers/CentersList.astro';
@@ -9,69 +9,67 @@ import CentersList from '../../../components/recycling-centers/CentersList.astro
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
 
-// Use hybrid approach with ISR
-export const prerender = false;
+// Switch to static generation
+export async function getStaticPaths() {
+  // Get all states with pagination
+  const allStates: State[] = [];
+  let statePage = 0;
+  const statePageSize = 50;
+  
+  while (true) {
+    const states = await getAllStates();
+    if (!states || states.length === 0) break;
+    allStates.push(...states);
+    break; // getAllStates already returns all states
+  }
 
-// Get data from params
-const { state: stateParam, city: cityParam } = Astro.params;
+  // For each state, get all cities and their centers
+  const paths = await Promise.all(allStates.map(async (state) => {
+    const centersByCity = await getRecyclingCentersByState(state.id);
 
-// Set cache control headers for browser - always check freshness
-Astro.response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
+    // Generate paths for each city
+    return Object.entries(centersByCity).map(([cityName, centers]) => {
+      // Convert city name to URL format
+      const citySlug = normalizeForUrl(cityName);
 
-// Set Vercel-specific CDN cache headers with durable caching
-// Include URL parameters in cache key
-Astro.response.headers.set('Vercel-CDN-Cache-Control', 
-  'public, s-maxage=3600, stale-while-revalidate=86400'
-);
+      // Convert centers to map markers
+      const mapMarkers: Marker[] = centers.map(center => ({
+        lat: Number(center.latitude),
+        lng: Number(center.longitude),
+        name: center.name,
+        address: center.full_address,
+        phone: center.phone,
+        website: center.site,
+        id: center.id
+      })).filter(marker => !isNaN(marker.lat) && !isNaN(marker.lng));
 
-// Ensure each URL gets its own cache entry
-Astro.response.headers.set('CDN-Cache-Control', 'public, must-revalidate');
-Astro.response.headers.set('Vary', 'x-vercel-id, x-forwarded-proto, x-vercel-proxy-signature, accept');
+      // Generate OG image URL
+      const PRODUCTION_URL = 'https://www.recycleoldtech.com';
+      const ogImageUrl = import.meta.env.PROD 
+        ? new URL('/images/default-og.png', PRODUCTION_URL).toString()
+        : '/images/default-og.png';
 
-// Add cache tags for targeted invalidation
-const cacheTag = `city-${cityParam},state-${stateParam}`;
-Astro.response.headers.set('Cache-Tag', cacheTag);
+      return {
+        params: { 
+          state: state.id,
+          city: citySlug
+        },
+        props: {
+          state,
+          cityName,
+          centers,
+          mapMarkers,
+          ogImageUrl
+        }
+      };
+    });
+  }));
 
-if (!stateParam || !cityParam) {
-  return Astro.redirect('/404');
+  // Flatten the array of arrays into a single array of paths
+  return paths.flat();
 }
 
-// Get state data
-const state = await getState(stateParam);
-if (!state) {
-  return Astro.redirect('/404');
-}
-
-// Convert city param to proper name format
-const cityName = cityParam.split('-').map(word => 
-  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-).join(' ');
-
-// Get centers data
-const centers = await getRecyclingCentersByCity(stateParam, cityName);
-
-// If no centers found, redirect to state page
-if (!centers || centers.length === 0) {
-  return Astro.redirect(`/states/${stateParam}`);
-}
-
-// Generate OG image URL using a static default image with the production domain
-const PRODUCTION_URL = 'https://www.recycleoldtech.com';
-const ogImageUrl = import.meta.env.PROD 
-  ? new URL('/images/default-og.png', PRODUCTION_URL).toString()
-  : '/images/default-og.png';
-
-// Convert centers to map markers
-const mapMarkers: Marker[] = centers.map(center => ({
-  lat: Number(center.latitude),
-  lng: Number(center.longitude),
-  name: center.name,
-  address: center.full_address,
-  phone: center.phone,
-  website: center.site,
-  id: center.id
-})).filter(marker => !isNaN(marker.lat) && !isNaN(marker.lng));
-
+const { state, cityName, centers, mapMarkers, ogImageUrl } = Astro.props;
 ---
 
 <Layout 
@@ -86,7 +84,6 @@ const mapMarkers: Marker[] = centers.map(center => ({
       
       // Load Google Maps API using the recommended pattern
       function initGoogleMaps() {
-        // console.log('Google Maps API loaded');
         window.dispatchEvent(new Event('google-maps-ready'));
       }
       
@@ -139,7 +136,7 @@ const mapMarkers: Marker[] = centers.map(center => ({
 
       <div class="mt-16 mb-8">
         <a 
-          href={`/states/${stateParam}`}
+          href={`/states/${state.id}`}
           class="text-green-600 hover:text-green-700 flex items-center"
         >
           <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

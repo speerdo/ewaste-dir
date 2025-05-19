@@ -16,13 +16,19 @@ export interface Location {
 }
 
 export class GeocodingError extends Error {
-  constructor(message: string, public details?: Record<string, any>) {
+  details: unknown;
+
+  constructor(message: string, details?: unknown) {
     super(message);
     this.name = 'GeocodingError';
+    this.details = details || {};
   }
 }
 
-// Cache for geocoding results
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
+// Cache for geocoding results (client-side only)
 const geocodeCache = new Map<
   string,
   {
@@ -33,13 +39,53 @@ const geocodeCache = new Map<
 
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
+export async function getCurrentLocation(): Promise<Coordinates | null> {
+  // This can only run in the browser
+  if (!isBrowser) {
+    console.warn('getCurrentLocation called in non-browser environment');
+    return null;
+  }
+
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(
+        new GeocodingError('Geolocation is not supported by your browser')
+      );
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (error) => {
+        reject(
+          new GeocodingError('Could not get your location', {
+            code: error.code,
+            message: error.message,
+          })
+        );
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  });
+}
+
 export async function reverseGeocode(
-  coordinates: Coordinates
-): Promise<Location> {
+  lat: number,
+  lng: number
+): Promise<Location | null> {
+  // This can only run in the browser
+  if (!isBrowser) {
+    console.warn('reverseGeocode called in non-browser environment');
+    return null;
+  }
+
   // Create cache key
-  const cacheKey = `${coordinates.lat.toFixed(6)},${coordinates.lng.toFixed(
-    6
-  )}`;
+  const cacheKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
 
   // Check cache
   const cached = geocodeCache.get(cacheKey);
@@ -48,13 +94,12 @@ export async function reverseGeocode(
   }
 
   const params = new URLSearchParams({
-    lat: coordinates.lat.toString(),
-    lng: coordinates.lng.toString(),
+    lat: lat.toString(),
+    lng: lng.toString(),
   });
 
-  const url = import.meta.env.PROD
-    ? new URL(`/api/geocode?${params.toString()}`, PRODUCTION_URL).toString()
-    : `${window.location.origin}/api/geocode?${params.toString()}`;
+  // Always use the client-side URL when in the browser
+  const url = `${window.location.origin}/api/geocode?${params.toString()}`;
 
   try {
     const response = await fetch(url, {
@@ -63,7 +108,7 @@ export async function reverseGeocode(
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(coordinates),
+      body: JSON.stringify({ lat, lng }),
     });
 
     const data = await response.json();
@@ -169,42 +214,4 @@ export async function findNearestCity(
   //   shortestDistance
   // );
   return nearestCity;
-}
-
-export async function getCurrentLocation(): Promise<Coordinates> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported by your browser'));
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      },
-      (error) => {
-        let message = 'An unknown error occurred';
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            message = 'Please allow location access to use this feature';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            message = 'Location information is unavailable';
-            break;
-          case error.TIMEOUT:
-            message = 'Location request timed out';
-            break;
-        }
-        reject(new Error(message));
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
-  });
 }

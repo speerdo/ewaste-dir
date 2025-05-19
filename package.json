@@ -5,9 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development astro dev",
-    "build": "NODE_ENV=production astro build",
+    "build": "NODE_ENV=production astro build && node scripts/post-build.js",
     "build:vercel": "chmod +x ./vercel-build.sh && ./vercel-build.sh",
-    "build:optimized": "node scripts/optimize-for-build.js && npm run cleanup && NODE_OPTIONS=\"--max-old-space-size=7168 --expose-gc\" NODE_ENV=production astro build",
+    "build:optimized": "node scripts/optimize-for-build.js && npm run cleanup && NODE_ENV=production astro build && node scripts/post-build.js",
+    "postbuild": "node scripts/post-build.js",
     "prebuild": "npm run cleanup",
     "verify": "npm run verify-ssr",
     "verify-ssr": "node scripts/verify-ssr.js",
@@ -27,6 +28,9 @@
     "@vercel/analytics": "^1.5.0",
     "astro": "^5.7.2",
     "tailwindcss": "^3.4.1"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.9.6"
   },
   "engines": {
     "node": ">=18.0.0"

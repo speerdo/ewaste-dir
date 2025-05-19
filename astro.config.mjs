@@ -18,12 +18,13 @@ const SITE_URL =
 export default defineConfig({
   site: SITE_URL,
   output: 'static',
+  outDir: './dist',
   adapter: vercel({
     analytics: true,
-    // Split build into smaller chunks to reduce memory usage
-    staticWorkers: 4,
-    // Keep intermediate files to a minimum
-    minify: true,
+    // Don't use static workers in this build to avoid issues
+    staticWorkers: false,
+    // Don't use minification during build to avoid issues
+    minify: false,
   }),
   integrations: [
     vue(),
@@ -45,27 +46,38 @@ export default defineConfig({
     build: {
       // Increase chunk size to reduce file count
       chunkSizeWarningLimit: 1000,
-      // Minimize and optimize output
-      minify: 'terser',
+      // Use esbuild for compatibility
+      minify: 'esbuild',
+      // Disable sourcemaps to save space
+      sourcemap: false,
       // Split build across chunks to avoid out-of-memory issues
       rollupOptions: {
         output: {
+          // Simpler chunk strategy
           manualChunks: {
-            'react-map': ['react', 'react-dom', 'leaflet'],
-            utils: ['dayjs', 'lodash-es'],
+            vendor: ['@supabase/supabase-js', '@googlemaps/js-api-loader'],
           },
         },
       },
     },
-    // Reduce build asset size and memory usage
+    // Override dependencies to improve compatibility
     ssr: {
-      noExternal: ['react-leaflet'],
+      noExternal: ['@supabase/supabase-js'],
+    },
+    // Avoid using native binaries where possible
+    optimizeDeps: {
+      esbuildOptions: {
+        target: 'es2020',
+      },
     },
   },
-  // Limit processing of images in parallel to reduce memory use
+  // Don't use image processing in parallel
   image: {
     service: {
-      concurrency: 5,
+      entrypoint: 'astro/assets/services/sharp',
+      config: {
+        concurrency: 2,
+      },
     },
   },
 });

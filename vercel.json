@@ -52,7 +52,7 @@
   "regions": ["iad1"],
   "build": {
     "env": {
-      "NODE_OPTIONS": "--max-old-space-size=7168 --no-warnings --expose-gc"
+      "NODE_OPTIONS": "--max-old-space-size=4096 --no-warnings"
     }
   },
   "crons": []

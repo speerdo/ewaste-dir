@@ -12,25 +12,41 @@ if [ $FREE_DISK_KB -lt 10485760 ]; then # Less than 10GB free
   rm -rf .vercel/cache
 fi
 
+# Clean up existing node_modules to prevent dependency issues
+if [ -d "node_modules" ]; then
+  echo "Removing existing node_modules to ensure clean install..."
+  rm -rf node_modules
+fi
+
 # If npm is used
 if [ -f "package-lock.json" ]; then
-  # Optimize npm for disk space
-  npm config set cache-min 9999999
-  # Install dependencies with production only flag to reduce size
-  npm ci --production=false --no-optional
-  # Skip audit which uses disk space
-  npm config set audit false
+  # Install dependencies with clean slate
+  echo "Installing dependencies..."
+  npm ci
+  
+  # Fix for Rollup binary dependency issues
+  echo "Installing platform-specific dependencies..."
+  npm install --no-save @rollup/rollup-linux-x64-gnu
 else
   # If yarn is used
   yarn install --frozen-lockfile --non-interactive
+  yarn add --dev @rollup/rollup-linux-x64-gnu
 fi
 
 # Clean tmp directories
 rm -rf /tmp/*
 
-# Run the optimized build
-echo "Running optimized build..."
-npm run build
+# Create required directories for output
+mkdir -p .vercel/output/static
+mkdir -p dist
+
+# Run the build without using npm scripts (avoids subshell issues)
+echo "Running Astro build..."
+NODE_OPTIONS="--max-old-space-size=4096" NODE_ENV=production npx astro build
+
+# Run post-build script to ensure files are in the right place
+echo "Running post-build script..."
+node scripts/post-build.js
 
 # Print disk usage after build
 echo "Disk usage after build:"
@@ -40,6 +56,9 @@ df -h
 if [ -d ".vercel/output/static" ]; then
   echo "Generated file count:"
   find .vercel/output/static -type f | wc -l
+else
+  echo "Error: No output directory found!"
+  exit 1
 fi
 
 # Success!

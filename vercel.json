@@ -2,11 +2,11 @@
   "github": {
     "silent": true
   },
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build:vercel",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "astro",
-  "outputDirectory": "dist",
+  "outputDirectory": ".vercel/output/static",
   "cleanUrls": true,
   "headers": [
     {
@@ -52,13 +52,8 @@
   "regions": ["iad1"],
   "build": {
     "env": {
-      "NODE_OPTIONS": "--max-old-space-size=7168 --no-warnings"
+      "NODE_OPTIONS": "--max-old-space-size=7168 --no-warnings --expose-gc"
     }
   },
-  "crons": [
-    {
-      "path": "/api/revalidate",
-      "schedule": "0 0 * * *"
-    }
-  ]
+  "crons": []
 }

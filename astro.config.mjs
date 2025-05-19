@@ -1,6 +1,9 @@
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
 import vercel from '@astrojs/vercel/static';
+import vue from '@astrojs/vue';
+import tailwind from '@astrojs/tailwind';
+import sitemap from '@astrojs/sitemap';
+import partytown from '@astrojs/partytown';
 
 // Production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
@@ -14,45 +17,55 @@ const SITE_URL =
 // https://astro.build/config
 export default defineConfig({
   site: SITE_URL,
-  integrations: [tailwind()],
   output: 'static',
   adapter: vercel({
-    webAnalytics: {
-      enabled: true,
-    },
-    imageService: true,
-    devImageService: 'sharp',
-    speedInsights: true,
+    analytics: true,
+    // Split build into smaller chunks to reduce memory usage
+    staticWorkers: 4,
+    // Keep intermediate files to a minimum
+    minify: true,
   }),
-  build: {
-    inlineStylesheets: 'auto',
-    assets: 'assets',
-    format: 'directory',
-  },
+  integrations: [
+    vue(),
+    tailwind(),
+    sitemap({
+      // Limit concurrent requests to reduce memory pressure
+      entryLimit: 5000,
+      // Skip draft and staging pages
+      filter: (page) =>
+        !page.includes('/drafts/') && !page.includes('/staging/'),
+    }),
+    partytown({
+      config: {
+        forward: ['dataLayer.push'],
+      },
+    }),
+  ],
   vite: {
-    define: {
-      'import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY': JSON.stringify(
-        process.env.PUBLIC_GOOGLE_MAPS_API_KEY
-      ),
-    },
     build: {
-      reportCompressedSize: false,
+      // Increase chunk size to reduce file count
       chunkSizeWarningLimit: 1000,
+      // Minimize and optimize output
+      minify: 'terser',
+      // Split build across chunks to avoid out-of-memory issues
       rollupOptions: {
         output: {
           manualChunks: {
-            'google-maps': ['@googlemaps/js-api-loader'],
-            supabase: ['@supabase/supabase-js'],
+            'react-map': ['react', 'react-dom', 'leaflet'],
+            utils: ['dayjs', 'lodash-es'],
           },
         },
       },
     },
+    // Reduce build asset size and memory usage
     ssr: {
-      noExternal: ['@supabase/supabase-js'],
-      optimizeDeps: {
-        include: ['@supabase/supabase-js'],
-      },
+      noExternal: ['react-leaflet'],
     },
   },
-  compressHTML: true,
+  // Limit processing of images in parallel to reduce memory use
+  image: {
+    service: {
+      concurrency: 5,
+    },
+  },
 });

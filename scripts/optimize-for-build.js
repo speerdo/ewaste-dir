@@ -1,189 +1,100 @@
-#!/usr/bin/env node
 /**
- * Build optimization script for Vercel deployments
- * This script helps with large static site generation by:
- * 1. Setting appropriate Node.js options for memory management
- * 2. Clearing any build caches to ensure a clean state
- * 3. Warming up db connections to prevent timeouts
+ * Build optimization script
+ *
+ * This script helps break down the static generation into manageable chunks
+ * to prevent memory issues when building a large number of pages
  */
 
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
-import https from 'https';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Set up paths
+const scriptPath = fileURLToPath(import.meta.url);
+const scriptDir = path.dirname(scriptPath);
+const projectRoot = path.resolve(scriptDir, '..');
+const pagesDir = path.join(projectRoot, 'src', 'pages');
+const tempDir = path.join(projectRoot, '.temp-build');
 
-console.log('🚀 Running build optimization script...');
+// Ensure temp directory exists
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir, { recursive: true });
+}
 
-// Ensure that we're using the max memory available in Vercel
-process.env.NODE_OPTIONS =
-  process.env.NODE_OPTIONS || '--max-old-space-size=7168';
-console.log(`ℹ️ NODE_OPTIONS: ${process.env.NODE_OPTIONS}`);
+console.log('Build optimization: Analyzing routes...');
 
-// Ensure we're in production mode
-process.env.NODE_ENV = 'production';
-console.log(`ℹ️ NODE_ENV: ${process.env.NODE_ENV}`);
+// Target dynamic route files that generate many pages
+const dynamicRouteFiles = [
+  path.join(pagesDir, 'states', '[state]', '[city].astro'),
+  path.join(pagesDir, 'states', '[state]', 'index.astro'),
+];
 
-// Clear any Astro build caches
-const clearCaches = () => {
-  const dirs = [
-    'node_modules/.astro',
-    'node_modules/.vite',
-    '.vercel/output',
-    'dist',
-  ];
-
-  dirs.forEach((dir) => {
-    const dirPath = path.join(process.cwd(), dir);
-    if (fs.existsSync(dirPath)) {
-      console.log(`🧹 Clearing cache directory: ${dir}`);
-      try {
-        // Use rimraf via execSync for better directory removal
-        execSync(`rm -rf "${dirPath}"`, { stdio: 'ignore' });
-      } catch (error) {
-        console.warn(`⚠️ Could not remove directory ${dir}: ${error.message}`);
-      }
-    }
-  });
-};
-
-// Warm up Supabase connection to ensure efficient data loading
-const warmupDatabase = async () => {
-  if (
-    !process.env.PUBLIC_SUPABASE_URL ||
-    !process.env.PUBLIC_SUPABASE_ANON_KEY
-  ) {
-    console.warn('⚠️ Supabase environment variables not set, skipping warmup');
-    return;
+// Create backups of each target file
+dynamicRouteFiles.forEach((filePath) => {
+  if (fs.existsSync(filePath)) {
+    const fileName = path.basename(filePath);
+    const backupPath = path.join(tempDir, fileName);
+    console.log(`Backing up ${fileName}...`);
+    fs.copyFileSync(filePath, backupPath);
   }
-
-  console.log('🔄 Warming up Supabase connection...');
-
-  // Simple HTTP request to wake up Supabase
-  return new Promise((resolve) => {
-    try {
-      const url = new URL(
-        '/rest/v1/states?select=name&limit=1',
-        process.env.PUBLIC_SUPABASE_URL
-      );
-      const req = https.get(
-        url,
-        {
-          headers: {
-            apikey: process.env.PUBLIC_SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${process.env.PUBLIC_SUPABASE_ANON_KEY}`,
-          },
-          timeout: 5000,
-        },
-        (res) => {
-          let data = '';
-          res.on('data', (chunk) => {
-            data += chunk;
-          });
-
-          res.on('end', () => {
-            console.log(`✅ Supabase connection ready: ${res.statusCode}`);
-            resolve();
-          });
-        }
-      );
-
-      req.on('error', (error) => {
-        console.error(`❌ Error warming up Supabase: ${error.message}`);
-        resolve(); // Continue anyway
-      });
-
-      // Set timeout
-      req.setTimeout(5000, () => {
-        console.warn('⚠️ Supabase warmup timed out');
-        req.destroy();
-        resolve();
-      });
-    } catch (error) {
-      console.error('Failed to warm up Supabase:', error.message);
-      resolve(); // Continue anyway
-    }
-  });
-};
-
-// Optimize Node.js garbage collection settings
-const optimizeNodeSettings = () => {
-  console.log('⚙️ Optimizing Node.js settings...');
-
-  // Expose GC for manual calls if needed
-  try {
-    execSync(
-      'node --expose-gc -e "console.log(\'✅ Garbage collection exposed\')"',
-      { stdio: 'ignore' }
-    );
-    // Set flag for later usage
-    process.env.EXPOSE_GC = 'true';
-  } catch (error) {
-    console.warn('⚠️ Could not expose garbage collection');
-  }
-
-  // Ensure we have the latest npm
-  try {
-    console.log('📦 Checking npm version...');
-    const npmVersion = execSync('npm --version').toString().trim();
-    console.log(`ℹ️ Using npm version ${npmVersion}`);
-  } catch (error) {
-    console.warn('⚠️ Could not check npm version');
-  }
-};
-
-// Increase system ulimit for large amounts of file operations
-const increaseUlimit = () => {
-  try {
-    if (process.platform !== 'win32') {
-      console.log('🔧 Increasing file descriptor limit...');
-      // Try to set ulimit to maximum
-      try {
-        execSync('ulimit -n 65536 || true', { stdio: 'ignore' });
-      } catch (e) {
-        // Ignore errors, this might not work in all environments
-      }
-
-      // Check what we were able to set
-      try {
-        const limit = execSync('ulimit -n').toString().trim();
-        console.log(`ℹ️ File descriptor limit: ${limit}`);
-      } catch (e) {
-        console.log('⚠️ Could not check file descriptor limit');
-      }
-    }
-  } catch (error) {
-    console.warn('⚠️ Could not increase ulimit:', error.message);
-  }
-};
-
-// Main function
-const main = async () => {
-  try {
-    console.log('🔍 Build environment:');
-    console.log(`ℹ️ Platform: ${process.platform}`);
-    console.log(`ℹ️ Architecture: ${process.arch}`);
-    console.log(`ℹ️ Node.js version: ${process.version}`);
-    console.log(`ℹ️ Current working directory: ${process.cwd()}`);
-
-    // Run optimizations
-    clearCaches();
-    optimizeNodeSettings();
-    increaseUlimit();
-    await warmupDatabase();
-
-    console.log('✅ Build optimization completed successfully!');
-  } catch (error) {
-    console.error('❌ Build optimization failed:', error);
-    // Don't exit with error code, let the build continue
-  }
-};
-
-// Run the script
-main().catch((err) => {
-  console.error('Unhandled error in optimization script:', err);
-  // Don't exit with error, let the build continue
 });
+
+// Modify city pages to use chunked builds
+const cityFilePath = path.join(pagesDir, 'states', '[state]', '[city].astro');
+if (fs.existsSync(cityFilePath)) {
+  console.log('Optimizing city pages for chunked builds...');
+
+  let content = fs.readFileSync(cityFilePath, 'utf8');
+
+  // Add pagination support to getStaticPaths function
+  content = content.replace(
+    /export async function getStaticPaths\(\) {/,
+    `export async function getStaticPaths({ paginate }) {
+  // Get the page number from environment or default to building all
+  const PAGE_TO_BUILD = process.env.BUILD_PAGE_NUMBER ? parseInt(process.env.BUILD_PAGE_NUMBER, 10) : undefined;
+  const PAGES_PER_BUILD = process.env.PAGES_PER_BUILD ? parseInt(process.env.PAGES_PER_BUILD, 10) : 2000;`
+  );
+
+  // Update the path generation to use pagination chunks
+  content = content.replace(
+    /return paths\.flat\(\);/,
+    `const allPaths = paths.flat();
+  
+  // If we're in a chunked build, only return the specified chunk
+  if (PAGE_TO_BUILD !== undefined) {
+    const startIdx = PAGE_TO_BUILD * PAGES_PER_BUILD;
+    const endIdx = startIdx + PAGES_PER_BUILD;
+    console.log(\`Building city pages chunk \${PAGE_TO_BUILD}: \${startIdx} to \${endIdx} (of \${allPaths.length})\`);
+    return allPaths.slice(startIdx, endIdx);
+  }
+  
+  // Otherwise return all paths
+  return allPaths;`
+  );
+
+  fs.writeFileSync(cityFilePath, content);
+}
+
+// Create a script to restore original files after build
+const restoreScript = `#!/bin/bash
+echo "Restoring original dynamic route files..."
+for file in .temp-build/*; do
+  filename=$(basename "$file")
+  if [[ "$filename" == *"[state]"* ]]; then
+    cp "$file" "src/pages/states/[state]/$filename"
+    echo "Restored $filename"
+  fi
+done
+echo "Cleanup complete."
+`;
+
+const restoreScriptPath = path.join(projectRoot, 'restore-files.sh');
+fs.writeFileSync(restoreScriptPath, restoreScript);
+fs.chmodSync(restoreScriptPath, '755');
+
+console.log(
+  'Build optimization complete. The build will now process pages in smaller batches.'
+);
+console.log(
+  'To rebuild with original files after completion, run: ./restore-files.sh'
+);

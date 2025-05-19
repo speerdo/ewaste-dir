@@ -1,6 +1,5 @@
 ---
 import { getAllCityStatePairs, type CityStatePair } from '../lib/cityData';
-import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
 import { PRODUCTION_URL } from '../lib/url-utils';
 
 interface Props {
@@ -31,55 +30,77 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       placeholder={placeholder}
       autocomplete="off"
     />
+
+    <!-- Only show this UI for hero variant -->
     {variant === 'hero' && (
       <button
-        id={`search-button-${id}`}
         type="button"
-        class="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors"
+        id={`use-location-${id}`}
+        class="absolute right-[80px] top-1/2 -translate-y-1/2 px-3 py-1 text-sm text-gray-500 hover:text-green-600"
       >
-        <svg id={`search-icon-${id}`} xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <svg id={`spinner-${id}`} class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span class="ml-2 font-medium">Search</span>
+        <span class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Use location
+        </span>
+        <div id={`location-loading-${id}`} class="hidden">
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
       </button>
     )}
+
     <button
-      id={`use-location-${id}`}
-      type="button"
+      type="submit"
+      id={`search-button-${id}`}
       class:list={[
-        "flex items-center text-gray-400 hover:text-gray-500",
+        "relative flex-shrink-0 z-10",
         variant === 'hero' 
-          ? "absolute right-[120px] top-0 bottom-0 pr-3" 
-          : "absolute right-3 top-1/2 -translate-y-1/2"
+          ? "bg-green-600 px-4 py-3 text-white rounded-r-lg hover:bg-green-700" 
+          : "absolute right-0 top-0 text-gray-500 p-3"
       ]}
-      title="Use my location"
     >
-      <svg id={`location-icon-${id}`} xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-      <svg id={`location-spinner-${id}`} class="animate-spin h-5 w-5 text-gray-400 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <span class:list={[
+        "flex items-center",
+        variant === 'hero' ? "font-medium" : ""
+      ]}>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        {variant === 'hero' && <span class="ml-2">Search</span>}
+      </span>
+    </button>
+
+    <!-- Loading spinner (initially hidden) -->
+    <div id={`search-loading-${id}`} class="hidden absolute right-0 top-0 flex items-center justify-center">
+      <svg class="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-    </button>
-    <div id={`search-error-${id}`} class="absolute -bottom-6 left-0 right-0 text-red-500 text-xs bg-red-50 p-1 rounded hidden"></div>
+    </div>
   </form>
 
-  <!-- Search Results -->
-  <div 
-    id={`search-results-${id}`}
-    class="absolute left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50 max-h-96 overflow-y-auto"
-  >
-    <div id={`results-content-${id}`} class="divide-y divide-gray-100"></div>
+  <!-- Search results dropdown -->
+  <div id={`search-results-${id}`} class="absolute z-50 mt-1 w-full hidden bg-white rounded-lg shadow-lg max-h-96 overflow-y-auto border border-gray-100">
+    <div id={`results-content-${id}`} class="p-0"></div>
+    <div id={`search-error-${id}`} class="hidden text-red-600 p-3 font-medium"></div>
   </div>
 </div>
 
-<script define:vars={{ getCurrentLocation, reverseGeocode }} type="module">
+<!-- Add global data for client-side access -->
+<script define:vars={{ cityStatePairs }} type="module">
+  // Make city data available to client-side scripts
+  window.__CITY_STATE_PAIRS__ = cityStatePairs;
+</script>
+
+<script type="module">
+  // Import the geocoding functions only on the client-side
+  import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
+
   // Simple test script
   console.log('Script loaded!');
 
@@ -116,54 +137,32 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       let cityStatePairs = []; // Will be populated from the server
       
       // Helper functions for UI feedback
-      function showLoading(isLoading) {
-        const searchIcon = document.getElementById(`search-icon-${id}`);
-        const spinner = document.getElementById(`spinner-${id}`);
+      function showLoading(loading) {
+        const searchLoading = document.getElementById(`search-loading-${id}`);
         const searchButton = document.getElementById(`search-button-${id}`);
         
-        if (isLoading) {
-          // Show loading state
-          if (searchIcon && spinner) {
-            searchIcon.classList.add('hidden');
-            spinner.classList.remove('hidden');
-          }
-          if (searchButton) {
-            searchButton.setAttribute('disabled', 'true');
-          }
-        } else {
-          // Remove loading state
-          if (searchIcon && spinner) {
-            searchIcon.classList.remove('hidden');
-            spinner.classList.add('hidden');
-          }
-          if (searchButton) {
-            searchButton.removeAttribute('disabled');
+        if (searchLoading && searchButton) {
+          if (loading) {
+            searchButton.classList.add('hidden');
+            searchLoading.classList.remove('hidden');
+          } else {
+            searchButton.classList.remove('hidden');
+            searchLoading.classList.add('hidden');
           }
         }
       }
       
-      function showLocationLoading(isLoading) {
-        const locationIcon = document.getElementById(`location-icon-${id}`);
-        const locationSpinner = document.getElementById(`location-spinner-${id}`);
+      function showLocationLoading(loading) {
+        const loadingEl = document.getElementById(`location-loading-${id}`);
         const useLocationBtn = document.getElementById(`use-location-${id}`);
         
-        if (isLoading) {
-          // Show loading state
-          if (locationIcon && locationSpinner) {
-            locationIcon.classList.add('hidden');
-            locationSpinner.classList.remove('hidden');
-          }
-          if (useLocationBtn) {
-            useLocationBtn.setAttribute('disabled', 'true');
-          }
-        } else {
-          // Remove loading state
-          if (locationIcon && locationSpinner) {
-            locationIcon.classList.remove('hidden');
-            locationSpinner.classList.add('hidden');
-          }
-          if (useLocationBtn) {
-            useLocationBtn.removeAttribute('disabled');
+        if (loadingEl && useLocationBtn) {
+          if (loading) {
+            useLocationBtn.querySelector('span')?.classList.add('hidden');
+            loadingEl.classList.remove('hidden');
+          } else {
+            useLocationBtn.querySelector('span')?.classList.remove('hidden');
+            loadingEl.classList.add('hidden');
           }
         }
       }
@@ -207,8 +206,8 @@ const id = variant === 'hero' ? 'hero' : 'nav';
               throw new Error("Could not determine your location");
             }
             
-            const { latitude, longitude } = location;
-            const geoData = await reverseGeocode(latitude, longitude);
+            const { lat, lng } = location;
+            const geoData = await reverseGeocode(lat, lng);
             
             if (!geoData) {
               throw new Error("Could not find your location");
@@ -508,10 +507,4 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       }
     });
   });
-</script>
-
-<!-- Add global data for client-side access -->
-<script define:vars={{ cityStatePairs }} type="module">
-  // Make city data available to client-side scripts
-  window.__CITY_STATE_PAIRS__ = cityStatePairs;
 </script>

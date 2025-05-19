@@ -1,6 +1,6 @@
-import type { APIRoute } from 'astro';
+import type { APIRoute, APIContext } from 'astro';
 
-// Disable prerendering for this endpoint
+// Explicitly set this endpoint to not be prerendered
 export const prerender = false;
 
 export interface GeocodeResponse {

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "NODE_ENV=development astro dev",
     "build": "NODE_ENV=production astro build",
-    "build:vercel": "npm run cleanup && NODE_OPTIONS=\"--max-old-space-size=7168 --expose-gc\" NODE_ENV=production astro build --verbose",
+    "build:vercel": "chmod +x ./vercel-build.sh && ./vercel-build.sh",
     "build:optimized": "node scripts/optimize-for-build.js && npm run cleanup && NODE_OPTIONS=\"--max-old-space-size=7168 --expose-gc\" NODE_ENV=production astro build",
     "prebuild": "npm run cleanup",
     "verify": "npm run verify-ssr",

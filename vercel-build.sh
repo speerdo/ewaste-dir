@@ -33,15 +33,6 @@ else
   yarn add --dev @rollup/rollup-linux-x64-gnu
 fi
 
-# Ensure the needed integrations are available
-echo "Checking Astro integrations..."
-for pkg in "@astrojs/vue" "@astrojs/sitemap" "@astrojs/partytown"; do
-  if ! npm list "$pkg" >/dev/null 2>&1; then
-    echo "Installing missing integration: $pkg"
-    npm install --save "$pkg"
-  fi
-done
-
 # Clean tmp directories
 rm -rf /tmp/*
 

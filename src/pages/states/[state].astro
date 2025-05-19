@@ -1,9 +1,71 @@
 ---
 import StateLayout from '../../layouts/StateLayout.astro';
 import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates, normalizeForUrl } from '../../lib/supabase';
-import { supabase } from '../../lib/supabase';
-import type { RecyclingCenter } from '../../types/supabase';
+import type { RecyclingCenter, State } from '../../types/supabase';
 import { monitorBuildProcess } from '../../lib/build-utils';
+
+// Switch to static generation
+export async function getStaticPaths() {
+  // Get all states with pagination to ensure we get everything
+  const allStates: State[] = [];
+  let page = 0;
+  const pageSize = 50;
+  
+  while (true) {
+    const states = await getAllStates();
+    if (!states || states.length === 0) break;
+    allStates.push(...states);
+    break; // getAllStates already returns all states
+  }
+
+  // For each state, get all centers with pagination
+  return await Promise.all(allStates.map(async (state) => {
+    const centersByCity = await getRecyclingCentersByState(state.id);
+
+    // Sort cities by name
+    const sortedCities = Object.keys(centersByCity).sort();
+
+    // Calculate total centers
+    const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum + centers.length, 0);
+
+    // Generate OG image URL
+    const PRODUCTION_URL = 'https://www.recycleoldtech.com';
+    const ogImageUrl = import.meta.env.PROD 
+      ? new URL('/images/default-og.png', PRODUCTION_URL).toString()
+      : '/images/default-og.png';
+
+    // Prepare city data
+    const cityData = sortedCities.map(city => {
+      const centers = centersByCity[city];
+      const firstCenter = centers[0];
+      return {
+        id: city.toLowerCase().replace(/\s+/g, '-'),
+        name: city,
+        description: `Find electronics recycling centers in ${city}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
+        address: firstCenter.full_address,
+        coordinates: {
+          lat: firstCenter.latitude,
+          lng: firstCenter.longitude
+        }
+      };
+    });
+
+    // Generate description
+    const description = `Find ${totalCenters} electronics recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${state.name}. Get directions and information for safe disposal of computers, phones, TVs and other electronic devices.`;
+
+    return {
+      params: { state: state.id },
+      props: { 
+        state,
+        cityData,
+        description,
+        ogImage: ogImageUrl
+      }
+    };
+  }));
+}
+
+const { state, cityData, description, ogImage } = Astro.props;
 
 // Use hybrid approach with ISR
 export const prerender = false;
@@ -33,17 +95,17 @@ if (!stateParam) {
 }
 
 // Get the state details
-const state = await getState(stateParam);
+const stateDetails = await getState(stateParam);
 
-if (!state) {
+if (!stateDetails) {
   return Astro.redirect('/404');
 }
 
 // Log state data for debugging
-// console.log('State page - state data:', state);
+// console.log('State page - state data:', stateDetails);
 
 // Get all recycling centers for this state
-const centersByCity = await getRecyclingCentersByState(state.id);
+const centersByCity = await getRecyclingCentersByState(stateDetails.id);
 
 // Sort cities by name
 const sortedCities = Object.keys(centersByCity).sort();
@@ -58,13 +120,13 @@ const ogImageUrl = import.meta.env.PROD
   : '/images/default-og.png';
 
 // Prepare city data for the layout
-const cityData = sortedCities.map(city => {
+const cityDataForLayout = sortedCities.map(city => {
   const centers = centersByCity[city];
   const firstCenter = centers[0];
   return {
     id: city.toLowerCase().replace(/\s+/g, '-'),
     name: city,
-    description: `Find electronics recycling centers in ${city}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
+    description: `Find electronics recycling centers in ${city}, ${stateDetails.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
     address: firstCenter.full_address,
     coordinates: {
       lat: firstCenter.latitude,
@@ -74,12 +136,12 @@ const cityData = sortedCities.map(city => {
 });
 
 // Generate description
-const description = `Find ${totalCenters} electronics recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${state.name}. Get directions and information for safe disposal of computers, phones, TVs and other electronic devices.`;
+const descriptionForLayout = `Find ${totalCenters} electronics recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${stateDetails.name}. Get directions and information for safe disposal of computers, phones, TVs and other electronic devices.`;
 ---
 
 <StateLayout 
-  state={state} 
-  cityData={cityData}
-  description={description}
+  state={stateDetails} 
+  cityData={cityDataForLayout}
+  description={descriptionForLayout}
   ogImage={ogImageUrl}
 />

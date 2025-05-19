@@ -12,16 +12,21 @@ const DEFAULT_LOGO = '/images/recycling.webp';
 // Use hybrid approach with ISR
 export const prerender = false;
 
+// Get data from params
+const { state: stateParam, city: cityParam } = Astro.params;
+
 // Set cache control headers for browser - always check freshness
 Astro.response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
 
 // Set Vercel-specific CDN cache headers with durable caching
+// Include URL parameters in cache key
 Astro.response.headers.set('Vercel-CDN-Cache-Control', 
-  'public, durable, s-maxage=3600, stale-while-revalidate=86400'
+  'public, s-maxage=3600, stale-while-revalidate=86400'
 );
 
-// Get data from params
-const { state: stateParam, city: cityParam } = Astro.params;
+// Ensure each URL gets its own cache entry
+Astro.response.headers.set('CDN-Cache-Control', 'public, must-revalidate');
+Astro.response.headers.set('Vary', 'x-vercel-id, x-forwarded-proto, x-vercel-proxy-signature, accept');
 
 // Add cache tags for targeted invalidation
 const cacheTag = `city-${cityParam},state-${stateParam}`;

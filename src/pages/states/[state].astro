@@ -8,16 +8,21 @@ import { monitorBuildProcess } from '../../lib/build-utils';
 // Use hybrid approach with ISR
 export const prerender = false;
 
+// Get the state parameter from the URL
+const { state: stateParam } = Astro.params;
+
 // Set cache control headers for browser - always check freshness
 Astro.response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
 
 // Set Vercel-specific CDN cache headers with durable caching
+// Include URL parameters in cache key
 Astro.response.headers.set('Vercel-CDN-Cache-Control', 
-  'public, durable, s-maxage=3600, stale-while-revalidate=86400'
+  'public, s-maxage=3600, stale-while-revalidate=86400'
 );
 
-// Get the state parameter from the URL
-const { state: stateParam } = Astro.params;
+// Ensure each URL gets its own cache entry
+Astro.response.headers.set('CDN-Cache-Control', 'public, must-revalidate');
+Astro.response.headers.set('Vary', 'x-vercel-id, x-forwarded-proto, x-vercel-proxy-signature, accept');
 
 // Add cache tag for targeted invalidation
 const cacheTag = `state-${stateParam}`;

@@ -26,8 +26,7 @@ export default defineConfig({
     edgeMiddleware: true,
     maxDuration: 8,
     functionPerRoute: false,
-    includeFiles: ['db/**/*.{js,json}', 'src/lib/**/*.{js,ts}'],
-    excludeFiles: ['src/assets/**/*', 'public/**/*', 'tests/**/*'],
+    excludeFiles: ['src/assets/**/*', 'public/**/*'],
   }),
   build: {
     inlineStylesheets: 'auto',

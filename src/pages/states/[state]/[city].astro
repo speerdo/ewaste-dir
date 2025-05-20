@@ -72,13 +72,80 @@ const mapMarkers: Marker[] = centers.map(center => ({
   id: center.id
 })).filter(marker => !isNaN(marker.lat) && !isNaN(marker.lng));
 
+// Generate a unique, keyword-rich meta description for SEO
+const metaDescription = `Find certified electronics recycling centers in ${cityName}, ${state.name}. Responsibly recycle old phones, computers, TVs and more. Discover safe, eco-friendly e-waste disposal options in ${cityName}, ${state.name}.`;
+
 ---
 
 <Layout 
-  title={`Recycling Centers in ${cityName}, ${state.name}`}
-  description={`Find ${centers.length} electronics recycling ${centers.length === 1 ? 'center' : 'centers'} in ${cityName}, ${state.name}. Get directions, contact information, and more.`}
+  title={`Electronics Recycling in ${cityName}, ${state.name} – E‑Waste Directory`}
+  description={metaDescription}
   ogImage={ogImageUrl}
 >
+  <head slot="head">
+    <script type="application/ld+json">
+      {JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://www.recycleoldtech.com/'
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: state.name,
+            item: `https://www.recycleoldtech.com/states/${stateParam}`
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: cityName,
+            item: `https://www.recycleoldtech.com/states/${stateParam}/${cityParam}`
+          }
+        ]
+      })}
+    </script>
+    <script type="application/ld+json">
+      {JSON.stringify({
+        '@context': 'https://schema.org',
+        '@graph': centers.map(center => {
+          const business = {
+            '@type': 'LocalBusiness',
+            name: center.name,
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: center.full_address || '',
+              addressLocality: cityName,
+              addressRegion: state.name,
+              addressCountry: 'US',
+            },
+            telephone: center.phone || undefined,
+            url: center.site || undefined,
+            image: center.logo || undefined,
+            geo: center.latitude && center.longitude ? {
+              '@type': 'GeoCoordinates',
+              latitude: center.latitude,
+              longitude: center.longitude
+            } : undefined,
+            openingHours: center.working_hours || undefined,
+            aggregateRating: center.rating ? {
+              '@type': 'AggregateRating',
+              ratingValue: center.rating,
+              reviewCount: center.reviews || 1
+            } : undefined,
+            description: center.description || undefined
+          };
+          // Remove undefined fields
+          Object.keys(business).forEach(key => business[key] === undefined && delete business[key]);
+          return business;
+        })
+      })}
+    </script>
+  </head>
   <div class="bg-white">
     {/* Load Google Maps API directly */}
     <script is:inline define:vars={{ mapApiKey: import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY }}>
@@ -159,6 +226,13 @@ const mapMarkers: Marker[] = centers.map(center => ({
           </p>
         </div>
         <div id="sort-button-container"></div>
+      </div>
+
+      <!-- SEO descriptive paragraph for city page -->
+      <div class="mb-8 max-w-2xl">
+        <p class="text-base text-gray-700">
+          Looking to recycle electronics in {cityName}, {state.name}? This directory helps you find certified e-waste recycling centers for computers, phones, TVs, printers, and more. Proper electronics recycling keeps hazardous materials out of landfills and supports a cleaner, greener community in {cityName}. Browse the map and list below to find a convenient drop-off location near you.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">

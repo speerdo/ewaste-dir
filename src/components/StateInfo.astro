@@ -25,6 +25,7 @@ const { stateInfo } = Astro.props;
           <img
             src={stateInfo.imageUrl}
             alt={stateInfo.imageAlt || `E-waste recycling in ${stateInfo.stateName}`}
+            loading="lazy"
             class="rounded-lg shadow-lg object-cover w-full h-96"
           />
         ) : (

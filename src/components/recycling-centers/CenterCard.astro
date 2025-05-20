@@ -54,9 +54,9 @@ function formatWorkingHours(hours: any): string {
   <div class="p-6">
     <div class="flex items-start justify-between">
       <div class="flex-grow">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">
           {center.name}
-        </h2>
+        </h3>
         {center.rating && (
           <div class="flex items-center mb-2">
             {Array.from({ length: Math.round(Number(center.rating)) }).map(() => (
@@ -74,7 +74,8 @@ function formatWorkingHours(hours: any): string {
         {center.logo ? (
           <img 
             src={center.logo}
-            alt={`${center.name} logo`}
+            alt=""
+            loading="lazy"
             class="w-16 h-16 object-contain rounded-lg bg-gray-50"
             onerror={`this.onerror=null; this.src='${defaultLogo}';`}
           />

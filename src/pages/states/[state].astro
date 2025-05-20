@@ -82,4 +82,46 @@ const description = `Find ${totalCenters} electronics recycling ${totalCenters =
   cityData={cityData}
   description={description}
   ogImage={ogImageUrl}
-/>
+>
+  <head slot="head">
+    <script type="application/ld+json">
+      {JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://www.recycleoldtech.com/'
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: state.name,
+            item: `https://www.recycleoldtech.com/states/${stateParam}`
+          }
+        ]
+      })}
+    </script>
+    <script type="application/ld+json">
+      {JSON.stringify({
+        '@context': 'https://schema.org',
+        '@graph': cityData.map(city => {
+          const business = {
+            '@type': 'LocalBusiness',
+            name: city.name + ' Electronics Recycling',
+            address: {
+              '@type': 'PostalAddress',
+              addressLocality: city.name,
+              addressRegion: state.name,
+              addressCountry: 'US',
+            },
+            description: city.description
+          };
+          return business;
+        })
+      })}
+    </script>
+  </head>
+</StateLayout>

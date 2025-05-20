@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@astrojs/node": "^9.2.1",
+    "@astrojs/sitemap": "^3.4.0",
     "@astrojs/tailwind": "^5.1.0",
     "@astrojs/vercel": "^8.1.4",
     "@googlemaps/js-api-loader": "^1.16.8",

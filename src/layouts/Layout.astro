@@ -4,6 +4,7 @@ import Footer from '../components/Footer.astro';
 import '../styles/recycling-centers.css';
 import { getAbsoluteUrl, getCanonicalUrl } from '../lib/url-utils';
 import Analytics from '@vercel/analytics/astro';
+import sitemap from '@astrojs/sitemap';
 
 interface Props {
   title: string;

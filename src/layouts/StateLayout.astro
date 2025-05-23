@@ -71,6 +71,7 @@ const metaDescription = description || `Find electronics recycling centers in ${
       <img 
         src={state.image_url || defaultStateImage} 
         alt={`Electronics recycling in ${state.name}`} 
+        loading="lazy"
         class="w-full h-full object-cover"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>

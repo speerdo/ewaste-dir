@@ -35,6 +35,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       <button
         id={`search-button-${id}`}
         type="button"
+        aria-label="Search"
         class="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors"
       >
         <svg id={`search-icon-${id}`} xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,6 +51,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
     <button
       id={`use-location-${id}`}
       type="button"
+      aria-label="Use my location"
       class:list={[
         "flex items-center text-gray-400 hover:text-gray-500",
         variant === 'hero' 

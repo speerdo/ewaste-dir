@@ -1,11 +1,12 @@
 ---
-import { getAllStates } from '../lib/supabase';
+import { normalizeForUrl, getAllStates } from '../lib/supabase';
 import type { State } from '../types/supabase';
 
+// Fetch all states directly
 const states = await getAllStates();
 
 // Group states by first letter
-const groupedStates = states.reduce<Record<string, State[]>>((acc, state) => {
+const groupedStates = states.reduce<Record<string, { name: string; centerCount?: number }[]>>((acc, state) => {
   const firstLetter = state.name[0];
   if (!acc[firstLetter]) {
     acc[firstLetter] = [];
@@ -36,7 +37,7 @@ const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79
               {groupedStates[letter].map(state => (
                 <li>
                   <a 
-                    href={`/states/${state.name.toLowerCase().replace(/\s+/g, '-')}`}
+                    href={`/states/${normalizeForUrl(state.name)}`}
                     class="text-gray-600 hover:text-green-600 hover:underline transition-colors"
                   >
                     {state.name}

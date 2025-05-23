@@ -20,6 +20,7 @@ export interface RecyclingCenter {
   accepted_items?: string;
   created_at?: string;
   updated_at?: string;
+  matched?: boolean;
 }
 
 export interface City {

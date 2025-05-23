@@ -55,6 +55,17 @@ if (!centers || centers.length === 0) {
   return Astro.redirect(`/states/${stateParam}`);
 }
 
+// Determine if we're showing exact city match or nearby centers
+const isMixedResults = centers.some(center => {
+  // Normalize both strings for comparison
+  const normalizedCityName = cityName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const normalizedCenterCity = (center.city || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return normalizedCenterCity !== normalizedCityName;
+});
+
+// Use the new matched flag - only show the "nearby centers" message if NONE of the centers match
+const showNearbyMessage = centers.length > 0 && !centers.some(center => center.matched === true);
+
 // Generate OG image URL using a static default image with the production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
 const ogImageUrl = import.meta.env.PROD 
@@ -74,7 +85,6 @@ const mapMarkers: Marker[] = centers.map(center => ({
 
 // Generate a unique, keyword-rich meta description for SEO
 const metaDescription = `Find certified electronics recycling centers in ${cityName}, ${state.name}. Responsibly recycle old phones, computers, TVs and more. Discover safe, eco-friendly e-waste disposal options in ${cityName}, ${state.name}.`;
-
 ---
 
 <Layout 
@@ -82,262 +92,242 @@ const metaDescription = `Find certified electronics recycling centers in ${cityN
   description={metaDescription}
   ogImage={ogImageUrl}
 >
-  <head slot="head">
-    <script type="application/ld+json">
-      {JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        'itemListElement': [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Home',
-            item: 'https://www.recycleoldtech.com/'
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: state.name,
-            item: `https://www.recycleoldtech.com/states/${stateParam}`
-          },
-          {
-            '@type': 'ListItem',
-            position: 3,
-            name: cityName,
-            item: `https://www.recycleoldtech.com/states/${stateParam}/${cityParam}`
-          }
-        ]
-      })}
-    </script>
-    <script type="application/ld+json">
-      {JSON.stringify({
-        '@context': 'https://schema.org',
-        '@graph': centers.map(center => {
-          const business = {
-            '@type': 'LocalBusiness',
-            name: center.name,
-            address: {
-              '@type': 'PostalAddress',
-              streetAddress: center.full_address || '',
-              addressLocality: cityName,
-              addressRegion: state.name,
-              addressCountry: 'US',
-            },
-            telephone: center.phone || undefined,
-            url: center.site || undefined,
-            image: center.logo || undefined,
-            geo: center.latitude && center.longitude ? {
-              '@type': 'GeoCoordinates',
-              latitude: center.latitude,
-              longitude: center.longitude
-            } : undefined,
-            openingHours: center.working_hours || undefined,
-            aggregateRating: center.rating ? {
-              '@type': 'AggregateRating',
-              ratingValue: center.rating,
-              reviewCount: center.reviews || 1
-            } : undefined,
-            description: center.description || undefined
-          };
-          // Remove undefined fields
-          Object.keys(business).forEach(key => business[key] === undefined && delete business[key]);
-          return business;
-        })
-      })}
-    </script>
-  </head>
-  <div class="bg-white">
-    {/* Load Google Maps API directly */}
-    <script is:inline define:vars={{ mapApiKey: import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY }}>
-      window.GOOGLE_MAPS_API_KEY = mapApiKey || '';
-      
-      // Load Google Maps API using the recommended pattern
-      function initGoogleMaps() {
-        // console.log('Google Maps API loaded');
-        window.dispatchEvent(new Event('google-maps-ready'));
-      }
-      
-      // Define the callback function on the window
-      window.initGoogleMaps = initGoogleMaps;
-      
-      // Load the script if not already loaded
-      if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY}&callback=initGoogleMaps&libraries=places&v=weekly`;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-      }
-    </script>
+  <!-- Google Maps API and Global Direction Functions -->
+  <script is:inline define:vars={{ mapApiKey: import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY }}>
+    // Store API key in a global variable
+    window.GOOGLE_MAPS_API_KEY = mapApiKey || '';
     
-    <!-- Add inline styles to prevent layout shift -->
-    <style is:inline>
-      @media (min-width: 1024px) {
-        .map-container {
-          grid-column: 1;
-          grid-row: 1;
-        }
-        .centers-container {
-          grid-column: 2;
-          grid-row: 1;
-        }
-      }
-    </style>
+    // Define directions functions
+    window.showDirections = function(lat, lng) {
+      if (!lat || !lng) return;
+      window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
+    };
+    window.openDirections = window.showDirections;
     
-    <div class="container mx-auto px-4 py-8">
-      <!-- Add the global script before any usage -->
-      <script>
-        // Declare the function type on the window object
-        declare global {
-          interface Window {
-            showDirections: (lat: number, lng: number) => void;
-            openDirections: (lat: number, lng: number) => void;
-          }
-        }
+    // Initialize Google Maps
+    function initGoogleMaps() {
+      window.dispatchEvent(new Event('google-maps-ready'));
+    }
+    window.initGoogleMaps = initGoogleMaps;
+    
+    // Load the script if not already loaded
+    if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY}&callback=initGoogleMaps&libraries=places&v=weekly`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  </script>
+  
+  <!-- Map layout styles -->
+  <style is:inline>
+    @media (min-width: 1024px) {
+      .map-container {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .centers-container {
+        grid-column: 2;
+        grid-row: 1;
+      }
+    }
+  </style>
 
-        // Define both functions globally
-        window.showDirections = function(lat: number, lng: number): void {
-          if (!lat || !lng) return;
-          window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
-        };
+  <!-- Main content -->
+  <div class="container mx-auto px-4 py-8">
+    <div class="mt-16 mb-8">
+      <a 
+        href={`/states/${stateParam}`}
+        class="text-green-600 hover:text-green-700 flex items-center"
+      >
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to {state.name}
+      </a>
+    </div>
 
-        window.openDirections = window.showDirections; // Alias for compatibility with map component
-      </script>
-
-      <div class="mt-16 mb-8">
-        <a 
-          href={`/states/${stateParam}`}
-          class="text-green-600 hover:text-green-700 flex items-center"
-        >
-          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to {state.name}
-        </a>
-      </div>
-
-      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-8">
-        <div>
-          <h1 class="text-4xl font-display font-bold text-gray-900 mb-2">
-            Electronics Recycling in {cityName}
-          </h1>
-          <p class="text-xl text-gray-600">
-            {centers.length} recycling {centers.length === 1 ? 'center' : 'centers'} in {cityName}, {state.name}
-          </p>
-        </div>
-        <div id="sort-button-container"></div>
-      </div>
-
-      <!-- SEO descriptive paragraph for city page -->
-      <div class="mb-8 max-w-2xl">
-        <p class="text-base text-gray-700">
-          Looking to recycle electronics in {cityName}, {state.name}? This directory helps you find certified e-waste recycling centers for computers, phones, TVs, printers, and more. Proper electronics recycling keeps hazardous materials out of landfills and supports a cleaner, greener community in {cityName}. Browse the map and list below to find a convenient drop-off location near you.
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-8">
+      <div>
+        <h1 class="text-4xl font-display font-bold text-gray-900 mb-2">
+          Electronics Recycling in {cityName}
+        </h1>
+        <p class="text-xl text-gray-600">
+          {centers.length} recycling {centers.length === 1 ? 'center' : 'centers'} in {isMixedResults ? `${state.name} area` : `${cityName}, ${state.name}`}
         </p>
       </div>
+      <div id="sort-button-container"></div>
+    </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Map Section -->
-        <div class="map-container rounded-xl overflow-hidden shadow-lg h-[600px] lg:sticky lg:top-8">
-          {mapMarkers.length > 0 ? (
-            <MapComponent 
-              markers={mapMarkers}
-              initialZoom={12}
-            />
-          ) : (
-            <div class="w-full h-full flex items-center justify-center bg-gray-100">
-              <p class="text-gray-500">Map not available</p>
-            </div>
-          )}
+    <!-- SEO descriptive paragraph for city page -->
+    <div class="mb-8 max-w-2xl">
+      {showNearbyMessage && (
+        <div class="bg-yellow-50 border border-yellow-100 p-4 rounded-lg mb-4">
+          <p class="text-base text-yellow-800">
+            <span class="font-semibold">Note:</span> We couldn't find recycling centers specifically in {cityName}, 
+            so we're showing you nearby options in the {state.name} area instead.
+          </p>
         </div>
+      )}
+      <p class="text-base text-gray-700">
+        Looking to recycle electronics in {cityName}, {state.name}? This directory helps you find certified e-waste recycling centers for computers, phones, TVs, printers, and more. Proper electronics recycling keeps hazardous materials out of landfills and supports a cleaner, greener community in {cityName}. Browse the map and list below to find a convenient drop-off location near you.
+      </p>
+    </div>
 
-        <!-- Recycling Centers List (scrollable) -->
-        <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
-          <CentersList centers={centers} defaultLogo={DEFAULT_LOGO} />
-        </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Map Section -->
+      <div class="map-container rounded-xl overflow-hidden shadow-lg h-[600px] lg:sticky lg:top-8">
+        {mapMarkers.length > 0 ? (
+          <MapComponent 
+            markers={mapMarkers}
+            initialZoom={12}
+          />
+        ) : (
+          <div class="w-full h-full flex items-center justify-center bg-gray-100">
+            <p class="text-gray-500">Map not available</p>
+          </div>
+        )}
+      </div>
+
+      <!-- Recycling Centers List (scrollable) -->
+      <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
+        <CentersList centers={centers} defaultLogo={DEFAULT_LOGO} />
       </div>
     </div>
   </div>
 
+  <!-- Map interactions script -->
   {mapMarkers.length > 0 && (
-    <>
-      <script is:inline>
-        // Define global direction functions
-        window.showDirections = function(lat, lng) {
-          if (!lat || !lng) return;
-          window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
-        };
-        window.openDirections = window.showDirections;
-      </script>
-      
-      <script>
-        interface MarkerClickEvent extends CustomEvent<{ centerId: string }> {
-          type: 'markerClick';
-        }
+    <script>
+      interface MarkerClickEvent extends CustomEvent<{ centerId: string }> {
+        type: 'markerClick';
+      }
 
-        function handleMarkerClick(event: MarkerClickEvent) {
-          // Remove highlight from all centers
-          document.querySelectorAll('[data-center-id]').forEach((el) => {
-            el.classList.remove('highlight-center');
-          });
-          
-          // Find and highlight the center card
-          const centerElement = document.getElementById(`center-${event.detail.centerId}`);
-          if (centerElement) {
-            centerElement.classList.add('highlight-center');
-            centerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }
-        
-        function handleCenterClick(event: MouseEvent) {
-          // Don't trigger if clicking on a button or link
-          if ((event.target as Element).closest('button') || (event.target as Element).closest('a')) {
-            return;
-          }
-          
-          const card = event.currentTarget as Element;
-          const centerId = card.getAttribute('data-center-id');
-          if (!centerId) return;
-          
-          // Remove highlight from all centers
-          document.querySelectorAll('[data-center-id]').forEach((el) => {
-            el.classList.remove('highlight-center');
-          });
-          
-          // Add highlight to the clicked center
-          card.classList.add('highlight-center');
-          
-          // Notify the map to focus on this marker
-          const customEvent = new CustomEvent('centerSelect', {
-            detail: { centerId }
-          });
-          document.dispatchEvent(customEvent);
-        }
-        
-        function setupInteractions() {
-          // Handle marker clicks
-          document.addEventListener('markerClick', handleMarkerClick as EventListener);
-          
-          // Add click handlers to all center cards
-          document.querySelectorAll('[data-center-id]').forEach(card => {
-            card.removeEventListener('click', handleCenterClick as EventListener);
-            card.addEventListener('click', handleCenterClick as EventListener);
-          });
-        }
-        
-        // Set up interactions on initial page load
-        setupInteractions();
-        
-        // Set up interactions after each Astro page transition
-        document.addEventListener('astro:page-load', setupInteractions);
-        
-        // Clean up event listeners before page transitions
-        document.addEventListener('astro:before-preparation', () => {
-          document.removeEventListener('markerClick', handleMarkerClick as EventListener);
-          document.querySelectorAll('[data-center-id]').forEach(card => {
-            card.removeEventListener('click', handleCenterClick as EventListener);
-          });
+      function handleMarkerClick(event: MarkerClickEvent) {
+        // Remove highlight from all centers
+        document.querySelectorAll('[data-center-id]').forEach((el) => {
+          el.classList.remove('highlight-center');
         });
-      </script>
-    </>
+        
+        // Find and highlight the center card
+        const centerElement = document.getElementById(`center-${event.detail.centerId}`);
+        if (centerElement) {
+          centerElement.classList.add('highlight-center');
+          centerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      
+      function handleCenterClick(event: MouseEvent) {
+        // Don't trigger if clicking on a button or link
+        if ((event.target as Element).closest('button') || (event.target as Element).closest('a')) {
+          return;
+        }
+        
+        const card = event.currentTarget as Element;
+        const centerId = card.getAttribute('data-center-id');
+        if (!centerId) return;
+        
+        // Remove highlight from all centers
+        document.querySelectorAll('[data-center-id]').forEach((el) => {
+          el.classList.remove('highlight-center');
+        });
+        
+        // Add highlight to the clicked center
+        card.classList.add('highlight-center');
+        
+        // Notify the map to focus on this marker
+        const customEvent = new CustomEvent('centerSelect', {
+          detail: { centerId }
+        });
+        document.dispatchEvent(customEvent);
+      }
+      
+      function setupInteractions() {
+        // Handle marker clicks
+        document.addEventListener('markerClick', handleMarkerClick as EventListener);
+        
+        // Add click handlers to all center cards
+        document.querySelectorAll('[data-center-id]').forEach(card => {
+          card.removeEventListener('click', handleCenterClick as EventListener);
+          card.addEventListener('click', handleCenterClick as EventListener);
+        });
+      }
+      
+      // Set up interactions on initial page load
+      setupInteractions();
+      
+      // Set up interactions after each Astro page transition
+      document.addEventListener('astro:page-load', setupInteractions);
+      
+      // Clean up event listeners before page transitions
+      document.addEventListener('astro:before-preparation', () => {
+        document.removeEventListener('markerClick', handleMarkerClick as EventListener);
+        document.querySelectorAll('[data-center-id]').forEach(card => {
+          card.removeEventListener('click', handleCenterClick as EventListener);
+        });
+      });
+    </script>
   )}
+
+  <!-- Structured data for SEO (hidden from display) -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://www.recycleoldtech.com/'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: state.name,
+        item: `https://www.recycleoldtech.com/states/${stateParam}`
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: cityName,
+        item: `https://www.recycleoldtech.com/states/${stateParam}/${cityParam}`
+      }
+    ]
+  })}></script>
+  
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': centers.map(center => {
+      const business: Record<string, any> = {
+        '@type': 'LocalBusiness',
+        name: center.name,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: center.full_address || '',
+          addressLocality: cityName,
+          addressRegion: state.name,
+          addressCountry: 'US',
+        },
+        telephone: center.phone || undefined,
+        url: center.site || undefined,
+        image: center.logo || undefined,
+        geo: center.latitude && center.longitude ? {
+          '@type': 'GeoCoordinates',
+          latitude: center.latitude,
+          longitude: center.longitude
+        } : undefined,
+        openingHours: center.working_hours || undefined,
+        aggregateRating: center.rating ? {
+          '@type': 'AggregateRating',
+          ratingValue: center.rating,
+          reviewCount: center.reviews || 1
+        } : undefined,
+        description: center.description || undefined
+      };
+      // Remove undefined fields
+      Object.keys(business).forEach(key => business[key] === undefined && delete business[key]);
+      return business;
+    })
+  })}></script>
 </Layout>

@@ -57,14 +57,75 @@ const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes for build process
 /**
  * Normalizes a string for use in URLs by:
  * - Converting to lowercase
+ * - Normalizing special characters (like ñ, á, é, etc.)
  * - Replacing non-alphanumeric characters with hyphens
  * - Removing leading/trailing hyphens
  */
 export function normalizeForUrl(str: string): string {
-  return str
+  if (!str) return '';
+
+  // Create a mapping of special characters to their ASCII equivalents
+  const charMap: Record<string, string> = {
+    á: 'a',
+    é: 'e',
+    í: 'i',
+    ó: 'o',
+    ú: 'u',
+    à: 'a',
+    è: 'e',
+    ì: 'i',
+    ò: 'o',
+    ù: 'u',
+    ä: 'a',
+    ë: 'e',
+    ï: 'i',
+    ö: 'o',
+    ü: 'u',
+    â: 'a',
+    ê: 'e',
+    î: 'i',
+    ô: 'o',
+    û: 'u',
+    ñ: 'n',
+    ç: 'c',
+    ß: 'ss',
+    ø: 'o',
+    å: 'a',
+    æ: 'ae',
+    œ: 'oe',
+    ã: 'a',
+    õ: 'o',
+    ď: 'd',
+    ť: 't',
+    ň: 'n',
+    ř: 'r',
+    š: 's',
+    ý: 'y',
+    ž: 'z',
+    ć: 'c',
+    ĺ: 'l',
+    ŕ: 'r',
+    ń: 'n',
+    ś: 's',
+    ź: 'z',
+    đ: 'd',
+    ů: 'u',
+    ě: 'e',
+    č: 'c',
+    ľ: 'l',
+  };
+
+  // Replace special characters with their ASCII equivalents
+  const normalized = str
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+    .split('')
+    .map((char) => {
+      return charMap[char] || char;
+    })
+    .join('');
+
+  // Replace non-alphanumeric characters with hyphens and clean up
+  return normalized.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
 // States batch loading for build optimization
@@ -409,7 +470,7 @@ export async function getRecyclingCentersByCity(
   city: string
 ): Promise<RecyclingCenter[]> {
   try {
-    // console.log(`Fetching centers for ${city}, ${stateId}...`);
+    console.log(`Fetching centers for ${city}, ${stateId}...`);
 
     // First get the state name from the ID
     const state = await getState(stateId);
@@ -418,7 +479,40 @@ export async function getRecyclingCentersByCity(
       return [];
     }
 
-    // Handle special cases for major cities first
+    // DEBUG: Check for cities with Spanish accents in this state
+    if (
+      city.toLowerCase().includes('espa') ||
+      city.toLowerCase().includes('cañ')
+    ) {
+      const { data: accentedCities } = await supabase
+        .from('recycling_centers')
+        .select('city')
+        .ilike('state', state.name)
+        .or(
+          'city.ilike.%ñ%,city.ilike.%á%,city.ilike.%é%,city.ilike.%í%,city.ilike.%ó%,city.ilike.%ú%'
+        )
+        .order('city');
+
+      if (accentedCities && accentedCities.length > 0) {
+        const uniqueCities = [
+          ...new Set(accentedCities.map((row) => row.city)),
+        ];
+        console.log(
+          `Found cities with Spanish accents in ${
+            state.name
+          }: ${uniqueCities.join(', ')}`
+        );
+      }
+    }
+
+    // Create a normalized version for comparison
+    const plainCity = city
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
+    // Special handling for cities
     const specialCityVariants: Record<string, string[]> = {
       'new york': ['new york', 'new york city', 'nyc', 'manhattan'],
       miami: ['miami', 'miami beach', 'miami-dade', 'north miami'],
@@ -429,7 +523,52 @@ export async function getRecyclingCentersByCity(
         'district of columbia',
         'washington d.c.',
       ],
+      'la canada flintridge': [
+        'la canada flintridge',
+        'la cañada flintridge',
+        'la canada',
+        'la cañada',
+      ],
+      'canon city': ['canon city', 'cañon city'],
+      espanola: ['espanola', 'española', 'espanola nm', 'española nm'],
+      // Common Midwest city variations
+      chicago: ['chicago', 'chicago heights', 'chicago ridge'],
+      'saint louis': ['saint louis', 'st louis', 'st. louis'],
+      'saint paul': ['saint paul', 'st paul', 'st. paul'],
     };
+
+    // Common city suffix variations to try
+    const commonPrefixes = [
+      'north ',
+      'south ',
+      'east ',
+      'west ',
+      'new ',
+      'old ',
+      'fort ',
+      'mount ',
+      'mt ',
+      'saint ',
+      'st ',
+      'san ',
+      'santa ',
+      'el ',
+      'la ',
+    ];
+    const commonSuffixes = [
+      ' city',
+      ' heights',
+      ' hills',
+      ' springs',
+      ' beach',
+      ' park',
+      ' gardens',
+      ' valley',
+      ' village',
+      ' township',
+      ' town',
+      ' center',
+    ];
 
     // Check if this is a special city case
     const normalizedCity = city.toLowerCase().trim();
@@ -437,9 +576,17 @@ export async function getRecyclingCentersByCity(
 
     // Find all matching variants
     for (const [baseCity, variants] of Object.entries(specialCityVariants)) {
+      // Check if the normalized city matches any of the base cities or variants
       if (
-        variants.includes(normalizedCity) ||
-        normalizedCity.includes(baseCity)
+        baseCity === plainCity ||
+        variants.includes(plainCity) ||
+        variants.some(
+          (v) =>
+            v
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .toLowerCase() === plainCity
+        )
       ) {
         console.log(
           `Detected special city case: ${city} matches base city ${baseCity}`
@@ -449,138 +596,305 @@ export async function getRecyclingCentersByCity(
       }
     }
 
-    // If we have variants to try, check all of them and combine results
-    if (cityVariantsToTry.length > 0) {
-      console.log(
-        `Trying ${cityVariantsToTry.length} known variants for ${city}`
-      );
-      let allResults: RecyclingCenter[] = [];
+    // Add more generic normalized versions
+    if (cityVariantsToTry.length === 0) {
+      // Start with basic variations
+      cityVariantsToTry = [
+        city,
+        city.normalize('NFD').replace(/[\u0300-\u036f]/g, ''), // No diacritical marks
+      ];
 
-      for (const variant of cityVariantsToTry) {
-        const { data: variantData, error: variantError } = await supabase
-          .from('recycling_centers')
-          .select('*')
-          .ilike('state', state.name)
-          .ilike('city', variant)
-          .order('name');
-
-        if (variantData && variantData.length > 0) {
-          console.log(
-            `Found ${variantData.length} centers with city variant: "${variant}"`
-          );
-          allResults = [...allResults, ...variantData];
-        }
-      }
-
-      // Deduplicate results by ID
-      if (allResults.length > 0) {
-        const uniqueResults = allResults.filter(
-          (center, index, self) =>
-            index === self.findIndex((c) => c.id === center.id)
-        );
-        console.log(
-          `After deduplication: ${uniqueResults.length} unique centers for ${city}, ${state.name}`
-        );
-        return uniqueResults;
-      }
-    }
-
-    // Try multiple approaches to find the centers
-    // 1. First try direct case-insensitive match
-    let { data, error } = await supabase
-      .from('recycling_centers')
-      .select('*')
-      .ilike('state', state.name)
-      .ilike('city', city)
-      .order('name');
-
-    // 2. If no results, try with words in different order (for cities like "West New York")
-    if (!data || data.length === 0) {
-      console.log(
-        `No exact match found. Trying alternative search for ${city}...`
-      );
-      const words = city.split(' ');
-
-      if (words.length > 1) {
-        const cityAlternatives = [
-          // Try different word orders
-          [...words].reverse().join(' '),
-          // Try with common prefix/suffix alternatives
-          city.replace(/^Mount\s/i, 'Mt '),
-          city.replace(/^Mt\s/i, 'Mount '),
-          city.replace(/^Saint\s/i, 'St '),
-          city.replace(/^St\s/i, 'Saint '),
-          city.replace(/\sCity$/i, ''),
-          city + ' City',
-          city.replace(/^North\s/i, 'N '),
-          city.replace(/^South\s/i, 'S '),
-          city.replace(/^East\s/i, 'E '),
-          city.replace(/^West\s/i, 'W '),
-          // Add more variations as needed
-        ];
-
-        for (const altCity of cityAlternatives) {
-          const { data: altData, error: altError } = await supabase
-            .from('recycling_centers')
-            .select('*')
-            .ilike('state', state.name)
-            .ilike('city', altCity)
-            .order('name');
-
-          if (altData && altData.length > 0) {
-            console.log(
-              `Found centers using alternative city name: ${altCity}`
-            );
-            data = altData;
-            break;
+      // Add prefix/suffix variations
+      // Check if city starts with a common prefix
+      for (const prefix of commonPrefixes) {
+        if (normalizedCity.startsWith(prefix)) {
+          // Try without the prefix
+          const withoutPrefix = normalizedCity.substring(prefix.length);
+          cityVariantsToTry.push(withoutPrefix);
+          // Also try with alternative prefixes
+          for (const altPrefix of commonPrefixes) {
+            if (altPrefix !== prefix) {
+              cityVariantsToTry.push(altPrefix + withoutPrefix);
+            }
           }
         }
       }
+
+      // Check if city ends with a common suffix
+      for (const suffix of commonSuffixes) {
+        if (normalizedCity.endsWith(suffix)) {
+          // Try without the suffix
+          const withoutSuffix = normalizedCity.substring(
+            0,
+            normalizedCity.length - suffix.length
+          );
+          cityVariantsToTry.push(withoutSuffix);
+          // Also try with alternative suffixes
+          for (const altSuffix of commonSuffixes) {
+            if (altSuffix !== suffix) {
+              cityVariantsToTry.push(withoutSuffix + altSuffix);
+            }
+          }
+        }
+      }
+
+      console.log(
+        `No special case found, trying ${cityVariantsToTry.length} generic variants`
+      );
+    } else {
+      console.log(
+        `Trying special city variants: ${cityVariantsToTry.join(', ')}`
+      );
     }
 
-    // 3. If still no results, try with fuzzy matching (city starts with or contains)
-    if (!data || data.length === 0) {
-      console.log(`Still no match. Trying fuzzy matching for ${city}...`);
+    // If we have variants to try, check all of them and combine results
+    let allResults: RecyclingCenter[] = [];
+    const cityMatchMap = new Map<string, boolean>(); // Track if each result matches the requested city
+
+    for (const variant of cityVariantsToTry) {
+      // Try exact city match
+      const { data: variantData, error: variantError } = await supabase
+        .from('recycling_centers')
+        .select('*')
+        .ilike('state', state.name)
+        .ilike('city', variant)
+        .order('name');
+
+      if (variantData && variantData.length > 0) {
+        console.log(
+          `Found ${variantData.length} centers with city variant: "${variant}"`
+        );
+        allResults = [...allResults, ...variantData];
+        cityMatchMap.set(variant, true);
+      }
+
+      // Also check the full_address field for the city name
+      const { data: addressData, error: addressError } = await supabase
+        .from('recycling_centers')
+        .select('*')
+        .ilike('state', state.name)
+        .ilike('full_address', `%${variant}%`)
+        .order('name');
+
+      if (addressData && addressData.length > 0) {
+        console.log(
+          `Found ${addressData.length} centers with "${variant}" in address`
+        );
+        allResults = [...allResults, ...addressData];
+        cityMatchMap.set(variant, true);
+      }
+    }
+
+    // Try broader search patterns if no results yet
+    if (allResults.length === 0) {
+      // Try alternate name patterns (e.g., "City" vs "City of")
+      const cityAlternatives = [
+        // Try with common prefix/suffix alternatives
+        city.replace(/^Mount\s/i, 'Mt '),
+        city.replace(/^Mt\s/i, 'Mount '),
+        city.replace(/^Saint\s/i, 'St '),
+        city.replace(/^St\s/i, 'Saint '),
+        city.replace(/\sCity$/i, ''),
+        city + ' City',
+        city.replace(/^North\s/i, 'N '),
+        city.replace(/^South\s/i, 'S '),
+        city.replace(/^East\s/i, 'E '),
+        city.replace(/^West\s/i, 'W '),
+        // Handle "La" prefix
+        city.replace(/^La\s/i, 'La '),
+        city.replace(/^La\s/i, 'Los '),
+        // Remove "The" at the beginning
+        city.replace(/^The\s/i, ''),
+      ];
+
+      for (const altCity of cityAlternatives) {
+        const { data: altData, error: altError } = await supabase
+          .from('recycling_centers')
+          .select('*')
+          .ilike('state', state.name)
+          .ilike('city', altCity)
+          .order('name');
+
+        if (altData && altData.length > 0) {
+          console.log(`Found centers using alternative city name: ${altCity}`);
+          allResults = [...allResults, ...altData];
+          cityMatchMap.set(altCity, true);
+        }
+      }
+    }
+
+    // Try even more flexible matches if still no results
+    if (allResults.length === 0) {
+      console.log(
+        `Still no match. Trying broader fuzzy matching for ${city}...`
+      );
 
       // Try "starts with" pattern
       const { data: startsWithData, error: startsWithError } = await supabase
         .from('recycling_centers')
         .select('*')
         .ilike('state', state.name)
-        .ilike('city', `${city}%`)
+        .ilike('city', `${plainCity}%`)
         .order('name');
 
       if (startsWithData && startsWithData.length > 0) {
-        console.log(`Found centers with city starting with "${city}"`);
-        data = startsWithData;
+        console.log(`Found centers with city starting with "${plainCity}"`);
+        allResults = [...allResults, ...startsWithData];
+        cityMatchMap.set(plainCity, true);
       } else {
         // Try "contains" pattern as last resort
         const { data: containsData, error: containsError } = await supabase
           .from('recycling_centers')
           .select('*')
           .ilike('state', state.name)
-          .ilike('city', `%${city}%`)
+          .ilike('city', `%${plainCity}%`)
           .order('name');
 
         if (containsData && containsData.length > 0) {
-          console.log(`Found centers with city containing "${city}"`);
-          data = containsData;
+          console.log(`Found centers with city containing "${plainCity}"`);
+          allResults = [...allResults, ...containsData];
+          cityMatchMap.set(plainCity, true);
+        }
+      }
+
+      // If still no results, fall back to getting nearby cities
+      // This is especially useful for suburbs where people might use the name of a larger nearby city
+      if (allResults.length === 0) {
+        // First try nearby cities using a more targeted approach
+        console.log(
+          `No centers found directly. Looking for alternative centers in ${state.name}...`
+        );
+
+        // Using coordinates or common city patterns isn't feasible without geographic data
+        // Instead, let's try to find the most relevant centers in the state
+
+        // 1. First try major cities in the state which are more likely to have centers
+        const majorCities = [
+          'Albuquerque',
+          'Santa Fe',
+          'Las Cruces',
+          'Las Vegas',
+          'Denver',
+          'Phoenix',
+          'Tucson',
+          'El Paso',
+          'Austin',
+          'Dallas',
+          'Houston',
+          'San Antonio',
+          'Chicago',
+          'Los Angeles',
+          'San Francisco',
+          'New York',
+          'Boston',
+          'Philadelphia',
+          'Atlanta',
+          'Miami',
+          'Seattle',
+          'Portland',
+          'Nashville',
+          'Charlotte',
+          'Orlando',
+          'San Diego',
+        ];
+
+        // Filter to just those in this state
+        const { data: popularCenters } = await supabase
+          .from('recycling_centers')
+          .select('*')
+          .ilike('state', state.name)
+          .or(majorCities.map((c) => `city.ilike.${c}`).join(','))
+          .order('city')
+          .limit(15);
+
+        if (popularCenters && popularCenters.length > 0) {
+          console.log(
+            `Found ${popularCenters.length} centers in major cities in ${state.name}`
+          );
+          allResults = [...popularCenters];
+          cityMatchMap.set(popularCenters[0].city, true);
+        } else {
+          // 2. If no major cities with centers, get a sample of centers in the state
+          const { data: stateData } = await supabase
+            .from('recycling_centers')
+            .select('*')
+            .ilike('state', state.name)
+            .limit(50); // Get a sample of centers in the state
+
+          if (stateData && stateData.length > 0) {
+            console.log(
+              `No centers found for ${city}, showing some centers from ${state.name} instead`
+            );
+            // Sort by most common cities first
+            const cityFrequency: Record<string, number> = {};
+            stateData.forEach((center) => {
+              if (center.city) {
+                cityFrequency[center.city] =
+                  (cityFrequency[center.city] || 0) + 1;
+              }
+            });
+
+            // Sort by frequency and then pick top cities
+            const sortedCenters = stateData.sort((a, b) => {
+              const freqA = cityFrequency[a.city || ''] || 0;
+              const freqB = cityFrequency[b.city || ''] || 0;
+              return freqB - freqA;
+            });
+
+            allResults = sortedCenters.slice(0, 10);
+            cityMatchMap.set(sortedCenters[0].city, true);
+          }
         }
       }
     }
 
-    if (error) {
-      console.error('Error fetching recycling centers:', error);
-      return [];
+    // Deduplicate results by ID
+    if (allResults.length > 0) {
+      // Mark centers that match the requested city vs. fallback centers
+      allResults = allResults.map((center) => {
+        // These will be used to determine if we need to show the "nearby centers" message
+        // Check if this center's city directly matches any of our search variants
+        const isExactMatch = cityVariantsToTry.some((variant) => {
+          const normalizedCenterCity = (center.city || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase();
+          const normalizedVariant = variant
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase();
+          return normalizedCenterCity === normalizedVariant;
+        });
+
+        return {
+          ...center,
+          matched: isExactMatch,
+        };
+      });
+
+      // Count exactly matched centers vs. fallback centers
+      const exactMatches = allResults.filter((center) => center.matched).length;
+      const totalCenters = allResults.length;
+
+      console.log(
+        `Found ${exactMatches} exact matches and ${
+          totalCenters - exactMatches
+        } nearby centers for ${city}`
+      );
+
+      const uniqueResults = allResults.filter(
+        (center, index, self) =>
+          index === self.findIndex((c) => c.id === center.id)
+      );
+
+      console.log(
+        `After deduplication: ${uniqueResults.length} unique centers for ${city}, ${state.name}`
+      );
+      return uniqueResults;
     }
 
-    if (!data || data.length === 0) {
-      console.log(`No centers found for ${city}, ${state.name}`);
-      return [];
-    }
-
-    console.log(`Found ${data.length} centers in ${city}, ${state.name}`);
-    return data;
+    console.log(`No centers found for ${city}, ${state.name}`);
+    return [];
   } catch (error) {
     console.error('Error in getRecyclingCentersByCity:', error);
     return [];
@@ -611,7 +925,7 @@ export async function getCitiesByState(stateId: string): Promise<City[]> {
 
   // Convert to City type and cache
   const cities = uniqueCities.map((cityName) => ({
-    id: cityName.toLowerCase().replace(/\s+/g, '-'),
+    id: normalizeForUrl(cityName),
     state_id: stateId,
     name: cityName,
     created_at: new Date().toISOString(),
@@ -693,7 +1007,7 @@ export async function getFeaturedStates(): Promise<State[]> {
 
     // Convert to State type with proper formatting
     const states = (data || []).map((state) => ({
-      id: state.name.toLowerCase().replace(/\s+/g, '-'),
+      id: normalizeForUrl(state.name),
       name: state.name,
       description:
         state.description ||

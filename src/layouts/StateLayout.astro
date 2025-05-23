@@ -1,8 +1,8 @@
 ---
 import Layout from './Layout.astro';
 import StateDescription from '../components/StateDescription.astro';
-import { getState, getRecyclingCentersByState } from '../lib/supabase';
-import type { State, RecyclingCenter } from '../types/supabase';
+import { getState, getRecyclingCentersByState, normalizeForUrl } from '../lib/supabase';
+import type { State, RecyclingCenter, City } from '../types/supabase';
 import type { CentersByCity } from '../lib/supabase';
 
 interface Props {
@@ -46,7 +46,7 @@ const totalCenters = Object.values(centersByCity)
 
 // Get the cities data with center counts and sort alphabetically by city name
 const citiesWithCounts = Object.entries(centersByCity).map(([cityName, centers]) => ({
-  id: cityName.toLowerCase().replace(/\s+/g, '-'),
+  id: normalizeForUrl(cityName),
   name: cityName,
   centerCount: centers.length,
   description: `Find electronics recycling centers in ${cityName}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`

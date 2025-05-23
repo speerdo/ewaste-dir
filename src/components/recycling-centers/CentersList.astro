@@ -23,6 +23,7 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
   <button
     id="sortToggle"
     class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+    data-sort-mode="name"
   >
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -32,69 +33,116 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
 </div>
 
 <script>
-  function setupSorting() {
-    const sortToggleElement = document.getElementById('sortToggle');
-    const centersListElement = document.getElementById('centersList');
-    const sortButtonElement = document.getElementById('sort-button');
-    const sortButtonContainer = document.getElementById('sort-button-container');
-
-    // Move sort button to header container
-    if (sortButtonElement?.firstElementChild && sortButtonContainer) {
-      sortButtonContainer.appendChild(sortButtonElement.firstElementChild);
-      sortButtonElement.remove();
+  // Define toggleSort outside of initSorting to ensure it's accessible
+  function toggleSort(e: Event) {
+    const centersList = document.getElementById('centersList');
+    const sortButton = e.currentTarget as HTMLButtonElement || document.querySelector('#sort-button-container #sortToggle');
+    
+    if (!centersList || !sortButton) {
+      return;
     }
-
-    // Early return if elements don't exist
-    if (!sortToggleElement || !centersListElement) return;
-
-    // Type assertions after null check
-    const sortToggle = sortToggleElement as HTMLButtonElement;
-    const centersList = centersListElement as HTMLDivElement;
-    let isAlphabetical = true;
-
-    function sortCenters() {
-      const centers = Array.from(centersList.children) as HTMLElement[];
+    
+    // Get current sort mode from data attribute
+    const currentMode = sortButton.getAttribute('data-sort-mode') || 'name';
+    
+    // Get all center elements
+    const centers = Array.from(centersList.children);
+    
+    // Detach all centers from DOM to avoid reflow
+    const fragment = document.createDocumentFragment();
+    centers.forEach(center => fragment.appendChild(center));
+    
+    // Sort centers
+    const sortedCenters = Array.from(fragment.children);
+    if (currentMode === 'name') {
+      // Switch to rating sort
+      sortedCenters.sort((a, b) => {
+        const ratingA = parseFloat(a.getAttribute('data-rating') || '0');
+        const ratingB = parseFloat(b.getAttribute('data-rating') || '0');
+        return ratingB - ratingA;
+      });
       
-      centers.sort((a, b) => {
-        if (isAlphabetical) {
-          // Sort by rating (highest first)
-          const ratingA = parseFloat(a.getAttribute('data-rating') || '0');
-          const ratingB = parseFloat(b.getAttribute('data-rating') || '0');
-          return ratingB - ratingA;
-        } else {
-          // Sort alphabetically
-          const nameA = a.querySelector('h2')?.textContent?.trim() || '';
-          const nameB = b.querySelector('h2')?.textContent?.trim() || '';
-          return nameA.localeCompare(nameB);
-        }
-      });
-
-      // Update button text and icon
-      const buttonText = sortToggle.querySelector('span');
-      const buttonIcon = sortToggle.querySelector('svg');
-      if (buttonText && buttonIcon) {
-        buttonText.textContent = isAlphabetical ? 'Sort by Name' : 'Sort by Rating';
-        buttonIcon.innerHTML = isAlphabetical 
-          ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />'
-          : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />';
+      // Update button
+      sortButton.setAttribute('data-sort-mode', 'rating');
+      const buttonText = sortButton.querySelector('span');
+      const buttonIcon = sortButton.querySelector('svg');
+      
+      if (buttonText) buttonText.textContent = 'Sort by Name';
+      if (buttonIcon) {
+        buttonIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />';
       }
-
-      // Clear and repopulate the list
-      centersList.innerHTML = '';
-      centers.forEach(center => {
-        centersList.appendChild(center);
+      
+    } else {
+      // Switch to name sort
+      sortedCenters.sort((a, b) => {
+        const nameA = a.getAttribute('data-name') || '';
+        const nameB = b.getAttribute('data-name') || '';
+        return nameA.localeCompare(nameB);
       });
-
-      // Toggle sort state
-      isAlphabetical = !isAlphabetical;
+      
+      // Update button
+      sortButton.setAttribute('data-sort-mode', 'name');
+      const buttonText = sortButton.querySelector('span');
+      const buttonIcon = sortButton.querySelector('svg');
+      
+      if (buttonText) buttonText.textContent = 'Sort by Rating';
+      if (buttonIcon) {
+        buttonIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />';
+      }
     }
-
-    sortToggle.addEventListener('click', sortCenters);
+    
+    // Clear the list and append sorted elements
+    centersList.innerHTML = '';
+    sortedCenters.forEach(center => centersList.appendChild(center));
   }
 
-  // Set up sorting on initial load
-  setupSorting();
-
-  // Set up sorting after Astro page transitions
-  document.addEventListener('astro:page-load', setupSorting);
+  function initSorting() {
+    // Clean up any existing event listeners first
+    const oldSortButton = document.querySelector('#sort-button-container #sortToggle');
+    if (oldSortButton) {
+      oldSortButton.removeEventListener('click', toggleSort);
+      // Also clone and replace the button to ensure no stale event handlers
+      if (oldSortButton.parentNode) {
+        const freshButton = oldSortButton.cloneNode(true);
+        oldSortButton.parentNode.replaceChild(freshButton, oldSortButton);
+      }
+    }
+    
+    // Move the sort button to the container
+    const sortButtonContainer = document.getElementById('sort-button-container');
+    const sortButtonWrapper = document.getElementById('sort-button');
+    
+    if (sortButtonContainer && sortButtonWrapper?.firstElementChild) {
+      // Move the button to its proper container
+      sortButtonContainer.innerHTML = ''; // Clear any existing content
+      const newButton = sortButtonWrapper.firstElementChild.cloneNode(true);
+      sortButtonContainer.appendChild(newButton);
+      
+      // Set up the new button
+      const sortButton = sortButtonContainer.querySelector('#sortToggle');
+      if (sortButton) {
+        // Add click handler to the new button - IMPORTANT: use direct handler reference
+        sortButton.addEventListener('click', toggleSort);
+      }
+    }
+  }
+  
+  // Run initialization on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSorting);
+  } else {
+    // DOM already loaded, run now
+    initSorting();
+  }
+  
+  // Run initialization after Astro page transitions
+  document.addEventListener('astro:page-load', initSorting);
+  
+  // Clean up event listeners on page transitions
+  document.addEventListener('astro:before-swap', () => {
+    const sortButton = document.querySelector('#sort-button-container #sortToggle');
+    if (sortButton) {
+      sortButton.removeEventListener('click', toggleSort);
+    }
+  });
 </script> 

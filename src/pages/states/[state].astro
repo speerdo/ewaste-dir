@@ -1,9 +1,11 @@
 ---
+import Layout from '../../layouts/Layout.astro';
 import StateLayout from '../../layouts/StateLayout.astro';
 import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates, normalizeForUrl } from '../../lib/supabase';
 import { supabase } from '../../lib/supabase';
 import type { RecyclingCenter } from '../../types/supabase';
 import { monitorBuildProcess } from '../../lib/build-utils';
+import { PRODUCTION_URL } from '../../lib/url-utils';
 
 // Use hybrid approach with ISR
 export const prerender = false;
@@ -52,7 +54,6 @@ const sortedCities = Object.keys(centersByCity).sort();
 const totalCenters = Object.values(centersByCity).reduce((sum, centers) => sum + centers.length, 0);
 
 // Generate OG image URL using a static default image with the production domain
-const PRODUCTION_URL = 'https://www.recycleoldtech.com';
 const ogImageUrl = import.meta.env.PROD 
   ? new URL('/images/default-og.png', PRODUCTION_URL).toString()
   : '/images/default-og.png';
@@ -62,7 +63,7 @@ const cityData = sortedCities.map(city => {
   const centers = centersByCity[city];
   const firstCenter = centers[0];
   return {
-    id: city.toLowerCase().replace(/\s+/g, '-'),
+    id: normalizeForUrl(city),
     name: city,
     description: `Find electronics recycling centers in ${city}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
     address: firstCenter.full_address,

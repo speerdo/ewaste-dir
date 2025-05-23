@@ -16,6 +16,33 @@
   @apply text-green-900;
 }
 
+/* Ensure proper page layout and footer positioning */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+footer {
+  flex-shrink: 0;
+  width: 100%;
+  z-index: 10;
+  position: relative;
+}
+
+/* Solve issue with footer appearing at top on city pages */
+.container {
+  width: 100%;
+}
+
 /* Add smooth transitions for center cards */
 [data-center-id] {
   @apply transition-all duration-300 ease-in-out;

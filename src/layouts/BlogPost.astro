@@ -17,7 +17,7 @@ const currentUrl = new URL(Astro.request.url);
 const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_URL).toString() : currentUrl.toString();
 ---
 
-<Layout title={`${title} | E-Waste Hub Blog`} description={description} ogImage={image}>
+<Layout title={`${title} | RecycleOldTech Blog`} description={description} ogImage={image}>
   <article class="pt-32">
     <!-- Hero Section -->
     <div class="relative h-[400px] overflow-hidden">

@@ -23,6 +23,58 @@ interface Props {
 
 const { state, cityData, description, ogImage } = Astro.props;
 
+// Helper function to normalize city names for comparison
+function normalizeCityName(cityName: string): string {
+  // Special city name normalization (matching the logic in getRecyclingCentersByCity)
+  const specialCityNormalization: Record<string, string> = {
+    'new york': 'New York',
+    'new york city': 'New York',
+    'nyc': 'New York',
+    'manhattan': 'Manhattan',
+    'brooklyn': 'Brooklyn',
+    'queens': 'Queens',
+    'bronx': 'Bronx',
+    'staten island': 'Staten Island',
+    'miami': 'Miami',
+    'miami beach': 'Miami Beach',
+    'miami-dade': 'Miami-Dade',
+    'north miami': 'North Miami',
+    'los angeles': 'Los Angeles',
+    'la': 'Los Angeles',
+    'washington': 'Washington',
+    'washington dc': 'Washington, D.C.',
+    'district of columbia': 'Washington, D.C.',
+    'washington d.c.': 'Washington, D.C.',
+    'canon city': 'Canon City',
+    'cañon city': 'Canon City',
+    'espanola': 'Espanola',
+    'española': 'Espanola',
+    'chicago': 'Chicago',
+    'saint louis': 'Saint Louis',
+    'st louis': 'Saint Louis',
+    'st. louis': 'Saint Louis',
+    'saint paul': 'Saint Paul',
+    'st paul': 'Saint Paul',
+    'st. paul': 'Saint Paul',
+  };
+
+  const normalizedCity = cityName.toLowerCase().trim();
+  return specialCityNormalization[normalizedCity] || cityName;
+}
+
+// Function to get accurate center count for a city
+function getAccurateCenterCount(cityName: string, centers: RecyclingCenter[]): number {
+  // This should match the same logic used in getRecyclingCentersByCity
+  const normalizedCityName = normalizeCityName(cityName);
+  
+  // Count centers that match this exact city name
+  return centers.filter(center => {
+    // Normalize the center's city name
+    const centerCity = center.city || '';
+    return centerCity === normalizedCityName;
+  }).length;
+}
+
 // Get recycling centers data from Supabase with error handling
 let centersByCity: CentersByCity = {};
 try {
@@ -44,13 +96,21 @@ const centers24_7 = Object.values(centersByCity)
 const totalCenters = Object.values(centersByCity)
   .reduce((acc, centers: RecyclingCenter[]) => acc + centers.length, 0);
 
-// Get the cities data with center counts and sort alphabetically by city name
-const citiesWithCounts = Object.entries(centersByCity).map(([cityName, centers]) => ({
-  id: normalizeForUrl(cityName),
-  name: cityName,
-  centerCount: centers.length,
-  description: `Find electronics recycling centers in ${cityName}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`
-})).sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by city name
+// Combine all centers into a flat array for accurate counting
+const allCenters = Object.values(centersByCity).flat();
+
+// Get the cities data with accurate center counts and sort alphabetically by city name
+const citiesWithCounts = Object.entries(centersByCity).map(([cityName, centers]) => {
+  // Calculate the accurate center count using our helper function
+  const accurateCenterCount = getAccurateCenterCount(cityName, centers);
+  
+  return {
+    id: normalizeForUrl(cityName),
+    name: cityName,
+    centerCount: accurateCenterCount > 0 ? accurateCenterCount : centers.length, // If no exact matches, fallback to all centers
+    description: `Find electronics recycling centers in ${cityName}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`
+  };
+}).sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by city name
 
 // For now, let's use a placeholder image for states until we have proper images
 const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80';

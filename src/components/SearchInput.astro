@@ -1,6 +1,5 @@
 ---
 import { getAllCityStatePairs, type CityStatePair } from '../lib/cityData';
-import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
 import { PRODUCTION_URL } from '../lib/url-utils';
 
 interface Props {
@@ -48,27 +47,6 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         <span class="ml-2 font-medium">Search</span>
       </button>
     )}
-    <button
-      id={`use-location-${id}`}
-      type="button"
-      aria-label="Use my location"
-      class:list={[
-        "flex items-center text-gray-400 hover:text-gray-500",
-        variant === 'hero' 
-          ? "absolute right-[120px] top-0 bottom-0 pr-3" 
-          : "absolute right-3 top-1/2 -translate-y-1/2"
-      ]}
-      title="Use my location"
-    >
-      <svg id={`location-icon-${id}`} xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-      <svg id={`location-spinner-${id}`} class="animate-spin h-5 w-5 text-gray-400 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-    </button>
     <div id={`search-error-${id}`} class="absolute -bottom-6 left-0 right-0 text-red-500 text-xs bg-red-50 p-1 rounded hidden"></div>
   </form>
 
@@ -81,7 +59,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
   </div>
 </div>
 
-<script define:vars={{ getCurrentLocation, reverseGeocode }} type="module">
+<script define:vars={{ cityStatePairs }} type="module">
   // Simple test script
   console.log('Script loaded!');
 
@@ -104,7 +82,6 @@ const id = variant === 'hero' ? 'hero' : 'nav';
       const searchButton = document.getElementById(`search-button-${id}`);
       const searchResults = document.getElementById(`search-results-${id}`);
       const resultsContent = document.getElementById(`results-content-${id}`);
-      const useLocationBtn = document.getElementById(`use-location-${id}`);
       const searchForm = document.getElementById(`search-form-${id}`);
       
       // Exit if required elements not found
@@ -144,32 +121,6 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
       }
       
-      function showLocationLoading(isLoading) {
-        const locationIcon = document.getElementById(`location-icon-${id}`);
-        const locationSpinner = document.getElementById(`location-spinner-${id}`);
-        const useLocationBtn = document.getElementById(`use-location-${id}`);
-        
-        if (isLoading) {
-          // Show loading state
-          if (locationIcon && locationSpinner) {
-            locationIcon.classList.add('hidden');
-            locationSpinner.classList.remove('hidden');
-          }
-          if (useLocationBtn) {
-            useLocationBtn.setAttribute('disabled', 'true');
-          }
-        } else {
-          // Remove loading state
-          if (locationIcon && locationSpinner) {
-            locationIcon.classList.remove('hidden');
-            locationSpinner.classList.add('hidden');
-          }
-          if (useLocationBtn) {
-            useLocationBtn.removeAttribute('disabled');
-          }
-        }
-      }
-      
       function showError(message) {
         const errorEl = document.getElementById(`search-error-${id}`);
         if (errorEl) {
@@ -195,40 +146,6 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         .catch(error => {
           console.error('Failed to load city data:', error);
         });
-         
-      // Use location button
-      if (useLocationBtn) {
-        useLocationBtn.addEventListener('click', async (e) => {
-          e.preventDefault();
-          hideError();
-          showLocationLoading(true);
-          
-          try {
-            const location = await getCurrentLocation();
-            if (!location) {
-              throw new Error("Could not determine your location");
-            }
-            
-            const { latitude, longitude } = location;
-            const geoData = await reverseGeocode(latitude, longitude);
-            
-            if (!geoData) {
-              throw new Error("Could not find your location");
-            }
-            
-            // Set the search input to the found location
-            searchInput.value = `${geoData.city}, ${geoData.state}`;
-            
-            // Trigger a search with this location
-            handleSearch();
-          } catch (error) {
-            console.error("Location error:", error);
-            showError(error instanceof Error ? error.message : "Could not access your location");
-          } finally {
-            showLocationLoading(false);
-          }
-        });
-      }
   
       // Search for matching cities/states
       function searchLocations(query) {

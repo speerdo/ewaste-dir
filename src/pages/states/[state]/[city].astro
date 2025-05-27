@@ -55,16 +55,23 @@ if (!centers || centers.length === 0) {
   return Astro.redirect(`/states/${stateParam}`);
 }
 
-// Determine if we're showing exact city match or nearby centers
-const isMixedResults = centers.some(center => {
-  // Normalize both strings for comparison
-  const normalizedCityName = cityName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const normalizedCenterCity = (center.city || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  return normalizedCenterCity !== normalizedCityName;
-});
+// Count how many centers match exactly vs nearby centers
+const exactMatches = centers.filter(center => center.matched === true);
+const nearbyMatches = centers.filter(center => center.matched !== true);
 
-// Use the new matched flag - only show the "nearby centers" message if NONE of the centers match
-const showNearbyMessage = centers.length > 0 && !centers.some(center => center.matched === true);
+// Determine whether to show nearby message
+const hasExactMatches = exactMatches.length > 0;
+const hasNearbyMatches = nearbyMatches.length > 0;
+
+// Choose which centers to display - if we have exact matches, only show those
+// Otherwise, show the nearby matches
+const displayCenters = hasExactMatches ? exactMatches : centers;
+
+// Use the new matched flag - only show the "nearby centers" message if none of the centers match
+const showNearbyMessage = !hasExactMatches && hasNearbyMatches;
+
+// For title display
+const locationDescription = hasExactMatches ? cityName : `${state.name} area`;
 
 // Generate OG image URL using a static default image with the production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
@@ -72,8 +79,8 @@ const ogImageUrl = import.meta.env.PROD
   ? new URL('/images/default-og.png', PRODUCTION_URL).toString()
   : '/images/default-og.png';
 
-// Convert centers to map markers
-const mapMarkers: Marker[] = centers.map(center => ({
+// Convert centers to map markers - only show the centers we're displaying
+const mapMarkers: Marker[] = displayCenters.map(center => ({
   lat: Number(center.latitude),
   lng: Number(center.longitude),
   name: center.name,
@@ -154,7 +161,7 @@ const metaDescription = `Find certified electronics recycling centers in ${cityN
           Electronics Recycling in {cityName}
         </h1>
         <p class="text-xl text-gray-600">
-          {centers.length} recycling {centers.length === 1 ? 'center' : 'centers'} in {isMixedResults ? `${state.name} area` : `${cityName}, ${state.name}`}
+          {displayCenters.length} recycling {displayCenters.length === 1 ? 'center' : 'centers'} in {locationDescription}
         </p>
       </div>
       <div id="sort-button-container"></div>
@@ -192,7 +199,7 @@ const metaDescription = `Find certified electronics recycling centers in ${cityN
 
       <!-- Recycling Centers List (scrollable) -->
       <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
-        <CentersList centers={centers} defaultLogo={DEFAULT_LOGO} />
+        <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} />
       </div>
     </div>
   </div>

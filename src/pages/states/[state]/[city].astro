@@ -91,7 +91,7 @@ const mapMarkers: Marker[] = displayCenters.map(center => ({
 })).filter(marker => !isNaN(marker.lat) && !isNaN(marker.lng));
 
 // Generate a unique, keyword-rich meta description for SEO
-const metaDescription = `Find certified electronics recycling centers in ${cityName}, ${state.name}. Responsibly recycle old phones, computers, TVs and more. Discover safe, eco-friendly e-waste disposal options in ${cityName}, ${state.name}.`;
+const metaDescription = `Find e-waste recycling centers in ${cityName}, ${state.name}. Safely dispose of old electronics including phones, computers & TVs. Local drop-off locations.`;
 ---
 
 <Layout 
@@ -306,34 +306,73 @@ const metaDescription = `Find certified electronics recycling centers in ${cityN
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': centers.map(center => {
+      // Create a valid LocalBusiness schema that passes validation
+      // Using a record type to avoid TypeScript errors with dynamic properties
       const business: Record<string, any> = {
         '@type': 'LocalBusiness',
-        name: center.name,
-        address: {
+        '@id': `https://www.recycleoldtech.com/centers/${center.id || ''}`,
+        'name': center.name || `${cityName} Electronics Recycling Center`,
+        'description': center.description || `Electronics recycling center in ${cityName}, ${state.name}`,
+        'address': {
           '@type': 'PostalAddress',
-          streetAddress: center.full_address || '',
-          addressLocality: cityName,
-          addressRegion: state.name,
-          addressCountry: 'US',
-        },
-        telephone: center.phone || undefined,
-        url: center.site || undefined,
-        image: center.logo || undefined,
-        geo: center.latitude && center.longitude ? {
-          '@type': 'GeoCoordinates',
-          latitude: center.latitude,
-          longitude: center.longitude
-        } : undefined,
-        openingHours: center.working_hours || undefined,
-        aggregateRating: center.rating ? {
-          '@type': 'AggregateRating',
-          ratingValue: center.rating,
-          reviewCount: center.reviews || 1
-        } : undefined,
-        description: center.description || undefined
+          'streetAddress': center.full_address || '',
+          'addressLocality': center.city || cityName,
+          'addressRegion': center.state || state.name,
+          'addressCountry': 'US'
+        }
       };
-      // Remove undefined fields
-      Object.keys(business).forEach(key => business[key] === undefined && delete business[key]);
+      
+      // Only add fields if they exist and are valid
+      if (center.phone) {
+        business.telephone = center.phone;
+      }
+      
+      if (center.site) {
+        business.url = center.site;
+      }
+      
+      if (center.latitude && center.longitude) {
+        business.geo = {
+          '@type': 'GeoCoordinates',
+          'latitude': Number(center.latitude),
+          'longitude': Number(center.longitude)
+        };
+      }
+      
+      if (center.working_hours) {
+        // Format openingHours according to schema.org requirements (e.g., "Mo-Fr 09:00-17:00")
+        const formattedHours = center.working_hours
+          .replace(/\n/g, ', ')
+          .replace(/\r/g, '')
+          .trim();
+        
+        if (formattedHours && !formattedHours.includes('24/7')) {
+          business.openingHoursSpecification = {
+            '@type': 'OpeningHoursSpecification',
+            'description': formattedHours
+          };
+        } else if (formattedHours.includes('24/7')) {
+          business.openingHoursSpecification = {
+            '@type': 'OpeningHoursSpecification',
+            'dayOfWeek': [
+              'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+            ],
+            'opens': '00:00',
+            'closes': '23:59'
+          };
+        }
+      }
+      
+      if (center.rating && Number(center.rating) > 0) {
+        business.aggregateRating = {
+          '@type': 'AggregateRating',
+          'ratingValue': Number(center.rating).toFixed(1),
+          'reviewCount': center.reviews ? Number(center.reviews) : 1,
+          'bestRating': '5',
+          'worstRating': '1'
+        };
+      }
+      
       return business;
     })
   })}></script>

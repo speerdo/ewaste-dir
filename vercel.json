@@ -49,6 +49,46 @@
       ]
     }
   ],
+  "redirects": [
+    { "source": "/home", "destination": "/", "permanent": true },
+    { "source": "/index", "destination": "/", "permanent": true },
+    {
+      "source": "/state/:state",
+      "destination": "/states/:state",
+      "permanent": true
+    },
+    {
+      "source": "/states/:state/:city/centers",
+      "destination": "/states/:state/:city",
+      "permanent": true
+    },
+    {
+      "source": "/recycling-centers/:state",
+      "destination": "/states/:state",
+      "permanent": true
+    },
+    {
+      "source": "/recycling-centers/:state/:city",
+      "destination": "/states/:state/:city",
+      "permanent": true
+    },
+    { "source": "/contact-us", "destination": "/contact", "permanent": true },
+    {
+      "source": "/states/new-york/new-york",
+      "destination": "/states/new-york/new-york-city",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/los-angeles",
+      "destination": "/states/california/los-angeles",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy",
+      "permanent": true
+    }
+  ],
   "regions": ["iad1"],
   "build": {
     "env": {

@@ -61,7 +61,7 @@ const cityData = sortedCities.map(city => {
   return {
     id: normalizeForUrl(city),
     name: city,
-    description: `Find electronics recycling centers in ${city}, ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`,
+    description: `Find e-waste recycling centers in ${city}, ${state.name}. Safe disposal options for electronics near you.`,
     address: firstCenter.full_address,
     coordinates: {
       lat: firstCenter.latitude,
@@ -71,7 +71,7 @@ const cityData = sortedCities.map(city => {
 });
 
 // Generate description
-const description = `Find ${totalCenters} electronics recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${state.name}. Get directions and information for safe disposal of computers, phones, TVs and other electronic devices.`;
+const description = `Find ${totalCenters} e-waste recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${state.name}. Get directions for safe disposal of electronics and reduce environmental impact.`;
 ---
 
 <StateLayout 
@@ -105,17 +105,31 @@ const description = `Find ${totalCenters} electronics recycling ${totalCenters =
       {JSON.stringify({
         '@context': 'https://schema.org',
         '@graph': cityData.map(city => {
-          const business = {
+          const business: Record<string, any> = {
             '@type': 'LocalBusiness',
-            name: city.name + ' Electronics Recycling',
-            address: {
+            '@id': `https://www.recycleoldtech.com/states/${stateParam}/${city.id}`,
+            'name': `${city.name} Electronics Recycling`,
+            'description': city.description,
+            'address': {
               '@type': 'PostalAddress',
-              addressLocality: city.name,
-              addressRegion: state.name,
-              addressCountry: 'US',
-            },
-            description: city.description
+              'addressLocality': city.name,
+              'addressRegion': state.name,
+              'addressCountry': 'US'
+            }
           };
+          
+          if (city.coordinates && city.coordinates.lat && city.coordinates.lng) {
+            business.geo = {
+              '@type': 'GeoCoordinates',
+              'latitude': city.coordinates.lat,
+              'longitude': city.coordinates.lng
+            };
+          }
+          
+          if (city.address) {
+            business.address.streetAddress = city.address;
+          }
+          
           return business;
         })
       })}

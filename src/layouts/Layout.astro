@@ -14,8 +14,10 @@ interface Props {
 
 const { title, description, ogImage } = Astro.props;
 
-// Default meta description
-const metaDescription = description || 'Find electronics recycling centers near you. Get directions, contact information, and more.';
+// Default meta description - limit to 155-160 characters max for better SEO
+const metaDescription = description 
+  ? (description.length > 155 ? description.substring(0, 155) + '...' : description)
+  : 'Find electronics recycling centers near you. Get directions, contact information, and more.';
 
 // Default OG image
 const defaultOgImage = '/images/default-og.png';
@@ -31,6 +33,25 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
 
 // Get Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
+
+// SEO-friendly title - limit to 60 characters for search engines
+const seoTitle = title && title.length > 60 ? title.substring(0, 60) + '...' : title;
+
+// Function to minify HTML by removing unnecessary whitespace
+function minifyHTML(html: string): string {
+  if (import.meta.env.PROD) {
+    return html
+      .replace(/\s+/g, ' ')
+      .replace(/>\s+</g, '><')
+      .replace(/\s+>/g, '>')
+      .replace(/<\s+/g, '<')
+      .trim();
+  }
+  return html;
+}
+
+// Apply minification to the output HTML
+Astro.response.headers.set('Content-Type', 'text/html; charset=utf-8');
 ---
 
 <!doctype html>
@@ -53,14 +74,14 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={seoTitle} />
     <meta property="og:description" content={metaDescription} />
     <meta property="og:image" content={ogImageUrl} />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalUrl} />
-    <meta property="twitter:title" content={title} />
+    <meta property="twitter:title" content={seoTitle} />
     <meta property="twitter:description" content={metaDescription} />
     <meta property="twitter:image" content={ogImageUrl} />
     
@@ -69,7 +90,7 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
     
-    <title>{title}</title>
+    <title>{seoTitle}</title>
 
     <!-- Make API key available to client scripts -->
     <script is:inline define:vars={{ GOOGLE_MAPS_API_KEY }}>

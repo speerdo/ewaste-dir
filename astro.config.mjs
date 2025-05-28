@@ -15,7 +15,15 @@ const SITE_URL =
 // https://astro.build/config
 export default defineConfig({
   site: SITE_URL,
-  integrations: [tailwind(), sitemap()],
+  integrations: [
+    tailwind(),
+    sitemap({
+      filter: (page) => !page.includes('404'),
+      changefreq: 'weekly',
+      priority: 0.7,
+      lastmod: new Date().toISOString(),
+    }),
+  ],
   output: 'server',
   adapter: vercel({
     webAnalytics: {
@@ -35,6 +43,19 @@ export default defineConfig({
     serverEntry: 'entry.mjs',
     format: 'directory',
   },
+  image: {
+    service: {
+      entrypoint: 'astro/assets/services/sharp',
+      config: {
+        // Image optimization settings
+        quality: 80, // Reduce image quality to 80% for better compression
+        format: ['avif', 'webp', 'jpeg', 'png'], // Prioritize modern formats
+        cacheDir: './.astro/cache',
+        logLevel: 'info',
+      },
+    },
+    domains: ['images.unsplash.com'], // Allow optimization for external domains
+  },
   vite: {
     define: {
       'import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY': JSON.stringify(
@@ -44,11 +65,24 @@ export default defineConfig({
     build: {
       reportCompressedSize: false,
       chunkSizeWarningLimit: 1000,
+      cssCodeSplit: true, // Split CSS for better caching
+      minify: 'terser', // Use more aggressive minification
+      terserOptions: {
+        compress: {
+          drop_console: true, // Remove console logs in production
+          passes: 2, // Multiple optimization passes
+        },
+      },
       rollupOptions: {
         output: {
           manualChunks: {
             'google-maps': ['@googlemaps/js-api-loader'],
             supabase: ['@supabase/supabase-js'],
+            // Add more chunks as needed for common dependencies
+            'common-ui': [
+              './src/components/Header.astro',
+              './src/components/Footer.astro',
+            ],
           },
         },
       },

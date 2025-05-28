@@ -31,5 +31,9 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {},
+  "comments": {
+    "build": "Using esbuild for minification which is built into Vite"
   }
 }

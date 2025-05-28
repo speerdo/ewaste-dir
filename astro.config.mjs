@@ -66,13 +66,7 @@ export default defineConfig({
       reportCompressedSize: false,
       chunkSizeWarningLimit: 1000,
       cssCodeSplit: true, // Split CSS for better caching
-      minify: 'terser', // Use more aggressive minification
-      terserOptions: {
-        compress: {
-          drop_console: true, // Remove console logs in production
-          passes: 2, // Multiple optimization passes
-        },
-      },
+      minify: 'esbuild', // Use esbuild instead of terser (built into Vite)
       rollupOptions: {
         output: {
           manualChunks: {
@@ -92,6 +86,14 @@ export default defineConfig({
       optimizeDeps: {
         include: ['@supabase/supabase-js'],
       },
+    },
+    esbuild: {
+      // Add esbuild options for minification
+      minifyIdentifiers: true,
+      minifySyntax: true,
+      minifyWhitespace: true,
+      keepNames: false, // Set to true if you need to preserve function names
+      drop: ['console', 'debugger'], // Drop console and debugger statements
     },
   },
   routes: [

@@ -93,7 +93,8 @@ export default defineConfig({
       minifySyntax: true,
       minifyWhitespace: true,
       keepNames: false, // Set to true if you need to preserve function names
-      drop: ['console', 'debugger'], // Drop console and debugger statements
+      drop: ['debugger'], // Only drop debugger statements, keep console for debugging
+      legalComments: 'inline', // Preserve license comments
     },
   },
   routes: [

@@ -42,13 +42,14 @@ if (!state) {
   return Astro.redirect('/404');
 }
 
-// Convert city param to proper name format
-const cityName = cityParam.split('-').map(word => 
+// Convert city param to proper name format for searching
+// This is used only for the database query, not for display
+const searchCityName = cityParam.split('-').map(word => 
   word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
 ).join(' ');
 
 // Get centers data
-const centers = await getRecyclingCentersByCity(stateParam, cityName);
+const centers = await getRecyclingCentersByCity(stateParam, searchCityName);
 
 // If no centers found, redirect to state page
 if (!centers || centers.length === 0) {
@@ -69,6 +70,24 @@ const displayCenters = hasExactMatches ? exactMatches : centers;
 
 // Use the new matched flag - only show the "nearby centers" message if none of the centers match
 const showNearbyMessage = !hasExactMatches && hasNearbyMatches;
+
+// Get the actual city name from the centers data to preserve special characters
+// Use the most common city name from the matching centers
+const cityNameCounts = new Map<string, number>();
+displayCenters.forEach(center => {
+  if (center.city) {
+    const count = cityNameCounts.get(center.city) || 0;
+    cityNameCounts.set(center.city, count + 1);
+  }
+});
+
+// Find the most frequent city name, fallback to searchCityName if no centers have city names
+let cityName = searchCityName;
+if (cityNameCounts.size > 0) {
+  const mostCommonCity = Array.from(cityNameCounts.entries())
+    .sort((a, b) => b[1] - a[1])[0][0];
+  cityName = mostCommonCity;
+}
 
 // For title display
 const locationDescription = hasExactMatches ? cityName : `${state.name} area`;

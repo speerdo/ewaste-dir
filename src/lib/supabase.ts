@@ -511,10 +511,20 @@ export async function getRecyclingCentersByCity(
       'washington dc': 'Washington, D.C.',
       'district of columbia': 'Washington, D.C.',
       'washington d.c.': 'Washington, D.C.',
-      'canon city': 'Canon City',
-      'cañon city': 'Canon City',
-      espanola: 'Espanola',
-      española: 'Espanola',
+      // Handle Canon City / Cañon City variations - both should map to the Spanish form
+      'canon city': 'Cañon City',
+      'cañon city': 'Cañon City',
+      // Handle Española variations
+      espanola: 'Española',
+      española: 'Española',
+      // Handle other common Spanish city names
+      'san jose': 'San José',
+      'san josé': 'San José',
+      'la canada': 'La Cañada',
+      'la cañada': 'La Cañada',
+      'la canada flintridge': 'La Cañada Flintridge',
+      'la cañada flintridge': 'La Cañada Flintridge',
+      // Other cities
       chicago: 'Chicago',
       'saint louis': 'Saint Louis',
       'st louis': 'Saint Louis',
@@ -538,12 +548,43 @@ export async function getRecyclingCentersByCity(
       searchCity.normalize('NFD').replace(/[\u0300-\u036f]/g, ''), // No diacritical marks
     ];
 
-    // Add common variants for ONLY this specific city
-    const withoutSuffix = normalizedCity.replace(
+    // If the original input city differs from searchCity, include it too
+    if (city !== searchCity) {
+      searchCityVariants.push(city);
+      searchCityVariants.push(
+        city.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      );
+    }
+
+    // Add URL-normalized version (what would be in the URL)
+    const urlNormalized = normalizeForUrl(searchCity);
+    if (urlNormalized !== searchCity.toLowerCase().replace(/\s+/g, '-')) {
+      // Convert back from URL format to title case
+      const fromUrl = urlNormalized
+        .split('-')
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(' ');
+      if (!searchCityVariants.includes(fromUrl)) {
+        searchCityVariants.push(fromUrl);
+      }
+    }
+
+    // Remove duplicates and filter out empty strings
+    searchCityVariants = [...new Set(searchCityVariants)].filter(
+      (variant) => variant.trim().length > 0
+    );
+
+    // Add common variants for ONLY this specific city (suffixes and prefixes)
+    const baseNormalizedCity = normalizedCity;
+
+    // Try variants without common suffixes
+    const withoutSuffix = baseNormalizedCity.replace(
       /\s(city|town|village|heights|springs|beach|park)$/i,
       ''
     );
-    if (withoutSuffix !== normalizedCity && withoutSuffix.length > 0) {
+    if (withoutSuffix !== baseNormalizedCity && withoutSuffix.length > 0) {
       // Capitalize first letter of each word
       const formattedWithoutSuffix = withoutSuffix
         .split(' ')
@@ -552,11 +593,12 @@ export async function getRecyclingCentersByCity(
       searchCityVariants.push(formattedWithoutSuffix);
     }
 
-    const withoutPrefix = normalizedCity.replace(
+    // Try variants without common prefixes
+    const withoutPrefix = baseNormalizedCity.replace(
       /^(north|south|east|west|new|old|fort|mount|mt|saint|st|san|santa|el|la)\s/i,
       ''
     );
-    if (withoutPrefix !== normalizedCity && withoutPrefix.length > 0) {
+    if (withoutPrefix !== baseNormalizedCity && withoutPrefix.length > 0) {
       // Capitalize first letter of each word
       const formattedWithoutPrefix = withoutPrefix
         .split(' ')
@@ -564,6 +606,11 @@ export async function getRecyclingCentersByCity(
         .join(' ');
       searchCityVariants.push(formattedWithoutPrefix);
     }
+
+    // Final deduplication
+    searchCityVariants = [...new Set(searchCityVariants)].filter(
+      (variant) => variant.trim().length > 0
+    );
 
     console.log(
       `Searching for exact matches with city variants: ${searchCityVariants.join(

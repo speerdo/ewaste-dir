@@ -119,6 +119,157 @@ const metaDescription = baseDescription.length <= maxBaseLength
   ? baseDescription
   : `E-waste recycling in ${cityName}, ${state.name}. Safe disposal of electronics & computers.`;
 
+// Helper function to convert working hours to schema.org format
+function formatOpeningHours(workingHours: any): string | undefined {
+  if (!workingHours) return undefined;
+  
+  // If it's already a string, return it
+  if (typeof workingHours === 'string') {
+    // Check if it's in a valid schema.org format
+    if (workingHours.includes('24/7') || workingHours.includes('24 hours')) {
+      return 'Mo-Su 00:00-24:00';
+    }
+    return workingHours;
+  }
+  
+  // If it's an object with day properties, convert to schema.org format
+  if (typeof workingHours === 'object') {
+    try {
+      const dayMap: Record<string, string> = {
+        'monday': 'Mo',
+        'tuesday': 'Tu', 
+        'wednesday': 'We',
+        'thursday': 'Th',
+        'friday': 'Fr',
+        'saturday': 'Sa',
+        'sunday': 'Su'
+      };
+      
+      // Group days by hours to create more compact format
+      const hoursTodays: Record<string, string[]> = {};
+      
+      for (const [day, hours] of Object.entries(workingHours)) {
+        if (typeof hours === 'string' && hours.trim()) {
+          const dayCode = dayMap[day.toLowerCase()];
+          if (dayCode) {
+            // Skip "Closed" or similar values for schema.org (only include actual hours)
+            if (hours.toLowerCase().includes('closed') || hours.toLowerCase().includes('close')) {
+              continue;
+            }
+            const convertedHours = convertTimeFormat(hours as string);
+            if (convertedHours) {
+              if (!hoursTodays[convertedHours]) {
+                hoursTodays[convertedHours] = [];
+              }
+              hoursTodays[convertedHours].push(dayCode);
+            }
+          }
+        }
+      }
+      
+      // Create compact format by grouping consecutive days
+      const schedules: string[] = [];
+      for (const [hours, days] of Object.entries(hoursTodays)) {
+        if (days.length > 0) {
+          // Sort days in week order
+          const sortedDays = days.sort((a, b) => {
+            const order = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+            return order.indexOf(a) - order.indexOf(b);
+          });
+          
+          // Group consecutive days (e.g., Mo-Fr instead of Mo,Tu,We,Th,Fr)
+          const dayString = groupConsecutiveDays(sortedDays);
+          schedules.push(`${dayString} ${hours}`);
+        }
+      }
+      
+      return schedules.length > 0 ? schedules.join(', ') : undefined;
+    } catch (error) {
+      console.error('Error formatting opening hours:', error);
+      return undefined;
+    }
+  }
+  
+  return undefined;
+}
+
+// Helper function to group consecutive days
+function groupConsecutiveDays(days: string[]): string {
+  if (days.length === 0) return '';
+  if (days.length === 1) return days[0];
+  
+  const dayOrder = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  const groups: string[] = [];
+  let currentGroup = [days[0]];
+  
+  for (let i = 1; i < days.length; i++) {
+    const currentIndex = dayOrder.indexOf(days[i]);
+    const previousIndex = dayOrder.indexOf(days[i - 1]);
+    
+    // Check if days are consecutive
+    if (currentIndex === previousIndex + 1) {
+      currentGroup.push(days[i]);
+    } else {
+      // End current group and start new one
+      if (currentGroup.length >= 3) {
+        groups.push(`${currentGroup[0]}-${currentGroup[currentGroup.length - 1]}`);
+      } else {
+        groups.push(currentGroup.join(','));
+      }
+      currentGroup = [days[i]];
+    }
+  }
+  
+  // Handle the last group
+  if (currentGroup.length >= 3) {
+    groups.push(`${currentGroup[0]}-${currentGroup[currentGroup.length - 1]}`);
+  } else {
+    groups.push(currentGroup.join(','));
+  }
+  
+  return groups.join(',');
+}
+
+// Helper function to convert time format to 24-hour format
+function convertTimeFormat(timeStr: string): string | undefined {
+  if (!timeStr) return undefined;
+  
+  try {
+    // Handle "24/7" or "24 hours" cases
+    if (timeStr.includes('24/7') || timeStr.includes('24 hours') || timeStr.toLowerCase().includes('24 hour')) {
+      return '00:00-24:00';
+    }
+    
+    // Handle formats like "9AM-6PM", "9:00AM-6:00PM", etc.
+    const timePattern = /(\d{1,2}):?(\d{0,2})\s*(AM|PM)?\s*[-–]\s*(\d{1,2}):?(\d{0,2})\s*(AM|PM)?/i;
+    const match = timeStr.match(timePattern);
+    
+    if (match) {
+      let [, startHour, startMin = '00', startPeriod = '', endHour, endMin = '00', endPeriod = ''] = match;
+      
+      // Convert to 24-hour format
+      let start24 = parseInt(startHour);
+      let end24 = parseInt(endHour);
+      
+      if (startPeriod.toUpperCase() === 'PM' && start24 !== 12) start24 += 12;
+      if (startPeriod.toUpperCase() === 'AM' && start24 === 12) start24 = 0;
+      if (endPeriod.toUpperCase() === 'PM' && end24 !== 12) end24 += 12;
+      if (endPeriod.toUpperCase() === 'AM' && end24 === 12) end24 = 0;
+      
+      const startTime = `${start24.toString().padStart(2, '0')}:${startMin.padStart(2, '0')}`;
+      const endTime = `${end24.toString().padStart(2, '0')}:${endMin.padStart(2, '0')}`;
+      
+      return `${startTime}-${endTime}`;
+    }
+    
+    // If we can't parse it, return the original string
+    return timeStr;
+  } catch (error) {
+    console.error('Error converting time format:', error);
+    return timeStr;
+  }
+}
+
 // Generate optimized title (target: 50-60 characters)
 const maxTitleLength = 60;
 const baseTitle = `E-Waste Recycling in ${cityName}, ${state.name}`;
@@ -365,7 +516,7 @@ if (baseTitle.length <= maxTitleLength) {
           latitude: center.latitude,
           longitude: center.longitude
         } : undefined,
-        openingHours: center.working_hours || undefined,
+        openingHours: formatOpeningHours(center.working_hours) || undefined,
         aggregateRating: center.rating ? {
           '@type': 'AggregateRating',
           ratingValue: center.rating,

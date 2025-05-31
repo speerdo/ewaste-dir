@@ -70,8 +70,15 @@ const cityData = sortedCities.map(city => {
   };
 });
 
-// Generate description
-const description = `Find ${totalCenters} electronics recycling ${totalCenters === 1 ? 'center' : 'centers'} in ${state.name}. Get directions and information for safe disposal of computers, phones, TVs and other electronic devices.`;
+// Generate description - keep it between 110-160 characters, accounting for longer state names
+const maxBaseLength = 160;
+const centerWord = totalCenters === 1 ? 'center' : 'centers';
+const baseDescription = `Find ${totalCenters} electronics recycling ${centerWord} in ${state.name}. Safe disposal of computers, phones, TVs & e-waste.`;
+
+// If the base description is too long, use a shorter version
+const description = baseDescription.length <= maxBaseLength 
+  ? baseDescription
+  : `${totalCenters} e-waste recycling ${centerWord} in ${state.name}. Safe electronics disposal & directions.`;
 ---
 
 <StateLayout 

@@ -110,11 +110,33 @@ const mapMarkers: Marker[] = displayCenters.map(center => ({
 })).filter(marker => !isNaN(marker.lat) && !isNaN(marker.lng));
 
 // Generate a unique, keyword-rich meta description for SEO
-const metaDescription = `Find certified electronics recycling centers in ${cityName}, ${state.name}. Responsibly recycle old phones, computers, TVs and more. Discover safe, eco-friendly e-waste disposal options in ${cityName}, ${state.name}.`;
+// Keep it between 110-160 characters, accounting for longer city/state names
+const maxBaseLength = 160;
+const baseDescription = `Electronics recycling centers in ${cityName}, ${state.name}. Safe disposal of phones, computers, TVs & e-waste.`;
+
+// If the base description is too long, use a shorter version
+const metaDescription = baseDescription.length <= maxBaseLength 
+  ? baseDescription
+  : `E-waste recycling in ${cityName}, ${state.name}. Safe disposal of electronics & computers.`;
+
+// Generate optimized title (target: 50-60 characters)
+const maxTitleLength = 60;
+const baseTitle = `E-Waste Recycling in ${cityName}, ${state.name}`;
+const shortTitle = `E-Waste Centers: ${cityName}, ${state.name}`;
+const ultraShortTitle = `E-Waste: ${cityName}, ${state.name}`;
+
+let pageTitle;
+if (baseTitle.length <= maxTitleLength) {
+  pageTitle = baseTitle;
+} else if (shortTitle.length <= maxTitleLength) {
+  pageTitle = shortTitle;
+} else {
+  pageTitle = ultraShortTitle;
+}
 ---
 
 <Layout 
-  title={`Electronics Recycling in ${cityName}, ${state.name} – E‑Waste Directory`}
+  title={pageTitle}
   description={metaDescription}
   ogImage={ogImageUrl}
 >

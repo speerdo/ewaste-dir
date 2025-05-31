@@ -117,10 +117,25 @@ const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79
 
 // Default description if not provided
 const metaDescription = description || `Find electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`;
+
+// Generate optimized title (target: 50-60 characters)
+const maxTitleLength = 60;
+const baseStateTitle = `E-Waste Recycling in ${state.name}`;
+const shortStateTitle = `E-Waste Centers: ${state.name}`;
+const ultraShortStateTitle = `E-Waste: ${state.name}`;
+
+let statePageTitle;
+if (baseStateTitle.length <= maxTitleLength) {
+  statePageTitle = baseStateTitle;
+} else if (shortStateTitle.length <= maxTitleLength) {
+  statePageTitle = shortStateTitle;
+} else {
+  statePageTitle = ultraShortStateTitle;
+}
 ---
 
 <Layout 
-  title={`Electronics Recycling in ${state.name} – E‑Waste Directory`}
+  title={statePageTitle}
   description={metaDescription}
   ogImage={ogImage}
 >

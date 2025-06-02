@@ -61,6 +61,9 @@ const totalCenters = centers?.length || 0;
 ---
 
 <Layout title={`Search Results for "${query}" | E-Waste Recycling Centers`}>
+  <!-- Prevent indexing of search result pages -->
+  <meta name="robots" content="noindex, nofollow" slot="head" />
+  
   <div class="bg-white min-h-screen">
     <div class="container mx-auto px-4 py-8">
       <h1 class="text-4xl font-display font-bold text-gray-900 mb-4">

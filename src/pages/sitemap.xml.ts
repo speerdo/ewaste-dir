@@ -1,14 +1,27 @@
 import { getAllStates, getCitiesByState } from '../lib/supabase';
+import { getCollection } from 'astro:content';
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async () => {
   const states = await getAllStates();
+
+  // Get all blog posts
+  const blogPosts = await getCollection('blog');
+
   let urls = [
     // Add static URLs
     { loc: 'https://www.recycleoldtech.com/' },
     { loc: 'https://www.recycleoldtech.com/about' },
-    // ...other static pages
+    { loc: 'https://www.recycleoldtech.com/contact' },
+    { loc: 'https://www.recycleoldtech.com/privacy' },
+    { loc: 'https://www.recycleoldtech.com/thanks' },
+    { loc: 'https://www.recycleoldtech.com/blog' },
   ];
+
+  // Add blog post URLs
+  for (const post of blogPosts) {
+    urls.push({ loc: `https://www.recycleoldtech.com/blog/${post.slug}` });
+  }
 
   // Add dynamic state and city URLs
   for (const state of states) {

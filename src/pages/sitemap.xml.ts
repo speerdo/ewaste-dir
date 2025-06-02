@@ -1,6 +1,7 @@
 import { getAllStates, getCitiesByState } from '../lib/supabase';
+import type { APIRoute } from 'astro';
 
-export async function get() {
+export const GET: APIRoute = async () => {
   const states = await getAllStates();
   let urls = [
     // Add static URLs
@@ -31,4 +32,4 @@ export async function get() {
       'Content-Type': 'application/xml',
     },
   });
-}
+};

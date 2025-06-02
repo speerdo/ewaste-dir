@@ -2,5 +2,9 @@
 User-agent: *
 Allow: /
 
+# Disallow search with parameters and API endpoints
+Disallow: /search?*
+Disallow: /api/
+
 # Sitemap location
 Sitemap: https://www.recycleoldtech.com/sitemap.xml 

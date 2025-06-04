@@ -23,7 +23,7 @@ export default defineConfig({
     imageService: true,
     devImageService: 'sharp',
     speedInsights: true,
-    edgeMiddleware: true,
+    edgeMiddleware: false,
     maxDuration: 8,
     functionPerRoute: false,
     excludeFiles: ['src/assets/**/*', 'public/**/*'],

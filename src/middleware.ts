@@ -1,6 +1,8 @@
 import { defineMiddleware } from 'astro:middleware';
 
 // Cache durations - Increased to reduce regeneration frequency
+// Note: This middleware now runs on Node.js runtime to avoid WebAssembly compilation issues
+// that occur with Supabase client library in Vercel's Edge Runtime
 const CACHE_DURATIONS = {
   static: {
     maxAge: 604800, // 7 days (increased from 24 hours)

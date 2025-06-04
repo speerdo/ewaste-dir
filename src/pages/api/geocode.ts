@@ -24,10 +24,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-export const config = {
-  runtime: 'edge',
-};
-
 const handler: APIRoute = async ({ request }): Promise<Response> => {
   // Handle preflight requests
   if (request.method === 'OPTIONS') {

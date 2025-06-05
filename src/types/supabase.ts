@@ -46,3 +46,39 @@ export interface State {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface LocalRegulations {
+  id: string;
+  city_state: string;
+  state_code: string;
+  city_name: string;
+  has_ewaste_ban: boolean;
+  landfill_restrictions?: string;
+  battery_regulations?: string;
+  tv_computer_rules?: string;
+  business_requirements?: string;
+  penalties_fines?: string;
+  municipal_programs?: string;
+  special_events?: string;
+  drop_off_locations?: string;
+  environmental_benefits?: string;
+  government_website?: string;
+  recycling_hotline?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CityStats {
+  id: string;
+  city_state: string;
+  population: number;
+  recycling_rate: string;
+  ewaste_per_capita: number;
+  co2_savings_lbs: number;
+  metals_recovered_lbs: number;
+  plastics_recycled_lbs: number;
+  jobs_supported: number;
+  economic_impact_dollars: number;
+  created_at?: string;
+  updated_at?: string;
+}

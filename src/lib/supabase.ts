@@ -1,5 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
-import type { State, RecyclingCenter, City } from '../types/supabase';
+import type {
+  State,
+  RecyclingCenter,
+  City,
+  LocalRegulations,
+  CityStats,
+} from '../types/supabase';
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -940,5 +946,75 @@ export async function getAllCitiesByState(): Promise<Record<string, string[]>> {
   } catch (error) {
     console.error('Error fetching all cities by state:', error);
     return {};
+  }
+}
+
+/**
+ * Get local regulations data for a city
+ */
+export async function getLocalRegulations(
+  cityState: string
+): Promise<LocalRegulations | null> {
+  try {
+    const { data, error } = await supabase
+      .from('local_regulations')
+      .select('*')
+      .eq('city_state', cityState)
+      .single();
+
+    if (error) {
+      console.log(`No local regulations found for ${cityState}`);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching local regulations:', error);
+    return null;
+  }
+}
+
+/**
+ * Get city statistics data for a city
+ */
+export async function getCityStats(
+  cityState: string
+): Promise<CityStats | null> {
+  try {
+    const { data, error } = await supabase
+      .from('city_stats')
+      .select('*')
+      .eq('city_state', cityState)
+      .single();
+
+    if (error) {
+      console.log(`No city stats found for ${cityState}`);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching city stats:', error);
+    return null;
+  }
+}
+
+/**
+ * Get both local regulations and city stats for a city
+ */
+export async function getLocalCityData(cityState: string): Promise<{
+  regulations: LocalRegulations | null;
+  stats: CityStats | null;
+}> {
+  try {
+    const [regulations, stats] = await Promise.all([
+      getLocalRegulations(cityState),
+      getCityStats(cityState),
+    ]);
+
+    return { regulations, stats };
+  } catch (error) {
+    console.error('Error fetching local city data:', error);
+    return { regulations: null, stats: null };
   }
 }

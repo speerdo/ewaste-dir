@@ -1,0 +1,337 @@
+---
+interface Props {
+  cityState: string;
+  localData?: {
+    regulations?: any;
+    stats?: any;
+    events?: any[];
+  };
+}
+
+const { cityState, localData } = Astro.props;
+const [city, state] = cityState.split(', ');
+---
+
+{localData && (
+  <div class="space-y-8">
+    
+    <!-- Local Regulations Section -->
+    {localData.regulations && (
+      <section class="bg-green-50 rounded-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+          <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Local Recycling Regulations
+        </h2>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          {localData.regulations.has_ewaste_ban && (
+            <div class="bg-white p-4 rounded-lg border-l-4 border-red-500">
+              <h3 class="font-semibold text-red-700 mb-2">⚠️ E-Waste Disposal Ban</h3>
+              <p class="text-gray-700">{localData.regulations.landfill_restrictions}</p>
+            </div>
+          )}
+          
+          {localData.regulations.tv_computer_rules && (
+            <div class="bg-white p-4 rounded-lg border-l-4 border-blue-500">
+              <h3 class="font-semibold text-blue-700 mb-2">📺 TV & Computer Rules</h3>
+              <p class="text-gray-700">{localData.regulations.tv_computer_rules}</p>
+            </div>
+          )}
+          
+          {localData.regulations.battery_regulations && (
+            <div class="bg-white p-4 rounded-lg border-l-4 border-yellow-500">
+              <h3 class="font-semibold text-yellow-700 mb-2">🔋 Battery Recycling</h3>
+              <p class="text-gray-700">{localData.regulations.battery_regulations}</p>
+            </div>
+          )}
+          
+          {localData.regulations.business_requirements && (
+            <div class="bg-white p-4 rounded-lg border-l-4 border-purple-500">
+              <h3 class="font-semibold text-purple-700 mb-2">🏢 Business Requirements</h3>
+              <p class="text-gray-700">{localData.regulations.business_requirements}</p>
+            </div>
+          )}
+        </div>
+
+        {localData.regulations.penalties_fines && (
+          <div class="mt-4 bg-red-50 p-4 rounded-lg">
+            <h3 class="font-semibold text-red-800 mb-2">💰 Penalties & Fines</h3>
+            <p class="text-red-700">{localData.regulations.penalties_fines}</p>
+          </div>
+        )}
+      </section>
+    )}
+
+    <!-- Environmental Impact Section -->
+    {localData.stats && (
+      <section class="bg-blue-50 rounded-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+          <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+          </svg>
+          Environmental Impact in {city}
+        </h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {localData.stats.population && (
+            <div class="bg-white p-4 rounded-lg text-center">
+              <div class="text-2xl font-bold text-blue-600">{localData.stats.population.toLocaleString()}</div>
+              <div class="text-sm text-gray-600">Population</div>
+            </div>
+          )}
+          
+          {localData.stats.recycling_rate && (
+            <div class="bg-white p-4 rounded-lg text-center">
+              <div class="text-2xl font-bold text-green-600">{localData.stats.recycling_rate}%</div>
+              <div class="text-sm text-gray-600">Recycling Rate</div>
+            </div>
+          )}
+          
+          {localData.stats.co2_savings_lbs && (
+            <div class="bg-white p-4 rounded-lg text-center">
+              <div class="text-2xl font-bold text-purple-600">{localData.stats.co2_savings_lbs.toLocaleString()}</div>
+              <div class="text-sm text-gray-600">lbs CO₂ Saved</div>
+            </div>
+          )}
+          
+          {localData.stats.jobs_supported && (
+            <div class="bg-white p-4 rounded-lg text-center">
+              <div class="text-2xl font-bold text-orange-600">{localData.stats.jobs_supported}</div>
+              <div class="text-sm text-gray-600">Jobs Supported</div>
+            </div>
+          )}
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-4 rounded-lg">
+            <h3 class="font-semibold text-gray-800 mb-3">Materials Recovered Annually</h3>
+            <div class="space-y-2">
+              {localData.stats.metals_recovered_lbs && (
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Metals:</span>
+                  <span class="font-medium">{localData.stats.metals_recovered_lbs.toLocaleString()} lbs</span>
+                </div>
+              )}
+              {localData.stats.plastics_recycled_lbs && (
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Plastics:</span>
+                  <span class="font-medium">{localData.stats.plastics_recycled_lbs.toLocaleString()} lbs</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div class="bg-white p-4 rounded-lg">
+            <h3 class="font-semibold text-gray-800 mb-3">Economic Impact</h3>
+            {localData.stats.economic_impact_dollars && (
+              <div class="text-lg">
+                <span class="text-2xl font-bold text-green-600">
+                  ${localData.stats.economic_impact_dollars.toLocaleString()}
+                </span>
+                <div class="text-sm text-gray-600">Annual economic benefit to {city}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Local Programs Section -->
+    {localData.regulations?.municipal_programs && (
+      <section class="bg-yellow-50 rounded-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+          <svg class="w-6 h-6 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          Local Programs & Resources
+        </h2>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-4 rounded-lg">
+            <h3 class="font-semibold text-gray-800 mb-2">Municipal Programs</h3>
+            <p class="text-gray-700">{localData.regulations.municipal_programs}</p>
+          </div>
+          
+          {localData.regulations.special_events && (
+            <div class="bg-white p-4 rounded-lg">
+              <h3 class="font-semibold text-gray-800 mb-2">Special Collection Events</h3>
+              <p class="text-gray-700">{localData.regulations.special_events}</p>
+            </div>
+          )}
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-4">
+          {localData.regulations.government_website && (
+            <a 
+              href={localData.regulations.government_website}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              City Government Website
+            </a>
+          )}
+          
+          {localData.regulations.recycling_hotline && (
+            <a 
+              href={`tel:${localData.regulations.recycling_hotline}`}
+              class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              {localData.regulations.recycling_hotline}
+            </a>
+          )}
+        </div>
+      </section>
+    )}
+
+    <!-- What You Can Recycle Section -->
+    <section class="bg-gray-50 rounded-xl p-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+        </svg>
+        What You Can Recycle in {city}
+      </h2>
+      
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-lg text-center">
+          <div class="text-3xl mb-2">💻</div>
+          <div class="font-medium text-gray-800">Computers</div>
+          <div class="text-sm text-gray-600">Desktops, laptops, tablets</div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg text-center">
+          <div class="text-3xl mb-2">📱</div>
+          <div class="font-medium text-gray-800">Mobile Devices</div>
+          <div class="text-sm text-gray-600">Phones, tablets, e-readers</div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg text-center">
+          <div class="text-3xl mb-2">📺</div>
+          <div class="font-medium text-gray-800">TVs & Monitors</div>
+          <div class="text-sm text-gray-600">All types and sizes</div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg text-center">
+          <div class="text-3xl mb-2">🖨️</div>
+          <div class="font-medium text-gray-800">Printers</div>
+          <div class="text-sm text-gray-600">All types, including 3D</div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg text-center">
+          <div class="text-3xl mb-2">🔋</div>
+          <div class="font-medium text-gray-800">Batteries</div>
+          <div class="text-sm text-gray-600">Rechargeable, lithium</div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg text-center">
+          <div class="text-3xl mb-2">🖱️</div>
+          <div class="font-medium text-gray-800">Accessories</div>
+          <div class="text-sm text-gray-600">Keyboards, mice, cables</div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg text-center">
+          <div class="text-3xl mb-2">📷</div>
+          <div class="font-medium text-gray-800">Cameras</div>
+          <div class="text-sm text-gray-600">Digital, film, video</div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg text-center">
+          <div class="text-3xl mb-2">🎮</div>
+          <div class="font-medium text-gray-800">Gaming</div>
+          <div class="text-sm text-gray-600">Consoles, controllers</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Preparation Tips Section -->
+    <section class="bg-orange-50 rounded-xl p-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Preparation Checklist
+      </h2>
+      
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white p-4 rounded-lg">
+          <h3 class="font-semibold text-gray-800 mb-3">Before You Drop Off</h3>
+          <ul class="space-y-2 text-gray-700">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Back up important files
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Sign out of all accounts
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Remove personal data
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Remove batteries if possible
+            </li>
+          </ul>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg">
+          <h3 class="font-semibold text-gray-800 mb-3">What NOT to Include</h3>
+          <ul class="space-y-2 text-gray-700">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              CRT monitors (may have fees)
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Household appliances
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Light bulbs
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Medical devices
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+  </div>
+)}
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style> 

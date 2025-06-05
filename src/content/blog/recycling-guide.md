@@ -1,6 +1,6 @@
 ---
 title: 'The Ultimate Guide to Recycling Your Electronics Responsibly'
-pubDate: 2024-05-04
+pubDate: 2025-05-04
 description: 'Learn everything about electronics recycling, from preparing your devices to finding the right recycling center.'
 image: '/images/recycle-phone.jpeg'
 ---

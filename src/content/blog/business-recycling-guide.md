@@ -1,9 +1,9 @@
 ---
 title: 'Business Electronics Recycling: Complete Corporate Guide 2025'
 description: 'Comprehensive guide for businesses to responsibly recycle IT equipment. Learn about compliance, costs, security, and vendor selection for corporate e-waste programs.'
-pubDate: 2024-12-08
+pubDate: 2025-06-01
 featured: true
-image: '/images/better-tomorrow.jpg'
+image: '/images/corporate-meeting.jpg'
 tags: ['business recycling', 'corporate', 'IT disposal', 'compliance']
 author: 'RecycleOldTech Team'
 ---

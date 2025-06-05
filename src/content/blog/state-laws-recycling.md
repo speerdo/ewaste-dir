@@ -1,9 +1,9 @@
 ---
 title: 'State Electronics Recycling Laws: A Complete 2025 Guide'
 description: 'Understanding electronics recycling laws across all 50 states. Learn about requirements, fees, and penalties for improper e-waste disposal.'
-pubDate: 2024-12-15
+pubDate: 2025-01-15
 featured: true
-image: '/images/recycling.webp'
+image: '/images/usa-guide.jpg'
 tags: ['recycling laws', 'state regulations', 'e-waste', 'compliance']
 author: 'RecycleOldTech Team'
 ---

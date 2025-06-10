@@ -31,21 +31,8 @@ CREATE TABLE IF NOT EXISTS recycling_centers (
     location GEOGRAPHY(POINT, 4326)
 );
 
--- Enable RLS
+-- Enable RLS (but don't create policies yet)
 ALTER TABLE recycling_centers ENABLE ROW LEVEL SECURITY;
-
--- Create a simple read policy
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies 
-        WHERE tablename = 'recycling_centers' 
-        AND policyname = 'Allow public read access on recycling_centers'
-    ) THEN
-        CREATE POLICY "Allow public read access on recycling_centers" 
-            ON recycling_centers FOR SELECT USING (true);
-    END IF;
-END $$;
 
 -- Create basic indexes
 CREATE INDEX IF NOT EXISTS idx_recycling_centers_state ON recycling_centers(state);

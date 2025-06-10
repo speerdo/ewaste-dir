@@ -3,13 +3,18 @@ import fs from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config();
-
 // CLI handling for environment selection
 const args = process.argv.slice(2);
 const useBranch = args.includes('--branch');
 const isDryRun = !args.includes('--live');
+
+// Load environment variables
+dotenv.config(); // Load default .env file
+
+// If using branch, also try to load .env.branch
+if (useBranch) {
+  dotenv.config({ path: '.env.branch' });
+}
 
 // Initialize Supabase client based on environment
 let supabaseUrl, supabaseKey;

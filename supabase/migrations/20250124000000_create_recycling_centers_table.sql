@@ -34,15 +34,9 @@ CREATE TABLE IF NOT EXISTS recycling_centers (
 -- Enable RLS
 ALTER TABLE recycling_centers ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
+-- Create a simple read policy
 CREATE POLICY IF NOT EXISTS "Allow public read access on recycling_centers" 
     ON recycling_centers FOR SELECT USING (true);
-
-CREATE POLICY IF NOT EXISTS "Enable read access for all users" 
-    ON recycling_centers FOR SELECT USING (true);
-
-CREATE POLICY IF NOT EXISTS "Enable insert for service role" 
-    ON recycling_centers FOR INSERT WITH CHECK (true);
 
 -- Create basic indexes
 CREATE INDEX IF NOT EXISTS idx_recycling_centers_state ON recycling_centers(state);

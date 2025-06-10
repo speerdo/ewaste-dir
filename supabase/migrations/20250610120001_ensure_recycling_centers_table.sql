@@ -6,6 +6,9 @@
   independently of dashboard-created tables.
 */
 
+-- Enable PostGIS extension (required for GEOGRAPHY data type)
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 -- First, create the recycling_centers table if it doesn't exist
 CREATE TABLE IF NOT EXISTS recycling_centers (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

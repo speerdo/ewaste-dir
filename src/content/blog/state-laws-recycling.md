@@ -10,6 +10,8 @@ author: 'RecycleOldTech Team'
 
 # State Electronics Recycling Laws: A Complete 2025 Guide
 
+_This guide provides educational information about electronics recycling laws and is not intended as legal advice. Laws and regulations change frequently, so please consult with legal professionals and verify current requirements with relevant authorities for compliance purposes._
+
 Electronics recycling laws vary significantly across the United States, with each state implementing different approaches to manage electronic waste. Understanding these laws is crucial for consumers, businesses, and manufacturers operating in multiple states.
 
 ## Overview of State E-Waste Legislation

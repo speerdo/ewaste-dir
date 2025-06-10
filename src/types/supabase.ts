@@ -21,6 +21,11 @@ export interface RecyclingCenter {
   created_at?: string;
   updated_at?: string;
   matched?: boolean;
+  legitimacy_score?: number;
+  legitimacy_reason?: string;
+  is_legitimate?: boolean;
+  is_suspicious?: boolean;
+  scraped_at?: string;
 }
 
 export interface City {

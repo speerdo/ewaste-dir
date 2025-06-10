@@ -10,6 +10,8 @@ author: 'RecycleOldTech Team'
 
 # Data Security in Electronics Recycling: Complete Protection Guide
 
+_This guide provides educational information about data security best practices for electronics recycling. While comprehensive, this information should be used alongside professional security assessments and current industry standards. Data security requirements may vary by industry and jurisdiction._
+
 When disposing of electronic devices, data security should be your top priority. Electronic devices store vast amounts of personal and business information that, if not properly handled, can lead to identity theft, financial fraud, or corporate espionage. This comprehensive guide covers everything you need to know about protecting your data during the electronics recycling process.
 
 ## Why Data Security Matters in E-Waste Recycling

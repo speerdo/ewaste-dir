@@ -20,20 +20,75 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
 </div>
 
 <div id="sort-button" class="hidden">
-  <button
-    id="sortToggle"
-    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-    data-sort-mode="name"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-    </svg>
-    <span>Sort by Rating</span>
-  </button>
+  <div class="flex gap-2">
+    <button
+      id="sortToggle"
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+      data-sort-mode="name"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+      </svg>
+      <span>Sort by Rating</span>
+    </button>
+    
+    <button
+      id="trustSortToggle"
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.25 7C20.4 19 22 17.4 22 15.25c0-1.158-.953-2.058-2.09-2.26a3.478 3.478 0 0 0-2.748-3.11c-1.87-.527-3.965.044-5.14 1.644-.23.314-.346.695-.346 1.078 0 .776.518 1.448 1.272 1.709.652.226 1.356.085 1.897-.402.541-.487.858-1.2.858-1.96" />
+      </svg>
+      <span>Sort by Trust</span>
+    </button>
+  </div>
 </div>
 
 <script>
-  // Define toggleSort outside of initSorting to ensure it's accessible
+  // Define sorting functions
+  function sortByName(a: Element, b: Element): number {
+    const nameA = a.getAttribute('data-name') || '';
+    const nameB = b.getAttribute('data-name') || '';
+    return nameA.localeCompare(nameB);
+  }
+  
+  function sortByRating(a: Element, b: Element): number {
+    const ratingA = parseFloat(a.getAttribute('data-rating') || '0');
+    const ratingB = parseFloat(b.getAttribute('data-rating') || '0');
+    return ratingB - ratingA;
+  }
+  
+  function sortByTrust(a: Element, b: Element): number {
+    // Get legitimacy scores
+    const scoreA = parseFloat(a.getAttribute('data-legitimacy-score') || '0');
+    const scoreB = parseFloat(b.getAttribute('data-legitimacy-score') || '0');
+    
+    // Get verification status
+    const verifiedA = a.getAttribute('data-is-legitimate') === 'true';
+    const verifiedB = a.getAttribute('data-is-legitimate') === 'true';
+    
+    // Check if centers have any verification data at all
+    const hasDataA = scoreA > 0 || verifiedA;
+    const hasDataB = scoreB > 0 || verifiedB;
+    
+    // Prioritize centers with verification data over those without
+    if (hasDataA && !hasDataB) return -1;
+    if (!hasDataA && hasDataB) return 1;
+    
+    // If both have no data, sort alphabetically
+    if (!hasDataA && !hasDataB) {
+      const nameA = a.getAttribute('data-name') || '';
+      const nameB = a.getAttribute('data-name') || '';
+      return nameA.localeCompare(nameB);
+    }
+    
+    // If both have data, prioritize verified status, then by score
+    if (verifiedA && !verifiedB) return -1;
+    if (!verifiedA && verifiedB) return 1;
+    
+    return scoreB - scoreA;
+  }
+
   function toggleSort(e: Event) {
     const centersList = document.getElementById('centersList');
     const sortButton = e.currentTarget as HTMLButtonElement || document.querySelector('#sort-button-container #sortToggle');
@@ -56,11 +111,7 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
     const sortedCenters = Array.from(fragment.children);
     if (currentMode === 'name') {
       // Switch to rating sort
-      sortedCenters.sort((a, b) => {
-        const ratingA = parseFloat(a.getAttribute('data-rating') || '0');
-        const ratingB = parseFloat(b.getAttribute('data-rating') || '0');
-        return ratingB - ratingA;
-      });
+      sortedCenters.sort(sortByRating);
       
       // Update button
       sortButton.setAttribute('data-sort-mode', 'rating');
@@ -74,11 +125,7 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
       
     } else {
       // Switch to name sort
-      sortedCenters.sort((a, b) => {
-        const nameA = a.getAttribute('data-name') || '';
-        const nameB = b.getAttribute('data-name') || '';
-        return nameA.localeCompare(nameB);
-      });
+      sortedCenters.sort(sortByName);
       
       // Update button
       sortButton.setAttribute('data-sort-mode', 'name');
@@ -95,36 +142,95 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
     centersList.innerHTML = '';
     sortedCenters.forEach(center => centersList.appendChild(center));
   }
+  
+  function toggleTrustSort(e: Event) {
+    const centersList = document.getElementById('centersList');
+    
+    if (!centersList) {
+      return;
+    }
+    
+    // Get all center elements
+    const centers = Array.from(centersList.children);
+    
+    // Detach all centers from DOM to avoid reflow
+    const fragment = document.createDocumentFragment();
+    centers.forEach(center => fragment.appendChild(center));
+    
+    // Sort by trust
+    const sortedCenters = Array.from(fragment.children);
+    sortedCenters.sort(sortByTrust);
+    
+    // Clear the list and append sorted elements
+    centersList.innerHTML = '';
+    sortedCenters.forEach(center => centersList.appendChild(center));
+    
+    // Reset the main sort button
+    const sortButton = document.querySelector('#sort-button-container #sortToggle');
+    if (sortButton) {
+      sortButton.setAttribute('data-sort-mode', 'trust');
+      const buttonText = sortButton.querySelector('span');
+      if (buttonText) buttonText.textContent = 'Sort by Name';
+    }
+  }
 
   function initSorting() {
     // Clean up any existing event listeners first
     const oldSortButton = document.querySelector('#sort-button-container #sortToggle');
+    const oldTrustButton = document.querySelector('#sort-button-container #trustSortToggle');
+    
     if (oldSortButton) {
       oldSortButton.removeEventListener('click', toggleSort);
-      // Also clone and replace the button to ensure no stale event handlers
       if (oldSortButton.parentNode) {
         const freshButton = oldSortButton.cloneNode(true);
         oldSortButton.parentNode.replaceChild(freshButton, oldSortButton);
       }
     }
     
-    // Move the sort button to the container
+    if (oldTrustButton) {
+      oldTrustButton.removeEventListener('click', toggleTrustSort);
+    }
+    
+    // Move the sort buttons to the container
     const sortButtonContainer = document.getElementById('sort-button-container');
     const sortButtonWrapper = document.getElementById('sort-button');
     
     if (sortButtonContainer && sortButtonWrapper?.firstElementChild) {
-      // Move the button to its proper container
+      // Move the buttons to their proper container
       sortButtonContainer.innerHTML = ''; // Clear any existing content
-      const newButton = sortButtonWrapper.firstElementChild.cloneNode(true);
-      sortButtonContainer.appendChild(newButton);
+      const newButtons = sortButtonWrapper.firstElementChild.cloneNode(true);
+      sortButtonContainer.appendChild(newButtons);
       
-      // Set up the new button
+      // Set up the new buttons
       const sortButton = sortButtonContainer.querySelector('#sortToggle');
+      const trustButton = sortButtonContainer.querySelector('#trustSortToggle');
+      
       if (sortButton) {
-        // Add click handler to the new button - IMPORTANT: use direct handler reference
         sortButton.addEventListener('click', toggleSort);
       }
+      
+      if (trustButton) {
+        trustButton.addEventListener('click', toggleTrustSort);
+      }
     }
+    
+    // Add data attributes to center cards for sorting
+    document.querySelectorAll('[data-center-id]').forEach(card => {
+      // Try to extract legitimacy data from the card content if not already set
+      if (!card.getAttribute('data-legitimacy-score')) {
+        const trustScoreElement = card.querySelector('[data-trust-score]');
+        if (trustScoreElement) {
+          card.setAttribute('data-legitimacy-score', trustScoreElement.getAttribute('data-trust-score') || '0');
+        }
+      }
+      
+      if (!card.getAttribute('data-is-legitimate')) {
+        const verifiedBadge = card.querySelector('.bg-green-100, .bg-blue-100');
+        if (verifiedBadge && verifiedBadge.textContent?.includes('Verified')) {
+          card.setAttribute('data-is-legitimate', 'true');
+        }
+      }
+    });
   }
   
   // Run initialization on DOMContentLoaded
@@ -141,8 +247,13 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
   // Clean up event listeners on page transitions
   document.addEventListener('astro:before-swap', () => {
     const sortButton = document.querySelector('#sort-button-container #sortToggle');
+    const trustButton = document.querySelector('#sort-button-container #trustSortToggle');
+    
     if (sortButton) {
       sortButton.removeEventListener('click', toggleSort);
+    }
+    if (trustButton) {
+      trustButton.removeEventListener('click', toggleTrustSort);
     }
   });
 </script> 

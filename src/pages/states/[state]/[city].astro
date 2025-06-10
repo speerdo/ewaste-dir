@@ -123,6 +123,56 @@ const metaDescription = baseDescription.length <= maxBaseLength
   ? baseDescription
   : `E-waste recycling in ${cityName}, ${state.name}. Safe disposal of electronics & computers.`;
 
+// Calculate statistics from the centers data
+const centersWithLegitimacy = displayCenters.filter(center => center.legitimacy_score != null);
+const verifiedCenters = displayCenters.filter(center => center.is_legitimate === true);
+const unverifiedCenters = displayCenters.filter(center => 
+  center.legitimacy_score == null && center.is_legitimate == null && center.scraped_at == null
+);
+const averageLegitimacyScore = centersWithLegitimacy.length > 0 
+  ? Math.round(centersWithLegitimacy.reduce((sum, center) => sum + (center.legitimacy_score || 0), 0) / centersWithLegitimacy.length)
+  : null;
+
+// Analyze business data for insights
+const centersWithRatings = displayCenters.filter(center => center.rating && Number(center.rating) > 0);
+const averageRating = centersWithRatings.length > 0 
+  ? Number((centersWithRatings.reduce((sum, center) => sum + Number(center.rating), 0) / centersWithRatings.length).toFixed(1))
+  : null;
+const totalReviews = displayCenters.reduce((sum, center) => sum + (Number(center.reviews) || 0), 0);
+
+// Analyze business types from descriptions
+const businessTypes = new Map<string, number>();
+const serviceKeywords = {
+  'electronics': ['electronic', 'computer', 'phone', 'laptop', 'tablet', 'tv', 'monitor'],
+  'metal': ['metal', 'scrap', 'iron', 'steel', 'aluminum', 'copper'],
+  'automotive': ['auto', 'car', 'vehicle', 'tire', 'battery'],
+  'repair': ['repair', 'fix', 'service', 'diagnostic'],
+  'recycling': ['recycle', 'disposal', 'waste', 'collection']
+};
+
+displayCenters.forEach(center => {
+  const description = (center.description || center.name || '').toLowerCase();
+  Object.entries(serviceKeywords).forEach(([type, keywords]) => {
+    if (keywords.some(keyword => description.includes(keyword))) {
+      businessTypes.set(type, (businessTypes.get(type) || 0) + 1);
+    }
+  });
+});
+
+// Recent verification activity
+const recentlyVerified = displayCenters.filter(center => {
+  if (!center.scraped_at) return false;
+  const verificationDate = new Date(center.scraped_at);
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  return verificationDate > thirtyDaysAgo;
+});
+
+// Centers with detailed information
+const centersWithDescriptions = displayCenters.filter(center => center.description && center.description.length > 50);
+const centersWithHours = displayCenters.filter(center => center.working_hours);
+const centersWithLogos = displayCenters.filter(center => center.logo);
+
 // Helper function to convert working hours to schema.org format
 function formatOpeningHours(workingHours: any): string | undefined {
   if (!workingHours) return undefined;
@@ -351,17 +401,51 @@ if (baseTitle.length <= maxTitleLength) {
       </a>
     </div>
 
+    <!-- Header Section -->
     <div class="mb-8">
       <h1 class="text-4xl font-display font-bold text-gray-900 mb-2">
         Electronics Recycling in {cityName}
       </h1>
-      <p class="text-xl text-gray-600">
-        {displayCenters.length} recycling {displayCenters.length === 1 ? 'center' : 'centers'} in {locationDescription}
-      </p>
-    </div>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+        <p class="text-xl text-gray-600">
+          {displayCenters.length} recycling {displayCenters.length === 1 ? 'center' : 'centers'} in {locationDescription}
+        </p>
+        
+        <!-- Quick Stats -->
+        <div class="flex flex-wrap items-center gap-4">
+          {verifiedCenters.length > 0 && (
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span class="text-sm text-gray-600">{verifiedCenters.length} verified</span>
+            </div>
+          )}
+          
+          {centersWithLegitimacy.length > verifiedCenters.length && (
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <span class="text-sm text-gray-600">{centersWithLegitimacy.length - verifiedCenters.length} checked</span>
+            </div>
+          )}
+          
+          {unverifiedCenters.length > 0 && (
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
+              <span class="text-sm text-gray-600">{unverifiedCenters.length} need verification</span>
+            </div>
+          )}
+          
+          {averageLegitimacyScore && (
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <span class="text-sm text-gray-600">Avg. score: {averageLegitimacyScore}</span>
+            </div>
+          )}
+        </div>
+      </div>
 
-    <!-- SEO descriptive paragraph for city page -->
-    <div class="mb-8 max-w-2xl">
+      <!-- Nearby Centers Message -->
       {showNearbyMessage && (
         <div class="bg-yellow-50 border border-yellow-100 p-4 rounded-lg mb-4">
           <p class="text-base text-yellow-800">
@@ -370,9 +454,256 @@ if (baseTitle.length <= maxTitleLength) {
           </p>
         </div>
       )}
-      <p class="text-base text-gray-700">
-        Looking to recycle electronics in {cityName}, {state.name}? This directory helps you find certified e-waste recycling centers for computers, phones, TVs, printers, and more. Proper electronics recycling keeps hazardous materials out of landfills and supports a cleaner, greener community in {cityName}. Browse the map and list below to find a convenient drop-off location near you.
-      </p>
+
+      <!-- Data-Driven Content Section -->
+      {displayCenters.length > 0 && (
+        <div class="mt-6 bg-gray-50 rounded-lg p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            Electronics Recycling Guide for {cityName}
+          </h2>
+          
+          {/* Dynamic intro based on local data */}
+          <div class="prose prose-gray max-w-none text-gray-700 space-y-4">
+            <p>
+              {cityName} offers {displayCenters.length} certified electronics recycling {displayCenters.length === 1 ? 'center' : 'centers'} 
+              to help residents and businesses safely dispose of computers, phones, TVs, and other electronic devices.
+              {verifiedCenters.length > 0 && ` Our verification process has confirmed ${verifiedCenters.length} ${verifiedCenters.length === 1 ? 'business' : 'businesses'} 
+              as legitimate e-waste recyclers with proper disposal practices.`}
+            </p>
+            
+            {businessTypes.size > 0 && (
+              <p>
+                Local recycling services in {cityName} specialize in various areas including{' '}
+                {Array.from(businessTypes.entries())
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 3)
+                  .map(([type, count], index, array) => {
+                    const isLast = index === array.length - 1;
+                    const isSecondToLast = index === array.length - 2;
+                    return `${type.toLowerCase()}${count > 1 ? ` (${count} centers)` : ''}${isLast ? '' : isSecondToLast && array.length > 2 ? ', and ' : ', '}`;
+                  })
+                  .join('')}. This diversity ensures residents can find appropriate disposal methods for different types of electronic waste.
+              </p>
+            )}
+            
+            {averageRating && centersWithRatings.length > 2 && (
+              <p>
+                Customer satisfaction in {cityName}'s e-waste industry is strong, with an average rating of {averageRating} stars 
+                based on {totalReviews.toLocaleString()} customer reviews across {centersWithRatings.length} businesses. 
+                This reflects the community's commitment to reliable and professional recycling services.
+              </p>
+            )}
+            
+            <p>
+              When choosing an electronics recycling center in {cityName}, look for businesses that provide data destruction services, 
+              offer pickup options for large items, and maintain proper certifications. {verifiedCenters.length > 0 ? 
+              `The ${verifiedCenters.length} verified centers listed above have been checked for legitimate business operations and proper disposal practices.` :
+              'Always verify business credentials and ask about their disposal methods before choosing a recycling service.'}
+            </p>
+            
+            {centersWithDescriptions.length > Math.floor(displayCenters.length * 0.6) && (
+              <p>
+                Most recycling centers in {cityName} provide detailed information about their services, including {centersWithHours.length} businesses 
+                with posted operating hours{centersWithLogos.length > 5 ? `, and ${centersWithLogos.length} with professional business profiles` : ''}. 
+                This transparency helps residents make informed decisions about where to recycle their electronics safely.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      <!-- Data-Driven City Insights -->
+      {displayCenters.length > 3 && (
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Business Specialties -->
+          {businessTypes.size > 0 && (
+            <div class="bg-blue-50 rounded-lg p-4">
+              <h3 class="text-sm font-semibold text-blue-900 mb-2 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Popular Services
+              </h3>
+              <div class="space-y-1">
+                {Array.from(businessTypes.entries())
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 2)
+                  .map(([type, count]) => (
+                    <div class="flex justify-between text-sm">
+                      <span class="text-blue-700 capitalize">{type} recycling</span>
+                      <span class="text-blue-600 font-medium">{count} centers</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          <!-- Customer Satisfaction -->
+          {averageRating && centersWithRatings.length > 2 && (
+            <div class="bg-green-50 rounded-lg p-4">
+              <h3 class="text-sm font-semibold text-green-900 mb-2 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+                Customer Reviews
+              </h3>
+              <div class="text-sm space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl font-bold text-green-700">{averageRating}</span>
+                  <div class="flex text-yellow-400">
+                    {Array.from({ length: Math.round(averageRating) }).map(() => (
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                    ))}
+                  </div>
+                </div>
+                <p class="text-green-600">
+                  Based on {totalReviews.toLocaleString()} reviews from {centersWithRatings.length} businesses
+                </p>
+              </div>
+            </div>
+          )}
+
+          <!-- Verification Activity -->
+          {(recentlyVerified.length > 0 || verifiedCenters.length > 0) && (
+            <div class="bg-purple-50 rounded-lg p-4">
+              <h3 class="text-sm font-semibold text-purple-900 mb-2 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Verification Status
+              </h3>
+              <div class="text-sm space-y-1">
+                {recentlyVerified.length > 0 && (
+                  <p class="text-purple-600">
+                    {recentlyVerified.length} recently verified (last 30 days)
+                  </p>
+                )}
+                {averageLegitimacyScore && (
+                  <p class="text-purple-600">
+                    Average trust score: <span class="font-semibold">{averageLegitimacyScore}/100</span>
+                  </p>
+                )}
+                <p class="text-purple-600">
+                  {Math.round((verifiedCenters.length / displayCenters.length) * 100)}% verified businesses
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+    </div>
+
+    <!-- Sort Controls -->
+    <div class="mb-6 flex justify-between items-center">
+      <h2 class="text-lg font-semibold text-gray-900">
+        Recycling Centers ({displayCenters.length})
+      </h2>
+      <div id="sort-button-container"></div>
+    </div>
+
+    <!-- Main Map and Centers Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <!-- Map Section -->
+      <div class="map-container rounded-xl overflow-hidden shadow-lg h-[600px] lg:sticky lg:top-8">
+        {mapMarkers.length > 0 ? (
+          <MapComponent 
+            markers={mapMarkers}
+            initialZoom={12}
+          />
+        ) : (
+          <div class="w-full h-full flex items-center justify-center bg-gray-100">
+            <p class="text-gray-500">Map not available</p>
+          </div>
+        )}
+      </div>
+
+      <!-- Recycling Centers List (scrollable) -->
+      <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
+        <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} />
+      </div>
+    </div>
+
+    <!-- E-Waste Disposal Best Practices -->
+    <div class="mb-8 bg-white border border-gray-200 rounded-lg p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+        <svg class="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Preparing Electronics for Recycling
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600">
+        <div>
+          <h3 class="font-semibold text-gray-900 mb-3">Before You Go</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Back up and delete all personal data from devices
+            </li>
+            <li class="flex items-start">
+              <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Remove batteries from devices when possible
+            </li>
+            <li class="flex items-start">
+              <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Check if the center offers pickup services for large items
+            </li>
+            <li class="flex items-start">
+              <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Call ahead to confirm accepted items and operating hours
+            </li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold text-gray-900 mb-3">What to Ask</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <svg class="w-4 h-4 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+              </svg>
+              Do you provide data destruction services?
+            </li>
+            <li class="flex items-start">
+              <svg class="w-4 h-4 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+              </svg>
+              What certifications do you hold for e-waste processing?
+            </li>
+            <li class="flex items-start">
+              <svg class="w-4 h-4 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+              </svg>
+              Are there any fees for specific types of electronics?
+            </li>
+            <li class="flex items-start">
+              <svg class="w-4 h-4 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+              </svg>
+              Where do the recycled materials ultimately go?
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <h4 class="font-semibold text-yellow-800 mb-2">Important Note</h4>
+        <p class="text-sm text-yellow-700">
+          {state.name} law requires proper disposal of certain electronics. Never dispose of computers, TVs, or phones in regular trash. 
+          Choose certified recyclers to ensure compliance with environmental regulations and protect your personal data.
+        </p>
+      </div>
     </div>
 
     <!-- Local Regulations & Environmental Impact Sections -->
@@ -507,34 +838,7 @@ if (baseTitle.length <= maxTitleLength) {
       </div>
     )}
 
-    <!-- Sort Controls -->
-    <div class="mb-6 flex justify-between items-center">
-      <h2 class="text-lg font-semibold text-gray-900">
-        Recycling Centers ({displayCenters.length})
-      </h2>
-      <div id="sort-button-container"></div>
-    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Map Section -->
-      <div class="map-container rounded-xl overflow-hidden shadow-lg h-[600px] lg:sticky lg:top-8">
-        {mapMarkers.length > 0 ? (
-          <MapComponent 
-            markers={mapMarkers}
-            initialZoom={12}
-          />
-        ) : (
-          <div class="w-full h-full flex items-center justify-center bg-gray-100">
-            <p class="text-gray-500">Map not available</p>
-          </div>
-        )}
-      </div>
-
-      <!-- Recycling Centers List (scrollable) -->
-      <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
-        <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} />
-      </div>
-    </div>
   </div>
 
   <!-- Map interactions script -->

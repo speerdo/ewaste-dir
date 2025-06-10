@@ -94,6 +94,10 @@ class DatabaseUpdater {
       const finalResults = await this.loadFinalScrapingData();
       allResults.push(...finalResults);
 
+      // 4. Load Google Places research data
+      const placesResults = await this.loadPlacesResearchData();
+      allResults.push(...placesResults);
+
       console.log(`Loaded ${allResults.length} total scraped results`);
 
       // Remove duplicates - prefer most recent/successful results
@@ -121,7 +125,14 @@ class DatabaseUpdater {
         const filePath = path.join(CONFIG.SCRAPED_DATA_DIR, file);
         const data = await fs.readFile(filePath, 'utf-8');
         const fileResults = JSON.parse(data);
-        results = results.concat(fileResults);
+
+        // Add source tags
+        const taggedResults = fileResults.map((result) => ({
+          ...result,
+          source: 'original-scraper',
+        }));
+
+        results = results.concat(taggedResults);
       }
 
       console.log(`Loaded ${results.length} original scraping results`);
@@ -155,7 +166,14 @@ class DatabaseUpdater {
         const filePath = path.join(CONFIG.SCRAPED_DATA_DIR, file);
         const data = await fs.readFile(filePath, 'utf-8');
         const fileResults = JSON.parse(data);
-        results = results.concat(fileResults);
+
+        // Add source tags
+        const taggedResults = fileResults.map((result) => ({
+          ...result,
+          source: 'retry-scraper',
+        }));
+
+        results = results.concat(taggedResults);
       }
 
       console.log(`Loaded ${results.length} retry scraping results`);
@@ -186,7 +204,14 @@ class DatabaseUpdater {
         const filePath = path.join(CONFIG.FINAL_SCRAPING_DIR, file);
         const data = await fs.readFile(filePath, 'utf-8');
         const fileResults = JSON.parse(data);
-        results = results.concat(fileResults);
+
+        // Add source tags
+        const taggedResults = fileResults.map((result) => ({
+          ...result,
+          source: 'final-alternative-scraper',
+        }));
+
+        results = results.concat(taggedResults);
       }
 
       console.log(
@@ -195,6 +220,64 @@ class DatabaseUpdater {
       return results;
     } catch (error) {
       console.log('No final scraping results found');
+      return [];
+    }
+  }
+
+  async loadPlacesResearchData() {
+    try {
+      // Check if places research directory exists
+      try {
+        await fs.access(CONFIG.PLACES_RESEARCH_DIR);
+      } catch {
+        console.log('No places research directory found');
+        return [];
+      }
+
+      const files = await fs.readdir(CONFIG.PLACES_RESEARCH_DIR);
+      const placesFiles = files.filter(
+        (f) => f.startsWith('places_research_') && f.endsWith('.json')
+      );
+
+      let results = [];
+      for (const file of placesFiles) {
+        const filePath = path.join(CONFIG.PLACES_RESEARCH_DIR, file);
+        const data = await fs.readFile(filePath, 'utf-8');
+        const fileResults = JSON.parse(data);
+
+        // Normalize Google Places data format to match scraping results
+        const normalizedResults = fileResults.map((result) => ({
+          centerId: result.centerId,
+          centerName: result.centerName || result.name,
+          city: result.city,
+          state: result.state,
+          url: result.website || result.url,
+          suggestedDescription: result.suggestedDescription,
+          legitimacyScore: result.legitimacyScore,
+          legitimacyReason: result.legitimacyReason,
+          isLegitimate: result.isLegitimate,
+          isSuspicious: result.isSuspicious,
+          scrapedAt: result.searchedAt || result.scrapedAt,
+          success: result.success !== false, // Default to true unless explicitly false
+          source: 'google-places-research',
+          contactInfo: {
+            phones: result.phone ? [result.phone] : [],
+          },
+          // Additional Google Places specific data
+          rating: result.rating,
+          reviewCount: result.reviewCount,
+          address: result.address,
+          hours: result.hours,
+          businessTypes: result.businessTypes,
+        }));
+
+        results = results.concat(normalizedResults);
+      }
+
+      console.log(`Loaded ${results.length} Google Places research results`);
+      return results;
+    } catch (error) {
+      console.log('No Google Places research results found');
       return [];
     }
   }
@@ -210,34 +293,55 @@ class DatabaseUpdater {
       if (!existing) {
         centerMap.set(centerId, result);
       } else {
-        // Priority order:
-        // 1. Final scraping results (most recent)
-        // 2. Successful results over failed ones
-        // 3. Retry results over original results
-        // 4. More recent timestamps
+        // Priority order (highest to lowest):
+        // 1. Final scraping results (most recent, comprehensive)
+        // 2. Direct website scraping results (retry > original)
+        // 3. Google Places research (good fallback data)
+        // 4. Within same type: successful > failed, newer > older
 
-        const isCurrentFinal = result.source === 'final-alternative-scraper';
-        const isExistingFinal = existing.source === 'final-alternative-scraper';
+        const currentPriority = this.getDataSourcePriority(result);
+        const existingPriority = this.getDataSourcePriority(existing);
 
-        if (isCurrentFinal && !isExistingFinal) {
+        if (currentPriority > existingPriority) {
           centerMap.set(centerId, result);
-        } else if (!isCurrentFinal && isExistingFinal) {
-          // Keep existing
-        } else if (result.success && !existing.success) {
-          centerMap.set(centerId, result);
-        } else if (!result.success && existing.success) {
-          // Keep existing
-        } else if (result.retryAttempt && !existing.retryAttempt) {
-          centerMap.set(centerId, result);
-        } else if (!result.retryAttempt && existing.retryAttempt) {
-          // Keep existing
-        } else if (new Date(result.scrapedAt) > new Date(existing.scrapedAt)) {
-          centerMap.set(centerId, result);
+        } else if (currentPriority === existingPriority) {
+          // Same priority level, use other criteria
+          if (result.success && !existing.success) {
+            centerMap.set(centerId, result);
+          } else if (!result.success && existing.success) {
+            // Keep existing
+          } else if (result.retryAttempt && !existing.retryAttempt) {
+            centerMap.set(centerId, result);
+          } else if (!result.retryAttempt && existing.retryAttempt) {
+            // Keep existing
+          } else if (result.scrapedAt && existing.scrapedAt) {
+            if (new Date(result.scrapedAt) > new Date(existing.scrapedAt)) {
+              centerMap.set(centerId, result);
+            }
+          } else if (result.legitimacyScore > existing.legitimacyScore) {
+            // Prefer higher legitimacy scores as tiebreaker
+            centerMap.set(centerId, result);
+          }
         }
       }
     }
 
     return Array.from(centerMap.values());
+  }
+
+  getDataSourcePriority(result) {
+    // Higher number = higher priority
+    switch (result.source) {
+      case 'final-alternative-scraper':
+        return 100;
+      case 'retry-scraper':
+      case 'website-scraper':
+        return 80;
+      case 'google-places-research':
+        return 60;
+      default:
+        return 40; // Original scraping results
+    }
   }
 
   async loadManualReviewCenters() {

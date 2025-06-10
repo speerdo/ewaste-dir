@@ -7,7 +7,7 @@ type Props = {
 };
 
 const { post } = Astro.props;
-const { title, description, pubDate, image } = post.data;
+const { title, description, pubDate, image, author } = post.data;
 
 // Production domain for consistent URLs
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
@@ -61,6 +61,11 @@ const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_
                 month: 'long',
                 day: 'numeric'
               })}
+              {author && (
+                <span class="ml-4">
+                  by <span class="font-medium">{author}</span>
+                </span>
+              )}
             </div>
             <p class="text-xl text-gray-200">
               {description}

@@ -14,6 +14,121 @@ import CTA from '../components/CTA.astro';
   description="Find electronics recycling centers near you. Safely dispose of computers, phones, TVs and other electronic devices at certified e-waste recycling facilities across the United States."
 >
   <Hero />
+  
+  <!-- Comprehensive E-Waste Information Section -->
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-3xl font-bold text-center mb-8">Complete Guide to Electronics Recycling</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <h3 class="text-xl font-semibold mb-4">What is E-Waste Recycling?</h3>
+            <p class="text-gray-700 leading-relaxed">
+              Electronic waste (e-waste) recycling is the process of recovering valuable materials from old, broken, or unwanted electronic devices. This includes computers, smartphones, tablets, televisions, printers, and other electronic equipment. Proper e-waste recycling prevents harmful materials like lead, mercury, and cadmium from entering landfills while recovering precious metals like gold, silver, and rare earth elements.
+            </p>
+          </div>
+          
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <h3 class="text-xl font-semibold mb-4">Why Recycle Electronics?</h3>
+            <p class="text-gray-700 leading-relaxed">
+              Electronics contain both valuable and hazardous materials. When disposed of properly, up to 95% of materials in electronic devices can be recovered and reused. This conserves natural resources, reduces mining for new materials, prevents soil and water contamination, and keeps toxic substances out of landfills where they can leach into groundwater.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-lg shadow-sm mb-12">
+          <h3 class="text-2xl font-semibold mb-6">What Electronics Can Be Recycled?</h3>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">Computers & Laptops</h4>
+              <ul class="text-gray-700 space-y-1">
+                <li>• Desktop computers</li>
+                <li>• Laptop computers</li>
+                <li>• Computer monitors</li>
+                <li>• Keyboards and mice</li>
+                <li>• Computer servers</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">Mobile Devices</h4>
+              <ul class="text-gray-700 space-y-1">
+                <li>• Smartphones</li>
+                <li>• Tablets</li>
+                <li>• E-readers</li>
+                <li>• GPS devices</li>
+                <li>• Smart watches</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">Home Electronics</h4>
+              <ul class="text-gray-700 space-y-1">
+                <li>• Televisions (LCD, LED, CRT)</li>
+                <li>• Printers and scanners</li>
+                <li>• Gaming consoles</li>
+                <li>• Audio equipment</li>
+                <li>• Small appliances</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 p-8 rounded-lg mb-12">
+          <h3 class="text-2xl font-semibold mb-6">How to Prepare Electronics for Recycling</h3>
+          <div class="space-y-4">
+            <div class="flex items-start">
+              <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-4 mt-1">1</span>
+              <div>
+                <h4 class="font-semibold mb-2">Data Security</h4>
+                <p class="text-gray-700">Remove or destroy all personal data. Use data wiping software or physically remove hard drives. Many recycling centers offer secure data destruction services.</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-4 mt-1">2</span>
+              <div>
+                <h4 class="font-semibold mb-2">Remove Batteries</h4>
+                <p class="text-gray-700">Take out any removable batteries, as they often require separate recycling processes. Many electronics stores accept batteries for recycling.</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-4 mt-1">3</span>
+              <div>
+                <h4 class="font-semibold mb-2">Check for Trade-In Value</h4>
+                <p class="text-gray-700">Working devices may have trade-in value with manufacturers or retailers. Check manufacturer programs before recycling.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-lg shadow-sm">
+          <h3 class="text-2xl font-semibold mb-6">Environmental Impact of Proper E-Waste Recycling</h3>
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">Positive Environmental Effects</h4>
+              <ul class="text-gray-700 space-y-2">
+                <li>• Prevents toxic materials from entering landfills</li>
+                <li>• Reduces the need for mining new materials</li>
+                <li>• Conserves energy used in manufacturing</li>
+                <li>• Protects soil and groundwater from contamination</li>
+                <li>• Reduces greenhouse gas emissions</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold text-red-600 mb-3">Consequences of Improper Disposal</h4>
+              <ul class="text-gray-700 space-y-2">
+                <li>• Heavy metals leach into soil and water</li>
+                <li>• Toxic fumes released during incineration</li>
+                <li>• Loss of valuable recoverable materials</li>
+                <li>• Increased demand for virgin materials</li>
+                <li>• Higher carbon footprint from new manufacturing</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <FeaturedStates />
   <StateDirectory />
   <PopularCities />

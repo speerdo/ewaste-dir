@@ -14,6 +14,13 @@
     "preview": "vercel dev",
     "astro": "astro",
     "import-data": "node scripts/import-data.js",
+    "collect-local-data": "node scripts/collect-local-data.js",
+    "test-scraper": "node scripts/test-scraper.js",
+    "scrape-websites": "node scripts/web-scraper.js",
+    "retry-failed": "node scripts/retry-failed-websites.js",
+    "research-places": "node scripts/google-places-researcher.js",
+    "update-database": "node scripts/update-database.js",
+    "scrape-and-update": "npm run scrape-websites && npm run update-database",
     "clean": "rm -rf dist node_modules/.astro node_modules/.vite .vercel/output",
     "cleanup": "rm -rf dist/ .vercel/output/ .temp-build/"
   },
@@ -27,6 +34,10 @@
     "@types/google.maps": "^3.55.4",
     "@vercel/analytics": "^1.5.0",
     "astro": "^5.7.2",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^16.5.0",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^23.0.0",
     "tailwindcss": "^3.4.1"
   },
   "engines": {

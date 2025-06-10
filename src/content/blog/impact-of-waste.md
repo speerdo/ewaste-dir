@@ -1,6 +1,6 @@
 ---
 title: 'The Environmental Impact of Electronic Waste'
-pubDate: 2024-04-15
+pubDate: 2025-04-15
 description: "Discover how electronic waste affects our environment and why proper recycling is crucial for our planet's future."
 image: '/images/broken-tv.jpeg'
 ---

@@ -14,6 +14,9 @@ dist/
 # Astro
 .astro/
 
+# Data
+data/
+
 # Environment Variables
 .env
 .env.local

@@ -56,11 +56,20 @@ CREATE TABLE IF NOT EXISTS recycling_centers (
 -- Enable Row Level Security
 ALTER TABLE recycling_centers ENABLE ROW LEVEL SECURITY;
 
--- Create policy for public read access
-CREATE POLICY "Allow public read access on recycling_centers"
-  ON recycling_centers FOR SELECT
-  TO public
-  USING (true);
+-- Create policy for public read access (skip if exists)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'recycling_centers' 
+        AND policyname = 'Allow public read access on recycling_centers'
+    ) THEN
+        CREATE POLICY "Allow public read access on recycling_centers"
+          ON recycling_centers FOR SELECT
+          TO public
+          USING (true);
+    END IF;
+END $$;
 
 -- Create indexes for common search patterns
 CREATE INDEX IF NOT EXISTS idx_recycling_centers_location 

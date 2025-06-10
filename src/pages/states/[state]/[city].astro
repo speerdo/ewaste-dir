@@ -1,6 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getState, getRecyclingCentersByCity, normalizeForUrl } from '../../../lib/supabase';
+import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
@@ -55,6 +55,10 @@ const centers = await getRecyclingCentersByCity(stateParam, searchCityName);
 if (!centers || centers.length === 0) {
   return Astro.redirect(`/states/${stateParam}`);
 }
+
+// Get local data for the city (regulations and statistics)
+const cityStateKey = `${searchCityName}, ${state.name}`;
+const localData = await getLocalCityData(cityStateKey);
 
 // Count how many centers match exactly vs nearby centers
 const exactMatches = centers.filter(center => center.matched === true);
@@ -347,16 +351,13 @@ if (baseTitle.length <= maxTitleLength) {
       </a>
     </div>
 
-    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-8">
-      <div>
-        <h1 class="text-4xl font-display font-bold text-gray-900 mb-2">
-          Electronics Recycling in {cityName}
-        </h1>
-        <p class="text-xl text-gray-600">
-          {displayCenters.length} recycling {displayCenters.length === 1 ? 'center' : 'centers'} in {locationDescription}
-        </p>
-      </div>
-      <div id="sort-button-container"></div>
+    <div class="mb-8">
+      <h1 class="text-4xl font-display font-bold text-gray-900 mb-2">
+        Electronics Recycling in {cityName}
+      </h1>
+      <p class="text-xl text-gray-600">
+        {displayCenters.length} recycling {displayCenters.length === 1 ? 'center' : 'centers'} in {locationDescription}
+      </p>
     </div>
 
     <!-- SEO descriptive paragraph for city page -->
@@ -372,6 +373,146 @@ if (baseTitle.length <= maxTitleLength) {
       <p class="text-base text-gray-700">
         Looking to recycle electronics in {cityName}, {state.name}? This directory helps you find certified e-waste recycling centers for computers, phones, TVs, printers, and more. Proper electronics recycling keeps hazardous materials out of landfills and supports a cleaner, greener community in {cityName}. Browse the map and list below to find a convenient drop-off location near you.
       </p>
+    </div>
+
+    <!-- Local Regulations & Environmental Impact Sections -->
+    {localData.regulations && (
+      <div class="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Local Regulations -->
+        <div class="bg-blue-50 border border-blue-100 rounded-lg p-6">
+          <h2 class="text-xl font-semibold text-blue-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Local E-Waste Regulations
+          </h2>
+          
+          {localData.regulations.has_ewaste_ban && (
+            <div class="mb-3">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                E-Waste Ban in Effect
+              </span>
+            </div>
+          )}
+          
+          {localData.regulations.landfill_restrictions && (
+            <div class="mb-4">
+              <h3 class="font-medium text-blue-800 mb-2">Disposal Restrictions</h3>
+              <p class="text-sm text-blue-700">{localData.regulations.landfill_restrictions}</p>
+            </div>
+          )}
+          
+          {localData.regulations.tv_computer_rules && (
+            <div class="mb-4">
+              <h3 class="font-medium text-blue-800 mb-2">TV & Computer Rules</h3>
+              <p class="text-sm text-blue-700">{localData.regulations.tv_computer_rules}</p>
+            </div>
+          )}
+          
+          {localData.regulations.battery_regulations && (
+            <div class="mb-4">
+              <h3 class="font-medium text-blue-800 mb-2">Battery Recycling</h3>
+              <p class="text-sm text-blue-700">{localData.regulations.battery_regulations}</p>
+            </div>
+          )}
+        </div>
+
+        <!-- Environmental Impact Stats -->
+        {localData.stats && (
+          <div class="bg-green-50 border border-green-100 rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-green-900 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Environmental Impact
+            </h2>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-green-800">{localData.stats.recycling_rate}%</div>
+                <div class="text-xs text-green-600">Recycling Rate</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-green-800">{localData.stats.co2_savings_lbs.toLocaleString()}</div>
+                <div class="text-xs text-green-600">lbs CO₂ Saved/Year</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-green-800">{localData.stats.jobs_supported}</div>
+                <div class="text-xs text-green-600">Jobs Supported</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-green-800">${(localData.stats.economic_impact_dollars / 1000).toFixed(0)}K</div>
+                <div class="text-xs text-green-600">Economic Impact</div>
+              </div>
+            </div>
+            
+            {localData.regulations && localData.regulations.environmental_benefits && (
+              <div class="mt-4 pt-4 border-t border-green-200">
+                <h3 class="font-medium text-green-800 mb-2">Local Benefits</h3>
+                <p class="text-sm text-green-700">{localData.regulations.environmental_benefits}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    )}
+
+    <!-- Additional Local Information -->
+    {localData.regulations && (localData.regulations.municipal_programs || localData.regulations.special_events) && (
+      <div class="mb-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Local Programs & Events
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {localData.regulations.municipal_programs && (
+            <div>
+              <h3 class="font-medium text-gray-800 mb-2">Municipal Programs</h3>
+              <p class="text-sm text-gray-600">{localData.regulations.municipal_programs}</p>
+            </div>
+          )}
+          
+          {localData.regulations.special_events && (
+            <div>
+              <h3 class="font-medium text-gray-800 mb-2">Special Collection Events</h3>
+              <p class="text-sm text-gray-600">{localData.regulations.special_events}</p>
+            </div>
+          )}
+          
+          {localData.regulations.recycling_hotline && (
+            <div>
+              <h3 class="font-medium text-gray-800 mb-2">Recycling Hotline</h3>
+              <p class="text-sm text-gray-600">
+                <a href={`tel:${localData.regulations.recycling_hotline}`} class="text-blue-600 hover:text-blue-700">
+                  {localData.regulations.recycling_hotline}
+                </a>
+              </p>
+            </div>
+          )}
+          
+          {localData.regulations.government_website && (
+            <div>
+              <h3 class="font-medium text-gray-800 mb-2">Local Government</h3>
+              <p class="text-sm text-gray-600">
+                <a href={localData.regulations.government_website} target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700">
+                  Visit {cityName} Government Website →
+                </a>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    <!-- Sort Controls -->
+    <div class="mb-6 flex justify-between items-center">
+      <h2 class="text-lg font-semibold text-gray-900">
+        Recycling Centers ({displayCenters.length})
+      </h2>
+      <div id="sort-button-container"></div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">

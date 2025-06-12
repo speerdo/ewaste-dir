@@ -37,15 +37,15 @@ declare global {
     Reset Map
   </button>
   
-  <div id="map" class="w-full h-full">
+  <div id="map" class="w-full h-full" role="application" aria-label="Interactive map showing recycling center locations">
     <!-- Loading state -->
     <div class="absolute inset-0 flex items-center justify-center bg-gray-100">
-      <div class="text-gray-500">Loading map...</div>
+      <div class="text-gray-500" role="status" aria-live="polite">Loading map...</div>
     </div>
   </div>
 
   <!-- Error state (hidden by default) -->
-  <div id="mapError" class="absolute inset-0 flex items-center justify-center bg-gray-100 hidden">
+  <div id="mapError" class="absolute inset-0 flex items-center justify-center bg-gray-100 hidden" role="alert">
     <div class="text-center p-4">
       <p class="text-red-500 mb-2">Failed to load map</p>
       <p class="text-gray-500 text-sm">Please try refreshing the page</p>

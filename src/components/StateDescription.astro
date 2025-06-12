@@ -11,23 +11,370 @@ const { state } = Astro.props;
 console.log('StateDescription component - state data:', state);
 ---
 
-<section class="bg-white py-12 border-b border-gray-100">
+<section class="bg-white py-12">
   <div class="container mx-auto px-4">
-    <div class="mx-auto">
-      <h2 class="text-2xl font-display font-bold text-gray-900 mb-6">
-        E-Waste Recycling Laws and Programs in {state.name}
-      </h2>
-      
-      <div class="max-w-none">
-        {state.description ? (
-          <p class="text-gray-600 leading-relaxed">
-            {state.description}
+    <div class="max-w-7xl mx-auto">
+      <div class="prose prose-lg max-w-none">
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+          <div class="bg-gray-50 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">Why Electronics Recycling Matters in {state.name}</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+              Electronic waste represents one of the fastest-growing waste streams nationwide. {state.name} generates thousands of tons of e-waste annually. This includes computers, smartphones, televisions, and other electronic devices. Proper recycling prevents toxic materials from entering landfills.
+            </p>
+            <p class="text-gray-700 leading-relaxed mb-4">
+              Heavy metals like lead, mercury, and cadmium are found in electronic devices. These substances can contaminate soil and groundwater if not handled properly. Professional recycling facilities safely extract and process these materials.
+            </p>
+            <p class="text-gray-700 leading-relaxed">
+              The economic impact of electronics recycling in {state.name} is significant. The industry creates jobs and generates revenue from recovered materials. Local communities benefit from reduced waste management costs. Environmental protection initiatives also receive support through responsible recycling programs.
+            </p>
+          </div>
+          
+          <div class="bg-green-50 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">Electronics Accepted for Recycling</h3>
+            <p class="text-gray-700 leading-relaxed mb-3">
+              Most electronics recycling centers in {state.name} accept a wide range of devices:
+            </p>
+            <ul class="text-gray-700 space-y-1 mb-4">
+              <li>• Desktop and laptop computers</li>
+              <li>• Computer monitors and keyboards</li>
+              <li>• Smartphones and tablets</li>
+              <li>• Televisions and audio equipment</li>
+              <li>• Printers and office equipment</li>
+              <li>• Gaming consoles and accessories</li>
+              <li>• Small household electronics</li>
+              <li>• Cables, chargers, and adapters</li>
+            </ul>
+            <p class="text-gray-700 leading-relaxed text-sm">
+              Some facilities may have restrictions on certain items. CRT monitors and televisions require special handling due to lead content. Always check with your chosen recycling center about their specific acceptance policies.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 p-8 rounded-lg mb-8">
+          <h3 class="text-2xl font-semibold mb-6">State-Specific Recycling Regulations in {state.name}</h3>
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Electronics recycling regulations vary by state. {state.name} may have specific requirements for manufacturers and consumers. Understanding these laws helps ensure compliance and proper disposal.
           </p>
-        ) : (
-          <p class="text-gray-600 leading-relaxed">
-            Find electronics recycling centers in {state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.
+          
+          <div class="grid md:grid-cols-2 gap-8 mb-6">
+            <div>
+              <h4 class="font-semibold text-purple-600 mb-3">Consumer Responsibilities</h4>
+              <ul class="text-gray-700 space-y-2">
+                <li>• Remove personal data before disposal</li>
+                <li>• Use certified recycling facilities when possible</li>
+                <li>• Separate batteries from electronic devices</li>
+                <li>• Follow local collection guidelines</li>
+                <li>• Keep receipts for business equipment disposal</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 class="font-semibold text-purple-600 mb-3">Manufacturer Programs</h4>
+              <ul class="text-gray-700 space-y-2">
+                <li>• Take-back programs for brand-specific devices</li>
+                <li>• Trade-in credits for new purchases</li>
+                <li>• Free recycling events and collection days</li>
+                <li>• Mail-back programs for small electronics</li>
+                <li>• Retail partnership programs</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="bg-yellow-50 p-6 rounded-lg">
+            <h4 class="font-semibold text-yellow-700 mb-3">Important Notice</h4>
+            <p class="text-yellow-800 text-sm">
+              Regulations change frequently. Always verify current requirements with local authorities. Some municipalities may have additional restrictions beyond state laws. Business disposal may require special documentation or certified destruction services.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 p-8 rounded-lg mb-8">
+          <h3 class="text-2xl font-semibold mb-6">Preparing Electronics for Recycling in {state.name}</h3>
+          
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <h4 class="font-semibold text-blue-600 mb-3">Data Security Steps</h4>
+              <p class="text-gray-700 mb-3">
+                Protecting personal information is crucial before recycling electronics. Follow these essential steps:
+              </p>
+              <ol class="text-gray-700 space-y-2">
+                <li>1. Back up important files to cloud storage or external drives</li>
+                <li>2. Sign out of all accounts and applications</li>
+                <li>3. Perform a factory reset on the device</li>
+                <li>4. Remove or destroy storage devices if needed</li>
+                <li>5. Consider professional data destruction services</li>
+              </ol>
+            </div>
+            
+            <div>
+              <h4 class="font-semibold text-blue-600 mb-3">Physical Preparation</h4>
+              <p class="text-gray-700 mb-3">
+                Proper preparation ensures safe transportation and processing:
+              </p>
+              <ol class="text-gray-700 space-y-2">
+                <li>1. Remove batteries from devices when possible</li>
+                <li>2. Keep cables and accessories together</li>
+                <li>3. Check for any removable storage media</li>
+                <li>4. Clean devices to remove personal items</li>
+                <li>5. Package securely for transport if needed</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 p-8 rounded-lg mb-8">
+          <h3 class="text-2xl font-semibold mb-6">Finding Certified Recyclers in {state.name}</h3>
+          <p class="text-gray-700 leading-relaxed mb-4">
+            Choosing certified electronics recyclers ensures responsible handling of your devices. Look for facilities with proper certifications and transparent processes. Certified recyclers follow strict environmental and security standards.
           </p>
-        )}
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">Key Certifications to Look For</h4>
+              <ul class="text-gray-700 space-y-2">
+                <li>• R2 (Responsible Recycling) certification</li>
+                <li>• e-Stewards certification</li>
+                <li>• ISO 14001 environmental management</li>
+                <li>• NAID AAA data destruction certification</li>
+                <li>• State-specific recycling licenses</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">What Certified Recyclers Provide</h4>
+              <ul class="text-gray-700 space-y-2">
+                <li>• Secure data destruction services</li>
+                <li>• Environmental compliance documentation</li>
+                <li>• Material tracking and reporting</li>
+                <li>• Worker safety protections</li>
+                <li>• Transparent downstream processing</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 p-8 rounded-lg mb-8">
+          <h3 class="text-2xl font-semibold mb-6">Electronics Recycling Process</h3>
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Understanding the recycling process helps ensure your electronics are handled properly. Professional facilities follow systematic procedures to maximize material recovery and minimize environmental impact.
+          </p>
+          
+          <div class="space-y-6">
+            <div class="flex items-start">
+              <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1">1</span>
+              <div>
+                <h4 class="font-semibold mb-2">Collection and Intake</h4>
+                <p class="text-gray-700">
+                  Electronics are collected from drop-off locations, pickup services, and collection events. Items are sorted by type and condition. Working devices may be evaluated for refurbishment or reuse programs.
+                </p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1">2</span>
+              <div>
+                <h4 class="font-semibold mb-2">Data Destruction</h4>
+                <p class="text-gray-700">
+                  All storage devices undergo secure data destruction. Hard drives are wiped using DOD-approved methods or physically destroyed. Certificates of destruction are provided for compliance purposes.
+                </p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1">3</span>
+              <div>
+                <h4 class="font-semibold mb-2">Disassembly and Sorting</h4>
+                <p class="text-gray-700">
+                  Devices are carefully disassembled by trained technicians. Components are separated by material type. Hazardous materials are identified and segregated for special handling.
+                </p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1">4</span>
+              <div>
+                <h4 class="font-semibold mb-2">Material Processing</h4>
+                <p class="text-gray-700">
+                  Separated materials undergo processing to extract valuable resources. Metals are sorted and prepared for refining. Plastics are cleaned and prepared for recycling into new products.
+                </p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1">5</span>
+              <div>
+                <h4 class="font-semibold mb-2">Recovery and Reuse</h4>
+                <p class="text-gray-700">
+                  Recovered materials are sold to manufacturers for use in new products. This closes the recycling loop and reduces demand for virgin materials. Proper documentation tracks all materials.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 p-8 rounded-lg mb-8">
+          <h3 class="text-2xl font-semibold mb-6">Environmental Benefits of Electronics Recycling</h3>
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Proper electronics recycling in {state.name} provides significant environmental benefits. These advantages extend beyond waste diversion to include resource conservation and pollution prevention.
+          </p>
+          
+          <div class="grid md:grid-cols-3 gap-6">
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">Resource Conservation</h4>
+              <ul class="text-gray-700 space-y-1">
+                <li>• Reduces mining for new materials</li>
+                <li>• Conserves precious metals and rare earth elements</li>
+                <li>• Saves energy compared to virgin material production</li>
+                <li>• Preserves natural resources for future generations</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">Pollution Prevention</h4>
+              <ul class="text-gray-700 space-y-1">
+                <li>• Prevents toxic materials from entering landfills</li>
+                <li>• Protects soil and groundwater from contamination</li>
+                <li>• Reduces air pollution from incineration</li>
+                <li>• Minimizes greenhouse gas emissions</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">Economic Impact</h4>
+              <ul class="text-gray-700 space-y-1">
+                <li>• Creates jobs in the recycling industry</li>
+                <li>• Generates revenue from recovered materials</li>
+                <li>• Reduces waste management costs</li>
+                <li>• Supports local green economy initiatives</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 p-8 rounded-lg">
+          <h3 class="text-2xl font-semibold mb-6">Getting Started with Electronics Recycling in {state.name}</h3>
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Taking the first step toward responsible electronics recycling is easier than you might think. Start by identifying the electronics you no longer need. Check if any devices still have value for trade-in programs. For non-functional items, locate a certified recycling facility near you.
+          </p>
+          
+          <div class="bg-green-50 p-6 rounded-lg">
+            <h4 class="font-semibold text-green-700 mb-3">Tips for Successful Electronics Recycling</h4>
+            <div class="grid md:grid-cols-2 gap-4">
+              <ul class="text-gray-700 space-y-2">
+                <li>• Research recycler certifications before visiting</li>
+                <li>• Prepare devices by removing personal data</li>
+                <li>• Group similar devices together for efficiency</li>
+                <li>• Ask about data destruction certificates</li>
+              </ul>
+              <ul class="text-gray-700 space-y-2">
+                <li>• Inquire about pickup services for large items</li>
+                <li>• Check for any fees before dropping off items</li>
+                <li>• Consider manufacturer take-back programs</li>
+                <li>• Schedule visits during facility operating hours</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 p-8 rounded-lg mb-8">
+          <h3 class="text-2xl font-semibold mb-6">Business Electronics Recycling in {state.name}</h3>
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Businesses in {state.name} face unique challenges when disposing of electronic equipment. Corporate electronics often contain sensitive data requiring specialized handling. Large volumes may need scheduled pickup services. Compliance documentation becomes essential for audit purposes.
+          </p>
+          
+          <div class="grid md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-lg border border-gray-200">
+              <h4 class="font-semibold text-blue-600 mb-3">IT Asset Disposal</h4>
+              <ul class="text-gray-700 space-y-2 text-sm">
+                <li>• Servers and networking equipment</li>
+                <li>• Desktop and laptop computers</li>
+                <li>• Monitors and peripherals</li>
+                <li>• Storage devices and drives</li>
+                <li>• Telecommunications equipment</li>
+              </ul>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg border border-gray-200">
+              <h4 class="font-semibold text-blue-600 mb-3">Office Equipment</h4>
+              <ul class="text-gray-700 space-y-2 text-sm">
+                <li>• Printers and copiers</li>
+                <li>• Fax machines and scanners</li>
+                <li>• Phone systems</li>
+                <li>• Point-of-sale terminals</li>
+                <li>• Security equipment</li>
+              </ul>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg border border-gray-200">
+              <h4 class="font-semibold text-blue-600 mb-3">Specialized Devices</h4>
+              <ul class="text-gray-700 space-y-2 text-sm">
+                <li>• Medical electronics</li>
+                <li>• Laboratory equipment</li>
+                <li>• Industrial controllers</li>
+                <li>• Audio/visual systems</li>
+                <li>• Testing instruments</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="bg-blue-50 p-6 rounded-lg">
+            <h4 class="font-semibold text-blue-700 mb-3">Business Recycling Benefits</h4>
+            <p class="text-blue-800 mb-3">
+              Professional electronics recycling offers significant advantages for businesses. These include liability protection and compliance assurance. Environmental responsibility enhances corporate image. Asset recovery can offset disposal costs.
+            </p>
+            <div class="grid md:grid-cols-2 gap-4">
+              <ul class="text-blue-700 space-y-1 text-sm">
+                <li>• Secure data destruction documentation</li>
+                <li>• Environmental compliance certificates</li>
+                <li>• Liability protection and insurance</li>
+                <li>• Asset tracking and reporting</li>
+              </ul>
+              <ul class="text-blue-700 space-y-1 text-sm">
+                <li>• Potential tax benefits for responsible disposal</li>
+                <li>• Enhanced corporate sustainability profile</li>
+                <li>• Reduced storage and management costs</li>
+                <li>• Professional pickup and handling services</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 p-8 rounded-lg mb-8">
+          <h3 class="text-2xl font-semibold mb-6">Common Electronics Recycling Myths</h3>
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Several misconceptions exist about electronics recycling. Understanding the facts helps make informed decisions. Proper information leads to better recycling outcomes for everyone.
+          </p>
+          
+          <div class="space-y-6">
+            <div class="border-l-4 border-red-500 pl-4">
+              <h4 class="font-semibold text-red-600 mb-2">Myth: All electronics end up in landfills anyway</h4>
+              <p class="text-gray-700">
+                Certified recyclers follow strict material tracking requirements. Most components are successfully recovered and reused. Metals, plastics, and rare earth elements find new life in manufacturing. Only non-recoverable materials require safe disposal.
+              </p>
+            </div>
+            
+            <div class="border-l-4 border-red-500 pl-4">
+              <h4 class="font-semibold text-red-600 mb-2">Myth: Data wiping is unnecessary if the device is broken</h4>
+              <p class="text-gray-700">
+                Storage devices can often be recovered even when computers appear non-functional. Professional data recovery tools can access information from damaged drives. Secure data destruction should always be performed regardless of device condition.
+              </p>
+            </div>
+            
+            <div class="border-l-4 border-red-500 pl-4">
+              <h4 class="font-semibold text-red-600 mb-2">Myth: Electronics recycling is too expensive for individuals</h4>
+              <p class="text-gray-700">
+                Many recycling options are available at no cost to consumers. Manufacturer take-back programs often provide free services. Municipal collection events frequently offer free disposal. Even paid services often cost less than other disposal methods.
+              </p>
+            </div>
+            
+            <div class="border-l-4 border-red-500 pl-4">
+              <h4 class="font-semibold text-red-600 mb-2">Myth: Newer electronics don't need special recycling</h4>
+              <p class="text-gray-700">
+                Modern devices often contain more complex materials than older electronics. Lithium batteries require specialized handling procedures. Rare earth elements in newer devices are particularly valuable for recovery. Advanced recycling techniques are needed for optimal processing.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

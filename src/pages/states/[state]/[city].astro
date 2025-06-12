@@ -114,14 +114,30 @@ const mapMarkers: Marker[] = displayCenters.map(center => ({
 })).filter(marker => !isNaN(marker.lat) && !isNaN(marker.lng));
 
 // Generate a unique, keyword-rich meta description for SEO
-// Keep it between 110-160 characters, accounting for longer city/state names
-const maxBaseLength = 160;
-const baseDescription = `Electronics recycling centers in ${cityName}, ${state.name}. Safe disposal of phones, computers, TVs & e-waste.`;
+// Keep it between 120-155 characters, accounting for longer city/state names
+const maxBaseLength = 155;
+const minBaseLength = 120;
+const centerWord = displayCenters.length === 1 ? 'center' : 'centers';
 
-// If the base description is too long, use a shorter version
-const metaDescription = baseDescription.length <= maxBaseLength 
-  ? baseDescription
-  : `E-waste recycling in ${cityName}, ${state.name}. Safe disposal of electronics & computers.`;
+// Generate comprehensive meta description
+const longDescription = `Find ${displayCenters.length} electronics recycling ${centerWord} in ${cityName}, ${state.name}. Safe disposal of computers, phones, TVs & e-waste with certified facilities, data destruction & directions.`;
+
+const mediumDescription = `${displayCenters.length} electronics recycling ${centerWord} in ${cityName}, ${state.name}. Safe disposal of computers, phones, TVs & e-waste. Get directions, hours & contact info.`;
+
+const shortDescription = `Electronics recycling centers in ${cityName}, ${state.name}. Safe disposal of computers, phones, TVs & e-waste. Find certified facilities with directions.`;
+
+// Choose the best description that fits our length requirements
+let metaDescription;
+if (longDescription.length >= minBaseLength && longDescription.length <= maxBaseLength) {
+  metaDescription = longDescription;
+} else if (mediumDescription.length >= minBaseLength && mediumDescription.length <= maxBaseLength) {
+  metaDescription = mediumDescription;
+} else if (shortDescription.length >= minBaseLength) {
+  metaDescription = shortDescription;
+} else {
+  // Fallback to ensure we meet minimum length
+  metaDescription = `Find electronics recycling centers in ${cityName}, ${state.name}. Safe and responsible disposal of computers, phones, televisions, tablets, and other electronic devices. Get directions, contact information, and hours of operation.`;
+}
 
 // Calculate statistics from the centers data
 const centersWithLegitimacy = displayCenters.filter(center => center.legitimacy_score != null);
@@ -326,13 +342,16 @@ function convertTimeFormat(timeStr: string): string | undefined {
 
 // Generate optimized title (target: 50-60 characters)
 const maxTitleLength = 60;
-const baseTitle = `E-Waste Recycling in ${cityName}, ${state.name}`;
-const shortTitle = `E-Waste Centers: ${cityName}, ${state.name}`;
-const ultraShortTitle = `E-Waste: ${cityName}, ${state.name}`;
+const baseTitle = `Electronics Recycling Centers in ${cityName}, ${state.name} - Directory`;
+const mediumTitle = `Electronics Recycling Centers in ${cityName}, ${state.name}`;
+const shortTitle = `E-Waste Recycling Centers in ${cityName}, ${state.name}`;
+const ultraShortTitle = `E-Waste Centers: ${cityName}, ${state.name}`;
 
 let pageTitle;
 if (baseTitle.length <= maxTitleLength) {
   pageTitle = baseTitle;
+} else if (mediumTitle.length <= maxTitleLength) {
+  pageTitle = mediumTitle;
 } else if (shortTitle.length <= maxTitleLength) {
   pageTitle = shortTitle;
 } else {

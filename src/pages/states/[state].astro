@@ -70,15 +70,31 @@ const cityData = sortedCities.map(city => {
   };
 });
 
-// Generate description - keep it between 110-160 characters, accounting for longer state names
-const maxBaseLength = 160;
+// Generate description - keep it between 120-155 characters, accounting for longer state names
+const maxBaseLength = 155;
+const minBaseLength = 120;
 const centerWord = totalCenters === 1 ? 'center' : 'centers';
-const baseDescription = `Find ${totalCenters} electronics recycling ${centerWord} in ${state.name}. Safe disposal of computers, phones, TVs & e-waste.`;
+const cityWord = sortedCities.length === 1 ? 'city' : 'cities';
 
-// If the base description is too long, use a shorter version
-const description = baseDescription.length <= maxBaseLength 
-  ? baseDescription
-  : `${totalCenters} e-waste recycling ${centerWord} in ${state.name}. Safe electronics disposal & directions.`;
+// Generate comprehensive description
+const longDescription = `Find ${totalCenters} electronics recycling ${centerWord} across ${sortedCities.length} ${cityWord} in ${state.name}. Safe disposal of computers, phones, TVs & e-waste with certified facilities and secure data destruction.`;
+
+const mediumDescription = `${totalCenters} electronics recycling ${centerWord} in ${state.name} across ${sortedCities.length} ${cityWord}. Safe disposal of computers, phones, TVs & e-waste. Find certified facilities near you.`;
+
+const shortDescription = `${totalCenters} electronics recycling ${centerWord} in ${state.name}. Safe disposal of computers, phones, TVs & e-waste. Find certified facilities.`;
+
+// Choose the best description that fits our length requirements
+let description;
+if (longDescription.length >= minBaseLength && longDescription.length <= maxBaseLength) {
+  description = longDescription;
+} else if (mediumDescription.length >= minBaseLength && mediumDescription.length <= maxBaseLength) {
+  description = mediumDescription;
+} else if (shortDescription.length >= minBaseLength) {
+  description = shortDescription;
+} else {
+  // Fallback to ensure we meet minimum length
+  description = `Find electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, televisions, tablets, and other electronic devices. Certified facilities with secure data destruction services.`;
+}
 ---
 
 <StateLayout 

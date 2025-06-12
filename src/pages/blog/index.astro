@@ -8,18 +8,24 @@ const posts = await getCollection('blog');
 posts.sort((a: CollectionEntry<'blog'>, b: CollectionEntry<'blog'>) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<Layout title="Blog | RecycleOldTech - Electronics Recycling News and Updates" description="Stay informed about electronics recycling trends, environmental impact of e-waste, and best practices for responsible disposal.">
+<Layout title="Blog | Electronics Recycling News - RecycleOldTech" description="Stay informed about electronics recycling trends, environmental impact of e-waste, and best practices for responsible disposal.">
   <div class="pt-32 pb-16 bg-gradient-to-b from-green-900 via-green-800 to-green-700">
     <div class="container mx-auto px-4">
       <h1 class="text-4xl md:text-5xl font-display font-bold text-white text-center mb-6">RecycleOldTech Blog</h1>
-      <p class="text-xl text-green-50 text-center max-w-3xl mx-auto">
+      <p class="text-xl text-green-50 text-center max-w-3xl mx-auto mb-8">
         Stay informed about electronics recycling trends and environmental impact
       </p>
+      <div class="max-w-2xl mx-auto text-center">
+        <p class="text-green-100 mb-4">
+          Our blog provides comprehensive coverage of electronics recycling topics. We explore industry trends, environmental impacts, and practical recycling tips. Our content helps individuals and businesses make informed decisions about e-waste disposal.
+        </p>
+      </div>
     </div>
   </div>
 
   <div class="py-16 bg-white">
     <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">Latest Articles</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {posts.map((post: CollectionEntry<'blog'>) => (
           <article class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
@@ -56,4 +62,207 @@ posts.sort((a: CollectionEntry<'blog'>, b: CollectionEntry<'blog'>) => b.data.pu
       </div>
     </div>
   </div>
+
+  <!-- Comprehensive Blog Information Section -->
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-3xl font-bold text-center mb-8">Your Source for Electronics Recycling Knowledge</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <h3 class="text-xl font-semibold mb-4">What We Cover</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+              We explore industry trends, environmental impacts, and practical recycling tips. New technologies emerge regularly. Regulations change frequently. Our blog keeps you updated on these important developments.
+            </p>
+            <ul class="text-gray-700 space-y-2">
+              <li>• Latest recycling technologies and innovations</li>
+              <li>• Environmental impact studies and research</li>
+              <li>• Government regulations and policy updates</li>
+              <li>• Corporate sustainability initiatives</li>
+              <li>• Consumer education and best practices</li>
+            </ul>
+          </div>
+          
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <h3 class="text-xl font-semibold mb-4">Why Follow Our Blog</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+              Electronics recycling is rapidly evolving. We make complex topics accessible and actionable. Our content provides expert analysis and practical guidance for better recycling decisions.
+            </p>
+            <ul class="text-gray-700 space-y-2">
+              <li>• Expert analysis of industry developments</li>
+              <li>• Practical guides for better recycling</li>
+              <li>• Interviews with industry leaders</li>
+              <li>• Research summaries and data insights</li>
+              <li>• Tips for reducing electronic waste</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 p-8 rounded-lg mb-12">
+          <h3 class="text-2xl font-semibold mb-6">Featured Topics</h3>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div>
+              <h4 class="font-semibold text-blue-600 mb-3">Technology Trends</h4>
+              <ul class="text-gray-700 space-y-1">
+                <li>• AI in recycling processes</li>
+                <li>• Automated sorting systems</li>
+                <li>• Blockchain for supply chain tracking</li>
+                <li>• IoT device recycling challenges</li>
+                <li>• 5G equipment disposal</li>
+                <li>• Cryptocurrency mining waste</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold text-blue-600 mb-3">Environmental Impact</h4>
+              <ul class="text-gray-700 space-y-1">
+                <li>• Carbon footprint reduction</li>
+                <li>• Toxic material containment</li>
+                <li>• Resource conservation benefits</li>
+                <li>• Water pollution prevention</li>
+                <li>• Landfill diversion strategies</li>
+                <li>• Circular economy principles</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold text-blue-600 mb-3">Industry News</h4>
+              <ul class="text-gray-700 space-y-1">
+                <li>• New recycling facility openings</li>
+                <li>• Manufacturer take-back programs</li>
+                <li>• Certification updates</li>
+                <li>• International trade policies</li>
+                <li>• Research partnerships</li>
+                <li>• Investment in recycling infrastructure</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-lg shadow-sm mb-12">
+          <h3 class="text-2xl font-semibold mb-6">Educational Resources</h3>
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">For Individuals</h4>
+              <p class="text-gray-700 mb-3">Learn how to properly recycle your personal electronics:</p>
+              <ul class="text-gray-700 space-y-2">
+                <li>• Step-by-step recycling guides</li>
+                <li>• Data security before disposal</li>
+                <li>• When to repair vs. recycle</li>
+                <li>• Finding local recycling centers</li>
+                <li>• Understanding recycling fees</li>
+                <li>• Donation alternatives</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold text-green-600 mb-3">For Businesses</h4>
+              <p class="text-gray-700 mb-3">Develop effective corporate e-waste strategies:</p>
+              <ul class="text-gray-700 space-y-2">
+                <li>• IT asset lifecycle management</li>
+                <li>• Compliance with regulations</li>
+                <li>• Cost-effective disposal methods</li>
+                <li>• Employee education programs</li>
+                <li>• Vendor selection criteria</li>
+                <li>• Sustainability reporting</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 p-8 rounded-lg mb-12">
+          <h3 class="text-2xl font-semibold mb-6">Current Industry Challenges</h3>
+          <div class="space-y-6">
+            <div>
+              <h4 class="font-semibold text-yellow-800 mb-2">Global Supply Chain Disruptions</h4>
+              <p class="text-gray-700">The electronics industry faces significant supply chain challenges. These impact both new device production and recycling operations. Our blog analyzes these disruptions and their environmental implications. We provide insights into adapting recycling strategies.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold text-yellow-800 mb-2">Rapid Technology Evolution</h4>
+              <p class="text-gray-700">Technology advances faster than recycling infrastructure can adapt. New materials and components create recycling challenges. Our content explores solutions for emerging device types. We cover research into new recycling methods.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold text-yellow-800 mb-2">Consumer Awareness Gaps</h4>
+              <p class="text-gray-700">Many consumers lack awareness about proper e-waste disposal. This leads to environmental damage and missed recycling opportunities. Our educational content addresses these knowledge gaps. We provide clear, actionable guidance for better recycling practices.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-green-50 p-8 rounded-lg mb-12">
+          <h3 class="text-2xl font-semibold mb-6">Success Stories and Case Studies</h3>
+          <p class="text-gray-700 mb-6">
+            We regularly feature success stories from the electronics recycling industry. These case studies demonstrate effective recycling programs and innovative solutions. They provide inspiration and practical examples for our readers.
+          </p>
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <h4 class="font-semibold text-green-700 mb-3">Corporate Programs</h4>
+              <ul class="text-gray-700 space-y-2">
+                <li>• Large-scale IT refresh projects</li>
+                <li>• Employee device recycling initiatives</li>
+                <li>• Zero-waste-to-landfill achievements</li>
+                <li>• Partnership with recycling vendors</li>
+                <li>• Cost savings through proper disposal</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold text-green-700 mb-3">Community Initiatives</h4>
+              <ul class="text-gray-700 space-y-2">
+                <li>• Municipal collection events</li>
+                <li>• School electronics drives</li>
+                <li>• Nonprofit refurbishment programs</li>
+                <li>• Local recycling center expansions</li>
+                <li>• Public-private partnerships</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-lg shadow-sm">
+          <h3 class="text-2xl font-semibold mb-6">Research and Data Insights</h3>
+          <p class="text-gray-700 mb-6">
+            Our blog synthesizes the latest research in electronics recycling. We make academic studies accessible to general audiences. We analyze market data and industry reports. This provides readers with evidence-based insights for decision-making.
+          </p>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="text-center p-4 bg-gray-50 rounded-lg">
+              <div class="text-2xl font-bold text-green-600 mb-2">50+</div>
+              <div class="text-gray-700 text-sm">Research studies analyzed monthly</div>
+            </div>
+            <div class="text-center p-4 bg-gray-50 rounded-lg">
+              <div class="text-2xl font-bold text-green-600 mb-2">100+</div>
+              <div class="text-gray-700 text-sm">Industry experts interviewed</div>
+            </div>
+            <div class="text-center p-4 bg-gray-50 rounded-lg">
+              <div class="text-2xl font-bold text-green-600 mb-2">25+</div>
+              <div class="text-gray-700 text-sm">Countries covered in our analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action Section -->
+  <section class="py-16 bg-green-600">
+    <div class="container mx-auto px-4 text-center">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Have Questions About Electronics Recycling?</h2>
+        <p class="text-xl text-green-100 mb-8">
+          Our team of experts is here to help. Whether you need guidance on recycling specific devices, want to suggest blog topics, or have questions about our directory, we'd love to hear from you.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/contact" class="inline-flex items-center justify-center bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors">
+            Contact Our Team
+            <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.003 8.003 0 01-7.93-6.84c-.42-.054-.84-.126-1.25-.254C2.92 11.36 2 9.8 2 8c0-1.657.895-3.157 2.343-3.657L7 3l.5 2.5L9 3l1 4-1 4-1-2.5L7 21l-2.657-1.343C2.895 19.157 2 17.657 2 16c0-1.8.92-3.36 2.82-4.906A7.98 7.98 0 0112 4c4.418 0 8 3.582 8 8z" />
+            </svg>
+          </a>
+          <a href="/" class="inline-flex items-center justify-center bg-green-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-800 transition-colors">
+            Find Recycling Centers
+            <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 </Layout>

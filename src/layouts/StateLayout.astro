@@ -120,23 +120,41 @@ const metaDescription = description || `Find electronics recycling centers in ${
 
 // Generate optimized title (target: 50-60 characters)
 const maxTitleLength = 60;
-const baseStateTitle = `E-Waste Recycling in ${state.name}`;
-const shortStateTitle = `E-Waste Centers: ${state.name}`;
-const ultraShortStateTitle = `E-Waste: ${state.name}`;
+const baseStateTitle = `Electronics Recycling Centers in ${state.name} - Complete Directory`;
+const mediumStateTitle = `Electronics Recycling Centers in ${state.name} - Directory`;
+const shortStateTitle = `E-Waste Recycling Centers in ${state.name}`;
+const ultraShortStateTitle = `E-Waste Centers: ${state.name}`;
 
 let statePageTitle;
 if (baseStateTitle.length <= maxTitleLength) {
   statePageTitle = baseStateTitle;
+} else if (mediumStateTitle.length <= maxTitleLength) {
+  statePageTitle = mediumStateTitle;
 } else if (shortStateTitle.length <= maxTitleLength) {
   statePageTitle = shortStateTitle;
 } else {
   statePageTitle = ultraShortStateTitle;
 }
+
+// Generate enhanced meta description (120-155 characters)
+const enhancedDescription = description || (() => {
+  const centerWord = totalCenters === 1 ? 'center' : 'centers';
+  const cityWord = citiesWithCounts.length === 1 ? 'city' : 'cities';
+  
+  const baseDesc = `Find ${totalCenters} electronics recycling ${centerWord} across ${citiesWithCounts.length} ${cityWord} in ${state.name}. Safe disposal of computers, phones, TVs & e-waste with certified facilities.`;
+  
+  // If too long, use shorter version
+  if (baseDesc.length > 155) {
+    return `${totalCenters} electronics recycling ${centerWord} in ${state.name}. Safe disposal of computers, phones, TVs & e-waste. Find certified facilities near you.`;
+  }
+  
+  return baseDesc;
+})();
 ---
 
 <Layout 
   title={statePageTitle}
-  description={metaDescription}
+  description={enhancedDescription}
   ogImage={ogImage}
 >
   <!-- State Hero -->
@@ -179,25 +197,45 @@ if (baseStateTitle.length <= maxTitleLength) {
     </div>
   </div>
 
-  <!-- State Description -->
-  <StateDescription state={state} />
+  <!-- State Description Header -->
+  <div class="bg-white py-8 border-b border-gray-100">
+    <div class="container mx-auto px-4">
+      <div class="max-w-7xl mx-auto">
+        <h2 class="text-2xl font-display font-bold text-gray-900 mb-6">
+          E-Waste Recycling Laws and Programs in {state.name}
+        </h2>
+        
+        {state.description ? (
+          <p class="text-gray-600 leading-relaxed text-lg">
+            {state.description}
+          </p>
+        ) : (
+          <p class="text-gray-600 leading-relaxed text-lg">
+            Find electronics recycling centers in {state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.
+          </p>
+        )}
+      </div>
+    </div>
+  </div>
 
-  <!-- Cities List -->
+  <!-- Cities Section -->
   <div class="container mx-auto px-4 py-12">
     <div class="max-w-7xl mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      
+      <!-- Full Width Cities Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-12">
         {citiesWithCounts.map((city) => (
           <a 
             href={`/states/${state.id}/${city.id}`}
-            class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-100"
+            class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border border-gray-100"
           >
             <div class="flex items-center justify-between">
               <div>
-                <h2 class="text-2xl font-display font-bold text-gray-900 mb-2">{city.name}</h2>
-                <p class="text-gray-600">{city.centerCount} recycling {city.centerCount === 1 ? 'center' : 'centers'}</p>
+                <h3 class="text-lg font-display font-bold text-gray-900 mb-1">{city.name}</h3>
+                <p class="text-gray-600 text-sm">{city.centerCount} recycling {city.centerCount === 1 ? 'center' : 'centers'}</p>
               </div>
               <div class="text-green-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -205,40 +243,86 @@ if (baseStateTitle.length <= maxTitleLength) {
           </a>
         ))}
       </div>
-    </div>
-  </div>
 
-  <!-- Nearby States Section -->
-  {state.nearby_states && state.nearby_states.length > 0 && (
-    <div class="bg-gray-50 py-12">
-      <div class="container mx-auto px-4">
-        <h2 class="text-2xl font-display font-bold text-gray-900 mb-8">Nearby States</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {await Promise.all(Object.values(state.nearby_states).slice(0, 3).map(async nearbyState => {
-            const relatedState = await getState(nearbyState);
-            if (!relatedState) return null;
-            
-            return (
-              <a href={`/states/${relatedState.id}`} class="group">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-shadow group-hover:shadow-lg">
-                  <div class="h-40 overflow-hidden">
-                    <img 
-                      src={relatedState.image_url || defaultStateImage} 
-                      alt={relatedState.name} 
-                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <div class="p-4">
-                    <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-700 transition-colors">{relatedState.name}</h3>
-                    <p class="text-sm text-gray-600 line-clamp-2">{relatedState.description}</p>
-                  </div>
-                </div>
-              </a>
-            );
-          }))}
+      <!-- Statistics and Quick Info Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Quick Statistics -->
+        <div class="bg-green-50 p-6 rounded-lg">
+          <h3 class="text-lg font-semibold text-green-800 mb-4">Recycling Statistics</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-green-700">Total Centers:</span>
+              <span class="font-semibold text-green-800">{totalCenters}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-green-700">Cities Covered:</span>
+              <span class="font-semibold text-green-800">{citiesWithCounts.length}</span>
+            </div>
+            {centers24_7 > 0 && (
+              <div class="flex justify-between">
+                <span class="text-green-700">24/7 Centers:</span>
+                <span class="font-semibold text-green-800">{centers24_7}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <!-- Nearby States Section -->
+        {state.nearby_states && state.nearby_states.length > 0 && (
+          <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Nearby States</h3>
+            <div class="space-y-3">
+              {await Promise.all(Object.values(state.nearby_states).slice(0, 3).map(async nearbyState => {
+                const relatedState = await getState(nearbyState);
+                if (!relatedState) return null;
+                
+                return (
+                  <a href={`/states/${relatedState.id}`} class="block group">
+                    <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div class="w-10 h-10 rounded-lg overflow-hidden mr-3">
+                        <img 
+                          src={relatedState.image_url || defaultStateImage} 
+                          alt={relatedState.name} 
+                          class="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-medium text-gray-900 group-hover:text-green-700 transition-colors truncate">{relatedState.name}</h4>
+                        <p class="text-xs text-gray-600 truncate">Electronics recycling</p>
+                      </div>
+                      <div class="text-green-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </a>
+                );
+              }))}
+            </div>
+          </div>
+        )}
+
+        <!-- Quick Action Card -->
+        <div class="bg-blue-50 p-6 rounded-lg">
+          <h3 class="text-lg font-semibold text-blue-800 mb-3">Need Help?</h3>
+          <p class="text-blue-700 text-sm mb-4">
+            Can't find what you're looking for? Contact us for assistance.
+          </p>
+          <a 
+            href="/contact" 
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Get Help
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.436L3 21l1.436-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+            </svg>
+          </a>
         </div>
       </div>
     </div>
-  )}
+  </div>
+
+  <!-- Detailed State Information -->
+  <StateDescription state={state} />
 </Layout>

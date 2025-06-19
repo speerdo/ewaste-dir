@@ -136,22 +136,18 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
       }
       
-      // In static mode, we already have the city data from build time
-      // Only fetch in development mode
-      if (!import.meta.env.PROD) {
-        fetch('/api/cities-data')
-          .then(response => response.json())
-          .then(data => {
-            cityStatePairs = data;
-            console.log(`Loaded ${cityStatePairs.length} cities for search`);
-          })
-          .catch(error => {
-            console.error('Failed to load city data:', error);
-          });
-      } else {
-        // In production/static mode, we have the data from server-side rendering
-        console.log(`Using pre-loaded ${cityStatePairs.length} cities for search`);
-      }
+      // In hybrid mode, we can use the API endpoint for dynamic city data loading
+      fetch('/api/cities-data')
+        .then(response => response.json())
+        .then(data => {
+          cityStatePairs = data;
+          console.log(`Loaded ${cityStatePairs.length} cities for search`);
+        })
+        .catch(error => {
+          console.error('Failed to load city data:', error);
+          // Fallback to pre-loaded data if API fails
+          console.log(`Using pre-loaded ${cityStatePairs.length} cities for search`);
+        });
   
       // Search for matching cities/states
       function searchLocations(query) {

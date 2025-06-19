@@ -32,21 +32,7 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
     });
   }
 
-  // Return error for static mode
-  if (import.meta.env.PROD) {
-    return new Response(
-      JSON.stringify({
-        error: 'Cities data API not available in static mode',
-        cities: [],
-      }),
-      {
-        status: 503,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-  }
+  // This API endpoint is available in hybrid mode
 
   try {
     // Get all city-state pairs

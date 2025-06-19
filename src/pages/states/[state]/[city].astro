@@ -1,6 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData } from '../../../lib/supabase';
+import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
@@ -9,28 +9,37 @@ import CentersList from '../../../components/recycling-centers/CentersList.astro
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
 
-// Use hybrid approach with ISR
-export const prerender = false;
+// Enable static generation now that we have a manageable number of pages (3,970)
+export const prerender = true;
 
-// Get data from params
+// Generate static paths for all city pages
+export async function getStaticPaths() {
+  const states = await getAllStates();
+  const paths = [];
+  
+  for (const state of states) {
+    const cities = await getCitiesByState(state.id);
+    for (const city of cities) {
+      paths.push({
+        params: { 
+          state: state.id, 
+          city: city.id 
+        },
+        props: { 
+          stateName: state.name,
+          cityName: city.name
+        }
+      });
+    }
+  }
+  
+  console.log(`Generated ${paths.length} static city pages`);
+  return paths;
+}
+
+// Get data from params and props
 const { state: stateParam, city: cityParam } = Astro.params;
-
-// Set cache control headers for browser - always check freshness
-Astro.response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
-
-// Set Vercel-specific CDN cache headers with durable caching
-// Include URL parameters in cache key
-Astro.response.headers.set('Vercel-CDN-Cache-Control', 
-  'public, s-maxage=3600, stale-while-revalidate=86400'
-);
-
-// Ensure each URL gets its own cache entry
-Astro.response.headers.set('CDN-Cache-Control', 'public, must-revalidate');
-Astro.response.headers.set('Vary', 'x-vercel-id, x-forwarded-proto, x-vercel-proxy-signature, accept');
-
-// Add cache tags for targeted invalidation
-const cacheTag = `city-${cityParam},state-${stateParam}`;
-Astro.response.headers.set('Cache-Tag', cacheTag);
+const { stateName, cityName: propCityName } = Astro.props;
 
 if (!stateParam || !cityParam) {
   return Astro.redirect('/404');

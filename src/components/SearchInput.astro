@@ -65,7 +65,7 @@ const id = variant === 'hero' ? 'hero' : 'nav';
 
   // Set up window global
   if (typeof window !== 'undefined') {
-    window.__CITY_STATE_PAIRS__ = window.__CITY_STATE_PAIRS__ || [];
+    window.__CITY_STATE_PAIRS__ = cityStatePairs;
   }
   
   // Set up once DOM is ready
@@ -136,18 +136,9 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
       }
       
-      // In hybrid mode, we can use the API endpoint for dynamic city data loading
-      fetch('/api/cities-data')
-        .then(response => response.json())
-        .then(data => {
-          cityStatePairs = data;
-          console.log(`Loaded ${cityStatePairs.length} cities for search`);
-        })
-        .catch(error => {
-          console.error('Failed to load city data:', error);
-          // Fallback to pre-loaded data if API fails
-          console.log(`Using pre-loaded ${cityStatePairs.length} cities for search`);
-        });
+      // Use pre-loaded city data for static site
+      cityStatePairs = window.__CITY_STATE_PAIRS__ || [];
+      console.log(`Loaded ${cityStatePairs.length} cities for search`);
   
       // Search for matching cities/states
       function searchLocations(query) {

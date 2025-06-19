@@ -19,6 +19,7 @@ export async function getStaticPaths() {
   
   for (const state of states) {
     const cities = await getCitiesByState(state.id);
+    
     for (const city of cities) {
       paths.push({
         params: { 

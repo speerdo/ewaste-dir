@@ -54,11 +54,5 @@
     "env": {
       "NODE_OPTIONS": "--max-old-space-size=7168 --no-warnings"
     }
-  },
-  "crons": [
-    {
-      "path": "/api/revalidate",
-      "schedule": "0 0 * * *"
-    }
-  ]
+  }
 }

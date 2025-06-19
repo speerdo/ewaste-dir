@@ -47,43 +47,76 @@ export async function reverseGeocode(
     return cached.data;
   }
 
-  const params = new URLSearchParams({
-    lat: coordinates.lat.toString(),
-    lng: coordinates.lng.toString(),
-  });
+  // Use Google Maps Geocoding API directly from client-side
+  // This works in both development and production/static mode
+  const apiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  const url = import.meta.env.PROD
-    ? new URL(`/api/geocode?${params.toString()}`, PRODUCTION_URL).toString()
-    : `${window.location.origin}/api/geocode?${params.toString()}`;
+  if (!apiKey) {
+    throw new GeocodingError('Google Maps API key is not configured', {
+      reason: 'missing_api_key',
+    });
+  }
+
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.lat},${coordinates.lng}&key=${apiKey}`;
 
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(coordinates),
-    });
-
+    const response = await fetch(url);
     const data = await response.json();
 
-    if (!response.ok) {
+    if (!response.ok || data.status !== 'OK') {
       throw new GeocodingError(
-        data.error || `HTTP error ${response.status}`,
-        data.details
+        data.error_message || `Geocoding failed: ${data.status}`,
+        { status: data.status, results: data.results }
       );
     }
 
-    // Validate the response data
-    if (!data.city || !data.state || !data.coordinates) {
-      throw new GeocodingError('Invalid response format', data);
+    if (!data.results || data.results.length === 0) {
+      throw new GeocodingError('No location found for these coordinates', data);
+    }
+
+    // Parse the result to extract city and state
+    const result = data.results[0];
+    let city = '';
+    let state = '';
+
+    // Look for city and state in address components
+    for (const component of result.address_components || []) {
+      const types = component.types || [];
+
+      // Look for city (locality, sublocality, or administrative_area_level_3)
+      if (
+        types.includes('locality') ||
+        types.includes('sublocality') ||
+        types.includes('administrative_area_level_3')
+      ) {
+        city = component.long_name;
+      }
+
+      // Look for state (administrative_area_level_1)
+      if (types.includes('administrative_area_level_1')) {
+        state = component.long_name;
+      }
+    }
+
+    // If we didn't find city, try to extract from formatted address
+    if (!city && result.formatted_address) {
+      const addressParts = result.formatted_address.split(', ');
+      if (addressParts.length >= 3) {
+        city = addressParts[0]; // First part is usually the city
+      }
+    }
+
+    if (!city || !state) {
+      throw new GeocodingError(
+        'Could not determine city and state from location',
+        { result, extractedCity: city, extractedState: state }
+      );
     }
 
     const location = {
-      city: data.city,
-      state: data.state,
-      coordinates: data.coordinates,
+      city,
+      state,
+      coordinates,
     };
 
     // Cache the result

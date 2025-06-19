@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 
-// Disable prerendering for this endpoint
-export const prerender = false;
+// Server-side endpoint for geocoding, disabled for static generation
+// export const prerender = false;
 
 export interface GeocodeResponse {
   city: string;

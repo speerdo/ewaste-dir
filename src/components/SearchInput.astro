@@ -136,16 +136,22 @@ const id = variant === 'hero' ? 'hero' : 'nav';
         }
       }
       
-      // Fetch city data from the server for client-side search
-      fetch('/api/cities-data')
-        .then(response => response.json())
-        .then(data => {
-          cityStatePairs = data;
-          console.log(`Loaded ${cityStatePairs.length} cities for search`);
-        })
-        .catch(error => {
-          console.error('Failed to load city data:', error);
-        });
+      // In static mode, we already have the city data from build time
+      // Only fetch in development mode
+      if (!import.meta.env.PROD) {
+        fetch('/api/cities-data')
+          .then(response => response.json())
+          .then(data => {
+            cityStatePairs = data;
+            console.log(`Loaded ${cityStatePairs.length} cities for search`);
+          })
+          .catch(error => {
+            console.error('Failed to load city data:', error);
+          });
+      } else {
+        // In production/static mode, we have the data from server-side rendering
+        console.log(`Using pre-loaded ${cityStatePairs.length} cities for search`);
+      }
   
       // Search for matching cities/states
       function searchLocations(query) {

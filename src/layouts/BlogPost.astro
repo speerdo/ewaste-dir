@@ -12,8 +12,8 @@ const { title, description, pubDate, image, author } = post.data;
 // Production domain for consistent URLs
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
 
-// Get the current URL for sharing
-const currentUrl = new URL(Astro.request.url);
+// Get the current URL for sharing - use Astro.url instead of Astro.request.url for static mode
+const currentUrl = Astro.url;
 const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_URL).toString() : currentUrl.toString();
 ---
 

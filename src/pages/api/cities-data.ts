@@ -2,7 +2,9 @@ import type { APIRoute } from 'astro';
 import { getAllCityStatePairs } from '../../lib/cityData';
 import { supabase } from '../../lib/supabase';
 
-export const prerender = false;
+// Optimized API endpoint that provides city data as a single JSON payload
+// Used by search components to load all city data at once
+// export const prerender = false;
 
 interface CityWithCoordinates {
   city: string;
@@ -29,6 +31,8 @@ const handler: APIRoute = async ({ request }): Promise<Response> => {
       headers: corsHeaders,
     });
   }
+
+  // This API endpoint is available in hybrid mode
 
   try {
     // Get all city-state pairs

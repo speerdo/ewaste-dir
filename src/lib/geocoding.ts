@@ -47,60 +47,84 @@ export async function reverseGeocode(
     return cached.data;
   }
 
-  const params = new URLSearchParams({
-    lat: coordinates.lat.toString(),
-    lng: coordinates.lng.toString(),
+  // For static sites, we'll use a simple fallback approach
+  // Since we can't make server calls, we'll return a generic location
+  // In a real implementation, you'd want to use Google Maps Geocoding API client-side
+  // or pre-generate a lookup table of coordinates to cities
+
+  // Simple fallback - find nearest major city from coordinates
+  const majorCities = [
+    {
+      city: 'New York',
+      state: 'New York',
+      coordinates: { lat: 40.7128, lng: -74.006 },
+    },
+    {
+      city: 'Los Angeles',
+      state: 'California',
+      coordinates: { lat: 34.0522, lng: -118.2437 },
+    },
+    {
+      city: 'Chicago',
+      state: 'Illinois',
+      coordinates: { lat: 41.8781, lng: -87.6298 },
+    },
+    {
+      city: 'Houston',
+      state: 'Texas',
+      coordinates: { lat: 29.7604, lng: -95.3698 },
+    },
+    {
+      city: 'Phoenix',
+      state: 'Arizona',
+      coordinates: { lat: 33.4484, lng: -112.074 },
+    },
+    {
+      city: 'Philadelphia',
+      state: 'Pennsylvania',
+      coordinates: { lat: 39.9526, lng: -75.1652 },
+    },
+    {
+      city: 'San Antonio',
+      state: 'Texas',
+      coordinates: { lat: 29.4241, lng: -98.4936 },
+    },
+    {
+      city: 'San Diego',
+      state: 'California',
+      coordinates: { lat: 32.7157, lng: -117.1611 },
+    },
+    {
+      city: 'Dallas',
+      state: 'Texas',
+      coordinates: { lat: 32.7767, lng: -96.797 },
+    },
+    {
+      city: 'San Jose',
+      state: 'California',
+      coordinates: { lat: 37.3382, lng: -121.8863 },
+    },
+  ];
+
+  const nearestCity = await findNearestCity(coordinates, majorCities);
+
+  if (!nearestCity) {
+    throw new GeocodingError('Could not determine location from coordinates');
+  }
+
+  const location = {
+    city: nearestCity.city,
+    state: nearestCity.state,
+    coordinates: coordinates, // Use the original coordinates
+  };
+
+  // Cache the result
+  geocodeCache.set(cacheKey, {
+    data: location,
+    timestamp: Date.now(),
   });
 
-  const url = import.meta.env.PROD
-    ? new URL(`/api/geocode?${params.toString()}`, PRODUCTION_URL).toString()
-    : `${window.location.origin}/api/geocode?${params.toString()}`;
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(coordinates),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new GeocodingError(
-        data.error || `HTTP error ${response.status}`,
-        data.details
-      );
-    }
-
-    // Validate the response data
-    if (!data.city || !data.state || !data.coordinates) {
-      throw new GeocodingError('Invalid response format', data);
-    }
-
-    const location = {
-      city: data.city,
-      state: data.state,
-      coordinates: data.coordinates,
-    };
-
-    // Cache the result
-    geocodeCache.set(cacheKey, {
-      data: location,
-      timestamp: Date.now(),
-    });
-
-    return location;
-  } catch (error) {
-    if (error instanceof GeocodingError) {
-      throw error;
-    }
-    throw new GeocodingError('Failed to fetch location data', {
-      originalError: error instanceof Error ? error.message : String(error),
-    });
-  }
+  return location;
 }
 
 export function calculateDistance(

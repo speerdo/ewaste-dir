@@ -1,6 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData } from '../../../lib/supabase';
+import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
@@ -9,28 +9,38 @@ import CentersList from '../../../components/recycling-centers/CentersList.astro
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
 
-// Use hybrid approach with ISR
-export const prerender = false;
+// Enable static generation now that we have a manageable number of pages (3,970)
+export const prerender = true;
 
-// Get data from params
+// Generate static paths for all city pages
+export async function getStaticPaths() {
+  const states = await getAllStates();
+  const paths = [];
+  
+  for (const state of states) {
+    const cities = await getCitiesByState(state.id);
+    
+    for (const city of cities) {
+      paths.push({
+        params: { 
+          state: state.id, 
+          city: city.id 
+        },
+        props: { 
+          stateName: state.name,
+          cityName: city.name
+        }
+      });
+    }
+  }
+  
+  console.log(`Generated ${paths.length} static city pages`);
+  return paths;
+}
+
+// Get data from params and props
 const { state: stateParam, city: cityParam } = Astro.params;
-
-// Set cache control headers for browser - always check freshness
-Astro.response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
-
-// Set Vercel-specific CDN cache headers with durable caching
-// Include URL parameters in cache key
-Astro.response.headers.set('Vercel-CDN-Cache-Control', 
-  'public, s-maxage=3600, stale-while-revalidate=86400'
-);
-
-// Ensure each URL gets its own cache entry
-Astro.response.headers.set('CDN-Cache-Control', 'public, must-revalidate');
-Astro.response.headers.set('Vary', 'x-vercel-id, x-forwarded-proto, x-vercel-proxy-signature, accept');
-
-// Add cache tags for targeted invalidation
-const cacheTag = `city-${cityParam},state-${stateParam}`;
-Astro.response.headers.set('Cache-Tag', cacheTag);
+const { stateName, cityName: propCityName } = Astro.props;
 
 if (!stateParam || !cityParam) {
   return Astro.redirect('/404');
@@ -376,19 +386,60 @@ if (baseTitle.length <= maxTitleLength) {
     };
     window.openDirections = window.showDirections;
     
+    // Global flag to track if Google Maps is loading or loaded
+    window.googleMapsLoading = false;
+    window.googleMapsLoaded = false;
+    
     // Initialize Google Maps
     function initGoogleMaps() {
+      window.googleMapsLoaded = true;
       window.dispatchEvent(new Event('google-maps-ready'));
     }
     window.initGoogleMaps = initGoogleMaps;
     
-    // Load the script if not already loaded
-    if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
+    // Function to load Google Maps script
+    function loadGoogleMaps() {
+      // Check if API key is available
+      if (!window.GOOGLE_MAPS_API_KEY) {
+        console.error('Google Maps API key is not configured');
+        return;
+      }
+      
+      // Check if Google Maps is already loaded
+      if (window.google && window.google.maps) {
+        window.googleMapsLoaded = true;
+        window.dispatchEvent(new Event('google-maps-ready'));
+        return;
+      }
+      
+      // Check if we're already loading
+      if (window.googleMapsLoading) {
+        return;
+      }
+      
+      // Check if script tag already exists
+      if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+        return;
+      }
+      
+      window.googleMapsLoading = true;
+      
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY}&callback=initGoogleMaps&libraries=places&v=weekly`;
       script.async = true;
       script.defer = true;
+      script.onerror = function() {
+        console.error('Failed to load Google Maps script');
+        window.googleMapsLoading = false;
+      };
       document.head.appendChild(script);
+    }
+    
+    // Load maps when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+    } else {
+      loadGoogleMaps();
     }
   </script>
   

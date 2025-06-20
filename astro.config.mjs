@@ -1,6 +1,5 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import vercel from '@astrojs/vercel/serverless';
 
 // Production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
@@ -15,23 +14,10 @@ const SITE_URL =
 export default defineConfig({
   site: SITE_URL,
   integrations: [tailwind()],
-  output: 'server',
-  adapter: vercel({
-    webAnalytics: {
-      enabled: true,
-    },
-    imageService: true,
-    devImageService: 'sharp',
-    speedInsights: true,
-    edgeMiddleware: false,
-    maxDuration: 8,
-    functionPerRoute: false,
-    excludeFiles: ['src/assets/**/*', 'public/**/*'],
-  }),
+  output: 'static',
   build: {
     inlineStylesheets: 'auto',
     assets: 'assets',
-    serverEntry: 'entry.mjs',
     format: 'directory',
   },
   vite: {
@@ -52,18 +38,6 @@ export default defineConfig({
         },
       },
     },
-    ssr: {
-      noExternal: ['@supabase/supabase-js'],
-      optimizeDeps: {
-        include: ['@supabase/supabase-js'],
-      },
-    },
   },
-  routes: [
-    {
-      pattern: '/api/*',
-      entryPoint: 'src/api/*.ts',
-    },
-  ],
   compressHTML: true,
 });

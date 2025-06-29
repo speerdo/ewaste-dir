@@ -791,17 +791,45 @@ export async function getCitiesByState(stateId: string): Promise<City[]> {
   const state = await getState(stateId);
   if (!state) throw new Error('State not found');
 
-  const { data, error } = await supabase
-    .from('recycling_centers')
-    .select('city')
-    .ilike('state', state.name)
-    .order('city')
-    .not('city', 'is', null);
+  // Use pagination to get ALL cities, not just first 1000 rows
+  // This fixes the issue where states with >1000 centers were missing cities
+  const allCities = new Set<string>();
+  let page = 0;
+  const pageSize = 1000;
+  let hasMore = true;
 
-  if (error) throw error;
+  console.log(`Fetching all cities for ${state.name}...`);
 
-  // Get unique cities
-  const uniqueCities = [...new Set(data?.map((row) => row.city) || [])];
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('recycling_centers')
+      .select('city')
+      .ilike('state', state.name)
+      .not('city', 'is', null)
+      .order('city')
+      .range(page * pageSize, (page + 1) * pageSize - 1);
+
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      data.forEach((row) => {
+        if (row.city) {
+          allCities.add(row.city);
+        }
+      });
+      hasMore = data.length === pageSize;
+      page++;
+      console.log(
+        `  Page ${page}: ${data.length} rows, ${allCities.size} unique cities so far`
+      );
+    } else {
+      hasMore = false;
+    }
+  }
+
+  // Convert Set to Array and sort
+  const uniqueCities = Array.from(allCities).sort();
+  console.log(`✅ Found ${uniqueCities.length} unique cities in ${state.name}`);
 
   // Add special virtual cities for certain states that should have static paths
   // These are cities that the getRecyclingCentersByCity function can handle through
@@ -816,7 +844,7 @@ export async function getCitiesByState(stateId: string): Promise<City[]> {
   if (virtualCities[stateId]) {
     // Add virtual cities, but only if they're not already in the list
     const existingCityNames = new Set(
-      uniqueCities.map((city) => city.toLowerCase())
+      uniqueCities.map((city: string) => city.toLowerCase())
     );
     for (const virtualCity of virtualCities[stateId]) {
       if (!existingCityNames.has(virtualCity.toLowerCase())) {
@@ -844,7 +872,7 @@ export async function getCitiesByState(stateId: string): Promise<City[]> {
   }
 
   // Convert to City type and cache
-  const cities = uniqueCities.map((cityName) => ({
+  const cities = uniqueCities.map((cityName: string) => ({
     id: normalizeForUrl(cityName),
     state_id: stateId,
     name: cityName,

@@ -14,7 +14,7 @@ interface Props {
 
 const { cityName, state, centers, localData, showNearbyMessage } = Astro.props;
 
-// Helper functions for dynamic content generation
+// Helper functions for essential insights only
 function getTopRatedCenter(centers: RecyclingCenter[]) {
   return centers
     .filter(c => c.rating && Number(c.rating) > 0)
@@ -31,217 +31,119 @@ function getCityGovernmentCenter(centers: RecyclingCenter[]) {
 }
 
 function getChainCenters(centers: RecyclingCenter[]) {
-  const chains = ['best buy', 'staples', 'goodwill', 'waste management', 'republic services'];
+  const chains = ['best buy', 'staples', 'goodwill', 'walmart', 'target'];
   return centers.filter(c => 
     chains.some(chain => c.name.toLowerCase().includes(chain))
   );
 }
 
-function getBusinessTypes(centers: RecyclingCenter[]) {
-  const types = new Map();
-  centers.forEach(center => {
-    const name = center.name.toLowerCase();
-    const desc = (center.description || '').toLowerCase();
-    const text = `${name} ${desc}`;
-    
-    if (text.includes('electronics') || text.includes('computer')) types.set('electronics', (types.get('electronics') || 0) + 1);
-    if (text.includes('metal') || text.includes('scrap')) types.set('metal', (types.get('metal') || 0) + 1);
-    if (text.includes('repair') || text.includes('service')) types.set('repair', (types.get('repair') || 0) + 1);
-    if (text.includes('auto') || text.includes('battery')) types.set('automotive', (types.get('automotive') || 0) + 1);
-  });
-  return types;
-}
-
-function generateUniqueFAQs(cityName: string, state: string, centers: RecyclingCenter[], localData?: any) {
+// Generate only 2 essential FAQs based on local context
+function generateEssentialFAQs(cityName: string, state: string, centers: RecyclingCenter[], localData?: any) {
   const faqs = [];
   const centerCount = centers.length;
   const topCenter = getTopRatedCenter(centers);
   const cityCenter = getCityGovernmentCenter(centers);
-  const hasRegulations = localData?.regulations;
   
-  // Always include a city-specific question about availability
+  // Always include availability/count question
   if (centerCount === 1) {
     faqs.push({
-      question: `Is there electronics recycling available in ${cityName}?`,
-      answer: `Yes, ${cityName} has ${centerCount} electronics recycling center. ${centers[0].name} accepts computers, phones, TVs and other electronic devices. It's located at ${centers[0].full_address}. Contact them at ${centers[0].phone || 'their listed number'} to confirm what items they accept and their current hours.`
+      question: `Where can I recycle electronics in ${cityName}?`,
+      answer: `${cityName} has 1 electronics recycling center: ${centers[0].name} at ${centers[0].full_address}. ${centers[0].phone ? `Call ${centers[0].phone} to` : 'Contact them to'} confirm accepted items and hours.`
     });
   } else {
     faqs.push({
-      question: `How many electronics recycling centers are in ${cityName}?`,
-      answer: `${cityName} has ${centerCount} electronics recycling centers. These facilities accept computers, phones, TVs, and other electronic devices. ${topCenter ? `${topCenter.name} is one of the highest-rated options with a ${topCenter.rating}-star rating.` : ''} Each center may have different accepted items and fees, so it's recommended to call ahead.`
+      question: `How many electronics recycling options are available in ${cityName}?`,
+      answer: `${cityName} has ${centerCount} electronics recycling centers accepting computers, phones, TVs, and other devices. ${topCenter ? `${topCenter.name} has the highest rating (${topCenter.rating} stars).` : ''} Call ahead to confirm specific items and fees.`
     });
   }
 
-  // Add city government question if applicable
+  // Add one practical question based on local context
   if (cityCenter) {
     faqs.push({
-      question: `Does ${cityName} have a city-run recycling program?`,
-      answer: `Yes, ${cityCenter.name} provides electronics recycling services for ${cityName} residents. City-operated facilities often offer free drop-off for residents and may have special programs for bulk electronics or business disposal. Contact them directly for specific policies and accepted items.`
+      question: `Does ${cityName} offer city-run electronics recycling?`,
+      answer: `Yes, ${cityCenter.name} provides municipal electronics recycling services. City programs often offer free drop-off for residents and may accept bulk items.`
     });
-  }
-
-  // Add state-specific regulations question
-  if (hasRegulations && hasRegulations.has_ewaste_ban) {
+  } else if (localData?.regulations?.has_ewaste_ban) {
     faqs.push({
-      question: `What are the electronics disposal laws in ${cityName}, ${state}?`,
-      answer: `${state} prohibits disposal of electronics in regular trash. ${hasRegulations.landfill_restrictions || `All computers, TVs, phones and other electronics must be recycled through authorized facilities in ${cityName}.`} ${hasRegulations.penalties_fines ? `Violations can result in fines, so it's important to use certified recyclers.` : ''}`
+      question: `Are there electronics disposal laws in ${cityName}?`,
+      answer: `${state} prohibits electronics in regular trash. All computers, TVs, phones and other electronics must be recycled through certified facilities. Use the centers listed above to comply with local regulations.`
     });
   } else {
     faqs.push({
-      question: `Are there any electronics disposal restrictions in ${cityName}?`,
-      answer: `While ${state} may not have statewide electronics disposal bans, many ${cityName} facilities encourage responsible recycling. Electronics contain valuable materials and hazardous substances that should be properly processed. Check with your chosen recycling center about their environmental certifications and data destruction services.`
+      question: `How should I prepare electronics for recycling?`,
+      answer: `Remove all personal data (back up files and factory reset), remove batteries when possible, and call ahead to confirm accepted items and any fees. Most centers also offer data destruction services.`
     });
   }
 
-  // Add practical question about preparation
-  faqs.push({
-    question: `How should I prepare electronics for recycling in ${cityName}?`,
-    answer: `Before recycling electronics in ${cityName}, remove all personal data by backing up files and performing a factory reset. Remove batteries when possible and keep cables with their devices. ${topCenter ? `${topCenter.name}` : 'Most centers'} can provide guidance on data destruction services if you're concerned about sensitive information.`
-  });
-
-  return faqs.slice(0, 4); // Limit to 4 FAQs to keep content manageable
+  return faqs; // Return only 2 FAQs
 }
 
-// Generate dynamic content based on available data
+// Generate brief, essential insights only
 const topRatedCenter = getTopRatedCenter(centers);
 const cityGovCenter = getCityGovernmentCenter(centers);
 const chainCenters = getChainCenters(centers);
-const businessTypes = getBusinessTypes(centers);
-const verifiedCenters = centers.filter(c => c.is_legitimate === true);
-const uniqueFAQs = generateUniqueFAQs(cityName, state, centers, localData);
+const essentialFAQs = generateEssentialFAQs(cityName, state, centers, localData);
 
-// Generate city-specific insights
-const cityInsights = [];
-if (centers.length > 10) {
-  cityInsights.push(`${cityName} has an extensive network of ${centers.length} electronics recycling facilities, making it easy for residents to find convenient drop-off locations.`);
-}
+// Generate only key highlights (max 2-3 brief points)
+const keyHighlights = [];
 if (topRatedCenter) {
-  cityInsights.push(`${topRatedCenter.name} stands out with a ${topRatedCenter.rating}-star rating from local customers.`);
+  keyHighlights.push(`${topRatedCenter.name} is the top-rated option (${topRatedCenter.rating}★)`);
 }
 if (cityGovCenter) {
-  cityInsights.push(`The city operates ${cityGovCenter.name}, providing residents with a municipal recycling option.`);
+  keyHighlights.push(`City-run facility available: ${cityGovCenter.name}`);
 }
 if (chainCenters.length > 0) {
-  cityInsights.push(`National retailers like ${chainCenters.slice(0, 2).map(c => c.name.split(' ')[0]).join(' and ')} offer convenient drop-off locations.`);
-}
-if (verifiedCenters.length > centers.length * 0.7) {
-  cityInsights.push(`Most facilities in ${cityName} have been verified for legitimate electronics recycling operations.`);
+  keyHighlights.push(`Retail drop-off options: ${chainCenters[0].name.split(' ')[0]}${chainCenters.length > 1 ? ` and ${chainCenters.length - 1} others` : ''}`);
 }
 ---
 
-<!-- Unique City Overview Section -->
-<div class="bg-gradient-to-r from-blue-50 to-green-50 border border-gray-200 rounded-lg p-6 mb-8">
-  <h2 class="text-2xl font-semibold text-gray-900 mb-4">
-    Electronics Recycling Guide for {cityName}
-  </h2>
-  
-  <div class="prose prose-lg max-w-none">
-    <p class="text-gray-700 leading-relaxed mb-4">
-      {showNearbyMessage 
-        ? `While ${cityName} has limited electronics recycling options, residents can access ${centers.length} nearby facilities in the ${state} area. These certified recyclers provide safe disposal services for computers, phones, televisions, and other electronic devices.`
-        : `${cityName}, ${state} offers ${centers.length} ${centers.length === 1 ? 'electronics recycling center' : 'electronics recycling centers'} to serve local residents and businesses. These facilities provide safe, environmentally responsible disposal of computers, phones, televisions, and other electronic devices.`
-      }
-    </p>
-    
-    {cityInsights.length > 0 && (
-      <div class="bg-white p-4 rounded-lg border-l-4 border-blue-500 mb-4">
-        <h3 class="font-semibold text-blue-800 mb-2">Key Highlights</h3>
-        <ul class="text-sm text-blue-700 space-y-1">
-          {cityInsights.map(insight => (
-            <li>• {insight}</li>
-          ))}
-        </ul>
-      </div>
-    )}
+<!-- Brief City Overview - Essential Info Only -->
+<div class="bg-gradient-to-r from-blue-50 to-green-50 border border-gray-200 rounded-lg p-6 mb-6">
+  <div class="flex items-center mb-3">
+    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+      </svg>
+    </div>
+    <h2 class="text-xl font-semibold text-gray-900">
+      Electronics Recycling in {cityName}
+    </h2>
   </div>
+  
+  <p class="text-gray-700 mb-3">
+    {showNearbyMessage 
+      ? `${centers.length} electronics recycling centers serve the ${cityName} area, accepting computers, phones, TVs, and other devices.`
+      : `${cityName} has ${centers.length} electronics recycling ${centers.length === 1 ? 'center' : 'centers'} for safe disposal of computers, phones, TVs, and other electronic devices.`
+    }
+  </p>
+    
+  {keyHighlights.length > 0 && (
+    <div class="bg-white/60 p-3 rounded border-l-3 border-blue-400">
+      <ul class="text-sm text-blue-800 space-y-1">
+        {keyHighlights.map(highlight => (
+          <li>• {highlight}</li>
+        ))}
+      </ul>
+    </div>
+  )}
 </div>
 
-<!-- Business Types Analysis (if diverse) -->
-{businessTypes.size > 1 && (
-  <div class="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-    <h3 class="text-xl font-semibold text-gray-900 mb-4">Types of Recycling Services in {cityName}</h3>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {Array.from(businessTypes.entries()).map(([type, count]) => (
-        <div class="text-center p-3 bg-gray-50 rounded-lg">
-          <div class="text-2xl font-bold text-blue-600">{count}</div>
-          <div class="text-sm text-gray-600 capitalize">{type} Centers</div>
-        </div>
-      ))}
+<!-- Essential FAQ Section - Only 2 Questions -->
+<div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+  <div class="flex items-center mb-4">
+    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+      <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
     </div>
-    <p class="text-sm text-gray-600 mt-4">
-      {cityName} offers diverse recycling services, from specialized electronics processors to comprehensive waste management facilities. 
-      Each center may have different specialties, accepted items, and fee structures.
-    </p>
+    <h3 class="text-lg font-semibold text-gray-900">Quick Questions</h3>
   </div>
-)}
-
-<!-- Unique FAQ Section -->
-<div class="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-  <h3 class="text-xl font-semibold text-gray-900 mb-6">Frequently Asked Questions - {cityName} Electronics Recycling</h3>
-  <div class="space-y-6">
-    {uniqueFAQs.map((faq, index) => (
-      <div class="border-l-4 border-green-500 pl-4">
-        <h4 class="font-semibold text-gray-800 mb-2">{faq.question}</h4>
-        <p class="text-gray-700 text-sm leading-relaxed">{faq.answer}</p>
+  <div class="space-y-4">
+    {essentialFAQs.map((faq, index) => (
+      <div class="border-l-3 border-green-400 pl-4 bg-green-50/30 p-3 rounded-r">
+        <h4 class="font-medium text-gray-800 mb-1 text-sm">{faq.question}</h4>
+        <p class="text-gray-700 text-sm">{faq.answer}</p>
       </div>
     ))}
   </div>
-</div>
-
-<!-- Local Context Section -->
-{(localData?.stats?.population || cityGovCenter) && (
-  <div class="bg-green-50 border border-green-100 rounded-lg p-6 mb-8">
-    <h3 class="text-xl font-semibold text-green-900 mb-4">{cityName} Community Impact</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {localData?.stats?.population && (
-        <div>
-          <h4 class="font-semibold text-green-800 mb-2">Community Scale</h4>
-          <p class="text-sm text-green-700">
-            With a population of {localData.stats.population.toLocaleString()}, {cityName} generates an estimated {Math.round(localData.stats.population * 45).toLocaleString()} pounds of electronic waste annually. 
-            Proper recycling helps recover valuable materials and prevents environmental contamination.
-          </p>
-        </div>
-      )}
-      
-      <div>
-        <h4 class="font-semibold text-green-800 mb-2">Why Recycle in {cityName}?</h4>
-        <ul class="text-sm text-green-700 space-y-1">
-          <li>• Recover precious metals like gold, silver, and copper</li>
-          <li>• Prevent toxic materials from entering local landfills</li>
-          <li>• Support local jobs in the recycling industry</li>
-          <li>• Comply with {state} environmental regulations</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-)}
-
-<!-- What Makes Each Center Different -->
-{centers.length > 1 && (
-  <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
-    <h3 class="text-xl font-semibold text-gray-900 mb-4">Choosing the Right Recycler in {cityName}</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <h4 class="font-semibold text-gray-800 mb-2">What to Consider</h4>
-        <ul class="text-sm text-gray-700 space-y-2">
-          <li>• Accepted items and any fees for specific electronics</li>
-          <li>• Data destruction services and certificates</li>
-          <li>• Operating hours and appointment requirements</li>
-          <li>• Environmental certifications (R2, e-Stewards)</li>
-          <li>• Customer reviews and business reputation</li>
-        </ul>
-      </div>
-      
-      <div>
-        <h4 class="font-semibold text-gray-800 mb-2">Tips for {cityName} Residents</h4>
-        <ul class="text-sm text-gray-700 space-y-2">
-          <li>• Call ahead to confirm accepted items and hours</li>
-          <li>• Remove personal data before drop-off</li>
-          <li>• Ask about bulk pickup services for large quantities</li>
-          <li>• Keep receipts for tax-deductible donations</li>
-          <li>• Consider certified data destruction for sensitive devices</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-)} 
+</div> 

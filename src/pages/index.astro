@@ -27,17 +27,42 @@ import CTA from '../components/CTA.astro';
         
         <div class="grid md:grid-cols-2 gap-8 mb-12">
           <div class="bg-white p-6 rounded-lg shadow-sm">
-            <h3 class="text-xl font-semibold mb-4">What is E-Waste Recycling?</h3>
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold">What is E-Waste Recycling?</h3>
+            </div>
             <p class="text-gray-700 leading-relaxed">
               Electronic waste recycling recovers valuable materials from old devices. This includes computers, smartphones, tablets, televisions, and printers. The process prevents harmful materials from entering landfills. Materials like lead, mercury, and cadmium are safely handled. It also recovers precious metals like gold, silver, and rare earth elements. These materials are reused in new products.
             </p>
           </div>
           
           <div class="bg-white p-6 rounded-lg shadow-sm">
-            <h3 class="text-xl font-semibold mb-4">Why Recycle Electronics?</h3>
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold">Why Recycle Electronics?</h3>
+            </div>
             <p class="text-gray-700 leading-relaxed">
               Electronics contain both valuable and hazardous materials. When disposed of properly, up to 95% of materials can be recovered. This conserves natural resources and reduces mining needs. It prevents soil and water contamination. It keeps toxic substances out of landfills. This protects groundwater from harmful chemicals.
             </p>
+          </div>
+        </div>
+
+        <!-- Visual break with recycling image -->
+        <div class="relative mb-12 rounded-xl overflow-hidden">
+          <img src="/images/recycle-phone.jpeg" alt="Electronics being recycled" class="w-full h-64 object-cover">
+          <div class="absolute inset-0 bg-gradient-to-r from-green-900/80 to-transparent flex items-center">
+            <div class="px-8">
+              <h3 class="text-2xl font-bold text-white mb-2">Responsible Electronics Disposal</h3>
+              <p class="text-green-100">Safe recycling of electronic devices protects our environment and recovers valuable materials.</p>
+            </div>
           </div>
         </div>
 
@@ -45,7 +70,14 @@ import CTA from '../components/CTA.astro';
           <h3 class="text-2xl font-semibold mb-6">What Electronics Can Be Recycled?</h3>
           <div class="grid md:grid-cols-3 gap-6">
             <div>
-              <h4 class="font-semibold text-green-600 mb-3">Computers & Laptops</h4>
+              <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <h4 class="font-semibold text-green-600">Computers & Laptops</h4>
+              </div>
               <ul class="text-gray-700 space-y-1">
                 <li>• Desktop computers</li>
                 <li>• Laptop computers</li>
@@ -59,7 +91,14 @@ import CTA from '../components/CTA.astro';
               </ul>
             </div>
             <div>
-              <h4 class="font-semibold text-green-600 mb-3">Mobile Devices</h4>
+              <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <h4 class="font-semibold text-green-600">Mobile Devices</h4>
+              </div>
               <ul class="text-gray-700 space-y-1">
                 <li>• Smartphones</li>
                 <li>• Tablets</li>
@@ -73,7 +112,14 @@ import CTA from '../components/CTA.astro';
               </ul>
             </div>
             <div>
-              <h4 class="font-semibold text-green-600 mb-3">Home Electronics</h4>
+              <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4h10m-5 0v6m-2-3h4"></path>
+                  </svg>
+                </div>
+                <h4 class="font-semibold text-green-600">Home Electronics</h4>
+              </div>
               <ul class="text-gray-700 space-y-1">
                 <li>• Televisions (LCD, LED, CRT)</li>
                 <li>• Printers and scanners</li>
@@ -102,10 +148,24 @@ import CTA from '../components/CTA.astro';
         </div>
 
         <div class="bg-green-50 p-8 rounded-lg mb-12">
-          <h3 class="text-2xl font-semibold mb-6">Benefits of Electronics Recycling</h3>
+          <div class="flex items-center justify-center mb-6">
+            <div class="w-16 h-16 bg-green-200 rounded-full flex items-center justify-center mr-4">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-semibold">Benefits of Electronics Recycling</h3>
+          </div>
           <div class="grid md:grid-cols-2 gap-8">
             <div>
-              <h4 class="font-semibold text-green-600 mb-3">Economic Benefits</h4>
+              <div class="flex items-center mb-3">
+                <div class="w-8 h-8 bg-green-200 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                  </svg>
+                </div>
+                <h4 class="font-semibold text-green-600">Economic Benefits</h4>
+              </div>
               <ul class="text-gray-700 space-y-2">
                 <li>• Creates jobs in the recycling industry</li>
                 <li>• Generates revenue from recovered materials</li>
@@ -116,7 +176,14 @@ import CTA from '../components/CTA.astro';
               </ul>
             </div>
             <div>
-              <h4 class="font-semibold text-green-600 mb-3">Social Benefits</h4>
+              <div class="flex items-center mb-3">
+                <div class="w-8 h-8 bg-green-200 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
+                </div>
+                <h4 class="font-semibold text-green-600">Social Benefits</h4>
+              </div>
               <ul class="text-gray-700 space-y-2">
                 <li>• Provides electronics to underserved communities</li>
                 <li>• Reduces digital divide through refurbishment</li>
@@ -129,8 +196,26 @@ import CTA from '../components/CTA.astro';
           </div>
         </div>
 
+        <!-- Visual break with data security image -->
+        <div class="relative mb-12 rounded-xl overflow-hidden">
+          <img src="/images/data-security.jpg" alt="Data security and electronics recycling" class="w-full h-64 object-cover">
+          <div class="absolute inset-0 bg-gradient-to-l from-blue-900/80 to-transparent flex items-center justify-end">
+            <div class="px-8 text-right">
+              <h3 class="text-2xl font-bold text-white mb-2">Secure Data Destruction</h3>
+              <p class="text-blue-100">Protect your personal information with certified data wiping services.</p>
+            </div>
+          </div>
+        </div>
+
         <div class="bg-blue-50 p-8 rounded-lg mb-12">
-          <h3 class="text-2xl font-semibold mb-6">How to Prepare Electronics for Recycling</h3>
+          <div class="flex items-center justify-center mb-6">
+            <div class="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center mr-4">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-semibold">How to Prepare Electronics for Recycling</h3>
+          </div>
           <div class="space-y-4">
             <div class="flex items-start">
               <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-4 mt-1">1</span>
@@ -170,8 +255,26 @@ import CTA from '../components/CTA.astro';
           </div>
         </div>
 
+        <!-- Visual break with broken electronics image -->
+        <div class="relative mb-12 rounded-xl overflow-hidden">
+          <img src="/images/broken-tv.jpeg" alt="Broken electronics ready for recycling" class="w-full h-64 object-cover">
+          <div class="absolute inset-0 bg-gradient-to-l from-red-900/80 to-transparent flex items-center justify-end">
+            <div class="px-8 text-right">
+              <h3 class="text-2xl font-bold text-white mb-2">End of Life Electronics</h3>
+              <p class="text-red-100">When electronics break or become obsolete, proper recycling recovers valuable materials.</p>
+            </div>
+          </div>
+        </div>
+
         <div class="bg-white p-8 rounded-lg shadow-sm mb-12">
-          <h3 class="text-2xl font-semibold mb-6">Recycling Process Overview</h3>
+          <div class="flex items-center justify-center mb-6">
+            <div class="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center mr-4">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-semibold">Recycling Process Overview</h3>
+          </div>
           <div class="grid md:grid-cols-2 gap-8 mb-6">
             <div>
               <h4 class="font-semibold text-blue-600 mb-3">Collection and Sorting</h4>
@@ -237,8 +340,26 @@ import CTA from '../components/CTA.astro';
           </div>
         </div>
 
+        <!-- Visual break with USA guide image -->
+        <div class="relative mb-12 rounded-xl overflow-hidden">
+          <img src="/images/usa-guide.jpg" alt="United States environmental regulations" class="w-full h-64 object-cover">
+          <div class="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-transparent flex items-center">
+            <div class="px-8">
+              <h3 class="text-2xl font-bold text-white mb-2">State & Federal Regulations</h3>
+              <p class="text-blue-100">Electronics recycling laws vary by state - know your local requirements.</p>
+            </div>
+          </div>
+        </div>
+
         <div class="bg-white p-8 rounded-lg shadow-sm mb-12">
-          <h3 class="text-2xl font-semibold mb-6">Laws and Regulations</h3>
+          <div class="flex items-center justify-center mb-6">
+            <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mr-4">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-semibold">Laws and Regulations</h3>
+          </div>
           <div class="grid md:grid-cols-2 gap-8">
             <div>
               <h4 class="font-semibold text-blue-600 mb-3">Federal Regulations</h4>
@@ -320,41 +441,128 @@ import CTA from '../components/CTA.astro';
               </ul>
             </div>
           </div>
-          <div class="mt-8 p-6 bg-green-50 rounded-lg">
-            <h4 class="font-semibold text-green-700 mb-3">By the Numbers: E-Waste Recycling Impact</h4>
-            <div class="grid md:grid-cols-3 gap-4 text-center">
-              <div>
-                <p class="text-2xl font-bold text-green-600">6.9 billion lbs</p>
-                <p class="text-sm text-gray-600">E-waste generated annually in the US</p>
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-green-600">95%</p>
-                <p class="text-sm text-gray-600">Of materials recoverable through proper recycling</p>
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-green-600">35%</p>
-                <p class="text-sm text-gray-600">Current recycling rate in the United States</p>
-              </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- By the Numbers Section -->
+  <section class="py-16 bg-gradient-to-b from-blue-900 to-green-900">
+    <div class="container mx-auto px-4">
+      <div class="max-w-6xl mx-auto">
+        <!-- Section Header -->
+        <div class="text-center mb-12">
+          <div class="flex items-center justify-center mb-6">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mr-4">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
             </div>
-            <div class="grid md:grid-cols-4 gap-4 text-center mt-6">
-              <div>
-                <p class="text-xl font-bold text-green-600">1 million</p>
-                <p class="text-xs text-gray-600">Cell phones recycled = 35,000 lbs of copper</p>
-              </div>
-              <div>
-                <p class="text-xl font-bold text-green-600">40 TVs</p>
-                <p class="text-xs text-gray-600">Contain 1 lb of lead that can be recovered</p>
-              </div>
-              <div>
-                <p class="text-xl font-bold text-green-600">1 laptop</p>
-                <p class="text-xs text-gray-600">Contains materials worth $15-30</p>
-              </div>
-              <div>
-                <p class="text-xl font-bold text-green-600">85%</p>
-                <p class="text-xs text-gray-600">Energy savings vs. mining new materials</p>
-              </div>
-            </div>
+            <h2 class="text-3xl md:text-4xl font-display font-bold text-white">By the Numbers</h2>
           </div>
+          <p class="text-xl text-blue-100 max-w-3xl mx-auto">
+            The impact of electronics recycling in the United States - real data that demonstrates why responsible e-waste disposal matters.
+          </p>
+        </div>
+
+        <!-- Main Stats Grid -->
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center border border-white/20">
+            <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-yellow-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+              </svg>
+            </div>
+            <div class="text-4xl font-bold text-white mb-2">6.9B</div>
+            <div class="text-lg font-medium text-blue-100 mb-1">Pounds Generated</div>
+            <div class="text-sm text-blue-200">E-waste produced annually in the US</div>
+          </div>
+
+          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center border border-white/20">
+            <div class="w-16 h-16 bg-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-green-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </div>
+            <div class="text-4xl font-bold text-white mb-2">95%</div>
+            <div class="text-lg font-medium text-blue-100 mb-1">Recoverable</div>
+            <div class="text-sm text-blue-200">Of materials can be recycled properly</div>
+          </div>
+
+          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center border border-white/20">
+            <div class="w-16 h-16 bg-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-red-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+              </svg>
+            </div>
+            <div class="text-4xl font-bold text-white mb-2">35%</div>
+            <div class="text-lg font-medium text-blue-100 mb-1">Current Rate</div>
+            <div class="text-sm text-blue-200">Actual recycling rate in America</div>
+          </div>
+        </div>
+
+        <!-- Impact Stats Grid -->
+        <div class="grid md:grid-cols-4 gap-6">
+          <div class="bg-white/5 rounded-lg p-6 text-center border border-white/10">
+            <div class="w-12 h-12 bg-blue-400 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-white mb-1">1M</div>
+            <div class="text-sm font-medium text-blue-100 mb-1">Cell Phones</div>
+            <div class="text-xs text-blue-200">= 35,000 lbs of copper recovered</div>
+          </div>
+
+          <div class="bg-white/5 rounded-lg p-6 text-center border border-white/10">
+            <div class="w-12 h-12 bg-purple-400 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-purple-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-white mb-1">40</div>
+            <div class="text-sm font-medium text-blue-100 mb-1">TVs</div>
+            <div class="text-xs text-blue-200">contain 1 lb of recoverable lead</div>
+          </div>
+
+          <div class="bg-white/5 rounded-lg p-6 text-center border border-white/10">
+            <div class="w-12 h-12 bg-green-400 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-green-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-white mb-1">$30</div>
+            <div class="text-sm font-medium text-blue-100 mb-1">Per Laptop</div>
+            <div class="text-xs text-blue-200">in recoverable materials value</div>
+          </div>
+
+          <div class="bg-white/5 rounded-lg p-6 text-center border border-white/10">
+            <div class="w-12 h-12 bg-orange-400 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-orange-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-white mb-1">85%</div>
+            <div class="text-sm font-medium text-blue-100 mb-1">Energy Savings</div>
+            <div class="text-xs text-blue-200">vs. mining new materials</div>
+          </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center mt-12">
+          <p class="text-blue-100 mb-6 text-lg">
+            Every device recycled makes a difference. Find certified recycling centers near you.
+          </p>
+          <a 
+            href="#state-directory" 
+            class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-900 bg-white hover:bg-gray-50 transition-colors"
+          >
+            Find Recycling Centers
+            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          </a>
         </div>
       </div>
     </div>

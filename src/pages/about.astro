@@ -7,9 +7,21 @@ import Layout from '../layouts/Layout.astro';
   title="About Us | RecycleOldTech - Electronics Recycling Directory" 
   description="Learn about our mission to promote responsible electronics recycling and protect the environment. Find certified e-waste centers nationwide."
 >
-  <div class="pt-32 pb-16 bg-gradient-to-b from-green-900 via-green-800 to-green-700">
-    <div class="container mx-auto px-4">
-      <h1 class="text-4xl md:text-5xl font-display font-bold text-white text-center mb-6">Our Mission</h1>
+  <!-- Hero Section with Background Image -->
+  <div class="relative pt-32 pb-16 overflow-hidden">
+    <div class="absolute inset-0">
+      <img src="/images/better-tomorrow.jpg" alt="Environmental sustainability" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-b from-green-900/90 via-green-800/85 to-green-700/90"></div>
+    </div>
+    <div class="container mx-auto px-4 relative z-10">
+      <div class="flex items-center justify-center mb-6">
+        <div class="w-20 h-20 bg-green-200/20 rounded-full flex items-center justify-center mr-6">
+          <svg class="w-10 h-10 text-green-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+          </svg>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-display font-bold text-white text-center">Our Mission</h1>
+      </div>
       <p class="text-xl text-green-50 text-center max-w-3xl mx-auto">
         Connecting people with certified electronics recycling centers to protect our environment and promote responsible e-waste disposal.
       </p>
@@ -20,15 +32,52 @@ import Layout from '../layouts/Layout.astro';
     <div class="container mx-auto px-4">
       <div class="max-w-3xl mx-auto">
         <section class="mb-16">
-          <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">Why We Exist</h2>
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h2 class="text-3xl font-display font-bold text-gray-900">Why We Exist</h2>
+          </div>
+          
+          <div class="grid md:grid-cols-3 gap-8 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+              <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2">Accessibility</h3>
+              <p class="text-gray-600 text-sm">Making electronics recycling accessible to everyone through our comprehensive directory.</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
+              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2">Environmental Protection</h3>
+              <p class="text-gray-600 text-sm">Preventing millions of tons of electronic waste from ending up in landfills.</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-purple-500">
+              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2">Quality Standards</h3>
+              <p class="text-gray-600 text-sm">Ensuring all recycling centers meet environmental and safety standards.</p>
+            </div>
+          </div>
+          
           <p class="text-lg text-gray-600 mb-6">
             RecycleOldTech was founded with a simple yet crucial mission. We aim to make electronics recycling accessible to everyone. In today's world, electronic devices are increasingly integral to our daily lives. Proper disposal of outdated or broken electronics has never been more important.
           </p>
           <p class="text-lg text-gray-600 mb-6">
             Every year, millions of tons of electronic waste end up in landfills. This releases harmful toxins into our environment. We believe that by making it easier to find certified recycling centers, we can help reduce this environmental impact. Our goal is to promote responsible e-waste management across the United States.
-          </p>
-          <p class="text-lg text-gray-600 mb-6">
-            Our team is committed to providing accurate, up-to-date information. We help individuals and businesses make informed decisions about electronics recycling. We thoroughly research and verify all recycling centers in our directory. This ensures they meet environmental and safety standards.
           </p>
         </section>
 
@@ -66,8 +115,26 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </section>
 
+        <!-- Visual break with e-waste problem image -->
+        <div class="relative mb-12 rounded-xl overflow-hidden">
+          <img src="/images/waste.avif" alt="Electronic waste environmental impact" class="w-full h-64 object-cover">
+          <div class="absolute inset-0 bg-gradient-to-r from-red-900/80 to-orange-900/60 flex items-center">
+            <div class="px-8">
+              <h3 class="text-2xl font-bold text-white mb-2">The E-Waste Crisis</h3>
+              <p class="text-red-100">Electronic waste is the fastest-growing waste stream globally.</p>
+            </div>
+          </div>
+        </div>
+
         <section class="mb-16">
-          <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">The Growing E-Waste Problem</h2>
+          <div class="flex items-center justify-center mb-6">
+            <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mr-4">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+            <h2 class="text-3xl font-display font-bold text-gray-900">The Growing E-Waste Problem</h2>
+          </div>
           <div class="bg-red-50 p-8 rounded-lg mb-8">
             <h3 class="text-2xl font-bold text-red-800 mb-4">Alarming Statistics</h3>
             <div class="grid md:grid-cols-2 gap-6">
@@ -110,8 +177,26 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </section>
 
+        <!-- Visual break with recycling solution image -->
+        <div class="relative mb-12 rounded-xl overflow-hidden">
+          <img src="/images/recycling.webp" alt="Modern recycling facility" class="w-full h-64 object-cover">
+          <div class="absolute inset-0 bg-gradient-to-l from-green-900/80 to-blue-900/60 flex items-center justify-end">
+            <div class="px-8 text-right">
+              <h3 class="text-2xl font-bold text-white mb-2">Technology-Driven Solutions</h3>
+              <p class="text-green-100">Our platform connects users with certified recycling facilities nationwide.</p>
+            </div>
+          </div>
+        </div>
+
         <section class="mb-16">
-          <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">Our Solution</h2>
+          <div class="flex items-center justify-center mb-6">
+            <div class="w-16 h-16 bg-green-200 rounded-full flex items-center justify-center mr-4">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+            </div>
+            <h2 class="text-3xl font-display font-bold text-gray-900">Our Solution</h2>
+          </div>
           <div class="grid md:grid-cols-2 gap-8 mb-8">
             <div class="bg-blue-50 p-6 rounded-lg">
               <h3 class="text-xl font-bold text-blue-800 mb-4">Comprehensive Directory</h3>
@@ -164,20 +249,53 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </section>
 
+        <!-- Visual break with impact image -->
+        <div class="relative mb-12 rounded-xl overflow-hidden">
+          <img src="/images/corporate-meeting.jpg" alt="Team working on environmental solutions" class="w-full h-64 object-cover">
+          <div class="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-transparent flex items-center">
+            <div class="px-8">
+              <h3 class="text-2xl font-bold text-white mb-2">Making a Difference Together</h3>
+              <p class="text-blue-100">Our platform connects millions with responsible recycling solutions nationwide.</p>
+            </div>
+          </div>
+        </div>
+
         <section class="mb-16">
-          <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">Our Impact</h2>
+          <div class="flex items-center justify-center mb-8">
+            <div class="w-16 h-16 bg-green-200 rounded-full flex items-center justify-center mr-4">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <h2 class="text-3xl font-display font-bold text-gray-900">Our Impact</h2>
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div class="text-center p-6 bg-green-50 rounded-lg">
+            <div class="text-center p-8 bg-green-50 rounded-xl shadow-sm">
+              <div class="w-16 h-16 bg-green-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
               <div class="text-4xl font-bold text-green-600 mb-2">40000+</div>
-              <div class="text-gray-700">Recycling Centers</div>
+              <div class="text-gray-700 font-medium">Recycling Centers</div>
             </div>
-            <div class="text-center p-6 bg-green-50 rounded-lg">
-              <div class="text-4xl font-bold text-green-600 mb-2">50</div>
-              <div class="text-gray-700">States Covered</div>
+            <div class="text-center p-8 bg-blue-50 rounded-xl shadow-sm">
+              <div class="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                </svg>
+              </div>
+              <div class="text-4xl font-bold text-blue-600 mb-2">50</div>
+              <div class="text-gray-700 font-medium">States Covered</div>
             </div>
-            <div class="text-center p-6 bg-green-50 rounded-lg">
-              <div class="text-4xl font-bold text-green-600 mb-2">24/7</div>
-              <div class="text-gray-700">Access</div>
+            <div class="text-center p-8 bg-purple-50 rounded-xl shadow-sm">
+              <div class="w-16 h-16 bg-purple-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="text-4xl font-bold text-purple-600 mb-2">24/7</div>
+              <div class="text-gray-700 font-medium">Access</div>
             </div>
           </div>
           <div class="bg-gray-50 p-8 rounded-lg">

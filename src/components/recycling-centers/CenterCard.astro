@@ -332,12 +332,60 @@ const recentlyVerified = isRecentlyVerified(center);
             <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
           <div class="text-sm">
-            <div class="font-medium text-gray-900 mb-1">Business Verification</div>
+            <div class="font-medium text-gray-900 mb-1 flex items-center gap-2">
+              Business Verification
+              {center.legitimacy_score && (
+                <button 
+                  type="button"
+                  class="text-xs text-blue-600 hover:text-blue-800 underline"
+                  onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'"
+                  aria-label="Show trust score explanation"
+                >
+                  What's this?
+                </button>
+              )}
+            </div>
+            
             {center.legitimacy_score && (
-              <div class="text-gray-600 mb-1">
-                Trust Score: <span class="font-medium">{center.legitimacy_score}/100</span>
+              <div>
+                <div class="text-gray-600 mb-1 flex items-center gap-2">
+                  Trust Score: <span class="font-medium">{center.legitimacy_score}/100</span>
+                  {center.legitimacy_score >= 30 && (
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                      Legitimate
+                    </span>
+                  )}
+                  {center.legitimacy_score < 30 && center.legitimacy_score >= -10 && (
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Needs Review
+                    </span>
+                  )}
+                  {center.legitimacy_score < -10 && (
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                      Suspicious
+                    </span>
+                  )}
+                </div>
+                
+                <div class="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded p-3 mt-2" style="display: none;">
+                  <h4 class="font-semibold text-blue-900 mb-2">How Trust Scores Work</h4>
+                  <p class="mb-2">
+                    We analyze business websites for electronics recycling keywords, certifications, and services. 
+                    Scores above 100 are possible because we add points for:
+                  </p>
+                  <ul class="list-disc list-inside text-xs space-y-1 mb-2">
+                    <li><strong>High-value terms:</strong> "e-waste", "electronics recycling", "R2 certified" (+5 each)</li>
+                    <li><strong>Medium-value terms:</strong> "recycle", "electronics", "computers" (+2 each)</li>
+                    <li><strong>Services:</strong> Trade-in programs (+20), certifications (+30), major retailers (+25)</li>
+                    <li><strong>Penalties:</strong> Non-electronics business indicators (negative points)</li>
+                  </ul>
+                  <div class="text-xs">
+                    <strong>Score meanings:</strong> ≥30 = Legitimate, -10 to 29 = Needs review, &lt;-10 = Suspicious
+                  </div>
+                </div>
               </div>
             )}
+            
             {center.legitimacy_reason && (
               <p class="text-gray-600 text-xs">{center.legitimacy_reason}</p>
             )}

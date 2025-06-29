@@ -178,14 +178,36 @@ class ContentEnhancer {
    * Generate city statistics with realistic estimates
    */
   generateCityStats(city, state, centerCount) {
-    // Estimate population based on city size indicators
+    // More realistic population estimation considering rural vs urban context
+    const ruralStates = [
+      'Montana',
+      'Wyoming',
+      'North Dakota',
+      'South Dakota',
+      'Alaska',
+      'Vermont',
+      'Delaware',
+      'West Virginia',
+    ];
+    const isRuralState = ruralStates.includes(state);
+
     let estimatedPopulation;
-    if (centerCount >= 20) {
-      estimatedPopulation = Math.floor(Math.random() * 500000) + 200000; // Large city
-    } else if (centerCount >= 5) {
-      estimatedPopulation = Math.floor(Math.random() * 150000) + 50000; // Medium city
+    if (centerCount >= 25) {
+      estimatedPopulation = Math.floor(Math.random() * 400000) + 250000; // Major city
+    } else if (centerCount >= 15) {
+      estimatedPopulation = Math.floor(Math.random() * 200000) + 100000; // Large city
+    } else if (centerCount >= 8) {
+      estimatedPopulation = isRuralState
+        ? Math.floor(Math.random() * 40000) + 15000 // Rural context: 15k-55k
+        : Math.floor(Math.random() * 100000) + 40000; // Urban context: 40k-140k
+    } else if (centerCount >= 3) {
+      estimatedPopulation = isRuralState
+        ? Math.floor(Math.random() * 15000) + 5000 // Rural context: 5k-20k
+        : Math.floor(Math.random() * 50000) + 15000; // Urban context: 15k-65k
     } else {
-      estimatedPopulation = Math.floor(Math.random() * 50000) + 10000; // Small city
+      estimatedPopulation = isRuralState
+        ? Math.floor(Math.random() * 8000) + 2000 // Rural context: 2k-10k
+        : Math.floor(Math.random() * 25000) + 5000; // Urban context: 5k-30k
     }
 
     // Industry averages for e-waste generation

@@ -148,13 +148,13 @@ export function generateCityMeta({
 
   const description = descriptionElements.join('');
 
-  // Ensure description is within optimal length (120-155 characters)
+  // Ensure description is within optimal length (150-160 characters)
   let finalDescription = description;
-  if (description.length > 155) {
+  if (description.length > 160) {
     // Trim to fit, preserving complete words
     finalDescription =
-      description.substring(0, 152).replace(/\s+\S*$/, '') + '...';
-  } else if (description.length < 120) {
+      description.substring(0, 157).replace(/\s+\S*$/, '') + '...';
+  } else if (description.length < 150) {
     // Add more context if too short
     const additions = [];
     if (localData?.regulations?.has_ewaste_ban) {
@@ -163,8 +163,19 @@ export function generateCityMeta({
     if (verified.length > 0) {
       additions.push(' Verified businesses');
     }
-    if (additions.length > 0) {
-      finalDescription += additions[0];
+    if (localData?.stats?.recycling_rate) {
+      additions.push(` ${localData.stats.recycling_rate} recycling rate`);
+    }
+    if (chains.length > 0) {
+      additions.push(' Retail chains available');
+    }
+
+    // Add additions until we reach the minimum length
+    for (const addition of additions) {
+      if (finalDescription.length + addition.length <= 160) {
+        finalDescription += addition;
+        if (finalDescription.length >= 150) break;
+      }
     }
   }
 
@@ -216,7 +227,16 @@ export function generateStateMeta(
 
   const title = `${titleVariations[titleIndex]} - ${centerCount} Locations`;
 
-  const description = `Find ${centerCount} electronics recycling centers across ${cityCount} cities in ${state}. Safe disposal of computers, phones, TVs & e-waste. Certified facilities with secure data destruction services.`;
+  let description = `Find ${centerCount} electronics recycling centers across ${cityCount} cities in ${state}. Safe disposal of computers, phones, TVs & e-waste. Certified facilities with secure data destruction services.`;
+
+  // Ensure state description is also 150-160 characters
+  if (description.length < 150) {
+    description +=
+      ' Compliant with state regulations & environmental standards for proper disposal of electronic waste items.';
+  }
+  if (description.length > 160) {
+    description = description.substring(0, 157) + '...';
+  }
 
   const keywords = [
     `${state} electronics recycling`,
@@ -230,10 +250,7 @@ export function generateStateMeta(
 
   return {
     title: title.length > 60 ? title.substring(0, 57) + '...' : title,
-    description:
-      description.length > 155
-        ? description.substring(0, 152) + '...'
-        : description,
+    description,
     keywords: keywords.join(', '),
   };
 }

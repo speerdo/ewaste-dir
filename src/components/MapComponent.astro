@@ -147,6 +147,11 @@ declare global {
         throw new Error('Map element not found');
       }
 
+      // Check if Google Maps is available
+      if (!window.google || !window.google.maps) {
+        throw new Error('Google Maps API is not loaded');
+      }
+
       // Get API key from window or environment
       const apiKey = window.GOOGLE_MAPS_API_KEY;
       if (!apiKey) {
@@ -333,9 +338,22 @@ declare global {
   }
 
   // Initialize map when Google Maps API is loaded
-  if (typeof google !== 'undefined' && google.maps) {
-    initMap();
-  } else {
-    window.addEventListener('google-maps-ready', initMap);
+  function tryInitMap() {
+    if (typeof google !== 'undefined' && google.maps) {
+      initMap();
+    } else {
+      // Check if we have a loading timeout
+      setTimeout(() => {
+        if (!window.googleMapsLoaded) {
+          handleMapError(new Error('Google Maps API failed to load within timeout'));
+        }
+      }, 10000); // 10 second timeout
+      
+      // Listen for the ready event
+      window.addEventListener('google-maps-ready', initMap);
+    }
   }
+  
+  // Start initialization
+  tryInitMap();
 </script>

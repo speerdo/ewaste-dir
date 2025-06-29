@@ -3,28 +3,24 @@ import StateLayout from '../../layouts/StateLayout.astro';
 import { getRecyclingCentersByState, getState, getCitiesByState, getAllStates, normalizeForUrl } from '../../lib/supabase';
 import { PRODUCTION_URL } from '../../lib/url-utils';
 
-// Use hybrid approach with ISR
-export const prerender = false;
+// Enable static generation - we have 51 states
+export const prerender = true;
 
-// Get the state parameter from the URL
+// Generate static paths for all state pages
+export async function getStaticPaths() {
+  const states = await getAllStates();
+  const paths = states.map(state => ({
+    params: { state: state.id },
+    props: { stateName: state.name }
+  }));
+  
+  console.log(`Generated ${paths.length} static state pages`);
+  return paths;
+}
+
+// Get the state parameter from the URL and props
 const { state: stateParam } = Astro.params;
-
-// Set cache control headers for browser - always check freshness
-Astro.response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
-
-// Set Vercel-specific CDN cache headers with durable caching
-// Include URL parameters in cache key
-Astro.response.headers.set('Vercel-CDN-Cache-Control', 
-  'public, s-maxage=3600, stale-while-revalidate=86400'
-);
-
-// Ensure each URL gets its own cache entry
-Astro.response.headers.set('CDN-Cache-Control', 'public, must-revalidate');
-Astro.response.headers.set('Vary', 'x-vercel-id, x-forwarded-proto, x-vercel-proxy-signature, accept');
-
-// Add cache tag for targeted invalidation
-const cacheTag = `state-${stateParam}`;
-Astro.response.headers.set('Cache-Tag', cacheTag);
+const { stateName } = Astro.props;
 
 if (!stateParam) {
   return Astro.redirect('/404');

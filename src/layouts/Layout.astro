@@ -28,9 +28,6 @@ const ogImageUrl = ogImage ? getAbsoluteUrl(ogImage) : getAbsoluteUrl(defaultOgI
 
 // Used for meta tags - get canonical URL
 const canonicalUrl = getCanonicalUrl(currentUrl);
-
-// Get Google Maps API key from environment variable
-const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
 ---
 
 <!doctype html>
@@ -70,26 +67,6 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
     
     <title>{title}</title>
-
-    <!-- Make API key available to client scripts -->
-    <script is:inline define:vars={{ GOOGLE_MAPS_API_KEY }}>
-      // Store API key in a global variable
-      window.GOOGLE_MAPS_API_KEY = GOOGLE_MAPS_API_KEY;
-    </script>
-
-    <!-- Initialize Google Maps -->
-    <script is:inline>
-      function initializeMap() {
-        // Create and dispatch the ready event
-        const event = new Event('google-maps-ready');
-        window.dispatchEvent(event);
-      }
-      // Make the function globally available
-      window.initializeMap = initializeMap;
-    </script>
-    <script async defer
-      src={`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initializeMap`}
-    ></script>
   </head>
   <body class="min-h-screen flex flex-col bg-white">
     <Header />

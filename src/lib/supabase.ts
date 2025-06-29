@@ -803,6 +803,46 @@ export async function getCitiesByState(stateId: string): Promise<City[]> {
   // Get unique cities
   const uniqueCities = [...new Set(data?.map((row) => row.city) || [])];
 
+  // Add special virtual cities for certain states that should have static paths
+  // These are cities that the getRecyclingCentersByCity function can handle through
+  // its normalization logic, even if they don't exist directly in the database
+  const virtualCities: Record<string, string[]> = {
+    'new-york': ['New York'], // For NYC/Manhattan centers
+    california: ['Los Angeles'], // In case LA centers are stored differently
+    florida: ['Miami'], // In case Miami centers are stored differently
+    // Add more as needed for other important cities
+  };
+
+  if (virtualCities[stateId]) {
+    // Add virtual cities, but only if they're not already in the list
+    const existingCityNames = new Set(
+      uniqueCities.map((city) => city.toLowerCase())
+    );
+    for (const virtualCity of virtualCities[stateId]) {
+      if (!existingCityNames.has(virtualCity.toLowerCase())) {
+        // Check if there are actually centers that would match this virtual city
+        // by testing the getRecyclingCentersByCity function
+        try {
+          const testCenters = await getRecyclingCentersByCity(
+            stateId,
+            virtualCity
+          );
+          if (testCenters && testCenters.length > 0) {
+            uniqueCities.push(virtualCity);
+            console.log(
+              `Added virtual city "${virtualCity}" for ${state.name} (${testCenters.length} centers found)`
+            );
+          }
+        } catch (error) {
+          console.log(
+            `Virtual city "${virtualCity}" test failed for ${state.name}:`,
+            error
+          );
+        }
+      }
+    }
+  }
+
   // Convert to City type and cache
   const cities = uniqueCities.map((cityName) => ({
     id: normalizeForUrl(cityName),

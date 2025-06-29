@@ -5,6 +5,8 @@ import type { RecyclingCenter } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
 import CentersList from '../../../components/recycling-centers/CentersList.astro';
+import CityContentEnhancer from '../../../components/CityContentEnhancer.astro';
+import { generateCityMeta } from '../../../utils/metaGenerator';
 
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
@@ -113,31 +115,18 @@ const mapMarkers: Marker[] = displayCenters.map(center => ({
   id: center.id
 })).filter(marker => !isNaN(marker.lat) && !isNaN(marker.lng));
 
-// Generate a unique, keyword-rich meta description for SEO
-// Keep it between 120-155 characters, accounting for longer city/state names
-const maxBaseLength = 155;
-const minBaseLength = 120;
-const centerWord = displayCenters.length === 1 ? 'center' : 'centers';
+// Generate enhanced metadata using the new meta generator
+const metaData = generateCityMeta({
+  cityName,
+  state: state.name,
+  centers: displayCenters,
+  localData,
+  showNearbyMessage
+});
 
-// Generate comprehensive meta description
-const longDescription = `Find ${displayCenters.length} electronics recycling ${centerWord} in ${cityName}, ${state.name}. Safe disposal of computers, phones, TVs & e-waste with certified facilities, data destruction & directions.`;
-
-const mediumDescription = `${displayCenters.length} electronics recycling ${centerWord} in ${cityName}, ${state.name}. Safe disposal of computers, phones, TVs & e-waste. Get directions, hours & contact info.`;
-
-const shortDescription = `Electronics recycling centers in ${cityName}, ${state.name}. Safe disposal of computers, phones, TVs & e-waste. Find certified facilities with directions.`;
-
-// Choose the best description that fits our length requirements
-let metaDescription;
-if (longDescription.length >= minBaseLength && longDescription.length <= maxBaseLength) {
-  metaDescription = longDescription;
-} else if (mediumDescription.length >= minBaseLength && mediumDescription.length <= maxBaseLength) {
-  metaDescription = mediumDescription;
-} else if (shortDescription.length >= minBaseLength) {
-  metaDescription = shortDescription;
-} else {
-  // Fallback to ensure we meet minimum length
-  metaDescription = `Find electronics recycling centers in ${cityName}, ${state.name}. Safe and responsible disposal of computers, phones, televisions, tablets, and other electronic devices. Get directions, contact information, and hours of operation.`;
-}
+const metaTitle = metaData.title;
+const metaDescription = metaData.description;
+const metaKeywords = metaData.keywords;
 
 // Calculate statistics from the centers data
 const centersWithLegitimacy = displayCenters.filter(center => center.legitimacy_score != null);
@@ -360,7 +349,7 @@ if (baseTitle.length <= maxTitleLength) {
 ---
 
 <Layout 
-  title={pageTitle}
+  title={metaTitle}
   description={metaDescription}
   ogImage={ogImageUrl}
 >
@@ -644,6 +633,15 @@ if (baseTitle.length <= maxTitleLength) {
         <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} />
       </div>
     </div>
+
+    <!-- Enhanced City-Specific Content -->
+    <CityContentEnhancer 
+      cityName={cityName}
+      state={state.name}
+      centers={displayCenters}
+      localData={localData}
+      showNearbyMessage={showNearbyMessage}
+    />
 
     <!-- E-Waste Disposal Best Practices -->
     <div class="mb-8 bg-white border border-gray-200 rounded-lg p-6">

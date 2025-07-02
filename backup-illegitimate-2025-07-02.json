@@ -1,0 +1,397 @@
+{
+  "timestamp": "2025-07-02T18:43:31.008Z",
+  "category": "illegitimate",
+  "count": 65,
+  "entries": [
+    {
+      "id": "b7ab95e8-7344-4dcc-8ac0-19a2ed4a4610",
+      "name": "Verizon",
+      "city": "Savannah",
+      "state": "Georgia"
+    },
+    {
+      "id": "f2e686bc-0e7b-4ce7-b187-a8c0a41e5502",
+      "name": "Verizon",
+      "city": "Warner Robins",
+      "state": "Georgia"
+    },
+    {
+      "id": "6bfb9fa2-fa8f-4294-9ae2-e255c9dbb4e2",
+      "name": "Recycling Chicago",
+      "city": "Chicago",
+      "state": "Illinois"
+    },
+    {
+      "id": "07152b31-dbe7-4b8f-b911-0579fd15b9d5",
+      "name": "Mobile Spot",
+      "city": "Clive",
+      "state": "Iowa"
+    },
+    {
+      "id": "5a90806e-4b46-4512-930d-4bdb9f799294",
+      "name": "Laptop Repair Castle Rock",
+      "city": "Castle Rock",
+      "state": "Colorado"
+    },
+    {
+      "id": "d7c90742-f1f5-4152-9f79-da2a79f1dfb4",
+      "name": "Verizon",
+      "city": "Maple Grove",
+      "state": "Minnesota"
+    },
+    {
+      "id": "e4707bd8-2e06-4eb0-aa17-710018b9df14",
+      "name": "Earthwaste Systems",
+      "city": "Middlebury",
+      "state": "Vermont"
+    },
+    {
+      "id": "a344ac68-10e1-4f50-a513-bd56d9529200",
+      "name": "Brooklyn Computer Center",
+      "city": "Brooklyn",
+      "state": "New York"
+    },
+    {
+      "id": "3de54cd9-7ae1-46c2-9da4-bef4cf311ee5",
+      "name": "Iron Mountain",
+      "city": "Fort Wayne",
+      "state": "Indiana"
+    },
+    {
+      "id": "8ec68c19-3ef6-4475-a196-ead52252a60a",
+      "name": "Digital Repair Surgeons LLC",
+      "city": "Rutland",
+      "state": "Vermont"
+    },
+    {
+      "id": "761a7da6-d413-44e0-b54e-968b508998aa",
+      "name": "First Source Recycling",
+      "city": "Fayetteville",
+      "state": "North Carolina"
+    },
+    {
+      "id": "ef1abc63-7185-4e53-866c-0fd54f328910",
+      "name": "Mid Cape Metal Recyclers",
+      "city": "Hyannis",
+      "state": "Massachusetts"
+    },
+    {
+      "id": "336db908-cc60-4f83-bbca-611c8b22b9ac",
+      "name": "Recycling Hotline-Bellingham",
+      "city": "Bellingham",
+      "state": "Washington"
+    },
+    {
+      "id": "22a46eb0-85e2-4613-b735-6d944a5e629a",
+      "name": "The WasteShed",
+      "city": "Chicago",
+      "state": "Illinois"
+    },
+    {
+      "id": "a4f3be15-68f6-43d4-9cd6-f186ff675ca7",
+      "name": "Cartridge World",
+      "city": "New York",
+      "state": "New York"
+    },
+    {
+      "id": "97e0d762-3bab-44b1-9001-0e56bc42d227",
+      "name": "Waste management",
+      "city": "Rochester",
+      "state": "New Hampshire"
+    },
+    {
+      "id": "2945568e-a84d-4835-9e2f-ed9484d10f71",
+      "name": "Netpointe.com",
+      "city": "New Albany",
+      "state": "Indiana"
+    },
+    {
+      "id": "951c0abe-48c6-4939-a41e-0362c49c12d9",
+      "name": "Target",
+      "city": "New York",
+      "state": "New York"
+    },
+    {
+      "id": "99037a90-041e-4172-b426-3f5798e9c0e2",
+      "name": "Target",
+      "city": "New York",
+      "state": "New York"
+    },
+    {
+      "id": "0818aa4e-fb9d-4af0-92ad-e3c47ccc1b2f",
+      "name": "Computer Recycling Services (formerly Go Green Recycling)",
+      "city": "Hudson",
+      "state": "New Hampshire"
+    },
+    {
+      "id": "da9f5387-35ef-46d7-b9b6-f2a37b467a42",
+      "name": "Recycling",
+      "city": "Crookston",
+      "state": "Minnesota"
+    },
+    {
+      "id": "f7aff4c5-e535-431e-b9ee-167372f50599",
+      "name": "Kearny Recycling",
+      "city": "Kearny",
+      "state": "New Jersey"
+    },
+    {
+      "id": "b15672db-9047-4edc-b31f-ce408d6e2856",
+      "name": "Eden Recycling Center",
+      "city": "Eden",
+      "state": "North Carolina"
+    },
+    {
+      "id": "572bfb7b-1a55-4476-8473-a63fa71ebe1c",
+      "name": "Verizon",
+      "city": "Rexburg",
+      "state": "Idaho"
+    },
+    {
+      "id": "3f71aa8d-a052-4b08-aeaa-b67923d44728",
+      "name": "Action Recycling",
+      "city": "Massillon",
+      "state": "Ohio"
+    },
+    {
+      "id": "2105e3a8-cd67-40d8-ba2f-07d16c43e10c",
+      "name": "El Recycling,Llc",
+      "city": "Dallas",
+      "state": "Texas"
+    },
+    {
+      "id": "9f1400d2-0076-4266-96a3-146ec76e327a",
+      "name": "Recycling Center",
+      "city": "Waynesboro",
+      "state": "Pennsylvania"
+    },
+    {
+      "id": "e50bcc1f-ca1e-44a5-b179-1612a10065dd",
+      "name": "BandB recycling",
+      "city": "Portales",
+      "state": "New Mexico"
+    },
+    {
+      "id": "c6a36be8-1be2-46d2-a924-83ecc6a96e2d",
+      "name": "Texas Disposal Systems Metal Buying",
+      "city": "Creedmoor",
+      "state": "Texas"
+    },
+    {
+      "id": "c4dcb5bb-9540-4b9d-8cb7-a1720ff60907",
+      "name": "C M Rubber Recycling",
+      "city": "Coleman",
+      "state": "Michigan"
+    },
+    {
+      "id": "26139192-199d-4ab0-9c6d-2ad1f9121b7b",
+      "name": "Plainfield Recycling Department",
+      "city": "Plainfield",
+      "state": "New Jersey"
+    },
+    {
+      "id": "8927c237-db10-456a-90e4-ddec15b7332a",
+      "name": "Redemption Centers Of New York",
+      "city": "Schenectady",
+      "state": "New York"
+    },
+    {
+      "id": "b9106f82-81b8-47af-89b3-7b1f424529dd",
+      "name": "Fast Junk Removal",
+      "city": "Cincinnati",
+      "state": "Ohio"
+    },
+    {
+      "id": "4d07043b-7e42-4052-bac5-88d47fd44364",
+      "name": "L&m scrapyard",
+      "city": "Magee",
+      "state": "Mississippi"
+    },
+    {
+      "id": "ec7488f5-8e3c-4a9a-b076-ff4c13e2f1a8",
+      "name": "Patagonia",
+      "city": "New York",
+      "state": "New York"
+    },
+    {
+      "id": "a77ea979-b6dd-40f6-933d-b08dd2f4dd68",
+      "name": "Goodwill Thrift Store & Donation Center",
+      "city": "Lawrenceville",
+      "state": "Georgia"
+    },
+    {
+      "id": "412ed9ca-0cae-440f-8f5f-4da6db33badd",
+      "name": "Glendale waste collection center",
+      "city": "Los Angeles",
+      "state": "California"
+    },
+    {
+      "id": "b75d7b1e-f208-48f1-bda5-badea8fe0f50",
+      "name": "Recycling Center",
+      "city": "Blytheville",
+      "state": "Arkansas"
+    },
+    {
+      "id": "13b5b95a-7182-4ca7-8cf5-e73a56770ba3",
+      "name": "Recycling dropoff",
+      "city": "Suttons Bay",
+      "state": "Michigan"
+    },
+    {
+      "id": "785e3bec-7c25-4501-bf22-26f0041c404a",
+      "name": "ELECTRONICS SERVICE CENTER",
+      "city": "Pompano Beach",
+      "state": "Florida"
+    },
+    {
+      "id": "0b67df28-9b6e-4afb-9ab0-c69c1cd77b0f",
+      "name": "Appliance Salvage",
+      "city": "Tulsa",
+      "state": "Oklahoma"
+    },
+    {
+      "id": "6ac3a061-5f06-40cd-90d6-7958a5a715d8",
+      "name": "Antigo Electronics",
+      "city": "Antigo",
+      "state": "Wisconsin"
+    },
+    {
+      "id": "07faf4de-96e6-48b2-9ff8-329c2af1ab33",
+      "name": "Recycle",
+      "city": "Gardena",
+      "state": "California"
+    },
+    {
+      "id": "281a143d-54c3-4203-bb25-9de95f2b417b",
+      "name": "Computer Hospital Walk in Computer Repair/ Sales / Virus Removal",
+      "city": "Nesconset",
+      "state": "New York"
+    },
+    {
+      "id": "d8b0351c-4687-4236-aca0-a12c88451349",
+      "name": "Target",
+      "city": "New York",
+      "state": "New York"
+    },
+    {
+      "id": "b8186514-a334-43d4-851b-1fb1eed24c47",
+      "name": "Target",
+      "city": "New York",
+      "state": "New York"
+    },
+    {
+      "id": "f07511cf-c741-4beb-9399-b760f78b29fd",
+      "name": "Target",
+      "city": "New York",
+      "state": "New York"
+    },
+    {
+      "id": "6dc4c890-701b-48ac-8bbd-773203673349",
+      "name": "Glass Recycling Place",
+      "city": "Lehi",
+      "state": "Utah"
+    },
+    {
+      "id": "5f0bca8f-f65a-4b2c-b5c8-7f086a2f3a22",
+      "name": "Rest E-Z Country Waste Pickup",
+      "city": "Nashville",
+      "state": "Georgia"
+    },
+    {
+      "id": "019679b0-0449-4676-8216-a96a8e92b7fd",
+      "name": "Can and Bottle Redemption Center.",
+      "city": "Ames",
+      "state": "Iowa"
+    },
+    {
+      "id": "be458832-21b5-42da-9383-c566b7eaeeb4",
+      "name": "Scrapyard Pro",
+      "city": "Jacksonville",
+      "state": "Florida"
+    },
+    {
+      "id": "72ac02dd-846d-4a71-bcf2-d2d7e855ceb6",
+      "name": "Chenango County Waste Management",
+      "city": "Norwich",
+      "state": "New York"
+    },
+    {
+      "id": "514973ab-f1fb-4f15-911b-14beb76836c3",
+      "name": "Brandywine Recycling",
+      "city": "Brandywine",
+      "state": "Maryland"
+    },
+    {
+      "id": "d8ff37d3-630f-454b-8318-c652790b4222",
+      "name": "Madison County Solid Waste Center",
+      "city": "Jackson",
+      "state": "Tennessee"
+    },
+    {
+      "id": "0e37f8ca-760c-402a-84e8-c9ba142d7f02",
+      "name": "Goodwill Thrift Store & Donation Center",
+      "city": "Marietta",
+      "state": "Georgia"
+    },
+    {
+      "id": "72599ae9-7f12-48ad-bb39-119eb5285d7d",
+      "name": "Altus Recycling",
+      "city": "Altus",
+      "state": "Oklahoma"
+    },
+    {
+      "id": "aec49d09-ce15-45d8-835c-0e683f76bc9d",
+      "name": "Alpha IT Solutions",
+      "city": "Fort Wayne",
+      "state": "Indiana"
+    },
+    {
+      "id": "42355870-3d5d-4eda-8779-fd99ed60b8dc",
+      "name": "Recycle Center",
+      "city": "Kingsport",
+      "state": "Tennessee"
+    },
+    {
+      "id": "de29bb21-8657-4db6-872c-d90ec0ef7950",
+      "name": "Twin Wireless",
+      "city": "Indianapolis",
+      "state": "Indiana"
+    },
+    {
+      "id": "246c7887-1596-4f28-842e-a31dd4f088ec",
+      "name": "Florence County Recycle Center",
+      "city": "Florence",
+      "state": "South Carolina"
+    },
+    {
+      "id": "e60f08de-3694-4b14-ba74-1c3ac4c8c0c8",
+      "name": "WM PATERSON. Florida Ave",
+      "city": "Paterson",
+      "state": "New Jersey"
+    },
+    {
+      "id": "1add8967-5390-4864-be85-ae5ff7734f80",
+      "name": "WM - Pinetop Lakeside Hauling & Lone Pine Transfer Station",
+      "city": "Show Low",
+      "state": "Arizona"
+    },
+    {
+      "id": "3f1def59-eb99-47ad-8557-1c05bbec9dee",
+      "name": "Bobic Computers",
+      "city": "Toledo",
+      "state": "Ohio"
+    },
+    {
+      "id": "d28d0a3b-41a2-4626-98fe-4128659c655b",
+      "name": "IDC Technology Solutions (CLOSED)",
+      "city": "Geneseo",
+      "state": "Illinois"
+    },
+    {
+      "id": "ffe6b735-ed7b-427d-9373-d0a866c145fb",
+      "name": "Main Street Recycling Center",
+      "city": "Ontario",
+      "state": "California"
+    }
+  ]
+}

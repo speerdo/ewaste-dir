@@ -53,7 +53,7 @@ import Layout from '../layouts/Layout.astro';
               </div>
             </div>
           </div>
-        </div>
+        </div>        
 
         <div class="bg-gray-50 rounded-xl p-8">
           <h2 class="text-2xl font-display font-bold text-gray-900 mb-6">Send Us a Message</h2>
@@ -93,7 +93,7 @@ import Layout from '../layouts/Layout.astro';
                 required
               ></textarea>
             </div>
-            <div>
+            <div class="flex justify-center">
               <button
                 type="submit"
                 class="w-full md:w-auto px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -103,6 +103,24 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </form>
         </div>
+
+        <div class="text-center py-8">
+          <div class="inline-flex items-center gap-3 px-6 py-4 bg-green-50 border border-green-200 rounded-xl">
+            <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <div class="text-left">
+              <p class="text-sm text-gray-600 mb-1">Or reach us directly at:</p>
+              <a 
+                href="mailto:hello@recycleoldtech.com" 
+                class="text-lg font-semibold text-green-700 hover:text-green-800 transition-colors"
+              >
+                hello@recycleoldtech.com
+              </a>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>

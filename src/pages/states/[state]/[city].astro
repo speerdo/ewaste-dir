@@ -108,6 +108,24 @@ if (cityNameCounts.size > 0) {
 // For title display
 const locationDescription = hasExactMatches ? cityName : `${state.name} area`;
 
+// Generate a consistent but pseudo-random number based on city name for phrasing variation
+const cityHash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+const phrasingIndex = cityHash % 5;
+
+const introPhrasings = [
+  `${cityName} is home to ${displayCenters.length} certified electronics recycling ${displayCenters.length === 1 ? 'center' : 'centers'}, making it easier than ever for neighbors and local businesses to responsibly part with old computers, phones, TVs, and other electronic devices.`,
+  
+  `${cityName} provides ${displayCenters.length} certified electronics recycling ${displayCenters.length === 1 ? 'center' : 'centers'} to serve local residents and businesses with safe disposal of computers, phones, TVs, and other electronic devices.`,
+  
+  `Residents and businesses in ${cityName} have access to ${displayCenters.length} certified electronics recycling ${displayCenters.length === 1 ? 'facility' : 'facilities'} for secure disposal of their old computers, phones, TVs, and electronic equipment.`,
+  
+  `Located throughout ${cityName}, ${displayCenters.length} certified electronics recycling ${displayCenters.length === 1 ? 'center' : 'centers'} ${displayCenters.length === 1 ? 'stands' : 'stand'} ready to help residents and businesses dispose of electronics responsibly.`,
+  
+  `When it comes to safe electronics disposal, ${cityName} residents and businesses can count on ${displayCenters.length} certified recycling ${displayCenters.length === 1 ? 'center' : 'centers'} for proper handling of computers, phones, TVs, and other devices.`
+];
+
+const selectedIntroPhrase = introPhrasings[phrasingIndex];
+
 // Generate OG image URL using a static default image with the production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
 const ogImageUrl = import.meta.env.PROD 
@@ -143,7 +161,14 @@ const mapMarkers: Marker[] = displayCenters.map(center => ({
   id: center.id
 })).filter(marker => !isNaN(marker.lat) && !isNaN(marker.lng));
 
-// Generate enhanced metadata using the new meta generator
+// Generate concise meta description (150 characters max)
+const centerCount = displayCenters.length;
+const centerWord = centerCount === 1 ? 'center' : 'centers';
+
+// Create concise meta description following the requested format
+const metaDescription = `Find ${centerCount} certified electronics recycling ${centerWord} in ${cityName}. Safe e-waste disposal for phones, computers, TVs and more in ${cityName}.`;
+
+// Generate title and keywords using the existing meta generator for consistency
 const metaData = generateCityMeta({
   cityName,
   state: state.name,
@@ -153,7 +178,6 @@ const metaData = generateCityMeta({
 });
 
 const metaTitle = metaData.title;
-const metaDescription = metaData.description;
 const metaKeywords = metaData.keywords;
 
 // Calculate statistics from the centers data
@@ -205,6 +229,64 @@ const recentlyVerified = displayCenters.filter(center => {
 const centersWithDescriptions = displayCenters.filter(center => center.description && center.description.length > 50);
 const centersWithHours = displayCenters.filter(center => center.working_hours);
 const centersWithLogos = displayCenters.filter(center => center.logo);
+
+// Check if this is a large city (population > 100k or major city)
+const majorCities = [
+  'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 
+  'San Antonio', 'San Diego', 'Dallas', 'Austin', 'San Jose', 'Jacksonville', 
+  'Fort Worth', 'Columbus', 'Charlotte', 'Indianapolis', 'San Francisco', 
+  'Seattle', 'Denver', 'Boston', 'Portland', 'Las Vegas', 'Detroit', 'Memphis', 
+  'Louisville', 'Baltimore', 'Milwaukee', 'Albuquerque', 'Tucson', 'Fresno', 
+  'Sacramento', 'Atlanta', 'Miami', 'Orlando', 'Tampa', 'Minneapolis', 
+  'Cleveland', 'Wichita', 'Arlington', 'Raleigh', 'Omaha', 'Long Beach', 
+  'Virginia Beach', 'Oakland', 'Tulsa', 'New Orleans', 'Honolulu', 'Colorado Springs',
+  'Kansas City', 'Mesa', 'Pittsburgh', 'St. Louis', 'Cincinnati', 'Henderson',
+  'Greensboro', 'Plano', 'Newark', 'Lincoln', 'Toledo', 'Orlando', 'Chula Vista',
+  'Fort Wayne', 'Jersey City', 'St. Petersburg', 'Laredo', 'Madison', 'Chandler',
+  'Buffalo', 'Lubbock', 'Scottsdale', 'Reno', 'Glendale', 'Gilbert', 'Winston-Salem',
+  'North Las Vegas', 'Norfolk', 'Chesapeake', 'Garland', 'Irving', 'Hialeah',
+  'Fremont', 'Boise', 'Richmond', 'Baton Rouge', 'Spokane', 'Des Moines',
+  'Tacoma', 'San Bernardino', 'Modesto', 'Fontana', 'Santa Clarita', 'Birmingham',
+  'Oxnard', 'Fayetteville', 'Moreno Valley', 'Akron', 'Huntington Beach',
+  'Little Rock', 'Augusta', 'Amarillo', 'Glendale', 'Mobile', 'Grand Rapids',
+  'Salt Lake City', 'Tallahassee', 'Huntsville', 'Grand Prairie', 'Knoxville',
+  'Worcester', 'Newport News', 'Brownsville', 'Overland Park', 'Santa Rosa',
+  'Peoria', 'Oceanside', 'Tempe', 'Savannah', 'Promontory', 'Bridgeport',
+  'Paterson', 'Sioux Falls', 'Springfield', 'Hayward', 'Pomona', 'Escondido',
+  'Sunnyvale', 'Killeen', 'Pasadena', 'Naperville', 'Salinas', 'Syracuse',
+  'Torrance', 'Lakewood', 'Orange', 'Rockford', 'Clearwater', 'Concord',
+  'Topeka', 'Thousand Oaks', 'Cedar Rapids', 'Simi Valley', 'Elizabeth',
+  'Inglewood', 'Pembroke Pines', 'Salem', 'Eugene', 'Lancaster', 'Corona',
+  'Elk Grove', 'Palmdale', 'Salinas', 'Springfield', 'Pasadena', 'Fort Lauderdale',
+  'Hayward', 'Hampton', 'Lakewood', 'Hollywood', 'Macon', 'Kansas City'
+];
+
+const population = localData.stats?.population || 0;
+const isLargeCity = population > 100000 || majorCities.includes(cityName);
+
+// Define different callout messages for variety
+const calloutMessages = [
+  {
+    fact: "Did you know? Proper e-waste recycling can recover precious metals like gold, silver, and platinum from old electronics.",
+    cta: "Read our Ultimate Guide to Electronics Recycling to learn more about the recycling process and environmental benefits."
+  },
+  {
+    fact: "Fun fact: One ton of recycled electronics can yield more gold than 17 tons of gold ore.",
+    cta: "Discover more fascinating recycling facts in our Ultimate Guide to Electronics Recycling."
+  },
+  {
+    fact: "Did you know? Recycling electronics prevents toxic materials like lead and mercury from contaminating landfills.",
+    cta: "Learn about safe disposal methods in our Ultimate Guide to Electronics Recycling."
+  },
+  {
+    fact: "Amazing fact: Electronics recycling can reduce greenhouse gas emissions by up to 2.5 million tons annually.",
+    cta: "Find out how you can make a difference with our Ultimate Guide to Electronics Recycling."
+  }
+];
+
+// Select a consistent message based on city name hash
+const calloutIndex = cityHash % calloutMessages.length;
+const selectedCallout = calloutMessages[calloutIndex];
 
 // Helper function to convert working hours to schema.org format
 function formatOpeningHours(workingHours: any): string | undefined {
@@ -570,10 +652,12 @@ if (baseTitle.length <= maxTitleLength) {
           {/* Dynamic intro based on local data */}
           <div class="prose prose-gray max-w-none text-gray-700 space-y-4">
             <p>
-              {cityName} offers {displayCenters.length} certified electronics recycling {displayCenters.length === 1 ? 'center' : 'centers'} 
-              to help residents and businesses safely dispose of computers, phones, TVs, and other electronic devices.
-              {verifiedCenters.length > 0 && ` Our verification process has confirmed ${verifiedCenters.length} ${verifiedCenters.length === 1 ? 'business' : 'businesses'} 
-              as legitimate e-waste recyclers with proper disposal practices.`}
+              {selectedIntroPhrase}
+              {localData.regulations?.has_ewaste_ban && ` What's great about ${cityName} is that it has strict e-waste disposal laws, meaning electronics are banned from regular landfills—keeping our community environmentally responsible.`}
+              {!localData.regulations?.has_ewaste_ban && localData.regulations?.municipal_programs && ` The city actively supports electronics recycling through local programs and partnerships with certified facilities.`}
+              {localData.regulations?.special_events && ` Plus, ${cityName} hosts special e-waste collection events throughout the year, making it even easier for residents to dispose of old electronics safely.`}
+              {verifiedCenters.length > 0 && ` We've personally verified ${verifiedCenters.length} ${verifiedCenters.length === 1 ? 'business' : 'businesses'} 
+              to ensure they follow legitimate recycling practices that protect both your data and our environment.`}
             </p>
             
             {businessTypes.size > 0 && (
@@ -585,7 +669,8 @@ if (baseTitle.length <= maxTitleLength) {
                   .map(([type, count], index, array) => {
                     const isLast = index === array.length - 1;
                     const isSecondToLast = index === array.length - 2;
-                    return `${type.toLowerCase()}${count > 1 ? ` (${count} centers)` : ''}${isLast ? '' : isSecondToLast && array.length > 2 ? ', and ' : ', '}`;
+                    const centerWord = count === 1 ? 'center' : 'centers';
+                    return `${type.toLowerCase()} – ${count} ${centerWord}${isLast ? '' : isSecondToLast && array.length > 2 ? ', and ' : ', '}`;
                   })
                   .join('')}. This diversity ensures residents can find appropriate disposal methods for different types of electronic waste.
               </p>
@@ -600,10 +685,10 @@ if (baseTitle.length <= maxTitleLength) {
             )}
             
             <p>
-              When choosing an electronics recycling center in {cityName}, look for businesses that provide data destruction services, 
-              offer pickup options for large items, and maintain proper certifications. {verifiedCenters.length > 0 ? 
-              `The ${verifiedCenters.length} verified centers listed above have been checked for legitimate business operations and proper disposal practices.` :
-              'Always verify business credentials and ask about their disposal methods before choosing a recycling service.'}
+              When selecting the right recycling partner in {cityName}, we recommend looking for businesses that offer secure data destruction, 
+              convenient pickup services for bulky items, and maintain industry certifications. {verifiedCenters.length > 0 ? 
+              `Good news: we've already done the legwork on ${verifiedCenters.length} of these centers, confirming they're legitimate businesses with responsible disposal practices.` :
+              'Pro tip: always ask about their data wiping process and disposal certifications before dropping off your devices.'}
             </p>
             
             {centersWithDescriptions.length > Math.floor(displayCenters.length * 0.6) && (
@@ -636,7 +721,7 @@ if (baseTitle.length <= maxTitleLength) {
                   .map(([type, count]) => (
                     <div class="flex justify-between text-sm">
                       <span class="text-blue-700 capitalize">{type} recycling</span>
-                      <span class="text-blue-600 font-medium">{count} centers</span>
+                      <span class="text-blue-600 font-medium">{count} {count === 1 ? 'center' : 'centers'}</span>
                     </div>
                   ))}
               </div>
@@ -706,6 +791,38 @@ if (baseTitle.length <= maxTitleLength) {
       )}
 
     </div>
+
+    <!-- Large City Callout -->
+    {isLargeCity && (
+      <div class="mb-8 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-6">
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+              {selectedCallout.fact}
+            </h3>
+            <p class="text-gray-700 mb-4">
+              {selectedCallout.cta}
+            </p>
+            <a 
+              href="/blog/recycling-guide" 
+              class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors"
+            >
+              Read the Guide
+              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    )}
 
     <!-- Sort Controls -->
     <div class="mb-6 flex justify-between items-center">

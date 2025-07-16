@@ -2,7 +2,7 @@
 title: 'Data Security in Electronics Recycling'
 description: 'Learn how to protect your personal and business data when recycling electronics. Complete guide to data destruction and security certifications.'
 pubDate: 2025-01-10
-featured: true
+featured: false
 image: '/images/data-security.jpg'
 tags: ['data security', 'privacy', 'data destruction', 'recycling']
 author: 'RecycleOldTech Team'

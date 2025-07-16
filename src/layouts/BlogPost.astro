@@ -157,4 +157,8 @@ const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_
   :global(.prose li) {
     @apply mb-2;
   }
+
+  :global(.prose a) {
+    @apply text-green-600 hover:text-green-700 transition-colors underline;
+  }
 </style>

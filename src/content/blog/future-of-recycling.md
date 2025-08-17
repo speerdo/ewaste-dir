@@ -3,7 +3,8 @@ title: 'Future of Electronics Recycling'
 pubDate: 2025-05-01
 description: 'Explore emerging technologies shaping electronics recycling: AI-powered sorting, urban mining, blockchain transparency, and innovative recovery methods.'
 image: '/images/better-tomorrow.jpg'
-featured: true
+featured: false
+author: 'RecycleOldTech Team'
 ---
 
 ## The Future of Electronics Recycling

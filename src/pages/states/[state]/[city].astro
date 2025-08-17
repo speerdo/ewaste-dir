@@ -56,14 +56,63 @@ if (!state) {
 
 // Convert city param to proper name format for searching
 // This is used only for the database query, not for display
-const searchCityName = cityParam.split('-').map(word => 
-  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-).join(' ');
+// Handle cities with special characters by trying multiple conversion strategies
+function convertUrlToSearchName(urlParam: string): string[] {
+  const parts = urlParam.split('-').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  );
+  
+  // Generate multiple possible variations
+  const variations = [
+    // Strategy 1: Spaces (most common - try first)
+    parts.join(' '),
+    
+    // Strategy 2: Hyphens (for cities like Ho-Ho-Kus, Winston-Salem)
+    parts.join('-'),
+    
+    // Strategy 3: Simple apostrophe patterns (for O'Fallon, D'Iberville)
+    parts.length === 2 ? `${parts[0]}'${parts[1]}` : null,
+    
+    // Strategy 4: "O' " pattern (for Land O' Lakes)
+    parts.length === 3 && parts[1].toLowerCase() === 'o' ? `${parts[0]} O' ${parts[2]}` : null,
+    
+    // Strategy 5: Periods for abbreviations (Mt. Juliet, St. Louis, St. Petersburg)
+    parts.length >= 2 && (parts[0].toLowerCase() === 'mt' || parts[0].toLowerCase() === 'st') 
+      ? `${parts[0]}. ${parts.slice(1).join(' ')}` : null,
+    
+    // Strategy 6: "d'" pattern (for Coeur d'Alene)
+    parts.length >= 3 && parts[1].toLowerCase() === 'd' 
+      ? `${parts[0]} d'${parts.slice(2).join(' ')}` : null,
+    
+    // Strategy 7: "'s" possessive pattern (for Lee's Summit)  
+    parts.length >= 2 && parts[1].toLowerCase() === 's'
+      ? `${parts[0]}'s ${parts.slice(2).join(' ')}` : null,
+      
+    // Strategy 8: "Ste." abbreviation (for Sault Ste. Marie)
+    parts.length >= 3 && parts[1].toLowerCase() === 'ste'
+      ? `${parts[0]} Ste. ${parts.slice(2).join(' ')}` : null
+  ];
+  
+  // Filter out null values and duplicates
+  return [...new Set(variations.filter(v => v !== null))];
+}
 
-// Get centers data
-const centers = await getRecyclingCentersByCity(stateParam, searchCityName);
+const cityVariations = convertUrlToSearchName(cityParam);
 
-// If no centers found, redirect to state page
+// Try each variation until we find centers
+let centers: RecyclingCenter[] = [];
+let searchCityName = cityVariations[0]; // Default to first variation
+
+for (const variation of cityVariations) {
+  centers = await getRecyclingCentersByCity(stateParam, variation);
+  if (centers && centers.length > 0) {
+    searchCityName = variation;
+    console.log(`Found ${centers.length} centers using city name variation: "${variation}"`);
+    break;
+  }
+}
+
+// If still no centers found, redirect to state page
 if (!centers || centers.length === 0) {
   return Astro.redirect(`/states/${stateParam}`);
 }
@@ -109,7 +158,7 @@ if (cityNameCounts.size > 0) {
 const locationDescription = hasExactMatches ? cityName : `${state.name} area`;
 
 // Generate a consistent but pseudo-random number based on city name for phrasing variation
-const cityHash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+const cityHash = cityName.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
 const phrasingIndex = cityHash % 5;
 
 const introPhrasings = [

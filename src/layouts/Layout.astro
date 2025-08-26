@@ -40,6 +40,22 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
     <meta name="description" content={metaDescription} />
     <link rel="canonical" href={canonicalUrl} />
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3GBQV8F6PX"></script>
+    <script>
+      interface GTagWindow extends Window {
+        dataLayer: any[];
+      }
+      declare const window: GTagWindow;
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(...args: any[]) {
+        window.dataLayer.push(args);
+      }
+      gtag('js', new Date());
+      gtag('config', 'G-3GBQV8F6PX');
+    </script>
+
     <!-- Ahrefs -->
     <script src="https://analytics.ahrefs.com/analytics.js" data-key="ymoBQ1YLGGwfqJ2qikw7fg" async></script>
 

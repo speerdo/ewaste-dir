@@ -43,14 +43,9 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3GBQV8F6PX"></script>
     <script>
-      interface GTagWindow extends Window {
-        dataLayer: any[];
-      }
-      declare const window: GTagWindow;
-
       window.dataLayer = window.dataLayer || [];
-      function gtag(...args: any[]) {
-        window.dataLayer.push(args);
+      function gtag() {
+        dataLayer.push(arguments);
       }
       gtag('js', new Date());
       gtag('config', 'G-3GBQV8F6PX');

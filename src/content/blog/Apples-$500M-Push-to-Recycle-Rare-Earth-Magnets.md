@@ -2,7 +2,7 @@
 title: 'Apple’s $500M Push to Recycle Rare-Earth Magnets: Why It Matters for All of Us'
 description: 'Apple has just announced a $500 million investment in MP Materials to build a rare-earth magnet recycling facility in Mountain Pass, California.'
 pubDate: 2025-07-15
-featured: true
+featured: false
 image: '/images/recycle-electronics.jpg'
 tags: ['business recycling', 'corporate', 'IT disposal', 'compliance']
 author: 'Adam Speer'

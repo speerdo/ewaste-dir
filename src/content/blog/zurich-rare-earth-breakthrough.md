@@ -4,7 +4,7 @@ description: 'Swiss scientists develop innovative method to extract rare-earth e
 pubDate: 2025-07-16
 author: 'Adam Speer'
 image: '/images/sci-lab.jpg'
-featured: true
+featured: false
 tags: ['rare-earth', 'recycling', 'innovation', 'research', 'technology']
 ---
 

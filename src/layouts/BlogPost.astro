@@ -18,9 +18,9 @@ const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_
 ---
 
 <Layout title={`${title} | RecycleOldTech Blog`} description={description} ogImage={image}>
-  <article class="pt-32">
+  <article>
     <!-- Hero Section -->
-    <div class="relative h-[400px] overflow-hidden">
+    <div class="relative h-[400px] overflow-hidden" style="margin-top: 84px;">
       <img 
         src={image} 
         alt={title}

@@ -1,7 +1,7 @@
 ---
 title: 'The E-Waste Crisis: Why Electronic Waste is Growing 5x Faster Than Recycling'
 description: 'According to the UN’s latest Global E-waste Monitor, electronic waste generation is rising five times faster than documented e-waste recycling worldwide.'
-pubDate: 2025-08-12
+pubDate: 2025-08-12T12:00:00Z
 featured: false
 image: '/images/ewaste-pile.jpg'
 tags: ['recycling laws', 'state regulations', 'e-waste', 'compliance']

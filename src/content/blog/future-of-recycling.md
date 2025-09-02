@@ -1,6 +1,6 @@
 ---
 title: 'Future of Electronics Recycling'
-pubDate: 2025-05-01
+pubDate: 2025-05-01T12:00:00Z
 description: 'Explore emerging technologies shaping electronics recycling: AI-powered sorting, urban mining, blockchain transparency, and innovative recovery methods.'
 image: '/images/better-tomorrow.jpg'
 featured: false

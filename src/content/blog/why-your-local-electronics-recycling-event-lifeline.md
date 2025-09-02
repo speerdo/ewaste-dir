@@ -1,6 +1,6 @@
 ---
 title: 'Why Your Local Electronics Recycling Event Could Be a Lifeline'
-pubDate: 2025-08-26
+pubDate: 2025-08-26T12:00:00Z
 description: 'Community events are becoming critical lifelines in a struggling electronics recycling infrastructure that’s failing to keep up with our digital demands.'
 image: '/images/ewaste-dropoff.webp'
 featured: true

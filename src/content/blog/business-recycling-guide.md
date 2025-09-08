@@ -5,7 +5,7 @@ pubDate: 2025-06-01T12:00:00Z
 featured: false
 image: '/images/corporate-meeting.jpg'
 tags: ['business recycling', 'corporate', 'IT disposal', 'compliance']
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 ## Complete Business Electronics Recycling Guide: Strategic Implementation for Corporate Success

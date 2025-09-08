@@ -4,7 +4,7 @@ pubDate: 2025-08-17T12:00:00Z
 description: 'Find out the connection between your electronics and gorilla survival and see how you can make an impact.'
 image: '/images/gorilla.jpg'
 featured: true
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 Yesterday, visitors to Zoo Atlanta had the opportunity to do something remarkable – help save critically endangered gorillas simply by bringing their old smartphones and tablets to recycle. The Zoo Atlanta Green Team hosted their second-annual E-Waste Recycling Event on Saturday, August 16, 2025, encouraging members and guests to bring small electronics to recycle through partners at ecocell to benefit the Gorillas on the Line … Answer the Call campaign.

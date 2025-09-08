@@ -4,7 +4,7 @@ pubDate: 2025-09-04T12:00:00Z
 description: 'The difference directly impacts whether your old smartphone gets properly recycled or ends up contributing to environmental and human health disasters'
 image: '/images/store-recycling.jpg'
 featured: true
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 As residents across America prepare for this week's electronics recycling events – from New Haven, [Missouri](/states/missouri) on Saturday, September 6th to Plymouth, [Wisconsin](/states/wisconsin) and St. Croix County, [Wisconsin](/states/wisconsin) on September 11th – new investigations into the global electronics recycling industry reveal a troubling reality: not all recycling is created equal.

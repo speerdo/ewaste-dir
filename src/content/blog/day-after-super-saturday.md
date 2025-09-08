@@ -4,7 +4,7 @@ pubDate: 2025-09-07T12:00:00Z
 description: 'Early reports suggest the event may have been the most successful single-day electronics collection effort in U.S. history.'
 image: 'https://giecdn.blob.core.windows.net/fileuploads/image/2025/03/26/s3-warehouse-web.jpg'
 featured: true
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 As the dust settles from yesterday's massive "Super Saturday" electronics recycling events across America, early reports suggest it may have been the most successful single-day electronics collection effort in U.S. history. But for those who missed yesterday's coordinated drives, this week offers multiple opportunities to participate in the continuing electronics recycling surge, with major events scheduled for Thursday and Friday that promise to be just as impactful.

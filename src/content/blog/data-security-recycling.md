@@ -5,7 +5,7 @@ pubDate: 2025-01-10T12:00:00Z
 featured: false
 image: '/images/data-security.jpg'
 tags: ['data security', 'privacy', 'data destruction', 'recycling']
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 ## Data Security in Electronics Recycling: Complete Protection Guide

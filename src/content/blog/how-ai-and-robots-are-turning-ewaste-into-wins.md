@@ -4,7 +4,7 @@ pubDate: 2025-09-05T12:00:00Z
 description: '2025 is proving to be a breakthrough year for positive change in electronics recycling.'
 image: '/images/robotics-arm.jpg'
 featured: true
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 While headlines about the e-waste crisis can feel overwhelming, a technological revolution is quietly transforming electronics recycling from an expensive, labor-intensive challenge into an efficient, profitable, and genuinely sustainable solution. From AI-powered robots that sort materials with superhuman precision to entire cities achieving "zero e-waste to landfill" goals, 2025 is proving to be a breakthrough year for positive change in electronics recycling.

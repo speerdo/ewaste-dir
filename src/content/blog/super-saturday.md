@@ -4,7 +4,7 @@ pubDate: 2025-09-06T12:00:00Z
 description: 'Across the US, dozens of communities are hosting simultaneous electronics recycling drives that will collectively process millions of pounds of electronic waste.'
 image: 'https://images.squarespace-cdn.com/content/v1/5770159a29687f12f68c09bc/1501086063805-2329NQ7FFLH7HJ05EV67/LPCS0238.jpg?format=500w'
 featured: true
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 If you're reading this on Saturday morning with a trunk full of old electronics, you're not alone. Today, September 6, 2025, marks what industry insiders call "Super Saturday" – the single biggest day for electronics recycling events across the United States. From New Haven, Missouri to Bloomingdale, Illinois, and from Aurora to Roselle, dozens of communities are hosting simultaneous electronics recycling drives that will collectively process millions of pounds of electronic waste.

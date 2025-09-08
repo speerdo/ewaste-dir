@@ -5,7 +5,7 @@ pubDate: 2025-08-12T12:00:00Z
 featured: false
 image: '/images/ewaste-pile.jpg'
 tags: ['recycling laws', 'state regulations', 'e-waste', 'compliance']
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 The numbers are staggering and the trend is deeply concerning. According to the UN's latest Global E-waste Monitor, electronic waste generation is rising five times faster than documented e-waste recycling worldwide. This alarming statistic reveals a critical gap in our global approach to managing the ever-growing mountain of discarded electronics.

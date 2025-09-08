@@ -4,7 +4,7 @@ pubDate: 2025-09-01T12:00:00Z
 description: 'The faster we innovate, the faster we create electronic waste - and our recycling infrastructure is struggling to keep pace'
 image: '/images/IFA-BERLIN.jpg'
 featured: true
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 As tech enthusiasts around the world marvel at the latest innovations unveiled at IFA 2025 in Berlin just hours ago, a sobering reality emerges from halfway around the globe. Despite recent efforts to modernize the industry, 95% of those employed in e-waste recycling are informal workers who unload trucks, sift through scraps, and dismantle TVs and computers in India's billion-dollar electronics recycling industry.

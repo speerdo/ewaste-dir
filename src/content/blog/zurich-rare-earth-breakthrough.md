@@ -2,7 +2,7 @@
 title: 'Zurich Researchers Pioneer Breakthrough in Rare-Earth Recycling from E-Waste'
 description: 'Swiss scientists develop innovative method to extract rare-earth elements from electronic waste with unprecedented precision, potentially revolutionizing recycling industry yields.'
 pubDate: 2025-07-16T12:00:00Z
-author: 'Adam Speer'
+author: 'Editorial Team'
 image: '/images/sci-lab.jpg'
 featured: false
 tags: ['rare-earth', 'recycling', 'innovation', 'research', 'technology']

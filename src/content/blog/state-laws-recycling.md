@@ -5,7 +5,7 @@ pubDate: 2025-01-15T12:00:00Z
 featured: false
 image: '/images/usa-guide.jpg'
 tags: ['recycling laws', 'state regulations', 'e-waste', 'compliance']
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 ## State Electronics Recycling Laws: A Complete 2025 Guide

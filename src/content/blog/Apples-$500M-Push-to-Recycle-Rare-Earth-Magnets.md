@@ -5,7 +5,7 @@ pubDate: 2025-07-15T12:00:00Z
 featured: false
 image: '/images/recycle-electronics.jpg'
 tags: ['business recycling', 'corporate', 'IT disposal', 'compliance']
-author: 'Adam Speer'
+author: 'Editorial Team'
 ---
 
 ## Apple’s $500M Push to Recycle Rare-Earth Magnets: Why It Matters for All of Us

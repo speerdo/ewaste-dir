@@ -3,7 +3,7 @@ title: 'Ultimate Electronics Recycling Guide'
 pubDate: 2025-05-04T12:00:00Z
 description: 'Complete guide to electronics recycling: device preparation, certified recycling centers, data security tips, and environmental benefits of proper e-waste disposal.'
 image: '/images/recycle-phone.jpeg'
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 ## The Ultimate Guide to Electronics Recycling

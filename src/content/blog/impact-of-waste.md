@@ -3,7 +3,7 @@ title: 'Electronic Waste Environmental Impact'
 pubDate: 2025-04-15T12:00:00Z
 description: 'Learn how electronic waste affects our environment: toxic materials, ecosystem damage, health risks, and sustainable recycling solutions for e-waste management.'
 image: '/images/broken-tv.jpeg'
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 ## The Environmental Impact of Electronic Waste

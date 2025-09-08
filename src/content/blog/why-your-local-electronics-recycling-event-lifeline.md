@@ -4,7 +4,7 @@ pubDate: 2025-08-26T12:00:00Z
 description: 'Community events are becoming critical lifelines in a struggling electronics recycling infrastructure that’s failing to keep up with our digital demands.'
 image: '/images/ewaste-dropoff.webp'
 featured: true
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 This past Saturday, August 24th, residents of Beaufort County, South Carolina, had the opportunity to drop off their old electronics for free recycling at River Ridge Academy in [Bluffton](/states/south-carolina/bluffton). It's one of dozens of similar events happening across the country this month, from [Madison](/states/wisconsin/madison) to [St. Louis](/states/missouri/st-louis). But what many attendees won't realize is that these community events aren't just convenient – they're becoming critical lifelines in a struggling electronics recycling infrastructure that's failing to keep up with our digital demands.

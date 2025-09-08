@@ -4,7 +4,7 @@ pubDate: 2025-09-02T12:00:00Z
 description: 'Understanding this seasonal pattern reveals much about our relationship with technology and offers insights into when and how to most effectively recycle our old devices.'
 image: '/images/autumn-laptop.jpg'
 featured: true
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 As government offices and recycling centers across the country reopened their doors today after the Labor Day holiday, a familiar pattern is already emerging. Douglas County, [Colorado](/states/colorado), which closed yesterday "in observation of the federal Labor Day holiday," reopened today with offices resuming "regular hours on Tuesday, Sept. 2," and they're bracing for what industry insiders know as the post-Labor Day e-waste surge.

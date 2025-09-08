@@ -4,7 +4,7 @@ pubDate: 2025-09-03T12:00:00Z
 description: 'Recent breakthroughs in water-soluble electronics technology are bringing this revolutionary approach to e-waste management closer to reality'
 image: '/images/water-phone.jpg'
 featured: true
-author: 'RecycleOldTech Team'
+author: 'Editorial Team'
 ---
 
 Imagine dropping your old smartphone into a bowl of water and watching it safely dissolve in just a few hours, leaving behind only recoverable metals and harmless byproducts. It sounds like science fiction, but recent breakthroughs in water-soluble electronics technology are bringing this revolutionary approach to e-waste management closer to reality than ever before.

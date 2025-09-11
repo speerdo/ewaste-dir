@@ -1,6 +1,6 @@
 ---
 title: 'DOE Awards $500K to Revolutionary E-Waste Recovery Technologies'
-pubDate: 2025-10-09T12:00:00Z
+pubDate: 2025-09-10T12:00:00Z
 description: 'With e-waste generation rising five times faster than documented recycling efforts, we’re facing an environmental crisis that demands innovative solutions.'
 image: '/images/mobile-ewaste.jpg'
 featured: true

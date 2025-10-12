@@ -69,8 +69,4 @@ export default defineConfig({
     },
   },
   compressHTML: true,
-  experimental: {
-    // Enable content layer for better caching
-    contentLayer: true,
-  },
 });

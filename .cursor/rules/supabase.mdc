@@ -1,0 +1,5 @@
+---
+description: 'when using Supabase as our database, account for the 1000 row limit in the database structure'
+globs:
+alwaysApply: true
+---

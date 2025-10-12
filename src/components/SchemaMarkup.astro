@@ -1,0 +1,141 @@
+---
+interface Props {
+  type: 'website' | 'recyclingCenter' | 'localBusiness' | 'article';
+  data?: Record<string, any>;
+}
+
+const { type, data = {} } = Astro.props;
+
+// Generate schema markup based on type
+const generateSchema = () => {
+  const baseUrl = 'https://www.recycleoldtech.com';
+  
+  switch (type) {
+    case 'website':
+      return {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'RecycleOldTech',
+        url: baseUrl,
+        description: 'Find electronics recycling centers near you. Comprehensive directory of certified e-waste recycling facilities across the United States.',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${baseUrl}/search?q={search_term_string}`,
+          },
+          'query-input': 'required name=search_term_string',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'RecycleOldTech',
+          url: baseUrl,
+          logo: {
+            '@type': 'ImageObject',
+            url: `${baseUrl}/images/default-recycling-logo.svg`,
+          },
+        },
+      };
+      
+    case 'recyclingCenter':
+      return {
+        '@context': 'https://schema.org',
+        '@type': 'RecyclingCenter',
+        name: data.name,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: data.address,
+          addressLocality: data.city,
+          addressRegion: data.state,
+          postalCode: data.postalCode,
+          addressCountry: 'US',
+        },
+        ...(data.phone && { telephone: data.phone }),
+        ...(data.website && { url: data.website }),
+        ...(data.description && { description: data.description }),
+        ...(data.latitude && data.longitude && {
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude: data.latitude,
+            longitude: data.longitude,
+          },
+        }),
+        ...(data.rating && {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: data.rating,
+            ...(data.reviewCount && { reviewCount: data.reviewCount }),
+          },
+        }),
+      };
+      
+    case 'localBusiness':
+      return {
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        '@id': data.url || baseUrl,
+        name: data.name || 'RecycleOldTech',
+        image: data.image || `${baseUrl}/images/default-og.png`,
+        url: data.url || baseUrl,
+        telephone: data.phone,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: data.streetAddress,
+          addressLocality: data.city,
+          addressRegion: data.state,
+          postalCode: data.postalCode,
+          addressCountry: 'US',
+        },
+        geo: data.latitude && data.longitude ? {
+          '@type': 'GeoCoordinates',
+          latitude: data.latitude,
+          longitude: data.longitude,
+        } : undefined,
+        openingHoursSpecification: data.hours ? {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+          opens: '09:00',
+          closes: '17:00',
+        } : undefined,
+      };
+      
+    case 'article':
+      return {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: data.title,
+        description: data.description,
+        image: data.image || `${baseUrl}/images/default-og.png`,
+        datePublished: data.publishDate,
+        dateModified: data.modifiedDate || data.publishDate,
+        author: {
+          '@type': 'Person',
+          name: data.author || 'Adam Speer',
+          url: 'https://adamspeerweb.dev',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'RecycleOldTech',
+          logo: {
+            '@type': 'ImageObject',
+            url: `${baseUrl}/images/default-recycling-logo.svg`,
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': data.url || baseUrl,
+        },
+      };
+      
+    default:
+      return {};
+  }
+};
+
+const schema = generateSchema();
+---
+
+{schema && Object.keys(schema).length > 0 && (
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+)}
+

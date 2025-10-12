@@ -7,6 +7,7 @@ import StateDirectory from '../components/StateDirectory.astro';
 import PopularCities from '../components/PopularCities.astro';
 import Testimonials from '../components/Testimonials.astro';
 import CTA from '../components/CTA.astro';
+import SchemaMarkup from '../components/SchemaMarkup.astro';
 import { getCollection } from 'astro:content';
 
 // Get featured blog posts
@@ -21,6 +22,9 @@ const featuredPosts = allBlogPosts
   title="Electronics Recycling Near Me - U.S. E-Waste Directory"
   description="Find electronics recycling centers near you. Safely dispose of computers, phones, TVs and e-waste at certified facilities nationwide."
 >
+  <!-- Schema Markup for SEO -->
+  <SchemaMarkup type="website" />
+  
   <Hero />
   
   <FeaturedStates />

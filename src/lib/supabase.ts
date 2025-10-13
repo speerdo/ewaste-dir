@@ -17,13 +17,20 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Initialize Supabase client with retries
+// Initialize Supabase client with extended timeout
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: false, // Don't persist auth state during builds
   },
   global: {
     headers: { 'x-client-info': 'astro-build' },
+  },
+  db: {
+    schema: 'public',
+  },
+  // Increase timeout for build queries
+  realtime: {
+    timeout: 120000, // 2 minutes
   },
 });
 
@@ -791,85 +798,68 @@ export async function getCitiesByState(stateId: string): Promise<City[]> {
   const state = await getState(stateId);
   if (!state) throw new Error('State not found');
 
-  // Use pagination to get ALL cities, not just first 1000 rows
-  // This fixes the issue where states with >1000 centers were missing cities
-  const allCities = new Set<string>();
-  let page = 0;
-  const pageSize = 1000;
-  let hasMore = true;
-
   console.log(`Fetching all cities for ${state.name}...`);
 
-  while (hasMore) {
-    const { data, error } = await supabase
-      .from('recycling_centers')
-      .select('city')
-      .ilike('state', state.name)
-      .not('city', 'is', null)
-      .order('city')
-      .range(page * pageSize, (page + 1) * pageSize - 1);
+  // Optimize: Fetch distinct cities directly instead of all rows
+  // This is much faster as we only get unique cities, not all recycling center rows
+  const { data, error } = await supabase
+    .rpc('get_distinct_cities_by_state', { state_name: state.name });
 
-    if (error) throw error;
+  // Fallback if RPC doesn't exist: use regular query with pagination
+  if (error || !data) {
+    console.log('RPC not available, using fallback query...');
+    
+    const allCities = new Set<string>();
+    let page = 0;
+    const pageSize = 1000;
+    let hasMore = true;
 
-    if (data && data.length > 0) {
-      data.forEach((row) => {
-        if (row.city) {
-          allCities.add(row.city);
-        }
-      });
-      hasMore = data.length === pageSize;
-      page++;
-      console.log(
-        `  Page ${page}: ${data.length} rows, ${allCities.size} unique cities so far`
-      );
-    } else {
-      hasMore = false;
-    }
-  }
+    while (hasMore) {
+      const { data: pageData, error: pageError } = await supabase
+        .from('recycling_centers')
+        .select('city')
+        .ilike('state', state.name)
+        .not('city', 'is', null)
+        .order('city')
+        .range(page * pageSize, (page + 1) * pageSize - 1);
 
-  // Convert Set to Array and sort
-  const uniqueCities = Array.from(allCities).sort();
-  console.log(`✅ Found ${uniqueCities.length} unique cities in ${state.name}`);
+      if (pageError) throw pageError;
 
-  // Add special virtual cities for certain states that should have static paths
-  // These are cities that the getRecyclingCentersByCity function can handle through
-  // its normalization logic, even if they don't exist directly in the database
-  const virtualCities: Record<string, string[]> = {
-    'new-york': ['New York'], // For NYC/Manhattan centers
-    california: ['Los Angeles'], // In case LA centers are stored differently
-    florida: ['Miami'], // In case Miami centers are stored differently
-    // Add more as needed for other important cities
-  };
-
-  if (virtualCities[stateId]) {
-    // Add virtual cities, but only if they're not already in the list
-    const existingCityNames = new Set(
-      uniqueCities.map((city: string) => city.toLowerCase())
-    );
-    for (const virtualCity of virtualCities[stateId]) {
-      if (!existingCityNames.has(virtualCity.toLowerCase())) {
-        // Check if there are actually centers that would match this virtual city
-        // by testing the getRecyclingCentersByCity function
-        try {
-          const testCenters = await getRecyclingCentersByCity(
-            stateId,
-            virtualCity
-          );
-          if (testCenters && testCenters.length > 0) {
-            uniqueCities.push(virtualCity);
-            console.log(
-              `Added virtual city "${virtualCity}" for ${state.name} (${testCenters.length} centers found)`
-            );
+      if (pageData && pageData.length > 0) {
+        pageData.forEach((row) => {
+          if (row.city) {
+            allCities.add(row.city);
           }
-        } catch (error) {
-          console.log(
-            `Virtual city "${virtualCity}" test failed for ${state.name}:`,
-            error
-          );
-        }
+        });
+        hasMore = pageData.length === pageSize;
+        page++;
+        console.log(
+          `  Page ${page}: ${pageData.length} rows, ${allCities.size} unique cities so far`
+        );
+      } else {
+        hasMore = false;
       }
     }
+
+    const uniqueCities = Array.from(allCities).sort();
+    console.log(`✅ Found ${uniqueCities.length} unique cities in ${state.name}`);
+
+    // Convert to City type and cache
+    const cities = uniqueCities.map((cityName: string) => ({
+      id: normalizeForUrl(cityName),
+      state_id: stateId,
+      name: cityName,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }));
+
+    cityCache.set(stateId, cities);
+    return cities;
   }
+
+  // If RPC worked, use its results
+  const uniqueCities = data.map((row: any) => row.city).sort();
+  console.log(`✅ Found ${uniqueCities.length} unique cities in ${state.name}`);
 
   // Convert to City type and cache
   const cities = uniqueCities.map((cityName: string) => ({

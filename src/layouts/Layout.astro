@@ -54,9 +54,9 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
     <!-- Ahrefs -->
     <script src="https://analytics.ahrefs.com/analytics.js" data-key="ymoBQ1YLGGwfqJ2qikw7fg" async></script>
 
-    <!-- ezoic ads -->
-    <script src="https://cmp.gatekeeperconsent.com/min.js" data-cfasync="false"></script>
-    <script src="https://the.gatekeeperconsent.com/cmp.min.js" data-cfasync="false"></script>
+    <!-- ezoic ads - deferred for performance -->
+    <script defer src="https://cmp.gatekeeperconsent.com/min.js" data-cfasync="false"></script>
+    <script defer src="https://the.gatekeeperconsent.com/cmp.min.js" data-cfasync="false"></script>
     <script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
     <script>
         const ezstandalone = (window as any).ezstandalone || {};
@@ -79,9 +79,14 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
     <meta property="twitter:description" content={metaDescription} />
     <meta property="twitter:image" content={ogImageUrl} />
     
-    <!-- Google Fonts -->
+    <!-- Preconnect to important third-parties for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://analytics.ahrefs.com">
+    <link rel="dns-prefetch" href="https://www.ezojs.com">
+    
+    <!-- Google Fonts with display=swap for better performance -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
     
     <title>{title}</title>

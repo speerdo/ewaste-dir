@@ -17,6 +17,9 @@ dist/
 # Data
 data/
 
+# Scripts
+scripts/
+
 # Environment Variables
 .env
 .env.local

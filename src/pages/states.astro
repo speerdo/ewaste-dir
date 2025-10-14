@@ -24,27 +24,33 @@ const sortedLetters = Object.keys(statesByLetter).sort();
 >
   <SchemaMarkup type="website" />
   
-  <!-- Hero Section -->
-  <div class="bg-gradient-to-b from-green-50 to-white py-12 px-4">
-    <div class="max-w-7xl mx-auto text-center">
-      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-        Electronics Recycling Centers by State
-      </h1>
-      <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-        Discover certified e-waste recycling facilities across all 50 states. Each state has unique regulations and local programs for responsible electronics disposal.
-      </p>
-      <div class="flex flex-wrap justify-center gap-4">
-        <div class="bg-white px-6 py-3 rounded-lg shadow-sm border border-gray-200">
-          <div class="text-3xl font-bold text-green-600">50</div>
-          <div class="text-sm text-gray-600">States Covered</div>
-        </div>
-        <div class="bg-white px-6 py-3 rounded-lg shadow-sm border border-gray-200">
-          <div class="text-3xl font-bold text-green-600">3,970+</div>
-          <div class="text-sm text-gray-600">Cities</div>
-        </div>
-        <div class="bg-white px-6 py-3 rounded-lg shadow-sm border border-gray-200">
-          <div class="text-3xl font-bold text-green-600">28,000+</div>
-          <div class="text-sm text-gray-600">Recycling Centers</div>
+  <!-- Hero Section with Background Image -->
+  <div class="relative pt-32 pb-16 overflow-hidden">
+    <div class="absolute inset-0">
+      <img src="/images/usa-guide.jpg" alt="United States electronics recycling guide" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-b from-blue-900/90 via-blue-800/85 to-blue-700/90"></div>
+    </div>
+    <div class="container mx-auto px-4 relative z-10">
+      <div class="max-w-5xl mx-auto text-center">
+        <h1 class="text-4xl md:text-6xl font-display font-bold text-white mb-6">
+          Electronics Recycling Centers by State
+        </h1>
+        <p class="text-xl md:text-2xl text-blue-50 max-w-3xl mx-auto mb-10">
+          Discover certified e-waste recycling facilities across all 50 states. Each state has unique regulations and local programs for responsible electronics disposal.
+        </p>
+        <div class="flex flex-wrap justify-center gap-6">
+          <div class="bg-white/10 backdrop-blur-sm px-8 py-4 rounded-lg border border-white/20">
+            <div class="text-4xl font-bold text-white">50</div>
+            <div class="text-sm text-blue-100">States Covered</div>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm px-8 py-4 rounded-lg border border-white/20">
+            <div class="text-4xl font-bold text-white">3,970+</div>
+            <div class="text-sm text-blue-100">Cities</div>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm px-8 py-4 rounded-lg border border-white/20">
+            <div class="text-4xl font-bold text-white">28,000+</div>
+            <div class="text-sm text-blue-100">Recycling Centers</div>
+          </div>
         </div>
       </div>
     </div>
@@ -55,28 +61,28 @@ const sortedLetters = Object.keys(statesByLetter).sort();
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-8 mb-12">
       <h2 class="text-2xl font-bold text-gray-900 mb-4">Why State-Specific E-Waste Information Matters</h2>
       <div class="grid md:grid-cols-2 gap-6">
-        <div>
+        <div class="flex flex-col h-full">
           <h3 class="text-lg font-semibold text-gray-900 mb-2">📋 Different Regulations</h3>
           <p class="text-gray-700">
-            Over 25 states have enacted specific e-waste recycling laws. Some ban electronics from landfills entirely, while others require manufacturer take-back programs. Understanding your state's rules ensures compliance.
+            Over 25 states have e-waste laws. Some ban electronics from landfills, while others require manufacturer take-back programs.
           </p>
         </div>
-        <div>
+        <div class="flex flex-col h-full">
           <h3 class="text-lg font-semibold text-gray-900 mb-2">🏛️ State Programs</h3>
           <p class="text-gray-700">
-            Many states offer free collection events, drop-off locations, and mail-in programs funded by extended producer responsibility (EPR) laws. These programs vary significantly by state.
+            Many states offer free collection events and drop-off locations funded by EPR laws. Programs vary by state.
           </p>
         </div>
-        <div>
+        <div class="flex flex-col h-full">
           <h3 class="text-lg font-semibold text-gray-900 mb-2">🌍 Local Solutions</h3>
           <p class="text-gray-700">
-            Each state has different recycling infrastructure, population density, and environmental priorities. Finding local solutions ensures convenient and responsible disposal.
+            Each state has different recycling infrastructure and priorities. Find local solutions for convenient disposal.
           </p>
         </div>
-        <div>
+        <div class="flex flex-col h-full">
           <h3 class="text-lg font-semibold text-gray-900 mb-2">💰 Fees & Incentives</h3>
           <p class="text-gray-700">
-            Some states charge recycling fees at purchase (California's Electronic Waste Recycling Fee), while others offer incentives for recycling. State pages detail these financial considerations.
+            Some states charge recycling fees at purchase, while others offer incentives. Check your state for details.
           </p>
         </div>
       </div>
@@ -113,7 +119,7 @@ const sortedLetters = Object.keys(statesByLetter).sort();
     </div>
 
     <!-- Find E-Waste Recycling Centers by State -->
-    <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+    <h2 id="states-directory" class="text-3xl font-bold text-gray-900 mb-8 text-center">
       Find E-Waste Recycling Centers by State
     </h2>
     <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">
@@ -147,14 +153,14 @@ const sortedLetters = Object.keys(statesByLetter).sort();
   </div>
 
   <!-- Featured States -->
-  <div class="bg-gray-50 py-12 px-4">
+  <div id="featured-states" class="bg-gray-50 py-12 px-4">
     <div class="max-w-7xl mx-auto">
       <h2 class="text-2xl font-bold text-gray-900 mb-6">Popular States for E-Waste Recycling</h2>
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {states.filter(s => ['California', 'Texas', 'New York', 'Florida'].includes(s.name)).map(state => (
           <a 
             href={`/states/${state.id}`}
-            class="block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+            class="flex flex-col bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow h-full"
           >
             <img 
               src={state.image_url} 
@@ -162,9 +168,9 @@ const sortedLetters = Object.keys(statesByLetter).sort();
               class="w-full h-48 object-cover"
               loading="lazy"
             />
-            <div class="p-4">
+            <div class="p-4 flex flex-col flex-grow">
               <h3 class="text-lg font-semibold text-gray-900 mb-2">{state.name}</h3>
-              <p class="text-sm text-gray-600 mb-3">{state.description}</p>
+              <p class="text-sm text-gray-600 mb-3 line-clamp-3 flex-grow">{state.description?.split('.').slice(0, 2).join('.') + '.'}</p>
               <span class="text-green-600 text-sm font-medium hover:underline">
                 View recycling centers →
               </span>
@@ -179,31 +185,31 @@ const sortedLetters = Object.keys(statesByLetter).sort();
   <div class="max-w-7xl mx-auto px-4 py-12">
     <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">How to Use This State Directory</h2>
     <div class="grid md:grid-cols-3 gap-6">
-      <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="bg-white border border-gray-200 rounded-lg p-6 flex flex-col h-full">
         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
           <span class="text-2xl font-bold text-green-600">1</span>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Select Your State</h3>
         <p class="text-gray-600">
-          Click on your state from the alphabetical list above to view state-specific recycling information, regulations, and facilities.
+          Click your state to view recycling information and facilities.
         </p>
       </div>
-      <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="bg-white border border-gray-200 rounded-lg p-6 flex flex-col h-full">
         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
           <span class="text-2xl font-bold text-green-600">2</span>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Browse Cities</h3>
         <p class="text-gray-600">
-          On the state page, browse cities to find recycling centers near you. Each city page lists local facilities and regulations.
+          Browse cities to find recycling centers near you.
         </p>
       </div>
-      <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="bg-white border border-gray-200 rounded-lg p-6 flex flex-col h-full">
         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
           <span class="text-2xl font-bold text-green-600">3</span>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Find Facilities</h3>
         <p class="text-gray-600">
-          View certified recycling centers with addresses, hours, contact information, and services offered for proper e-waste disposal.
+          View certified centers with addresses, hours, and services.
         </p>
       </div>
     </div>

@@ -1,0 +1,790 @@
+🚀 Starting city description generation...
+
+📊 Configuration:
+   API Provider: OPENAI
+   Rate Limit: 60 requests/minute
+   Daily Limit: 10000 requests/day
+
+📂 Checkpoint loaded: 330 cities already processed
+
+📍 Found 3120 cities needing descriptions
+
+💾 Found 350 already saved descriptions
+
+[331/3120] Processing: Kenosha, Wisconsin
+   ✅ Generated (219 words, 3 paragraphs)
+[332/3120] Processing: Gadsden, Alabama
+   ✅ Generated (180 words, 3 paragraphs)
+[333/3120] Processing: Stockbridge, Georgia
+   ✅ Generated (199 words, 3 paragraphs)
+[334/3120] Processing: Corpus Christi, Texas
+   ✅ Generated (196 words, 3 paragraphs)
+[335/3120] Processing: Hialeah, Florida
+   ✅ Generated (221 words, 3 paragraphs)
+[336/3120] Processing: Santa Ana, California
+   ✅ Generated (191 words, 3 paragraphs)
+[337/3120] Processing: McDonough, Georgia
+   ✅ Generated (220 words, 3 paragraphs)
+[338/3120] Processing: Hollywood, Florida
+   ✅ Generated (196 words, 3 paragraphs)
+[339/3120] Processing: Newark, Delaware
+   ✅ Generated (185 words, 3 paragraphs)
+[340/3120] Processing: Nacogdoches, Texas
+   ✅ Generated (188 words, 3 paragraphs)
+[341/3120] Processing: Doral, Florida
+   ✅ Generated (203 words, 3 paragraphs)
+[342/3120] Processing: Anchorage, Alaska
+   ✅ Generated (190 words, 3 paragraphs)
+[343/3120] Processing: Old Saybrook, Connecticut
+   ✅ Generated (204 words, 3 paragraphs)
+[344/3120] Processing: Cumming, Georgia
+   ✅ Generated (178 words, 3 paragraphs)
+[345/3120] Processing: Goshen, Indiana
+   ✅ Generated (201 words, 3 paragraphs)
+[346/3120] Processing: Medford, Oregon
+   ✅ Generated (209 words, 3 paragraphs)
+[347/3120] Processing: Bad Axe, Michigan
+   ✅ Generated (203 words, 3 paragraphs)
+[348/3120] Processing: Parker, Colorado
+   ✅ Generated (191 words, 3 paragraphs)
+[349/3120] Processing: Elizabeth City, North Carolina
+   ✅ Generated (213 words, 3 paragraphs)
+[350/3120] Processing: Staunton, Virginia
+   ✅ Generated (207 words, 3 paragraphs)
+[351/3120] Processing: Orangeburg, South Carolina
+   ✅ Generated (182 words, 3 paragraphs)
+[352/3120] Processing: Sierra Vista, Arizona
+   ✅ Generated (204 words, 3 paragraphs)
+[353/3120] Processing: Ashtabula, Ohio
+   ✅ Generated (195 words, 3 paragraphs)
+[354/3120] Processing: Passaic, New Jersey
+   ✅ Generated (204 words, 3 paragraphs)
+[355/3120] Processing: Tullahoma, Tennessee
+   ✅ Generated (183 words, 3 paragraphs)
+[356/3120] Processing: Hampton, Virginia
+   ✅ Generated (205 words, 3 paragraphs)
+[357/3120] Processing: Wyoming, Michigan
+   ✅ Generated (193 words, 3 paragraphs)
+[358/3120] Processing: Fort Mill, South Carolina
+   ✅ Generated (211 words, 3 paragraphs)
+[359/3120] Processing: Beaufort, South Carolina
+   ✅ Generated (214 words, 3 paragraphs)
+[360/3120] Processing: Rockaway, New Jersey
+   ✅ Generated (229 words, 3 paragraphs)
+[361/3120] Processing: Bullhead City, Arizona
+   ✅ Generated (174 words, 3 paragraphs)
+[362/3120] Processing: Paramus, New Jersey
+   ✅ Generated (175 words, 3 paragraphs)
+[363/3120] Processing: Avondale, Arizona
+   ✅ Generated (207 words, 3 paragraphs)
+[364/3120] Processing: Kearny, New Jersey
+   ✅ Generated (191 words, 3 paragraphs)
+[365/3120] Processing: Colonial Heights, Virginia
+   ✅ Generated (196 words, 3 paragraphs)
+[366/3120] Processing: Alexander City, Alabama
+   ✅ Generated (212 words, 3 paragraphs)
+[367/3120] Processing: Braintree, Massachusetts
+   ✅ Generated (212 words, 3 paragraphs)
+[368/3120] Processing: Irvine, California
+   ✅ Generated (196 words, 3 paragraphs)
+[369/3120] Processing: Dearborn, Michigan
+   ✅ Generated (186 words, 3 paragraphs)
+[370/3120] Processing: Beckley, West Virginia
+   ✅ Generated (212 words, 3 paragraphs)
+[371/3120] Processing: Klamath Falls, Oregon
+   ✅ Generated (186 words, 3 paragraphs)
+[372/3120] Processing: Enid, Oklahoma
+   ✅ Generated (199 words, 3 paragraphs)
+[373/3120] Processing: Ephrata, Pennsylvania
+   ✅ Generated (232 words, 3 paragraphs)
+[374/3120] Processing: Douglasville, Georgia
+   ✅ Generated (181 words, 3 paragraphs)
+[375/3120] Processing: Camp Hill, Pennsylvania
+   ✅ Generated (195 words, 3 paragraphs)
+[376/3120] Processing: Idaho Falls, Idaho
+   ✅ Generated (195 words, 3 paragraphs)
+[377/3120] Processing: Kalispell, Montana
+   ✅ Generated (196 words, 3 paragraphs)
+[378/3120] Processing: Grand Rapids, Minnesota
+   ✅ Generated (194 words, 3 paragraphs)
+[379/3120] Processing: Morgantown, West Virginia
+   ✅ Generated (221 words, 3 paragraphs)
+[380/3120] Processing: Woburn, Massachusetts
+   ✅ Generated (211 words, 3 paragraphs)
+[381/3120] Processing: Davison, Michigan
+   ✅ Generated (217 words, 3 paragraphs)
+[382/3120] Processing: Stafford, Virginia
+   ✅ Generated (192 words, 3 paragraphs)
+[383/3120] Processing: Richland, Washington
+   ✅ Generated (174 words, 3 paragraphs)
+[384/3120] Processing: Blairsville, Georgia
+   ✅ Generated (196 words, 3 paragraphs)
+[385/3120] Processing: Kokomo, Indiana
+   ✅ Generated (196 words, 3 paragraphs)
+[386/3120] Processing: Longview, Texas
+   ✅ Generated (210 words, 3 paragraphs)
+[387/3120] Processing: Joplin, Missouri
+   ✅ Generated (208 words, 3 paragraphs)
+[388/3120] Processing: Murphy, North Carolina
+   ✅ Generated (185 words, 3 paragraphs)
+[389/3120] Processing: Morganton, North Carolina
+   ✅ Generated (183 words, 3 paragraphs)
+[390/3120] Processing: Crystal Lake, Illinois
+   ✅ Generated (232 words, 3 paragraphs)
+[391/3120] Processing: Biloxi, Mississippi
+   ✅ Generated (187 words, 3 paragraphs)
+[392/3120] Processing: Sun Valley, California
+   ✅ Generated (199 words, 3 paragraphs)
+[393/3120] Processing: Hickory, North Carolina
+   ✅ Generated (196 words, 3 paragraphs)
+[394/3120] Processing: Seabrook, New Hampshire
+   ✅ Generated (180 words, 3 paragraphs)
+[395/3120] Processing: Bismarck, North Dakota
+   ✅ Generated (196 words, 3 paragraphs)
+[396/3120] Processing: Biddeford, Maine
+   ✅ Generated (228 words, 3 paragraphs)
+[397/3120] Processing: St Johnsbury, Vermont
+   ✅ Generated (205 words, 3 paragraphs)
+[398/3120] Processing: Toms River, New Jersey
+   ✅ Generated (189 words, 3 paragraphs)
+[399/3120] Processing: Lapeer, Michigan
+   ✅ Generated (207 words, 3 paragraphs)
+[400/3120] Processing: Conshohocken, Pennsylvania
+   ✅ Generated (189 words, 3 paragraphs)
+[401/3120] Processing: Brevard, North Carolina
+   ✅ Generated (205 words, 3 paragraphs)
+[402/3120] Processing: Waterville, Maine
+   ✅ Generated (186 words, 3 paragraphs)
+[403/3120] Processing: Flushing, New York
+   ✅ Generated (190 words, 3 paragraphs)
+[404/3120] Processing: Sarasota, Florida
+   ✅ Generated (197 words, 3 paragraphs)
+[405/3120] Processing: Layton, Utah
+   ✅ Generated (196 words, 3 paragraphs)
+[406/3120] Processing: Clinton Twp, Michigan
+   ✅ Generated (207 words, 3 paragraphs)
+[407/3120] Processing: West Palm Beach, Florida
+   ✅ Generated (202 words, 3 paragraphs)
+[408/3120] Processing: Seneca, South Carolina
+   ✅ Generated (216 words, 3 paragraphs)
+[409/3120] Processing: Falls Church, Virginia
+   ✅ Generated (197 words, 3 paragraphs)
+[410/3120] Processing: Crossville, Tennessee
+   ✅ Generated (193 words, 3 paragraphs)
+[411/3120] Processing: Vero Beach, Florida
+   ✅ Generated (210 words, 3 paragraphs)
+[412/3120] Processing: Gallatin, Tennessee
+   ✅ Generated (195 words, 3 paragraphs)
+[413/3120] Processing: Stamford, Connecticut
+   ✅ Generated (211 words, 3 paragraphs)
+[414/3120] Processing: Wheeling, West Virginia
+   ✅ Generated (201 words, 3 paragraphs)
+[415/3120] Processing: Morristown, Tennessee
+   ✅ Generated (199 words, 3 paragraphs)
+[416/3120] Processing: West Allis, Wisconsin
+   ✅ Generated (200 words, 3 paragraphs)
+[417/3120] Processing: North Bergen, New Jersey
+   ✅ Generated (202 words, 3 paragraphs)
+[418/3120] Processing: Sioux Falls, South Dakota
+   ✅ Generated (191 words, 3 paragraphs)
+[419/3120] Processing: Stockton, California
+   ✅ Generated (202 words, 3 paragraphs)
+[420/3120] Processing: Torrance, California
+   ✅ Generated (208 words, 3 paragraphs)
+[421/3120] Processing: Cheboygan, Michigan
+   ✅ Generated (174 words, 3 paragraphs)
+[422/3120] Processing: Anaheim, California
+   ✅ Generated (208 words, 3 paragraphs)
+[423/3120] Processing: Ontario, California
+   ✅ Generated (201 words, 3 paragraphs)
+[424/3120] Processing: Bellefontaine, Ohio
+   ✅ Generated (193 words, 3 paragraphs)
+[425/3120] Processing: Gurnee, Illinois
+   ✅ Generated (205 words, 3 paragraphs)
+[426/3120] Processing: Quincy, Massachusetts
+   ✅ Generated (202 words, 3 paragraphs)
+[427/3120] Processing: Flemington, New Jersey
+   ✅ Generated (208 words, 3 paragraphs)
+[428/3120] Processing: Columbia, Tennessee
+   ✅ Generated (199 words, 3 paragraphs)
+[429/3120] Processing: Sterling, Virginia
+   ✅ Generated (197 words, 3 paragraphs)
+[430/3120] Processing: Chicopee, Massachusetts
+   ✅ Generated (202 words, 3 paragraphs)
+[431/3120] Processing: Danville, Virginia
+   ✅ Generated (179 words, 3 paragraphs)
+[432/3120] Processing: Mt Airy, Maryland
+   ✅ Generated (192 words, 3 paragraphs)
+[433/3120] Processing: Bend, Oregon
+   ✅ Generated (222 words, 3 paragraphs)
+[434/3120] Processing: Yakima, Washington
+   ✅ Generated (191 words, 3 paragraphs)
+[435/3120] Processing: Arvada, Colorado
+   ✅ Generated (177 words, 3 paragraphs)
+[436/3120] Processing: Oakland, California
+   ✅ Generated (215 words, 3 paragraphs)
+[437/3120] Processing: Rexburg, Idaho
+   ✅ Generated (193 words, 3 paragraphs)
+[438/3120] Processing: Pasadena, Texas
+   ✅ Generated (191 words, 3 paragraphs)
+[439/3120] Processing: Fairmont, West Virginia
+   ✅ Generated (196 words, 3 paragraphs)
+[440/3120] Processing: Great Falls, Montana
+   ✅ Generated (205 words, 3 paragraphs)
+[441/3120] Processing: Upper Marlboro, Maryland
+   ✅ Generated (207 words, 3 paragraphs)
+[442/3120] Processing: Pasco, Washington
+   ✅ Generated (173 words, 3 paragraphs)
+[443/3120] Processing: Bellevue, Washington
+   ✅ Generated (215 words, 3 paragraphs)
+[444/3120] Processing: Peachtree City, Georgia
+   ✅ Generated (196 words, 3 paragraphs)
+[445/3120] Processing: Eugene, Oregon
+   ✅ Generated (175 words, 3 paragraphs)
+[446/3120] Processing: Tucker, Georgia
+   ✅ Generated (208 words, 3 paragraphs)
+[447/3120] Processing: Blacksburg, Virginia
+   ✅ Generated (188 words, 3 paragraphs)
+[448/3120] Processing: Perris, California
+   ✅ Generated (213 words, 3 paragraphs)
+[449/3120] Processing: Griffin, Georgia
+   ✅ Generated (213 words, 3 paragraphs)
+[450/3120] Processing: Elyria, Ohio
+   ✅ Generated (226 words, 3 paragraphs)
+[451/3120] Processing: Noblesville, Indiana
+   ✅ Generated (197 words, 3 paragraphs)
+[452/3120] Processing: South Windsor, Connecticut
+   ✅ Generated (202 words, 3 paragraphs)
+[453/3120] Processing: Gresham, Oregon
+   ✅ Generated (205 words, 3 paragraphs)
+[454/3120] Processing: West Jordan, Utah
+   ✅ Generated (185 words, 3 paragraphs)
+[455/3120] Processing: Paducah, Kentucky
+   ✅ Generated (215 words, 3 paragraphs)
+[456/3120] Processing: Fort Walton Beach, Florida
+   ✅ Generated (209 words, 3 paragraphs)
+[457/3120] Processing: Bear, Delaware
+   ✅ Generated (197 words, 3 paragraphs)
+[458/3120] Processing: Manhattan, Kansas
+   ✅ Generated (195 words, 3 paragraphs)
+[459/3120] Processing: Hillsboro, Oregon
+   ✅ Generated (211 words, 3 paragraphs)
+[460/3120] Processing: White Lake, Michigan
+   ✅ Generated (204 words, 3 paragraphs)
+[461/3120] Processing: Southaven, Mississippi
+   ✅ Generated (199 words, 3 paragraphs)
+[462/3120] Processing: Martinsville, Virginia
+   ✅ Generated (181 words, 3 paragraphs)
+[463/3120] Processing: Garden City, Kansas
+   ✅ Generated (191 words, 3 paragraphs)
+[464/3120] Processing: Mayfield, Kentucky
+   ✅ Generated (188 words, 3 paragraphs)
+[465/3120] Processing: South Burlington, Vermont
+   ✅ Generated (194 words, 3 paragraphs)
+[466/3120] Processing: Detroit Lakes, Minnesota
+   ✅ Generated (197 words, 3 paragraphs)
+[467/3120] Processing: Lenoir, North Carolina
+   ✅ Generated (217 words, 3 paragraphs)
+[468/3120] Processing: Iowa City, Iowa
+   ✅ Generated (216 words, 3 paragraphs)
+[469/3120] Processing: Buckeye, Arizona
+   ✅ Generated (168 words, 3 paragraphs)
+[470/3120] Processing: Levittown, Pennsylvania
+   ✅ Generated (199 words, 3 paragraphs)
+[471/3120] Processing: Rock Island, Illinois
+   ✅ Generated (177 words, 3 paragraphs)
+[472/3120] Processing: Prescott, Arizona
+   ✅ Generated (199 words, 3 paragraphs)
+[473/3120] Processing: Waterbury, Connecticut
+   ✅ Generated (210 words, 3 paragraphs)
+[474/3120] Processing: Brainerd, Minnesota
+   ✅ Generated (206 words, 3 paragraphs)
+[475/3120] Processing: Garland, Texas
+   ✅ Generated (207 words, 3 paragraphs)
+[476/3120] Processing: Humble, Texas
+   ✅ Generated (198 words, 3 paragraphs)
+[477/3120] Processing: Yonkers, New York
+   ✅ Generated (208 words, 3 paragraphs)
+[478/3120] Processing: Bentonville, Arkansas
+   ✅ Generated (200 words, 3 paragraphs)
+[479/3120] Processing: Hibbing, Minnesota
+   ✅ Generated (202 words, 3 paragraphs)
+[480/3120] Processing: Elmira, New York
+   ✅ Generated (198 words, 3 paragraphs)
+[481/3120] Processing: Bossier City, Louisiana
+   ✅ Generated (210 words, 3 paragraphs)
+[482/3120] Processing: Elk Grove Village, Illinois
+   ✅ Generated (195 words, 3 paragraphs)
+[483/3120] Processing: Houma, Louisiana
+   ✅ Generated (188 words, 3 paragraphs)
+[484/3120] Processing: Wilkes-Barre, Pennsylvania
+   ✅ Generated (201 words, 3 paragraphs)
+[485/3120] Processing: Lawrence, Massachusetts
+   ✅ Generated (228 words, 3 paragraphs)
+[486/3120] Processing: Alcoa, Tennessee
+   ✅ Generated (175 words, 3 paragraphs)
+[487/3120] Processing: Show Low, Arizona
+   ✅ Generated (177 words, 3 paragraphs)
+[488/3120] Processing: Scranton, Pennsylvania
+   ✅ Generated (228 words, 3 paragraphs)
+[489/3120] Processing: Holland, Michigan
+   ✅ Generated (182 words, 3 paragraphs)
+[490/3120] Processing: York, South Carolina
+   ✅ Generated (186 words, 3 paragraphs)
+[491/3120] Processing: East Hanover, New Jersey
+   ✅ Generated (200 words, 3 paragraphs)
+[492/3120] Processing: Skokie, Illinois
+   ✅ Generated (214 words, 3 paragraphs)
+[493/3120] Processing: Perth Amboy, New Jersey
+   ✅ Generated (208 words, 3 paragraphs)
+[494/3120] Processing: Owasso, Oklahoma
+   ✅ Generated (186 words, 3 paragraphs)
+[495/3120] Processing: Glen Ellyn, Illinois
+   ✅ Generated (201 words, 3 paragraphs)
+[496/3120] Processing: Canton, Connecticut
+   ✅ Generated (195 words, 3 paragraphs)
+[497/3120] Processing: Phenix City, Alabama
+   ✅ Generated (214 words, 3 paragraphs)
+[498/3120] Processing: Carrollton, Texas
+   ✅ Generated (217 words, 3 paragraphs)
+[499/3120] Processing: Bourbonnais, Illinois
+   ✅ Generated (190 words, 3 paragraphs)
+[500/3120] Processing: Wooster, Ohio
+   ✅ Generated (194 words, 3 paragraphs)
+[501/3120] Processing: Middletown, Delaware
+   ✅ Generated (202 words, 3 paragraphs)
+[502/3120] Processing: Cary, North Carolina
+   ✅ Generated (191 words, 3 paragraphs)
+[503/3120] Processing: West Columbia, South Carolina
+   ✅ Generated (200 words, 3 paragraphs)
+[504/3120] Processing: East Providence, Rhode Island
+   ✅ Generated (217 words, 3 paragraphs)
+[505/3120] Processing: Meriden, Connecticut
+   ✅ Generated (198 words, 3 paragraphs)
+[506/3120] Processing: Normal, Illinois
+   ✅ Generated (226 words, 3 paragraphs)
+[507/3120] Processing: Wilkes-Barre Township, Pennsylvania
+   ✅ Generated (206 words, 3 paragraphs)
+[508/3120] Processing: Oxnard, California
+   ✅ Generated (212 words, 3 paragraphs)
+[509/3120] Processing: East Stroudsburg, Pennsylvania
+   ✅ Generated (202 words, 3 paragraphs)
+[510/3120] Processing: West Bend, Wisconsin
+   ✅ Generated (186 words, 3 paragraphs)
+[511/3120] Processing: Coralville, Iowa
+   ✅ Generated (192 words, 3 paragraphs)
+[512/3120] Processing: Roswell, New Mexico
+   ✅ Generated (203 words, 3 paragraphs)
+[513/3120] Processing: Billings, Montana
+   ✅ Generated (198 words, 3 paragraphs)
+[514/3120] Processing: Beatrice, Nebraska
+   ✅ Generated (178 words, 3 paragraphs)
+[515/3120] Processing: Post Falls, Idaho
+   ✅ Generated (199 words, 3 paragraphs)
+[516/3120] Processing: Wenatchee, Washington
+   ✅ Generated (203 words, 3 paragraphs)
+[517/3120] Processing: Shelby Charter Township, Michigan
+   ✅ Generated (183 words, 3 paragraphs)
+[518/3120] Processing: Grand Island, Nebraska
+   ✅ Generated (190 words, 3 paragraphs)
+[519/3120] Processing: Moses Lake, Washington
+   ✅ Generated (203 words, 3 paragraphs)
+[520/3120] Processing: Grants Pass, Oregon
+   ✅ Generated (201 words, 3 paragraphs)
+[521/3120] Processing: Suwanee, Georgia
+   ✅ Generated (199 words, 3 paragraphs)
+[522/3120] Processing: Bloomsburg, Pennsylvania
+   ✅ Generated (194 words, 3 paragraphs)
+[523/3120] Processing: Cape Girardeau, Missouri
+   ✅ Generated (199 words, 3 paragraphs)
+[524/3120] Processing: East Lansing, Michigan
+   ✅ Generated (201 words, 3 paragraphs)
+[525/3120] Processing: Novi, Michigan
+   ✅ Generated (210 words, 3 paragraphs)
+[526/3120] Processing: Brookings, South Dakota
+   ✅ Generated (187 words, 3 paragraphs)
+[527/3120] Processing: Chillicothe, Ohio
+   ✅ Generated (201 words, 3 paragraphs)
+[528/3120] Processing: Neenah, Wisconsin
+   ✅ Generated (206 words, 3 paragraphs)
+[529/3120] Processing: Fond du Lac, Wisconsin
+   ✅ Generated (207 words, 3 paragraphs)
+[530/3120] Processing: Homestead, Florida
+   ✅ Generated (208 words, 3 paragraphs)
+[531/3120] Processing: Herndon, Virginia
+   ✅ Generated (190 words, 3 paragraphs)
+[532/3120] Processing: Annapolis, Maryland
+   ✅ Generated (199 words, 3 paragraphs)
+[533/3120] Processing: Reynoldsburg, Ohio
+   ✅ Generated (233 words, 3 paragraphs)
+[534/3120] Processing: Northport, Alabama
+   ✅ Generated (183 words, 3 paragraphs)
+[535/3120] Processing: Loganville, Georgia
+   ✅ Generated (185 words, 3 paragraphs)
+[536/3120] Processing: Chantilly, Virginia
+   ✅ Generated (185 words, 3 paragraphs)
+[537/3120] Processing: Willoughby, Ohio
+   ✅ Generated (206 words, 3 paragraphs)
+[538/3120] Processing: Conyers, Georgia
+   ✅ Generated (201 words, 3 paragraphs)
+[539/3120] Processing: Presque Isle, Maine
+   ✅ Generated (192 words, 3 paragraphs)
+[540/3120] Processing: Minot, North Dakota
+   ✅ Generated (182 words, 3 paragraphs)
+[541/3120] Processing: Brattleboro, Vermont
+   ✅ Generated (190 words, 3 paragraphs)
+[542/3120] Processing: Auburn Hills, Michigan
+   ✅ Generated (211 words, 3 paragraphs)
+[543/3120] Processing: Algonquin, Illinois
+   ✅ Generated (189 words, 3 paragraphs)
+[544/3120] Processing: Searcy, Arkansas
+   ✅ Generated (205 words, 3 paragraphs)
+[545/3120] Processing: Daytona Beach, Florida
+   ✅ Generated (213 words, 3 paragraphs)
+[546/3120] Processing: Grand Forks, North Dakota
+   ✅ Generated (196 words, 3 paragraphs)
+[547/3120] Processing: Southfield, Michigan
+   ✅ Generated (201 words, 3 paragraphs)
+[548/3120] Processing: Cedar City, Utah
+   ✅ Generated (196 words, 3 paragraphs)
+[549/3120] Processing: Alliance, Ohio
+   ✅ Generated (214 words, 3 paragraphs)
+[550/3120] Processing: Statesville, North Carolina
+   ✅ Generated (219 words, 3 paragraphs)
+[551/3120] Processing: Dahlonega, Georgia
+   ✅ Generated (222 words, 3 paragraphs)
+[552/3120] Processing: Goldsboro, North Carolina
+   ✅ Generated (207 words, 3 paragraphs)
+[553/3120] Processing: Wilson, North Carolina
+   ✅ Generated (180 words, 3 paragraphs)
+[554/3120] Processing: Lenexa, Kansas
+   ✅ Generated (224 words, 3 paragraphs)
+[555/3120] Processing: Windham, Maine
+   ✅ Generated (197 words, 3 paragraphs)
+[556/3120] Processing: St Peters, Missouri
+   ❌ Validation failed: City name not mentioned
+[557/3120] Processing: Waterford Twp, Michigan
+   ✅ Generated (223 words, 3 paragraphs)
+[558/3120] Processing: Kernersville, North Carolina
+   ✅ Generated (186 words, 3 paragraphs)
+[559/3120] Processing: Traverse City, Michigan
+   ✅ Generated (194 words, 3 paragraphs)
+[560/3120] Processing: Homosassa, Florida
+   ✅ Generated (222 words, 3 paragraphs)
+[561/3120] Processing: Delray Beach, Florida
+   ✅ Generated (213 words, 3 paragraphs)
+[562/3120] Processing: New Bern, North Carolina
+   ✅ Generated (183 words, 3 paragraphs)
+[563/3120] Processing: Metairie, Louisiana
+   ✅ Generated (200 words, 3 paragraphs)
+[564/3120] Processing: Slidell, Louisiana
+   ✅ Generated (196 words, 3 paragraphs)
+[565/3120] Processing: Broussard, Louisiana
+   ✅ Generated (185 words, 3 paragraphs)
+[566/3120] Processing: Lakeville, Minnesota
+   ✅ Generated (214 words, 3 paragraphs)
+[567/3120] Processing: Eden Prairie, Minnesota
+   ✅ Generated (181 words, 3 paragraphs)
+[568/3120] Processing: College Station, Texas
+   ✅ Generated (203 words, 3 paragraphs)
+[569/3120] Processing: Tyler, Texas
+   ✅ Generated (206 words, 3 paragraphs)
+[570/3120] Processing: West Monroe, Louisiana
+   ✅ Generated (203 words, 3 paragraphs)
+[571/3120] Processing: Fremont, California
+   ✅ Generated (212 words, 3 paragraphs)
+[572/3120] Processing: Mansfield, Texas
+   ✅ Generated (195 words, 3 paragraphs)
+[573/3120] Processing: Dover, Delaware
+   ✅ Generated (228 words, 3 paragraphs)
+[574/3120] Processing: Marina, California
+   ✅ Generated (212 words, 3 paragraphs)
+[575/3120] Processing: Hanover, Pennsylvania
+   ✅ Generated (196 words, 3 paragraphs)
+[576/3120] Processing: Augusta, Maine
+   ✅ Generated (196 words, 3 paragraphs)
+[577/3120] Processing: Pembroke Pines, Florida
+   ✅ Generated (206 words, 3 paragraphs)
+[578/3120] Processing: Huntington Beach, California
+   ✅ Generated (204 words, 3 paragraphs)
+[579/3120] Processing: Oak Ridge, Tennessee
+   ✅ Generated (210 words, 3 paragraphs)
+[580/3120] Processing: Fontana, California
+   ✅ Generated (206 words, 3 paragraphs)
+[581/3120] Processing: Clifton, New Jersey
+   ✅ Generated (208 words, 3 paragraphs)
+[582/3120] Processing: Madisonville, Tennessee
+   ✅ Generated (180 words, 3 paragraphs)
+[583/3120] Processing: Totowa, New Jersey
+   ✅ Generated (196 words, 3 paragraphs)
+[584/3120] Processing: Chino, California
+   ✅ Generated (215 words, 3 paragraphs)
+[585/3120] Processing: City of Orange, New Jersey
+   ✅ Generated (213 words, 3 paragraphs)
+[586/3120] Processing: Hackensack, New Jersey
+   ✅ Generated (212 words, 3 paragraphs)
+[587/3120] Processing: Stratford, Connecticut
+   ✅ Generated (199 words, 3 paragraphs)
+[588/3120] Processing: Heber City, Utah
+   ✅ Generated (209 words, 3 paragraphs)
+[589/3120] Processing: Gloucester, Virginia
+   ✅ Generated (218 words, 3 paragraphs)
+[590/3120] Processing: Blaine, Minnesota
+   ✅ Generated (189 words, 3 paragraphs)
+[591/3120] Processing: Yankton, South Dakota
+   ✅ Generated (209 words, 3 paragraphs)
+[592/3120] Processing: Egg Harbor Township, New Jersey
+   ✅ Generated (211 words, 3 paragraphs)
+[593/3120] Processing: Bergenfield, New Jersey
+   ✅ Generated (191 words, 3 paragraphs)
+[594/3120] Processing: Walterboro, South Carolina
+   ✅ Generated (213 words, 3 paragraphs)
+[595/3120] Processing: Elmwood Park, New Jersey
+   ✅ Generated (214 words, 3 paragraphs)
+[596/3120] Processing: Hartsville, South Carolina
+   ✅ Generated (192 words, 3 paragraphs)
+[597/3120] Processing: Cocoa, Florida
+   ✅ Generated (217 words, 3 paragraphs)
+[598/3120] Processing: Athol, Massachusetts
+   ✅ Generated (188 words, 3 paragraphs)
+[599/3120] Processing: Burton, Michigan
+   ✅ Generated (178 words, 3 paragraphs)
+[600/3120] Processing: Tinton Falls, New Jersey
+   ✅ Generated (204 words, 3 paragraphs)
+[601/3120] Processing: Millbury, Massachusetts
+   ✅ Generated (221 words, 3 paragraphs)
+[602/3120] Processing: East Rutherford, New Jersey
+   ✅ Generated (213 words, 3 paragraphs)
+[603/3120] Processing: Selbyville, Delaware
+   ✅ Generated (177 words, 3 paragraphs)
+[604/3120] Processing: Kentwood, Michigan
+   ✅ Generated (191 words, 3 paragraphs)
+[605/3120] Processing: Plaistow, New Hampshire
+   ✅ Generated (204 words, 3 paragraphs)
+[606/3120] Processing: Shelbyville, Tennessee
+   ✅ Generated (182 words, 3 paragraphs)
+[607/3120] Processing: Kershaw, South Carolina
+   ✅ Generated (197 words, 3 paragraphs)
+[608/3120] Processing: Piedmont, South Carolina
+   ✅ Generated (228 words, 3 paragraphs)
+[609/3120] Processing: Guntersville, Alabama
+   ✅ Generated (188 words, 3 paragraphs)
+[610/3120] Processing: Bluffton, South Carolina
+   ✅ Generated (201 words, 3 paragraphs)
+[611/3120] Processing: Castle Rock, Colorado
+   ✅ Generated (209 words, 3 paragraphs)
+[612/3120] Processing: Gaffney, South Carolina
+   ✅ Generated (185 words, 3 paragraphs)
+[613/3120] Processing: Fitchburg, Massachusetts
+   ✅ Generated (198 words, 3 paragraphs)
+[614/3120] Processing: North Adams, Massachusetts
+   ✅ Generated (195 words, 3 paragraphs)
+[615/3120] Processing: Piscataway, New Jersey
+   ✅ Generated (185 words, 3 paragraphs)
+[616/3120] Processing: Greensburg, Pennsylvania
+   ✅ Generated (208 words, 3 paragraphs)
+[617/3120] Processing: Oak Lawn, Illinois
+   ✅ Generated (208 words, 3 paragraphs)
+[618/3120] Processing: Ventura, California
+   ✅ Generated (199 words, 3 paragraphs)
+[619/3120] Processing: Pawtucket, Rhode Island
+   ✅ Generated (201 words, 3 paragraphs)
+[620/3120] Processing: Littleton, Colorado
+   ✅ Generated (195 words, 3 paragraphs)
+[621/3120] Processing: Melbourne, Florida
+   ✅ Generated (202 words, 3 paragraphs)
+[622/3120] Processing: Benton, Arkansas
+   ✅ Generated (210 words, 3 paragraphs)
+[623/3120] Processing: Manning, South Carolina
+   ✅ Generated (206 words, 3 paragraphs)
+[624/3120] Processing: Superior, Wisconsin
+   ✅ Generated (188 words, 3 paragraphs)
+[625/3120] Processing: Muncie, Indiana
+   ✅ Generated (188 words, 3 paragraphs)
+[626/3120] Processing: Adrian, Michigan
+   ✅ Generated (203 words, 3 paragraphs)
+[627/3120] Processing: Kiel, Wisconsin
+   ✅ Generated (199 words, 3 paragraphs)
+[628/3120] Processing: Middlesex, New Jersey
+   ✅ Generated (195 words, 3 paragraphs)
+[629/3120] Processing: Casper, Wyoming
+   ✅ Generated (210 words, 3 paragraphs)
+[630/3120] Processing: Commerce Township, Michigan
+   ✅ Generated (202 words, 3 paragraphs)
+[631/3120] Processing: Pekin, Illinois
+   ✅ Generated (200 words, 3 paragraphs)
+[632/3120] Processing: Rochester Hills, Michigan
+   ✅ Generated (210 words, 3 paragraphs)
+[633/3120] Processing: Clackamas, Oregon
+   ✅ Generated (213 words, 3 paragraphs)
+[634/3120] Processing: Spring Hill, Florida
+   ✅ Generated (214 words, 3 paragraphs)
+[635/3120] Processing: Hingham, Massachusetts
+   ✅ Generated (195 words, 3 paragraphs)
+[636/3120] Processing: Raynham, Massachusetts
+   ✅ Generated (173 words, 3 paragraphs)
+[637/3120] Processing: Wauwatosa, Wisconsin
+   ✅ Generated (191 words, 3 paragraphs)
+[638/3120] Processing: Germantown, Wisconsin
+   ✅ Generated (182 words, 3 paragraphs)
+[639/3120] Processing: Elk City, Oklahoma
+   ✅ Generated (185 words, 3 paragraphs)
+[640/3120] Processing: Roseburg, Oregon
+   ✅ Generated (186 words, 3 paragraphs)
+[641/3120] Processing: Leesburg, Virginia
+   ✅ Generated (200 words, 3 paragraphs)
+[642/3120] Processing: Richland Center, Wisconsin
+   ✅ Generated (185 words, 3 paragraphs)
+[643/3120] Processing: De Pere, Wisconsin
+   ✅ Generated (210 words, 3 paragraphs)
+[644/3120] Processing: Kankakee, Illinois
+   ✅ Generated (197 words, 3 paragraphs)
+[645/3120] Processing: North Augusta, South Carolina
+   ✅ Generated (205 words, 3 paragraphs)
+[646/3120] Processing: Woodinville, Washington
+   ✅ Generated (210 words, 3 paragraphs)
+[647/3120] Processing: Bethlehem, Pennsylvania
+   ✅ Generated (175 words, 3 paragraphs)
+[648/3120] Processing: North Canton, Ohio
+   ✅ Generated (217 words, 3 paragraphs)
+[649/3120] Processing: La Grande, Oregon
+   ✅ Generated (171 words, 3 paragraphs)
+[650/3120] Processing: Three Rivers, Michigan
+   ✅ Generated (185 words, 3 paragraphs)
+[651/3120] Processing: Westerville, Ohio
+   ✅ Generated (207 words, 3 paragraphs)
+[652/3120] Processing: Ocean City, Maryland
+   ✅ Generated (189 words, 3 paragraphs)
+[653/3120] Processing: Schererville, Indiana
+   ✅ Generated (196 words, 3 paragraphs)
+[654/3120] Processing: Warrenton, Virginia
+   ✅ Generated (208 words, 3 paragraphs)
+[655/3120] Processing: Muskogee, Oklahoma
+   ✅ Generated (211 words, 3 paragraphs)
+[656/3120] Processing: Sedalia, Missouri
+   ✅ Generated (193 words, 3 paragraphs)
+[657/3120] Processing: Morrow, Georgia
+   ✅ Generated (224 words, 3 paragraphs)
+[658/3120] Processing: Dearborn Heights, Michigan
+   ✅ Generated (213 words, 3 paragraphs)
+[659/3120] Processing: Northbrook, Illinois
+   ✅ Generated (197 words, 3 paragraphs)
+[660/3120] Processing: Maple Grove, Minnesota
+   ✅ Generated (178 words, 3 paragraphs)
+[661/3120] Processing: Ripon, Wisconsin
+   ✅ Generated (173 words, 3 paragraphs)
+[662/3120] Processing: Defiance, Ohio
+   ✅ Generated (185 words, 3 paragraphs)
+[663/3120] Processing: Jasper, Alabama
+   ✅ Generated (169 words, 3 paragraphs)
+[664/3120] Processing: South Yarmouth, Massachusetts
+   ✅ Generated (219 words, 3 paragraphs)
+[665/3120] Processing: Pine Bluff, Arkansas
+   ✅ Generated (184 words, 3 paragraphs)
+[666/3120] Processing: Springdale, Arkansas
+   ✅ Generated (192 words, 3 paragraphs)
+[667/3120] Processing: Moneta, Virginia
+   ✅ Generated (178 words, 3 paragraphs)
+[668/3120] Processing: Cassopolis, Michigan
+   ✅ Generated (171 words, 3 paragraphs)
+[669/3120] Processing: Conway, Arkansas
+   ✅ Generated (193 words, 3 paragraphs)
+[670/3120] Processing: Mentor, Ohio
+   ✅ Generated (192 words, 3 paragraphs)
+[671/3120] Processing: Saco, Maine
+   ✅ Generated (220 words, 3 paragraphs)
+[672/3120] Processing: Scottsdale, Arizona
+   ✅ Generated (208 words, 3 paragraphs)
+[673/3120] Processing: Austell, Georgia
+   ✅ Generated (209 words, 3 paragraphs)
+[674/3120] Processing: Skowhegan, Maine
+   ✅ Generated (199 words, 3 paragraphs)
+[675/3120] Processing: Arab, Alabama
+   ✅ Generated (216 words, 3 paragraphs)
+[676/3120] Processing: Ocoee, Florida
+   ✅ Generated (183 words, 3 paragraphs)
+[677/3120] Processing: Ashburn, Virginia
+   ✅ Generated (213 words, 3 paragraphs)
+[678/3120] Processing: Marlborough, Massachusetts
+   ✅ Generated (200 words, 3 paragraphs)
+[679/3120] Processing: Wayne, Pennsylvania
+   ✅ Generated (205 words, 3 paragraphs)
+[680/3120] Processing: Laramie, Wyoming
+   ✅ Generated (221 words, 3 paragraphs)
+[681/3120] Processing: New Castle, Delaware
+   ✅ Generated (209 words, 3 paragraphs)
+[682/3120] Processing: Price, Utah
+   ✅ Generated (182 words, 3 paragraphs)
+[683/3120] Processing: Ogden, Utah
+   ✅ Generated (195 words, 3 paragraphs)
+[684/3120] Processing: Logansport, Indiana
+   ✅ Generated (195 words, 3 paragraphs)
+[685/3120] Processing: Opa-locka, Florida
+   ✅ Generated (203 words, 3 paragraphs)
+[686/3120] Processing: Randleman, North Carolina
+   ✅ Generated (189 words, 3 paragraphs)
+[687/3120] Processing: Highland, Indiana
+   ✅ Generated (185 words, 3 paragraphs)
+[688/3120] Processing: Millsboro, Delaware
+   ✅ Generated (233 words, 3 paragraphs)
+[689/3120] Processing: Salina, Kansas
+   ✅ Generated (188 words, 3 paragraphs)
+[690/3120] Processing: Edinburg, Texas
+   ✅ Generated (201 words, 3 paragraphs)
+[691/3120] Processing: Towson, Maryland
+   ✅ Generated (171 words, 3 paragraphs)
+[692/3120] Processing: Durango, Colorado
+   ✅ Generated (190 words, 3 paragraphs)
+[693/3120] Processing: Flowood, Mississippi
+   ✅ Generated (192 words, 3 paragraphs)
+[694/3120] Processing: Killeen, Texas
+   ✅ Generated (195 words, 3 paragraphs)
+[695/3120] Processing: Chapel Hill, North Carolina
+   ✅ Generated (187 words, 3 paragraphs)
+[696/3120] Processing: Apex, North Carolina
+   ✅ Generated (197 words, 3 paragraphs)
+[697/3120] Processing: Lyndonville, Vermont
+   ✅ Generated (198 words, 3 paragraphs)
+[698/3120] Processing: Peoria, Arizona
+   ✅ Generated (200 words, 3 paragraphs)
+[699/3120] Processing: Lumberton, North Carolina
+   ✅ Generated (158 words, 3 paragraphs)
+[700/3120] Processing: Byron Center, Michigan
+   ✅ Generated (221 words, 3 paragraphs)
+[701/3120] Processing: La Plata, Maryland
+   ✅ Generated (186 words, 3 paragraphs)
+[702/3120] Processing: Havertown, Pennsylvania
+   ✅ Generated (210 words, 3 paragraphs)
+[703/3120] Processing: Casa Grande, Arizona
+   ✅ Generated (196 words, 3 paragraphs)
+[704/3120] Processing: Saline, Michigan
+   ✅ Generated (212 words, 3 paragraphs)
+[705/3120] Processing: Howell, Michigan
+   ✅ Generated (197 words, 3 paragraphs)
+[706/3120] Processing: Brentwood, Tennessee
+   ✅ Generated (185 words, 3 paragraphs)
+[707/3120] Processing: Hicksville, New York
+   ✅ Generated (190 words, 3 paragraphs)
+[708/3120] Processing: Covington, Virginia
+   ✅ Generated (172 words, 3 paragraphs)
+[709/3120] Processing: McKinney, Texas
+   ✅ Generated (191 words, 3 paragraphs)
+[710/3120] Processing: Wakefield, Massachusetts
+   ✅ Generated (181 words, 3 paragraphs)
+[711/3120] Processing: Lemoyne, Pennsylvania
+   ✅ Generated (193 words, 3 paragraphs)
+[712/3120] Processing: Niagara Falls, New York
+   ✅ Generated (204 words, 3 paragraphs)
+[713/3120] Processing: Lehi, Utah
+   ✅ Generated (187 words, 3 paragraphs)
+[714/3120] Processing: Siloam Springs, Arkansas
+   ✅ Generated (210 words, 3 paragraphs)
+[715/3120] Processing: Mena, Arkansas
+   ✅ Generated (190 words, 3 paragraphs)
+[716/3120] Processing: Dedham, Massachusetts
+   ✅ Generated (221 words, 3 paragraphs)
+[717/3120] Processing: Weymouth, Massachusetts
+   ✅ Generated (186 words, 3 paragraphs)
+[718/3120] Processing: Columbia City, Indiana
+   ✅ Generated (196 words, 3 paragraphs)
+[719/3120] Processing: Astoria, New York

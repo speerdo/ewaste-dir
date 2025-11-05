@@ -788,6 +788,26 @@ export async function getRecyclingCentersByCity(
   }
 }
 
+/**
+ * Get city description from database
+ * Returns the verified description if available, null otherwise
+ */
+export async function getCityDescription(stateId: string, cityId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('cities')
+    .select('description, description_verified')
+    .eq('state_id', stateId)
+    .eq('id', cityId)
+    .eq('description_verified', true)
+    .single();
+
+  if (error || !data || !data.description) {
+    return null;
+  }
+
+  return data.description;
+}
+
 export async function getCitiesByState(stateId: string): Promise<City[]> {
   // Check cache first
   if (cityCache.has(stateId)) {

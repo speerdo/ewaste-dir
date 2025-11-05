@@ -1,6 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState } from '../../../lib/supabase';
+import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState, getCityDescription } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
@@ -121,6 +121,10 @@ if (!centers || centers.length === 0) {
 const cityStateKey = `${searchCityName}, ${state.name}`;
 const localData = await getLocalCityData(cityStateKey);
 
+// Get city description from database (if available)
+const cityId = normalizeForUrl(cityName);
+const cityDescription = await getCityDescription(stateParam, cityId);
+
 // Count how many centers match exactly vs nearby centers
 const exactMatches = centers.filter(center => center.matched === true);
 const nearbyMatches = centers.filter(center => center.matched !== true);
@@ -214,8 +218,18 @@ const mapMarkers: Marker[] = displayCenters.map(center => ({
 const centerCount = displayCenters.length;
 const centerWord = centerCount === 1 ? 'center' : 'centers';
 
-// Create concise meta description following the requested format
-const metaDescription = `Find ${centerCount} certified electronics recycling ${centerWord} in ${cityName}. Safe e-waste disposal for phones, computers, TVs and more in ${cityName}.`;
+// Use database description for meta if available, otherwise use generated
+let metaDescription: string;
+if (cityDescription) {
+  // Use first paragraph of database description, truncated to 155 chars
+  const firstParagraph = cityDescription.split('\n\n')[0];
+  metaDescription = firstParagraph.length > 155 
+    ? firstParagraph.substring(0, 152) + '...'
+    : firstParagraph;
+} else {
+  // Fallback to generated description
+  metaDescription = `Find ${centerCount} certified electronics recycling ${centerWord} in ${cityName}. Safe e-waste disposal for phones, computers, TVs and more in ${cityName}.`;
+}
 
 // Generate title and keywords using the existing meta generator for consistency
 const metaData = generateCityMeta({
@@ -903,13 +917,28 @@ if (baseTitle.length <= maxTitleLength) {
       </div>
     </div>
 
-    <!-- Enhanced City-Specific Content -->
+    <!-- City Description from Database (if available) -->
+    {cityDescription && (
+      <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+          About Electronics Recycling in {cityName}
+        </h2>
+        <div class="prose prose-lg max-w-none text-gray-700">
+          {cityDescription.split('\n\n').map((paragraph: string, index: number) => (
+            <p class="mb-4" key={index}>{paragraph}</p>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Enhanced City-Specific Content (fallback if no database description) -->
     <CityContentEnhancer 
       cityName={cityName}
       state={state.name}
       centers={displayCenters}
       localData={localData}
       showNearbyMessage={showNearbyMessage}
+      useDatabaseDescription={!!cityDescription}
     />
 
     <!-- Quick Preparation Tips -->

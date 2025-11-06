@@ -45,7 +45,6 @@ export function generateCityMeta({
     )
   );
 
-  const verified = centers.filter((c) => c.is_legitimate === true);
   const withHours = centers.filter((c) => c.working_hours);
 
   // Generate title variations to avoid repetition
@@ -65,8 +64,6 @@ export function generateCityMeta({
     titleModifier = ` - Top-Rated Services`;
   } else if (cityGov) {
     titleModifier = ` - City & Private Options`;
-  } else if (verified.length > centerCount * 0.8) {
-    titleModifier = ` - Certified Facilities`;
   } else if (centerCount === 1) {
     titleModifier = ` - Local Drop-Off`;
   }
@@ -107,9 +104,6 @@ export function generateCityMeta({
   }
   if (chains.length > 0) {
     sellingPoints.push('retail drop-off locations');
-  }
-  if (verified.length > centerCount * 0.7) {
-    sellingPoints.push('certified facilities');
   }
   if (localData?.regulations?.has_ewaste_ban) {
     sellingPoints.push('compliant with state e-waste laws');
@@ -159,9 +153,6 @@ export function generateCityMeta({
     const additions = [];
     if (localData?.regulations?.has_ewaste_ban) {
       additions.push(' Required by state law');
-    }
-    if (verified.length > 0) {
-      additions.push(' Verified businesses');
     }
     if (localData?.stats?.recycling_rate) {
       additions.push(` ${localData.stats.recycling_rate} recycling rate`);

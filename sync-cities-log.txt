@@ -1,0 +1,231 @@
+
+> directory-website@0.1.0 sync-cities
+> node scripts/sync-cities-table.js
+
+🔄 Starting cities table synchronization...
+
+📊 Found 51 states
+
+📍 Processing Alabama...
+   Found 69 cities
+   ✅ Synced 69 cities for Alabama
+
+📍 Processing Alaska...
+   Found 7 cities
+   ✅ Synced 7 cities for Alaska
+
+📍 Processing Arizona...
+   Found 48 cities
+   ✅ Synced 48 cities for Arizona
+
+📍 Processing Arkansas...
+   Found 42 cities
+   ✅ Synced 42 cities for Arkansas
+
+📍 Processing California...
+   Found 241 cities
+   ✅ Synced 241 cities for California
+
+📍 Processing Colorado...
+   Found 51 cities
+   ✅ Synced 51 cities for Colorado
+
+📍 Processing Connecticut...
+   Found 80 cities
+   ✅ Synced 80 cities for Connecticut
+
+📍 Processing Delaware...
+   Found 18 cities
+   ✅ Synced 18 cities for Delaware
+
+📍 Processing District of Columbia...
+   Found 1 cities
+   ✅ Synced 1 cities for District of Columbia
+
+📍 Processing Florida...
+   Found 168 cities
+   ✅ Synced 168 cities for Florida
+
+📍 Processing Georgia...
+   Found 127 cities
+   ✅ Synced 127 cities for Georgia
+
+📍 Processing Hawaii...
+   Found 14 cities
+   ✅ Synced 14 cities for Hawaii
+
+📍 Processing Idaho...
+   Found 21 cities
+   ✅ Synced 21 cities for Idaho
+
+📍 Processing Illinois...
+   Found 149 cities
+   ✅ Synced 149 cities for Illinois
+
+📍 Processing Indiana...
+   Found 83 cities
+   ✅ Synced 83 cities for Indiana
+
+📍 Processing Iowa...
+   Found 61 cities
+   ✅ Synced 61 cities for Iowa
+
+📍 Processing Kansas...
+   Found 35 cities
+   ✅ Synced 35 cities for Kansas
+
+📍 Processing Kentucky...
+   Found 71 cities
+   ✅ Synced 71 cities for Kentucky
+
+📍 Processing Louisiana...
+   Found 52 cities
+   ✅ Synced 52 cities for Louisiana
+
+📍 Processing Maine...
+   Found 54 cities
+   ✅ Synced 54 cities for Maine
+
+📍 Processing Maryland...
+   Found 83 cities
+   ✅ Synced 83 cities for Maryland
+
+📍 Processing Massachusetts...
+   Found 138 cities
+   ✅ Synced 138 cities for Massachusetts
+
+📍 Processing Michigan...
+   Found 146 cities
+   ✅ Synced 146 cities for Michigan
+
+📍 Processing Minnesota...
+   Found 80 cities
+   ✅ Synced 80 cities for Minnesota
+
+📍 Processing Mississippi...
+   Found 43 cities
+   ✅ Synced 43 cities for Mississippi
+
+📍 Processing Missouri...
+   Found 78 cities
+   ✅ Synced 78 cities for Missouri
+
+📍 Processing Montana...
+   Found 15 cities
+   ✅ Synced 15 cities for Montana
+
+📍 Processing Nebraska...
+   Found 20 cities
+   ✅ Synced 20 cities for Nebraska
+
+📍 Processing Nevada...
+   Found 9 cities
+   ✅ Synced 9 cities for Nevada
+
+📍 Processing New Hampshire...
+   Found 46 cities
+   ✅ Synced 46 cities for New Hampshire
+
+📍 Processing New Jersey...
+   Found 159 cities
+   ✅ Synced 159 cities for New Jersey
+
+📍 Processing New Mexico...
+   Found 27 cities
+   ✅ Synced 27 cities for New Mexico
+
+📍 Processing New York...
+   Found 229 cities
+   ✅ Synced 229 cities for New York
+
+📍 Processing North Carolina...
+   Found 155 cities
+   ✅ Synced 155 cities for North Carolina
+
+📍 Processing North Dakota...
+   Found 11 cities
+   ✅ Synced 11 cities for North Dakota
+
+📍 Processing Ohio...
+   Found 149 cities
+   ✅ Synced 149 cities for Ohio
+
+📍 Processing Oklahoma...
+   Found 38 cities
+   ✅ Synced 38 cities for Oklahoma
+
+📍 Processing Oregon...
+   Found 47 cities
+   ✅ Synced 47 cities for Oregon
+
+📍 Processing Pennsylvania...
+   Found 211 cities
+   ✅ Synced 211 cities for Pennsylvania
+
+📍 Processing Rhode Island...
+   Found 21 cities
+   ✅ Synced 21 cities for Rhode Island
+
+📍 Processing South Carolina...
+   Found 92 cities
+   ✅ Synced 92 cities for South Carolina
+
+📍 Processing South Dakota...
+   Found 16 cities
+   ✅ Synced 16 cities for South Dakota
+
+📍 Processing Tennessee...
+   Found 90 cities
+   ✅ Synced 90 cities for Tennessee
+
+📍 Processing Texas...
+   Found 170 cities
+   ✅ Synced 170 cities for Texas
+
+📍 Processing Utah...
+   Found 31 cities
+   ✅ Synced 31 cities for Utah
+
+📍 Processing Vermont...
+   Found 24 cities
+   ✅ Synced 24 cities for Vermont
+
+📍 Processing Virginia...
+   Found 123 cities
+   ✅ Synced 123 cities for Virginia
+
+📍 Processing Washington...
+   Found 66 cities
+   ✅ Synced 66 cities for Washington
+
+📍 Processing West Virginia...
+   Found 31 cities
+   ✅ Synced 31 cities for West Virginia
+
+📍 Processing Wisconsin...
+   Found 93 cities
+   ✅ Synced 93 cities for Wisconsin
+
+📍 Processing Wyoming...
+   Found 8 cities
+   ✅ Synced 8 cities for Wyoming
+
+
+============================================================
+📈 SYNCHRONIZATION SUMMARY
+============================================================
+Total cities processed: 3841
+✅ Successfully synced: 3841
+❌ Errors: 0
+============================================================
+
+📊 CITIES TABLE STATISTICS
+============================================================
+Total cities in table: 3132
+Cities with descriptions: 12
+Verified descriptions: 0
+Pending verification: 12
+============================================================
+
+✅ Synchronization complete!
+

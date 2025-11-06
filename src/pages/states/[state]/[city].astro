@@ -1,6 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState } from '../../../lib/supabase';
+import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState, getCityDescription } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
@@ -157,6 +157,10 @@ if (cityNameCounts.size > 0) {
 // For title display
 const locationDescription = hasExactMatches ? cityName : `${state.name} area`;
 
+// Get city description from database (if available) - MUST be after cityName is determined
+const cityId = normalizeForUrl(cityName);
+const cityDescription = await getCityDescription(stateParam, cityId);
+
 // Generate a consistent but pseudo-random number based on city name for phrasing variation
 const cityHash = cityName.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
 const phrasingIndex = cityHash % 5;
@@ -214,8 +218,18 @@ const mapMarkers: Marker[] = displayCenters.map(center => ({
 const centerCount = displayCenters.length;
 const centerWord = centerCount === 1 ? 'center' : 'centers';
 
-// Create concise meta description following the requested format
-const metaDescription = `Find ${centerCount} certified electronics recycling ${centerWord} in ${cityName}. Safe e-waste disposal for phones, computers, TVs and more in ${cityName}.`;
+// Use database description for meta if available, otherwise use generated
+let metaDescription: string;
+if (cityDescription) {
+  // Use first paragraph of database description, truncated to 155 chars
+  const firstParagraph = cityDescription.split('\n\n')[0];
+  metaDescription = firstParagraph.length > 155 
+    ? firstParagraph.substring(0, 152) + '...'
+    : firstParagraph;
+} else {
+  // Fallback to generated description
+  metaDescription = `Find ${centerCount} certified electronics recycling ${centerWord} in ${cityName}. Safe e-waste disposal for phones, computers, TVs and more in ${cityName}.`;
+}
 
 // Generate title and keywords using the existing meta generator for consistency
 const metaData = generateCityMeta({
@@ -230,14 +244,6 @@ const metaTitle = metaData.title;
 const metaKeywords = metaData.keywords;
 
 // Calculate statistics from the centers data
-const centersWithLegitimacy = displayCenters.filter(center => center.legitimacy_score != null);
-const verifiedCenters = displayCenters.filter(center => center.is_legitimate === true);
-const unverifiedCenters = displayCenters.filter(center => 
-  center.legitimacy_score == null && center.is_legitimate == null && center.scraped_at == null
-);
-const averageLegitimacyScore = centersWithLegitimacy.length > 0 
-  ? Math.round(centersWithLegitimacy.reduce((sum, center) => sum + (center.legitimacy_score || 0), 0) / centersWithLegitimacy.length)
-  : null;
 
 // Analyze business data for insights
 const centersWithRatings = displayCenters.filter(center => center.rating && Number(center.rating) > 0);
@@ -265,14 +271,6 @@ displayCenters.forEach(center => {
   });
 });
 
-// Recent verification activity
-const recentlyVerified = displayCenters.filter(center => {
-  if (!center.scraped_at) return false;
-  const verificationDate = new Date(center.scraped_at);
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  return verificationDate > thirtyDaysAgo;
-});
 
 // Centers with detailed information
 const centersWithDescriptions = displayCenters.filter(center => center.description && center.description.length > 50);
@@ -647,38 +645,6 @@ if (baseTitle.length <= maxTitleLength) {
           </div>
         </div>
         
-        <!-- Quick Stats -->
-        <div class="flex flex-wrap items-center gap-4">
-          {verifiedCenters.length > 0 && (
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span class="text-sm text-gray-600">{verifiedCenters.length} verified</span>
-            </div>
-          )}
-          
-          {centersWithLegitimacy.length > verifiedCenters.length && (
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span class="text-sm text-gray-600">{centersWithLegitimacy.length - verifiedCenters.length} checked</span>
-            </div>
-          )}
-          
-          {unverifiedCenters.length > 0 && (
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
-              <span class="text-sm text-gray-600">{unverifiedCenters.length} need verification</span>
-            </div>
-          )}
-          
-          {averageLegitimacyScore && (
-            <div class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              <span class="text-sm text-gray-600">Avg. score: {averageLegitimacyScore}</span>
-            </div>
-          )}
-        </div>
       </div>
 
       <!-- Nearby Centers Message -->
@@ -691,61 +657,43 @@ if (baseTitle.length <= maxTitleLength) {
         </div>
       )}
 
-      <!-- Data-Driven Content Section -->
+      <!-- City Description Section (merged generated + database content) -->
       {displayCenters.length > 0 && (
-        <div class="mt-6 bg-gray-50 rounded-lg p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">
-            Electronics Recycling Guide for {cityName}
+        <div class="mt-6 bg-white border border-gray-200 rounded-lg p-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-4">
+            About Electronics Recycling in {cityName}
           </h2>
           
-          {/* Dynamic intro based on local data */}
-          <div class="prose prose-gray max-w-none text-gray-700 space-y-4">
-            <p>
+          <div class="prose prose-lg max-w-none text-gray-700 space-y-4">
+            {/* Single intro paragraph from generated content */}
+            <p class="text-gray-600">
               {selectedIntroPhrase}
-              {localData.regulations?.has_ewaste_ban && ` What's great about ${cityName} is that it has strict e-waste disposal laws, meaning electronics are banned from regular landfills—keeping our community environmentally responsible.`}
-              {!localData.regulations?.has_ewaste_ban && localData.regulations?.municipal_programs && ` The city actively supports electronics recycling through local programs and partnerships with certified facilities.`}
-              {localData.regulations?.special_events && ` Plus, ${cityName} hosts special e-waste collection events throughout the year, making it even easier for residents to dispose of old electronics safely.`}
-              {verifiedCenters.length > 0 && ` We've personally verified ${verifiedCenters.length} ${verifiedCenters.length === 1 ? 'business' : 'businesses'} 
-              to ensure they follow legitimate recycling practices that protect both your data and our environment.`}
             </p>
             
-            {businessTypes.size > 0 && (
-              <p>
-                Local recycling services in {cityName} specialize in various areas including{' '}
-                {Array.from(businessTypes.entries())
-                  .sort((a, b) => b[1] - a[1])
-                  .slice(0, 3)
-                  .map(([type, count], index, array) => {
-                    const isLast = index === array.length - 1;
-                    const isSecondToLast = index === array.length - 2;
-                    const centerWord = count === 1 ? 'center' : 'centers';
-                    return `${type.toLowerCase()} – ${count} ${centerWord}${isLast ? '' : isSecondToLast && array.length > 2 ? ', and ' : ', '}`;
-                  })
-                  .join('')}. This diversity ensures residents can find appropriate disposal methods for different types of electronic waste.
-              </p>
-            )}
-            
-            {averageRating && centersWithRatings.length > 2 && (
-              <p>
-                Customer satisfaction in {cityName}'s e-waste industry is strong, with an average rating of {averageRating} stars 
-                based on {totalReviews.toLocaleString()} customer reviews across {centersWithRatings.length} businesses. 
-                This reflects the community's commitment to reliable and professional recycling services.
-              </p>
-            )}
-            
-            <p>
-              When selecting the right recycling partner in {cityName}, we recommend looking for businesses that offer secure data destruction, 
-              convenient pickup services for bulky items, and maintain industry certifications. {verifiedCenters.length > 0 ? 
-              `Good news: we've already done the legwork on ${verifiedCenters.length} of these centers, confirming they're legitimate businesses with responsible disposal practices.` :
-              'Pro tip: always ask about their data wiping process and disposal certifications before dropping off your devices.'}
-            </p>
-            
-            {centersWithDescriptions.length > Math.floor(displayCenters.length * 0.6) && (
-              <p>
-                Most recycling centers in {cityName} provide detailed information about their services, including {centersWithHours.length} businesses 
-                with posted operating hours{centersWithLogos.length > 5 ? `, and ${centersWithLogos.length} with professional business profiles` : ''}. 
-                This transparency helps residents make informed decisions about where to recycle their electronics safely.
-              </p>
+            {/* Database description paragraphs - most prominent */}
+            {cityDescription ? (
+              cityDescription.split('\n\n').map((paragraph: string, index: number) => (
+                <p class="mb-4" key={index}>{paragraph}</p>
+              ))
+            ) : (
+              /* Fallback if no database description */
+              <>
+                {localData.regulations?.has_ewaste_ban && (
+                  <p>
+                    What's great about {cityName} is that it has strict e-waste disposal laws, meaning electronics are banned from regular landfills—keeping our community environmentally responsible.
+                  </p>
+                )}
+                {!localData.regulations?.has_ewaste_ban && localData.regulations?.municipal_programs && (
+                  <p>
+                    The city actively supports electronics recycling through local programs and partnerships with certified facilities.
+                  </p>
+                )}
+                {localData.regulations?.special_events && (
+                  <p>
+                    Plus, {cityName} hosts special e-waste collection events throughout the year, making it even easier for residents to dispose of old electronics safely.
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -804,38 +752,6 @@ if (baseTitle.length <= maxTitleLength) {
             </div>
           )}
 
-          <!-- Verification Activity -->
-          {(recentlyVerified.length > 0 || verifiedCenters.length > 0) && (
-            <div class="bg-purple-50 rounded-lg p-4">
-              <h3 class="text-sm font-semibold text-purple-900 mb-2 flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-                Verification Status
-              </h3>
-              <div class="text-sm space-y-1">
-                {recentlyVerified.length > 0 && (
-                  <p class="text-purple-600">
-                    {recentlyVerified.length} recently verified (last 30 days)
-                  </p>
-                )}
-                {averageLegitimacyScore && (
-                  <div class="text-purple-600">
-                    <p class="mb-1">
-                      Average trust score: <span class="font-semibold">{averageLegitimacyScore}/100</span>
-                    </p>
-                    <p class="text-xs text-purple-500">
-                      Based on website analysis for e-waste keywords & services. 
-                      Scores ≥30 = legitimate, scores can exceed 100 for highly specialized recyclers.
-                    </p>
-                  </div>
-                )}
-                <p class="text-purple-600">
-                  {Math.round((verifiedCenters.length / displayCenters.length) * 100)}% verified businesses
-                </p>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -903,13 +819,14 @@ if (baseTitle.length <= maxTitleLength) {
       </div>
     </div>
 
-    <!-- Enhanced City-Specific Content -->
+    <!-- Enhanced City-Specific Content (fallback if no database description) -->
     <CityContentEnhancer 
       cityName={cityName}
       state={state.name}
       centers={displayCenters}
       localData={localData}
       showNearbyMessage={showNearbyMessage}
+      useDatabaseDescription={!!cityDescription}
     />
 
     <!-- Quick Preparation Tips -->

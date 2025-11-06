@@ -1,0 +1,84 @@
+🔍 Starting factual accuracy verification...
+
+Using: Gemini 2.0 Flash Exp (Free with Pixel 10 Pro)
+Rate limit: 8 requests/minute (conservative, actual limit is 10/min)
+
+📊 Loaded 3968 descriptions
+   Processing all cities
+
+📂 Checkpoint: 0 already processed
+
+[1/3968] Checking: Albertville, Alabama
+   ✅ High accuracy
+[2/3968] Checking: Alexander City, Alabama
+   ⚠️  Medium accuracy - The description contains a lot of vague, unverifiable claims about CO2 reduction, economic benefits, and community engagement. These claims are likely true in principle but lack specific supporting data and are presented as facts.
+[3/3968] Checking: Alexandria, Alabama
+   ❌ Low accuracy - The number of recycling centers is incorrect. The population size of Alexandria may also be incorrect as it was not provided in the document.
+   ⚠️  Center count mismatch: says 3, actual 18
+   📝 1 correction(s) suggested:
+      "Alexandria offers three dedicated recycling centers" → "Alexandria offers 18 dedicated recycling centers"
+[4/3968] Checking: Andalusia, Alabama
+   ✅ High accuracy
+[5/3968] Checking: Anniston, Alabama
+   ✅ High accuracy
+[6/3968] Checking: Arab, Alabama
+   ✅ High accuracy
+[7/3968] Checking: Athens, Alabama
+   ⚠️  Medium accuracy - The number of recycling centers is incorrect. Population data would improve the description if it could be added and verified.
+   ⚠️  Center count mismatch: says 7, actual 4
+   📝 2 correction(s) suggested:
+      "seven dedicated recycling centers" → "four dedicated recycling centers"
+      "seven recycling spots in town" → "four recycling spots in town"
+[8/3968] Checking: Attalla, Alabama
+   ⏳ Rate limit: waiting 35s...
+   ✅ High accuracy
+[9/3968] Checking: Auburn, Alabama
+   ⚠️  Medium accuracy - The number of recycling centers needs to be corrected. The description contains unverifiable claims.
+   ⚠️  Center count mismatch: says 4, actual 6
+   📝 1 correction(s) suggested:
+      "With four conveniently located recycling centers" → "With six conveniently located recycling centers"
+[10/3968] Checking: Bay Minette, Alabama
+   ✅ High accuracy
+[11/3968] Checking: Bessemer, Alabama
+   ✅ High accuracy
+[12/3968] Checking: Birmingham, Alabama
+   ✅ High accuracy
+[13/3968] Checking: Brent, Alabama
+   ✅ High accuracy
+[14/3968] Checking: Calera, Alabama
+   ⚠️  Medium accuracy - The description contains some generalizations and unverifiable claims about economic impacts and job creation related to recycling. A more neutral and factual tone would improve accuracy.
+   📝 2 correction(s) suggested:
+      "Participation in electronics recycling is straightforward for Calera residents, leading to positive outcomes for the local economy." → "Electronics recycling is available for Calera residents and contributes to resource recovery."
+      "By encouraging proper disposal methods, the state contributes to a cleaner environment and promotes recycling efforts that benefit the community at large." → "Encouraging proper disposal methods contributes to a cleaner environment and promotes recycling efforts that benefit the community at large."
+[15/3968] Checking: Chelsea, Alabama
+   ⚠️  Medium accuracy - The description contains some generalizations and unverifiable claims about the impact of recycling on the local economy and environment. The claim about state regulations may also be an overstatement. Minor phrasing improvements are also recommended.
+   📝 2 correction(s) suggested:
+      "These centers not only help in clearing out old devices but also contribute to a more sustainable environment." → "These centers help in clearing out old devices and contribute to a more sustainable environment."
+      "The state's approach encourages localities to establish guidelines that promote material recovery and reuse." → "The state encourages localities to establish guidelines that promote material recovery and reuse."
+[16/3968] Checking: Clanton, Alabama
+   ⏳ Rate limit: waiting 26s...
+   ✅ High accuracy
+[17/3968] Checking: Cullman, Alabama
+   ✅ High accuracy
+[18/3968] Checking: Daphne, Alabama
+   ⚠️  Medium accuracy - The recycling center count and population data are accurate. However, some claims about economic impact and community building are vague and potentially overstated without evidence.
+   📝 1 correction(s) suggested:
+      "The benefits extend beyond environmental care, contributing to a healthier community landscape." → "The benefits extend beyond environmental care, potentially contributing to a healthier community landscape."
+[19/3968] Checking: Decatur, Alabama
+   ❌ Low accuracy - The number of recycling centers is highly inaccurate. The population data is missing. The description includes unverifiable claims and could use more specific, factual information.
+   ⚠️  Center count mismatch: says 9, actual 1
+   📝 1 correction(s) suggested:
+      "nine dedicated recycling centers scattered throughout the area" → "a dedicated recycling center in the area"
+[20/3968] Checking: Dothan, Alabama
+   ✅ High accuracy
+[21/3968] Checking: Enterprise, Alabama
+   ✅ High accuracy
+[22/3968] Checking: Fairhope, Alabama
+   ✅ High accuracy
+[23/3968] Checking: Florence, Alabama
+   ❌ Low accuracy - The number of recycling centers is significantly overstated. Many claims are not backed by data and are unverifiable. The population is not mentioned, but the description makes the city sound larger than its actual population.
+   ⚠️  Center count mismatch: says 13, actual 2
+   📝 1 correction(s) suggested:
+      "With 13 dedicated recycling centers in the area" → "With 2 dedicated recycling centers in the area"
+[24/3968] Checking: Foley, Alabama
+   ⏳ Rate limit: waiting 29s...

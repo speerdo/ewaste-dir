@@ -1,0 +1,117 @@
+🔍 Starting factual accuracy verification...
+
+Using: Gemini 2.0 Flash Exp (Free with Pixel 10 Pro)
+Rate limit: 8 requests/minute (conservative, actual limit is 10/min)
+
+📊 Loaded 3968 descriptions
+   Processing all cities
+
+📂 Checkpoint: 20 already processed
+
+[1/3968] Skipping: Albertville, Alabama (already checked)
+[2/3968] Skipping: Alexander City, Alabama (already checked)
+[3/3968] Skipping: Alexandria, Alabama (already checked)
+[4/3968] Skipping: Andalusia, Alabama (already checked)
+[5/3968] Skipping: Anniston, Alabama (already checked)
+[6/3968] Skipping: Arab, Alabama (already checked)
+[7/3968] Skipping: Athens, Alabama (already checked)
+[8/3968] Skipping: Attalla, Alabama (already checked)
+[9/3968] Skipping: Auburn, Alabama (already checked)
+[10/3968] Skipping: Bay Minette, Alabama (already checked)
+[11/3968] Skipping: Bessemer, Alabama (already checked)
+[12/3968] Skipping: Birmingham, Alabama (already checked)
+[13/3968] Skipping: Brent, Alabama (already checked)
+[14/3968] Skipping: Calera, Alabama (already checked)
+[15/3968] Skipping: Chelsea, Alabama (already checked)
+[16/3968] Skipping: Clanton, Alabama (already checked)
+[17/3968] Skipping: Cullman, Alabama (already checked)
+[18/3968] Skipping: Daphne, Alabama (already checked)
+[19/3968] Skipping: Decatur, Alabama (already checked)
+[20/3968] Skipping: Dothan, Alabama (already checked)
+[21/3968] Checking: Enterprise, Alabama
+   ✅ High accuracy
+[22/3968] Checking: Fairhope, Alabama
+   ✅ High accuracy
+[23/3968] Checking: Florence, Alabama
+   ❌ Low accuracy - The number of recycling centers is drastically incorrect. Claims about residents' contributions, eco-friendliness, and the city being a 'hub' are unverifiable. The description needs a major overhaul.
+   ⚠️  Center count mismatch: says 13, actual 2
+   📝 1 correction(s) suggested:
+      "With 13 dedicated recycling centers in the area" → "With a couple of recycling centers in the area"
+[24/3968] Checking: Foley, Alabama
+   ✅ High accuracy
+[25/3968] Checking: Fort Payne, Alabama
+   ✅ High accuracy
+[26/3968] Checking: Fultondale, Alabama
+   ✅ High accuracy
+[27/3968] Checking: Gadsden, Alabama
+   ⚠️  Medium accuracy - The description includes claims that are difficult to verify such as the creation of local jobs. These claims should be removed or supported by evidence.
+   📝 1 correction(s) suggested:
+      "This accessibility bolsters the local economy, as the recycling centers create jobs and stimulate growth within the area." → "This accessibility bolsters the local economy."
+[28/3968] Checking: Gardendale, Alabama
+   ⏳ Rate limit: waiting 35s...
+   ✅ High accuracy
+[29/3968] Checking: Geneva, Alabama
+   ✅ High accuracy
+[30/3968] Checking: Greenville, Alabama
+   ⚠️  Medium accuracy - The number of recycling centers is incorrect and needs to be updated to the actual count of two. The rest of the description is generally accurate but contains some unverifiable claims.
+   ⚠️  Center count mismatch: says 4, actual 2
+   📝 1 correction(s) suggested:
+      "With four dedicated recycling centers" → "With two dedicated recycling centers"
+[31/3968] Checking: Grove Hill, Alabama
+   ✅ High accuracy
+[32/3968] Checking: Gulf Shores, Alabama
+   ✅ High accuracy
+[33/3968] Checking: Guntersville, Alabama
+   ⚠️  Medium accuracy - The description makes several broad, unsubstantiated claims about the benefits and impact of recycling in Guntersville. These need verification or should be rephrased to be less definitive.
+[34/3968] Checking: Haleyville, Alabama
+   ✅ High accuracy
+[35/3968] Checking: Hamilton, Alabama
+   ⚠️  Medium accuracy - The description contains a lot of general statements about e-waste and recycling benefits that are not specific to Hamilton and are difficult to verify. While factually plausible, they lack specific sourcing and could be seen as promotional material. The claims regarding emissions reductions, economic stimulus and ecosystem health need justification.
+[36/3968] Checking: Hanceville, Alabama
+   ⏳ Rate limit: waiting 34s...
+   ✅ High accuracy
+[37/3968] Checking: Hartselle, Alabama
+   ⚠️  Medium accuracy - Many claims are difficult to verify without additional data, such as specific materials accepted at recycling centers or quantifiable economic benefits. While the population and recycling center count are accurate, the narrative contains unverifiable generalities that should be either substantiated or removed.
+[38/3968] Checking: Homewood, Alabama
+   ✅ High accuracy
+[39/3968] Checking: Hoover, Alabama
+   ✅ High accuracy
+[40/3968] Checking: Huntsville, Alabama
+   ❌ Low accuracy - The number of recycling centers is significantly overstated. The population is also not mentioned in the correct numbers. The claim that every piece of waste is handled with care is unverifiable.
+   ⚠️  Center count mismatch: says 36, actual 3
+   ⚠️  Population inaccuracy detected
+   ⚠️  Possible invented data: 36 recycling centers
+   📝 2 correction(s) suggested:
+      "the city boasts 36 recycling centers" → "the city has 3 recycling centers"
+      "With a thriving population" → "With a population of 45,941"
+[41/3968] Checking: Jasper, Alabama
+   ⚠️  Medium accuracy - The description contains many claims that are not directly verifiable from the provided facts. These are general statements about recycling benefits and economic impact, which may be true but require external sources for verification. Suggest review to determine if these claims can be substantiated or should be rephrased.
+[42/3968] Checking: Leeds, Alabama
+   ✅ High accuracy
+[43/3968] Checking: Lincoln, Alabama
+   ❌ Low accuracy - The number of recycling centers is incorrect. The rest of the description contains general statements about e-waste and sustainability, which are difficult to verify for this specific location.
+   ⚠️  Center count mismatch: says 3, actual 1
+   📝 1 correction(s) suggested:
+      "With three dedicated recycling centers in the vicinity, Lincoln stands at the forefront of responsible e-waste management." → "With a dedicated recycling center in the vicinity, Lincoln is working towards responsible e-waste management."
+[44/3968] Checking: Madison, Alabama
+   ⏳ Rate limit: waiting 33s...
+   ❌ Low accuracy - The number of recycling centers is incorrect. Other claims are reasonable but could be made more specific and supported with data.
+   ⚠️  Center count mismatch: says 9, actual 33
+   📝 1 correction(s) suggested:
+      "With nine dedicated recycling centers in the area" → "With 33 dedicated recycling centers in the area"
+[45/3968] Checking: Millbrook, Alabama
+   ⚠️  Medium accuracy - While the factual claims regarding population and recycling centers are accurate, many statements are general and unverifiable opinions. The claims about Alabama's e-waste regulations and economic impacts are not backed by any specific data, so it's impossible to verify if they are correct for Millbrook specifically.
+[46/3968] Checking: Mobile, Alabama
+   ✅ High accuracy
+[47/3968] Checking: Montgomery, Alabama
+   ✅ High accuracy
+[48/3968] Checking: Northport, Alabama
+   ⚠️  Medium accuracy - The description contains many vague claims that are difficult to verify without more information, such as the claim about local job creation due to recycling operations. While no inaccuracies were found, unverifiable claims are flagged.
+[49/3968] Checking: Opelika, Alabama
+   ⚠️  Medium accuracy - The description relies heavily on generalizations about e-waste recycling benefits. While likely true, they are difficult to verify without specific evidence related to Opelika. The claim that recycling facilities *create jobs* and *boost Opelika's economy* is vague and should ideally be supported by local statistics. Consider adding some context or detail.
+[50/3968] Checking: Oxford, Alabama
+   ✅ High accuracy
+[51/3968] Checking: Ozark, Alabama
+   ✅ High accuracy
+[52/3968] Checking: Pell City, Alabama
+   ⏳ Rate limit: waiting 35s...

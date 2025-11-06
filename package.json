@@ -29,6 +29,8 @@
     "check-fact-check": "bash scripts/check-fact-check-progress.sh",
     "apply-corrections": "node scripts/apply-corrections.js",
     "review-corrections": "node scripts/review-corrections.js",
+    "analyze-description-quality": "node scripts/analyze-description-quality.js",
+    "fix-database-descriptions": "node scripts/fix-database-descriptions.js",
     "import-descriptions": "node scripts/import-city-descriptions.js",
     "check-progress": "node scripts/check-progress.js",
     "descriptions-workflow": "npm run sync-cities && npm run generate-descriptions && npm run verify-descriptions",

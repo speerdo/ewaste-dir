@@ -705,61 +705,49 @@ if (baseTitle.length <= maxTitleLength) {
         </div>
       )}
 
-      <!-- Data-Driven Content Section -->
+      <!-- City Description Section (merged generated + database content) -->
       {displayCenters.length > 0 && (
-        <div class="mt-6 bg-gray-50 rounded-lg p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">
-            Electronics Recycling Guide for {cityName}
+        <div class="mt-6 bg-white border border-gray-200 rounded-lg p-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-4">
+            About Electronics Recycling in {cityName}
           </h2>
           
-          {/* Dynamic intro based on local data */}
-          <div class="prose prose-gray max-w-none text-gray-700 space-y-4">
-            <p>
+          <div class="prose prose-lg max-w-none text-gray-700 space-y-4">
+            {/* Single intro paragraph from generated content */}
+            <p class="text-gray-600">
               {selectedIntroPhrase}
-              {localData.regulations?.has_ewaste_ban && ` What's great about ${cityName} is that it has strict e-waste disposal laws, meaning electronics are banned from regular landfills—keeping our community environmentally responsible.`}
-              {!localData.regulations?.has_ewaste_ban && localData.regulations?.municipal_programs && ` The city actively supports electronics recycling through local programs and partnerships with certified facilities.`}
-              {localData.regulations?.special_events && ` Plus, ${cityName} hosts special e-waste collection events throughout the year, making it even easier for residents to dispose of old electronics safely.`}
-              {verifiedCenters.length > 0 && ` We've personally verified ${verifiedCenters.length} ${verifiedCenters.length === 1 ? 'business' : 'businesses'} 
-              to ensure they follow legitimate recycling practices that protect both your data and our environment.`}
             </p>
             
-            {businessTypes.size > 0 && (
-              <p>
-                Local recycling services in {cityName} specialize in various areas including{' '}
-                {Array.from(businessTypes.entries())
-                  .sort((a, b) => b[1] - a[1])
-                  .slice(0, 3)
-                  .map(([type, count], index, array) => {
-                    const isLast = index === array.length - 1;
-                    const isSecondToLast = index === array.length - 2;
-                    const centerWord = count === 1 ? 'center' : 'centers';
-                    return `${type.toLowerCase()} – ${count} ${centerWord}${isLast ? '' : isSecondToLast && array.length > 2 ? ', and ' : ', '}`;
-                  })
-                  .join('')}. This diversity ensures residents can find appropriate disposal methods for different types of electronic waste.
-              </p>
-            )}
-            
-            {averageRating && centersWithRatings.length > 2 && (
-              <p>
-                Customer satisfaction in {cityName}'s e-waste industry is strong, with an average rating of {averageRating} stars 
-                based on {totalReviews.toLocaleString()} customer reviews across {centersWithRatings.length} businesses. 
-                This reflects the community's commitment to reliable and professional recycling services.
-              </p>
-            )}
-            
-            <p>
-              When selecting the right recycling partner in {cityName}, we recommend looking for businesses that offer secure data destruction, 
-              convenient pickup services for bulky items, and maintain industry certifications. {verifiedCenters.length > 0 ? 
-              `Good news: we've already done the legwork on ${verifiedCenters.length} of these centers, confirming they're legitimate businesses with responsible disposal practices.` :
-              'Pro tip: always ask about their data wiping process and disposal certifications before dropping off your devices.'}
-            </p>
-            
-            {centersWithDescriptions.length > Math.floor(displayCenters.length * 0.6) && (
-              <p>
-                Most recycling centers in {cityName} provide detailed information about their services, including {centersWithHours.length} businesses 
-                with posted operating hours{centersWithLogos.length > 5 ? `, and ${centersWithLogos.length} with professional business profiles` : ''}. 
-                This transparency helps residents make informed decisions about where to recycle their electronics safely.
-              </p>
+            {/* Database description paragraphs - most prominent */}
+            {cityDescription ? (
+              cityDescription.split('\n\n').map((paragraph: string, index: number) => (
+                <p class="mb-4" key={index}>{paragraph}</p>
+              ))
+            ) : (
+              /* Fallback if no database description */
+              <>
+                {localData.regulations?.has_ewaste_ban && (
+                  <p>
+                    What's great about {cityName} is that it has strict e-waste disposal laws, meaning electronics are banned from regular landfills—keeping our community environmentally responsible.
+                  </p>
+                )}
+                {!localData.regulations?.has_ewaste_ban && localData.regulations?.municipal_programs && (
+                  <p>
+                    The city actively supports electronics recycling through local programs and partnerships with certified facilities.
+                  </p>
+                )}
+                {localData.regulations?.special_events && (
+                  <p>
+                    Plus, {cityName} hosts special e-waste collection events throughout the year, making it even easier for residents to dispose of old electronics safely.
+                  </p>
+                )}
+                {verifiedCenters.length > 0 && (
+                  <p>
+                    We've personally verified {verifiedCenters.length} {verifiedCenters.length === 1 ? 'business' : 'businesses'} 
+                    to ensure they follow legitimate recycling practices that protect both your data and our environment.
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -916,20 +904,6 @@ if (baseTitle.length <= maxTitleLength) {
         <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} />
       </div>
     </div>
-
-    <!-- City Description from Database (if available) -->
-    {cityDescription && (
-      <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">
-          About Electronics Recycling in {cityName}
-        </h2>
-        <div class="prose prose-lg max-w-none text-gray-700">
-          {cityDescription.split('\n\n').map((paragraph: string, index: number) => (
-            <p class="mb-4" key={index}>{paragraph}</p>
-          ))}
-        </div>
-      </div>
-    )}
 
     <!-- Enhanced City-Specific Content (fallback if no database description) -->
     <CityContentEnhancer 

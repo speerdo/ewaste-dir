@@ -35,7 +35,6 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
     <button
       id="trustSortToggle"
       class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-      title="Sort by trust score - automated analysis of business websites for e-waste recycling keywords and services. Scores ≥30 indicate legitimate recyclers."
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.25 7C20.4 19 22 17.4 22 15.25c0-1.158-.953-2.058-2.09-2.26a3.478 3.478 0 0 0-2.748-3.11c-1.87-.527-3.965.044-5.14 1.644-.23.314-.346.695-.346 1.078 0 .776.518 1.448 1.272 1.709.652.226 1.356.085 1.897-.402.541-.487.858-1.2.858-1.96" />
@@ -66,7 +65,7 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
     
     // Get verification status
     const verifiedA = a.getAttribute('data-is-legitimate') === 'true';
-    const verifiedB = a.getAttribute('data-is-legitimate') === 'true';
+    const verifiedB = b.getAttribute('data-is-legitimate') === 'true';
     
     // Check if centers have any verification data at all
     const hasDataA = scoreA > 0 || verifiedA;
@@ -79,7 +78,7 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
     // If both have no data, sort alphabetically
     if (!hasDataA && !hasDataB) {
       const nameA = a.getAttribute('data-name') || '';
-      const nameB = a.getAttribute('data-name') || '';
+      const nameB = b.getAttribute('data-name') || '';
       return nameA.localeCompare(nameB);
     }
     

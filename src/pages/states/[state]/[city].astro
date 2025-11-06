@@ -121,10 +121,6 @@ if (!centers || centers.length === 0) {
 const cityStateKey = `${searchCityName}, ${state.name}`;
 const localData = await getLocalCityData(cityStateKey);
 
-// Get city description from database (if available)
-const cityId = normalizeForUrl(cityName);
-const cityDescription = await getCityDescription(stateParam, cityId);
-
 // Count how many centers match exactly vs nearby centers
 const exactMatches = centers.filter(center => center.matched === true);
 const nearbyMatches = centers.filter(center => center.matched !== true);
@@ -160,6 +156,10 @@ if (cityNameCounts.size > 0) {
 
 // For title display
 const locationDescription = hasExactMatches ? cityName : `${state.name} area`;
+
+// Get city description from database (if available) - MUST be after cityName is determined
+const cityId = normalizeForUrl(cityName);
+const cityDescription = await getCityDescription(stateParam, cityId);
 
 // Generate a consistent but pseudo-random number based on city name for phrasing variation
 const cityHash = cityName.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);

@@ -4,7 +4,9 @@ import type { APIRoute } from 'astro';
 const REVALIDATION_TOKEN =
   import.meta.env.REVALIDATION_TOKEN || 'your-secret-token-change-me';
 
-export const get: APIRoute = async ({ request }) => {
+// export const prerender = false; // Commented out - Vercel will handle this as serverless function
+
+export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const token = url.searchParams.get('token');
   const path = url.searchParams.get('path');

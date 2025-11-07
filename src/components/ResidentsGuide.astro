@@ -1,0 +1,170 @@
+---
+import type { RecyclingCenter } from '../types/supabase';
+
+interface Props {
+  cityName: string;
+  state: string;
+  centers: RecyclingCenter[];
+  localData?: {
+    regulations?: any;
+    stats?: any;
+  };
+}
+
+const { cityName, state, centers, localData } = Astro.props;
+
+// Generate city-specific tips based on local data
+function generateLocalTips(cityName: string, state: string, localData?: any): string[] {
+  const tips = [];
+  
+  if (localData?.regulations?.has_ewaste_ban) {
+    tips.push(`${state} law prohibits disposing electronics in regular trash. Always use certified recycling facilities.`);
+  }
+  
+  if (localData?.regulations?.municipal_programs) {
+    tips.push(`Check with ${cityName} municipal programs for free or low-cost recycling events throughout the year.`);
+  }
+  
+  if (localData?.stats?.recycling_rate && Number(localData.stats.recycling_rate) < 30) {
+    tips.push(`With a ${localData.stats.recycling_rate}% recycling rate, ${cityName} has room to improve. Every device you recycle makes a difference.`);
+  }
+  
+  // Always include these general tips
+  tips.push(`Call ahead to confirm what items each center accepts and their hours of operation.`);
+  tips.push(`Remove all personal data from devices before recycling to protect your privacy.`);
+  tips.push(`Some centers offer free pickup for large quantities - ask about bulk recycling services.`);
+  
+  return tips;
+}
+
+// Generate "what NOT to include" list
+function generateWhatNotToInclude(): string[] {
+  return [
+    'Batteries that are leaking or damaged (these require special handling)',
+    'Devices with personal data that hasn\'t been wiped',
+    'Items mixed with regular trash or other recyclables',
+    'Electronics that have been exposed to water damage without proper assessment',
+    'Devices with unknown or suspicious origins'
+  ];
+}
+
+// Generate step-by-step guide
+function generateStepByStepGuide(cityName: string, centers: RecyclingCenter[]): Array<{step: number, title: string, description: string}> {
+  return [
+    {
+      step: 1,
+      title: 'Prepare Your Devices',
+      description: 'Remove all personal data using factory reset or data wiping software. Remove batteries from devices if possible.'
+    },
+    {
+      step: 2,
+      title: 'Gather Your Electronics',
+      description: `Collect all devices you want to recycle. Check our list of ${centers.length} centers in ${cityName} to see which items each accepts.`
+    },
+    {
+      step: 3,
+      title: 'Call Ahead',
+      description: 'Contact your chosen recycling center to confirm hours, accepted items, and any fees. Some centers offer free drop-off for residents.'
+    },
+    {
+      step: 4,
+      title: 'Transport Safely',
+      description: 'Pack devices securely to prevent damage during transport. Keep batteries separate if removed.'
+    },
+    {
+      step: 5,
+      title: 'Drop Off and Get Receipt',
+      description: 'Bring your electronics to the center during business hours. Request a receipt for your records, especially if you\'re recycling for business purposes.'
+    }
+  ];
+}
+
+const localTips = generateLocalTips(cityName, state, localData);
+const whatNotToInclude = generateWhatNotToInclude();
+const stepByStepGuide = generateStepByStepGuide(cityName, centers);
+---
+
+<!-- Resident's Guide Section -->
+<div class="bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 border border-purple-200 rounded-lg p-6 mb-6">
+  <div class="flex items-center mb-4">
+    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+      <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+      </svg>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-900">Resident's Guide to Electronics Recycling in {cityName}</h2>
+  </div>
+  
+  <p class="text-gray-700 mb-6 text-base leading-relaxed">
+    This practical guide helps {cityName} residents navigate electronics recycling with confidence. Follow these steps and tips to ensure your devices are disposed of safely and responsibly.
+  </p>
+
+  <!-- Step-by-Step Guide -->
+  <div class="mb-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+      </svg>
+      Step-by-Step Recycling Process
+    </h3>
+    <div class="space-y-4">
+      {stepByStepGuide.map((item) => (
+        <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500 shadow-sm">
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+              <span class="text-blue-700 font-bold text-sm">{item.step}</span>
+            </div>
+            <div class="flex-1">
+              <h4 class="font-semibold text-gray-900 mb-1">{item.title}</h4>
+              <p class="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- What NOT to Include -->
+  <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+    <h3 class="text-lg font-semibold text-red-900 mb-3 flex items-center">
+      <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+      </svg>
+      What NOT to Include
+    </h3>
+    <p class="text-red-800 text-sm mb-3">
+      To ensure safe recycling and protect workers, avoid including these items:
+    </p>
+    <ul class="space-y-2">
+      {whatNotToInclude.map((item) => (
+        <li class="flex items-start text-sm text-red-700">
+          <svg class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- Local Tips -->
+  <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+    <h3 class="text-lg font-semibold text-green-900 mb-3 flex items-center">
+      <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+      </svg>
+      Local Tips for {cityName} Residents
+    </h3>
+    <ul class="space-y-2">
+      {localTips.map((tip) => (
+        <li class="flex items-start text-sm text-green-800">
+          <svg class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>{tip}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+

@@ -17,11 +17,24 @@
 }
 
 /* Ensure proper page layout and footer positioning */
+html {
+  overflow-x: hidden;
+  height: auto;
+  min-height: 100%;
+  max-height: none;
+}
+
 body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
+  height: auto;
+  overflow-x: hidden;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  max-height: none;
 }
 
 main {
@@ -29,6 +42,8 @@ main {
   display: flex;
   flex-direction: column;
   width: 100%;
+  position: relative;
+  min-height: 0;
 }
 
 footer {
@@ -36,6 +51,7 @@ footer {
   width: 100%;
   z-index: 10;
   position: relative;
+  margin-top: auto;
 }
 
 /* Solve issue with footer appearing at top on city pages */
@@ -135,10 +151,15 @@ footer {
 /* Layout and scrolling styles */
 @media (min-width: 1024px) {
   .centers-container {
-    height: calc(100vh - 16rem);
+    height: 600px;
+    max-height: 600px;
     overflow-y: auto;
+    overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: #9ca3af transparent;
+    position: relative;
+    /* Prevent creating extra scrollable space */
+    contain: layout style paint;
   }
 
   .centers-container::-webkit-scrollbar {
@@ -152,6 +173,111 @@ footer {
   .centers-container::-webkit-scrollbar-thumb {
     background-color: #9ca3af;
     border-radius: 3px;
+  }
+  
+  /* Ensure the container doesn't extend beyond its parent */
+  .centers-container > * {
+    max-width: 100%;
+  }
+}
+
+/* Fix for sticky elements that might create extra scrollable space */
+.map-container {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .map-container.lg\:sticky {
+    align-self: flex-start;
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+  }
+}
+
+/* Ensure page height matches content - prevent extra scrollable space */
+body {
+  max-width: 100vw;
+}
+
+/* Ensure footer doesn't create extra space */
+footer {
+  clear: both;
+}
+
+/* CRITICAL FIX: Prevent extra scrollable space after footer */
+/* Ensure document height exactly matches content height - no extra scrollable space */
+html {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: auto;
+}
+
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: auto;
+}
+
+/* Ensure main content doesn't create extra space */
+main {
+  overflow: visible;
+}
+
+/* Fix for sticky map container - prevent extra scrollable space */
+@media (min-width: 1024px) {
+  .grid.grid-cols-1.lg\:grid-cols-2 {
+    align-items: start;
+    /* Prevent grid from creating extra scrollable space */
+    min-height: 0;
+  }
+  
+  .map-container.lg\:sticky {
+    height: 600px;
+    max-height: 600px;
+    overflow: hidden;
+    position: sticky;
+    top: 2rem;
+    align-self: start;
+    /* Prevent sticky from creating extra scrollable space */
+    will-change: transform;
+  }
+  
+  /* Prevent sticky elements from creating extra scrollable space */
+  .lg\:sticky {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 2rem;
+    align-self: start;
+    max-height: calc(100vh - 4rem);
+  }
+  
+  /* CRITICAL: Prevent centers-container from creating extra scrollable space */
+  .centers-container {
+    /* Ensure it doesn't extend beyond the viewport */
+    max-height: 600px;
+    height: 600px;
+    /* Prevent it from affecting document height */
+    position: relative;
+    /* Ensure content is properly contained */
+    contain: layout style paint;
+  }
+  
+  /* Ensure the grid container doesn't create extra space */
+  .grid.grid-cols-1.lg\:grid-cols-2.gap-8 {
+    /* Prevent grid from extending beyond content */
+    min-height: 0;
+    height: auto;
+    /* Ensure grid doesn't create extra scrollable space */
+    contain: layout;
+  }
+  
+  /* CRITICAL: Ensure the parent container of centers-container doesn't extend beyond footer */
+  .grid.grid-cols-1.lg\:grid-cols-2.gap-8.mb-12 {
+    /* Prevent margin-bottom from creating extra space */
+    margin-bottom: 3rem;
+    /* Ensure it doesn't extend beyond content */
+    position: relative;
   }
 }
 

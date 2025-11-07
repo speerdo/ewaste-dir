@@ -136,6 +136,81 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
             });
           });
         }
+        
+        // Fix: Prevent extra scrollable space after footer
+        function fixExtraScrollableSpace() {
+          const body = document.body;
+          const html = document.documentElement;
+          const footer = document.querySelector('footer');
+          const centersContainer = document.querySelector('.centers-container');
+          
+          if (footer) {
+            // Get the footer position
+            const footerRect = footer.getBoundingClientRect();
+            const footerBottom = footerRect.bottom + window.scrollY;
+            
+            // Get the actual document height
+            const documentHeight = Math.max(
+              document.body.scrollHeight,
+              document.body.offsetHeight,
+              document.documentElement.clientHeight,
+              document.documentElement.scrollHeight,
+              document.documentElement.offsetHeight
+            );
+            
+            // CRITICAL: If there's extra scrollable space after the footer, fix it
+            // The document height should be approximately the footer bottom position
+            // Allow a small margin (20px) for rounding errors
+            if (documentHeight > footerBottom + 20) {
+              // There's extra scrollable space - fix it
+              const extraSpace = documentHeight - footerBottom;
+              
+              // Try to find what's creating the extra space
+              // Check if centers-container is creating extra space
+              if (centersContainer) {
+                const containerRect = centersContainer.getBoundingClientRect();
+                const containerBottom = containerRect.bottom + window.scrollY;
+                
+                // If the container extends beyond the footer, it might be the issue
+                if (containerBottom > footerBottom) {
+                  // Ensure the container doesn't create extra space
+                  centersContainer.style.maxHeight = '600px';
+                  centersContainer.style.height = '600px';
+                  centersContainer.style.overflowY = 'auto';
+                  centersContainer.style.overflowX = 'hidden';
+                }
+              }
+              
+              // Ensure body and html don't have extra height
+              body.style.height = 'auto';
+              html.style.height = 'auto';
+              
+              // Force a recalculation
+              const newDocumentHeight = Math.max(
+                document.body.scrollHeight,
+                document.body.offsetHeight,
+                document.documentElement.clientHeight,
+                document.documentElement.scrollHeight,
+                document.documentElement.offsetHeight
+              );
+              
+              // If still too tall, try setting explicit height
+              if (newDocumentHeight > footerBottom + 20) {
+                // Set body height to footer bottom + small margin
+                body.style.height = (footerBottom + 10) + 'px';
+                html.style.height = 'auto';
+              }
+            }
+          }
+        }
+        
+        // Run on load and after any dynamic content loads
+        fixExtraScrollableSpace();
+        window.addEventListener('load', fixExtraScrollableSpace);
+        window.addEventListener('resize', fixExtraScrollableSpace);
+        
+        // Also run after Astro page transitions
+        document.addEventListener('astro:page-load', fixExtraScrollableSpace);
       });
     </script>
   </body>

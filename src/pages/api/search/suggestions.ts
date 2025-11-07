@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { getAllCityStatePairs } from '../../../lib/cityData';
 import { searchLocations } from '../../../lib/cityData';
 
+// export const prerender = false; // Commented out - Vercel will handle this as serverless function
+
 export const GET: APIRoute = async ({ url }): Promise<Response> => {
   try {
     const query = url.searchParams.get('q')?.toLowerCase().trim() || '';

@@ -1,4 +1,6 @@
 ---
+export const prerender = false; // Search page uses query parameters, needs to be server-rendered
+
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../lib/supabase';
 import type { RecyclingCenter } from '../types/supabase';

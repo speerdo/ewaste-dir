@@ -7,6 +7,8 @@ import {
 } from '../lib/url-utils';
 import type { APIRoute } from 'astro';
 
+export const prerender = false; // API routes need to be server-side
+
 export const GET: APIRoute = async () => {
   const states = await getAllStates();
 

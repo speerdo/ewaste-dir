@@ -6,7 +6,11 @@ import MapComponent from '../../../components/MapComponent.astro';
 import type { Marker } from '../../../components/MapComponent.astro';
 import CentersList from '../../../components/recycling-centers/CentersList.astro';
 import CityContentEnhancer from '../../../components/CityContentEnhancer.astro';
+import ResidentsGuide from '../../../components/ResidentsGuide.astro';
+import LocalNews from '../../../components/LocalNews.astro';
 import { generateCityMeta } from '../../../utils/metaGenerator';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 
 // Default images
 const DEFAULT_LOGO = '/images/recycling.webp';
@@ -178,6 +182,27 @@ const introPhrasings = [
 ];
 
 const selectedIntroPhrase = introPhrasings[phrasingIndex];
+
+// Get relevant blog posts for linking
+const allBlogPosts = await getCollection('blog');
+// Select 3-4 most relevant posts (prioritize guides, data security, and general recycling topics)
+const relevantPosts = allBlogPosts
+  .filter((post: CollectionEntry<'blog'>) => {
+    const title = post.data.title.toLowerCase();
+    const description = post.data.description.toLowerCase();
+    // Prioritize guides, data security, recycling guides, and general topics
+    return title.includes('guide') || 
+           title.includes('data') || 
+           title.includes('security') ||
+           title.includes('recycling') ||
+           title.includes('how to') ||
+           description.includes('step-by-step') ||
+           description.includes('guide');
+  })
+  .sort((a: CollectionEntry<'blog'>, b: CollectionEntry<'blog'>) => 
+    b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+  )
+  .slice(0, 4);
 
 // Generate OG image URL using a static default image with the production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
@@ -828,6 +853,58 @@ if (baseTitle.length <= maxTitleLength) {
       showNearbyMessage={showNearbyMessage}
       useDatabaseDescription={!!cityDescription}
     />
+
+    <!-- Local News Section (fetched client-side) -->
+    <LocalNews 
+      cityName={cityName}
+      state={state.name}
+    />
+
+    <!-- Resident's Guide Section -->
+    <ResidentsGuide 
+      cityName={cityName}
+      state={state.name}
+      centers={displayCenters}
+      localData={localData}
+    />
+
+    <!-- Related Blog Articles Section -->
+    {relevantPosts.length > 0 && (
+      <div class="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-6">
+        <div class="flex items-center mb-4">
+          <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900">Learn More About Electronics Recycling</h2>
+        </div>
+        <p class="text-gray-700 mb-4 text-base">
+          Explore our comprehensive guides and articles to learn more about responsible electronics recycling, data security, and environmental impact.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {relevantPosts.map((post: CollectionEntry<'blog'>) => (
+            <a 
+              href={`/blog/${post.slug}`}
+              class="bg-white rounded-lg p-4 border border-indigo-200 hover:border-indigo-400 hover:shadow-md transition-all group"
+            >
+              <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                {post.data.title}
+              </h3>
+              <p class="text-sm text-gray-600 line-clamp-2 mb-2">
+                {post.data.description}
+              </p>
+              <div class="flex items-center text-sm text-indigo-600 font-medium">
+                Read article
+                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
 
     <!-- Quick Preparation Tips -->
     <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">

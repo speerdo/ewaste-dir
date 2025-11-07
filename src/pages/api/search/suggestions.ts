@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { getAllCityStatePairs } from '../../../lib/cityData';
 import { searchLocations } from '../../../lib/cityData';
 
+export const prerender = false; // API routes need to be server-side
+
 export const GET: APIRoute = async ({ url }): Promise<Response> => {
   try {
     const query = url.searchParams.get('q')?.toLowerCase().trim() || '';

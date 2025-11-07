@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 
 // Optimized API endpoint that provides city data as a single JSON payload
 // Used by search components to load all city data at once
-// export const prerender = false;
+export const prerender = false; // API routes need to be server-side
 
 interface CityWithCoordinates {
   city: string;

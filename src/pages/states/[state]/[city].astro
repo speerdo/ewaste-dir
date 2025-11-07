@@ -844,6 +844,12 @@ if (baseTitle.length <= maxTitleLength) {
       </div>
     </div>
 
+    <!-- Local News Section (fetched client-side) -->
+    <LocalNews 
+      cityName={cityName}
+      state={state.name}
+    />
+
     <!-- Enhanced City-Specific Content (fallback if no database description) -->
     <CityContentEnhancer 
       cityName={cityName}
@@ -852,12 +858,6 @@ if (baseTitle.length <= maxTitleLength) {
       localData={localData}
       showNearbyMessage={showNearbyMessage}
       useDatabaseDescription={!!cityDescription}
-    />
-
-    <!-- Local News Section (fetched client-side) -->
-    <LocalNews 
-      cityName={cityName}
-      state={state.name}
     />
 
     <!-- Resident's Guide Section -->

@@ -7,16 +7,33 @@ import { XMLParser } from 'fast-xml-parser';
  * 
  * Note: In static mode, this will be handled by Vercel as a serverless function
  */
-// export const prerender = false; // Commented out - Vercel will handle this as serverless function
+// In static mode, Vercel automatically handles /api/* routes as serverless functions
+// We don't set prerender = false here because it would break static builds
+// Vercel will detect and handle this route automatically at runtime
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
+  // Handle OPTIONS for CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
+  }
+  
   const city = url.searchParams.get('city');
   const state = url.searchParams.get('state');
   
   if (!city || !state) {
     return new Response(JSON.stringify({ error: 'City and state are required' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   }
   
@@ -124,18 +141,26 @@ export const GET: APIRoute = async ({ url }) => {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
       }
     });
     
   } catch (error) {
-    console.error('Error fetching news:', error);
+    console.error('News API Error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return new Response(JSON.stringify({ 
       error: 'Failed to fetch news',
+      errorDetails: errorMessage,
       articles: []
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   }
 };

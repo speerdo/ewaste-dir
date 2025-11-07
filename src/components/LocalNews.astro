@@ -50,21 +50,44 @@ const { cityName, state } = Astro.props;
     const errorEl = document.getElementById('news-error');
     const articlesEl = document.getElementById('news-articles');
     
-    if (!container) return;
+    if (!container) {
+      console.error('LocalNews: Container not found');
+      return;
+    }
     
     const cityName = container.dataset.city;
     const state = container.dataset.state;
     
+    console.log('LocalNews: Fetching news for', cityName, state);
+    
+    if (!cityName || !state) {
+      console.error('LocalNews: Missing city or state data');
+      loadingEl.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+      errorEl.innerHTML = '<p class="text-gray-600 text-sm">Unable to load news: missing location data.</p>';
+      return;
+    }
+    
     try {
       // Fetch news via API endpoint (to handle CORS)
-      const response = await fetch(`/api/news?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(state)}`);
+      const apiUrl = `/api/news?city=${encodeURIComponent(cityName)}&state=${encodeURIComponent(state)}`;
+      console.log('LocalNews: Calling API:', apiUrl);
+      
+      const response = await fetch(apiUrl);
+      
+      console.log('LocalNews: API response status:', response.status, response.statusText);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch news');
+        const errorText = await response.text();
+        console.error('LocalNews: API error response:', errorText);
+        throw new Error(`Failed to fetch news: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log('LocalNews: Received data:', data);
+      
       const articles = data.articles || [];
+      console.log('LocalNews: Found articles:', articles.length);
       
       // Filter to recent articles (last 6 months)
       const sixMonthsAgo = new Date();
@@ -86,8 +109,10 @@ const { cityName, state } = Astro.props;
         .slice(0, 3); // Show max 3 articles
       
       if (recentArticles.length === 0) {
-        // Hide entire section if no recent articles
-        container.style.display = 'none';
+        // Show message if no recent articles instead of hiding
+        loadingEl.classList.add('hidden');
+        errorEl.classList.remove('hidden');
+        errorEl.innerHTML = '<p class="text-gray-600 text-sm">No recent recycling news found for this area. Check back later for updates!</p>';
         return;
       }
       
@@ -159,9 +184,16 @@ const { cityName, state } = Astro.props;
       }).join('');
       
     } catch (error) {
-      console.error('Error fetching news:', error);
+      console.error('LocalNews: Error fetching news:', error);
       loadingEl.classList.add('hidden');
       errorEl.classList.remove('hidden');
+      // Show a more helpful error message with debugging info
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      errorEl.innerHTML = `
+        <p class="text-gray-600 text-sm mb-2">Unable to load news at this time.</p>
+        <p class="text-gray-500 text-xs">Error: ${errorMessage}</p>
+        <p class="text-gray-500 text-xs mt-1">Check browser console for details.</p>
+      `;
     }
   })();
 </script>

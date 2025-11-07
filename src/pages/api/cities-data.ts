@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 
 // Optimized API endpoint that provides city data as a single JSON payload
 // Used by search components to load all city data at once
-export const prerender = false; // API routes need to be server-side
+// export const prerender = false; // Commented out - Vercel will handle this as serverless function
 
 interface CityWithCoordinates {
   city: string;

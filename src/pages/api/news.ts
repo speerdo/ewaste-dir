@@ -5,9 +5,9 @@ import { XMLParser } from 'fast-xml-parser';
  * API endpoint to fetch local recycling news via RSS feeds
  * This proxies RSS feeds to handle CORS issues
  * 
- * Note: This works in static mode because Vercel handles API routes as serverless functions
+ * Note: In static mode, this will be handled by Vercel as a serverless function
  */
-export const prerender = false; // API routes need to be server-side
+// export const prerender = false; // Commented out - Vercel will handle this as serverless function
 
 export const GET: APIRoute = async ({ url }) => {
   const city = url.searchParams.get('city');

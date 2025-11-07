@@ -1,7 +1,6 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
-import vercel from '@astrojs/vercel/serverless';
 
 // Production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
@@ -37,8 +36,7 @@ export default defineConfig({
       },
     }),
   ],
-  output: 'hybrid',
-  adapter: vercel(),
+  output: 'static',
   build: {
     inlineStylesheets: 'auto',
     assets: 'assets',

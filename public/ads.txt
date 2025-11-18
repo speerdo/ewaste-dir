@@ -1,12 +1,6 @@
 #Ads.txt recycleoldtech.com
 #Ads.txt managed by AdsTxtManager.com - the free ads.txt management tool for publishers
 ownerdomain=recycleoldtech.com
-contact=directsales@ezoic.com
-managerdomain=ezoic.ai
-
-ezoic.ai, 87d2c1daea01ab4c60ae8befb03533ca, DIRECT
-ezoic.ai, 748d35a1eecaa556a322195ee06d1ced, DIRECT
-ezoic.co.uk, 748d35a1eecaa556a322195ee06d1ced, DIRECT
 # 35
 themediagrid.com, 4M5PGT, DIRECT, 35d5010d7789b49d
 themediagrid.com, Q19AKF, DIRECT, 35d5010d7789b49d

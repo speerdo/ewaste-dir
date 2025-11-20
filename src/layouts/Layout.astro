@@ -1,6 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import AdsterraNativeBanner from '../components/AdsterraNativeBanner.astro';
 import '../styles/recycling-centers.css';
 import { getAbsoluteUrl, getCanonicalUrl } from '../lib/url-utils';
 import Analytics from '@vercel/analytics/astro';
@@ -84,6 +85,11 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
     <Header />
     
     <main class="flex-grow">
+      <!-- Adsterra Native Banner - Will be moved after first section via JS -->
+      <div id="adsterra-banner-container" style="display: none;">
+        <AdsterraNativeBanner />
+      </div>
+      
       <slot />
     </main>
     
@@ -99,9 +105,6 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
 
     <!-- Vercel Analytics -->
     <Analytics />
-
-    <!-- Social Bar Ads -->
-    <script type='text/javascript' src='//pl28081786.effectivegatecpm.com/93/b4/7f/93b47ff1db634df3e0148f0ad1cfd93d.js'></script>
 
     <script>
       // Back to top button
@@ -203,6 +206,42 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
         
         // Also run after Astro page transitions
         document.addEventListener('astro:page-load', fixExtraScrollableSpace);
+        
+        // Move Adsterra banner after first major section for better UX
+        function placeAdsterraBanner() {
+          const bannerContainer = document.getElementById('adsterra-banner-container');
+          if (!bannerContainer) return;
+          
+          // Find the first major section (hero, first section, or first div with significant content)
+          const main = document.querySelector('main');
+          if (!main) return;
+          
+          // Look for common first section patterns
+          const firstSection = main.querySelector('section:first-of-type, .hero, [class*="hero"], [class*="Hero"]') ||
+                               main.querySelector('div.pt-16, div.pt-20') ||
+                               main.children[0];
+          
+          if (firstSection && firstSection !== bannerContainer) {
+            // Show the banner container
+            bannerContainer.style.display = 'block';
+            
+            // Insert after the first section with proper spacing
+            firstSection.insertAdjacentElement('afterend', bannerContainer);
+            
+            // Add margin for spacing
+            bannerContainer.style.marginTop = '2rem';
+            bannerContainer.style.marginBottom = '2rem';
+          } else {
+            // Fallback: show at top if no section found
+            bannerContainer.style.display = 'block';
+            bannerContainer.style.paddingTop = '5rem';
+          }
+        }
+        
+        // Run on load and after page transitions
+        placeAdsterraBanner();
+        window.addEventListener('load', placeAdsterraBanner);
+        document.addEventListener('astro:page-load', placeAdsterraBanner);
       });
     </script>
   </body>

@@ -702,8 +702,8 @@ if (baseTitle.length <= maxTitleLength) {
             
             {/* Database description paragraphs - most prominent */}
             {cityDescription ? (
-              cityDescription.split('\n\n').map((paragraph: string, index: number) => (
-                <p class="mb-4" key={index}>{paragraph}</p>
+              cityDescription.split('\n\n').map((paragraph: string) => (
+                <p class="mb-4">{paragraph}</p>
               ))
             ) : (
               /* Fallback if no database description */

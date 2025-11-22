@@ -1,5 +1,6 @@
 ---
 import Layout from './Layout.astro';
+import BannerAd from '../components/BannerAd.astro';
 import StateDescription from '../components/StateDescription.astro';
 import { getState, getRecyclingCentersByState, normalizeForUrl } from '../lib/supabase';
 import type { State, RecyclingCenter, City } from '../types/supabase';
@@ -156,9 +157,13 @@ const enhancedDescription = description || (() => {
   title={statePageTitle}
   description={enhancedDescription}
   ogImage={ogImage}
+  showBanner={false}
 >
+  <!-- Banner Ad with reduced bottom padding for state pages -->
+  <BannerAd addTopPadding={true} reduceBottomPadding={true} />
+  
   <!-- State Hero -->
-  <div class="pt-16"> <!-- Added padding to account for fixed header -->
+  <div>
     <!-- Hero Image -->
     <div class="relative h-[400px] overflow-hidden">
       <img 

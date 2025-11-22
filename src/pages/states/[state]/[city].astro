@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import BannerAd from '../../../components/BannerAd.astro';
 import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState, getCityDescription } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
@@ -534,6 +535,7 @@ if (baseTitle.length <= maxTitleLength) {
   title={metaTitle}
   description={metaDescription}
   ogImage={ogImageUrl}
+  showBanner={false}
 >
   <!-- Google Maps API and Global Direction Functions -->
   <script is:inline define:vars={{ mapApiKey: import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY }}>
@@ -651,21 +653,8 @@ if (baseTitle.length <= maxTitleLength) {
     </div>
   </div>
 
-  <!-- Banner Ad -->
-  <div class="container mx-auto px-4 py-4">
-    <div class="flex justify-center items-center">
-      <script type="text/javascript">
-        atOptions = {
-          'key' : '20016c80aa06a20da138e161bee80b71',
-          'format' : 'iframe',
-          'height' : 90,
-          'width' : 728,
-          'params' : {}
-        };
-      </script>
-      <script type="text/javascript" src="//www.highperformanceformat.com/20016c80aa06a20da138e161bee80b71/invoke.js"></script>
-    </div>
-  </div>
+  <!-- Banner Ad (positioned after hero, same as before) -->
+  <BannerAd addTopPadding={false} />
 
   <!-- Main content -->
   <div class="container mx-auto px-4 py-8">

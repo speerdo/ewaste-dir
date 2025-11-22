@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry } from 'astro:content';
 import Layout from './Layout.astro';
+import BannerAd from '../components/BannerAd.astro';
 
 type Props = {
   post: CollectionEntry<'blog'>;
@@ -17,10 +18,12 @@ const currentUrl = Astro.url;
 const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_URL).toString() : currentUrl.toString();
 ---
 
-<Layout title={`${title} | RecycleOldTech Blog`} description={description} ogImage={image}>
+<Layout title={`${title} | RecycleOldTech Blog`} description={description} ogImage={image} showBanner={false}>
+  <!-- Banner Ad with reduced bottom padding for blog posts -->
+  <BannerAd addTopPadding={true} reduceBottomPadding={true} />
   <article>
     <!-- Hero Section -->
-    <div class="relative h-[600px] overflow-hidden" style="margin-top: 84px;">
+    <div class="relative h-[600px] overflow-hidden">
       <img 
         src={image} 
         alt={title}

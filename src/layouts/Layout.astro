@@ -1,7 +1,6 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import BannerAd from '../components/BannerAd.astro';
 import '../styles/recycling-centers.css';
 import { getAbsoluteUrl, getCanonicalUrl } from '../lib/url-utils';
 import Analytics from '@vercel/analytics/astro';
@@ -11,10 +10,9 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
-  showBanner?: boolean; // Allow pages to control banner visibility
 }
 
-const { title, description, ogImage, showBanner = true } = Astro.props;
+const { title, description, ogImage } = Astro.props;
 
 // Default meta description
 const metaDescription = description || 'Find electronics recycling centers near you. Get directions, contact information, and more.';
@@ -84,9 +82,6 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
   </head>
   <body class="min-h-screen flex flex-col bg-white">
     <Header />
-    
-    <!-- Banner Ad (site-wide, can be disabled per page) -->
-    {showBanner && <BannerAd />}
     
     <main class="flex-grow">
       <slot />

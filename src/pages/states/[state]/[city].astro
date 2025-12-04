@@ -1,6 +1,5 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import BannerAd from '../../../components/BannerAd.astro';
 import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState, getCityDescription } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
@@ -535,7 +534,6 @@ if (baseTitle.length <= maxTitleLength) {
   title={metaTitle}
   description={metaDescription}
   ogImage={ogImageUrl}
-  showBanner={false}
 >
   <!-- Google Maps API and Global Direction Functions -->
   <script is:inline define:vars={{ mapApiKey: import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY }}>
@@ -652,9 +650,6 @@ if (baseTitle.length <= maxTitleLength) {
       </div>
     </div>
   </div>
-
-  <!-- Banner Ad (positioned after hero, same as before) -->
-  <BannerAd addTopPadding={false} />
 
   <!-- Main content -->
   <div class="container mx-auto px-4 py-8">

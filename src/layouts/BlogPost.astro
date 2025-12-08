@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry } from 'astro:content';
 import Layout from './Layout.astro';
+import TradeInCallout from '../components/TradeInCallout.astro';
 
 type Props = {
   post: CollectionEntry<'blog'>;
@@ -80,6 +81,11 @@ const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_
       <div class="max-w-3xl mx-auto">
         <div class="prose prose-lg prose-green mx-auto">
           <slot />
+        </div>
+
+        <!-- Trade-In Callout - placed after article content for engaged readers -->
+        <div class="mt-8">
+          <TradeInCallout variant="compact" />
         </div>
 
         <!-- Share Links -->

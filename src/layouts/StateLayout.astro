@@ -1,6 +1,7 @@
 ---
 import Layout from './Layout.astro';
 import StateDescription from '../components/StateDescription.astro';
+import TradeInCallout from '../components/TradeInCallout.astro';
 import { getState, getRecyclingCentersByState, normalizeForUrl } from '../lib/supabase';
 import type { State, RecyclingCenter, City } from '../types/supabase';
 import type { CentersByCity } from '../lib/supabase';
@@ -221,6 +222,9 @@ const enhancedDescription = description || (() => {
   <!-- Cities Section -->
   <div class="container mx-auto px-4 py-12">
     <div class="max-w-7xl mx-auto">
+      
+      <!-- Trade-In Callout -->
+      <TradeInCallout />
       
       <!-- Full Width Cities Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-12">

@@ -8,6 +8,7 @@ import CentersList from '../../../components/recycling-centers/CentersList.astro
 import CityContentEnhancer from '../../../components/CityContentEnhancer.astro';
 import ResidentsGuide from '../../../components/ResidentsGuide.astro';
 import LocalNews from '../../../components/LocalNews.astro';
+import TradeInCallout from '../../../components/TradeInCallout.astro';
 import { generateCityMeta } from '../../../utils/metaGenerator';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
@@ -813,6 +814,9 @@ if (baseTitle.length <= maxTitleLength) {
         </div>
       </div>
     )}
+
+    <!-- Trade-In Callout -->
+    <TradeInCallout />
 
     <!-- Sort Controls -->
     <div class="mb-6 flex justify-between items-center">

@@ -1,0 +1,115 @@
+---
+/**
+ * TradeInCallout - Affiliate callout for Amazon Trade-In program
+ * Encourages users to check trade-in value before recycling their electronics
+ */
+
+interface Props {
+  /** Optional variant to control styling context */
+  variant?: 'default' | 'compact';
+}
+
+const { variant = 'default' } = Astro.props;
+
+const isCompact = variant === 'compact';
+---
+
+<aside class={`
+  trade-in-callout
+  bg-gradient-to-r from-emerald-50 to-teal-50
+  border-l-4 border-emerald-500
+  rounded-lg shadow-sm
+  ${isCompact ? 'p-4' : 'p-6'}
+  mb-8
+`}>
+  <div class="flex items-start gap-4">
+    <!-- Icon -->
+    <div class={`
+      flex-shrink-0
+      ${isCompact ? 'w-10 h-10' : 'w-12 h-12'}
+      bg-emerald-100 rounded-full
+      flex items-center justify-center
+    `}>
+      <svg 
+        class={`${isCompact ? 'w-5 h-5' : 'w-6 h-6'} text-emerald-600`}
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path 
+          stroke-linecap="round" 
+          stroke-linejoin="round" 
+          stroke-width="2" 
+          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 min-w-0">
+      <h3 class={`
+        font-display font-bold text-gray-900
+        ${isCompact ? 'text-lg mb-1' : 'text-xl mb-2'}
+      `}>
+        Get Cash for Your Old Electronics
+      </h3>
+      
+      <p class={`
+        text-gray-600
+        ${isCompact ? 'text-sm mb-3' : 'text-base mb-4'}
+      `}>
+        Before you recycle, check if your device has trade-in value. Amazon Trade-In offers instant quotes and free shipping for phones, tablets, Kindles, Echo devices, and more.
+      </p>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <a 
+          href="https://amzn.to/3Kk2E45"
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          class={`
+            inline-flex items-center
+            bg-emerald-600 hover:bg-emerald-700
+            text-white font-medium
+            ${isCompact ? 'px-4 py-2 text-sm' : 'px-5 py-2.5'}
+            rounded-lg
+            shadow-sm hover:shadow-md
+            transition-all duration-200
+            group
+          `}
+        >
+          Check Trade-In Value
+          <svg 
+            class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+
+        <span class={`
+          text-gray-500
+          ${isCompact ? 'text-xs' : 'text-sm'}
+        `}>
+          Or find free recycling options below
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accepted devices badge -->
+  <div class={`
+    mt-4 pt-4 border-t border-emerald-200/50
+    flex flex-wrap gap-2
+    ${isCompact ? 'text-xs' : 'text-sm'}
+  `}>
+    <span class="text-gray-500">Accepts:</span>
+    {['Phones', 'Tablets', 'Kindles', 'Echo', 'Gaming'].map((device) => (
+      <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">
+        {device}
+      </span>
+    ))}
+  </div>
+</aside>
+

@@ -1,0 +1,79 @@
+---
+/**
+ * TradeInBanner - Promotional banner for Amazon Trade-In affiliate program
+ * Placed between Hero and directory sections to catch users before they search
+ */
+
+const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
+---
+
+<section class="py-6 bg-gradient-to-b from-green-800 to-gray-50">
+  <div class="container mx-auto px-4">
+    <div class="max-w-4xl mx-auto">
+      <div class="relative bg-gradient-to-r from-slate-700 via-blue-800 to-slate-800 rounded-2xl shadow-xl overflow-hidden">
+        <!-- Decorative background pattern -->
+        <div class="absolute inset-0 opacity-10">
+          <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <pattern id="trade-in-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M0 10h20M10 0v20" stroke="white" stroke-width="0.5" fill="none"/>
+              </pattern>
+            </defs>
+            <rect width="100" height="100" fill="url(#trade-in-pattern)" />
+          </svg>
+        </div>
+        
+        <!-- Content -->
+        <div class="relative z-10 px-6 py-8 md:px-10 md:py-10">
+          <div class="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+            
+            <!-- Icon/Visual -->
+            <div class="flex-shrink-0">
+              <div class="w-16 h-16 md:w-20 md:h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                <svg class="w-9 h-9 md:w-11 md:h-11 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            
+            <!-- Text Content -->
+            <div class="flex-1 text-center md:text-left">
+              <h2 class="text-xl md:text-2xl font-display font-bold text-white mb-2">
+                Your Old Electronics Might Be Worth Money
+              </h2>
+              <p class="text-blue-100 text-sm md:text-base max-w-xl">
+                Get instant trade-in quotes before you recycle. Free shipping, no obligation — see what your phone, tablet, or laptop is worth.
+              </p>
+            </div>
+            
+            <!-- CTA Button -->
+            <div class="flex-shrink-0">
+              <a 
+                href={AFFILIATE_LINK}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                class="inline-flex items-center bg-white text-blue-700 px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-sm md:text-base shadow-lg hover:shadow-xl hover:bg-blue-50 transition-all transform hover:-translate-y-0.5 group"
+              >
+                Check Trade-In Value
+                <svg class="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+            </div>
+          </div>
+          
+          <!-- Device badges -->
+          <div class="mt-6 pt-5 border-t border-white/20 flex flex-wrap justify-center md:justify-start gap-2 text-xs md:text-sm">
+            <span class="text-blue-200">Accepts:</span>
+            {['iPhones', 'Android', 'Tablets', 'Laptops', 'Gaming Consoles'].map((device) => (
+              <span class="px-2.5 py-1 bg-white/15 text-white rounded-full backdrop-blur-sm">
+                {device}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

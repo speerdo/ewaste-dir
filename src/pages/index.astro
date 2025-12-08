@@ -2,6 +2,7 @@
 export const prerender = true;
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
+import TradeInBanner from '../components/TradeInBanner.astro';
 import FeaturedStates from '../components/FeaturedStates.astro';
 import StateDirectory from '../components/StateDirectory.astro';
 import PopularCities from '../components/PopularCities.astro';
@@ -26,6 +27,8 @@ const featuredPosts = allBlogPosts
   <SchemaMarkup type="website" />
   
   <Hero />
+  
+  <TradeInBanner />
   
   <FeaturedStates />
   <StateDirectory />

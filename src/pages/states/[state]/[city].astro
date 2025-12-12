@@ -1,6 +1,5 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import BannerAd from '../../../components/BannerAd.astro';
 import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState, getCityDescription } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
 import MapComponent from '../../../components/MapComponent.astro';
@@ -9,6 +8,7 @@ import CentersList from '../../../components/recycling-centers/CentersList.astro
 import CityContentEnhancer from '../../../components/CityContentEnhancer.astro';
 import ResidentsGuide from '../../../components/ResidentsGuide.astro';
 import LocalNews from '../../../components/LocalNews.astro';
+import TradeInCallout from '../../../components/TradeInCallout.astro';
 import { generateCityMeta } from '../../../utils/metaGenerator';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
@@ -535,7 +535,6 @@ if (baseTitle.length <= maxTitleLength) {
   title={metaTitle}
   description={metaDescription}
   ogImage={ogImageUrl}
-  showBanner={false}
 >
   <!-- Google Maps API and Global Direction Functions -->
   <script is:inline define:vars={{ mapApiKey: import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY }}>
@@ -652,9 +651,6 @@ if (baseTitle.length <= maxTitleLength) {
       </div>
     </div>
   </div>
-
-  <!-- Banner Ad (positioned after hero, same as before) -->
-  <BannerAd addTopPadding={false} />
 
   <!-- Main content -->
   <div class="container mx-auto px-4 py-8">
@@ -818,6 +814,9 @@ if (baseTitle.length <= maxTitleLength) {
         </div>
       </div>
     )}
+
+    <!-- Trade-In Callout -->
+    <TradeInCallout />
 
     <!-- Sort Controls -->
     <div class="mb-6 flex justify-between items-center">

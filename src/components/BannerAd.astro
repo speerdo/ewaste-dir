@@ -1,9 +1,6 @@
 ---
 // Banner Ad Component
-// Uses Adsterra banner format (highperformanceformat.com)
-// Best practices: Non-blocking, responsive, placed after header
-// Following Astro best practices: is:inline for third-party scripts
-// 
+// Placeholder component for future ad integration
 // Props:
 //   addTopPadding: boolean - Add padding-top to account for fixed header (default: true)
 //   reduceBottomPadding: boolean - Reduce bottom padding for tighter spacing (default: false)
@@ -15,23 +12,8 @@ interface Props {
 const { addTopPadding = true, reduceBottomPadding = false } = Astro.props;
 ---
 
+<!-- Ad placeholder - currently empty -->
 <div class={`container mx-auto px-4 ${addTopPadding ? 'pt-24' : ''} ${reduceBottomPadding ? 'pb-2' : 'pb-4'}`}>
-  <div class="flex justify-center items-center" id="banner-ad-container">
-    <script is:inline type="text/javascript">
-      atOptions = {
-        'key' : '20016c80aa06a20da138e161bee80b71',
-        'format' : 'iframe',
-        'height' : 90,
-        'width' : 728,
-        'params' : {}
-      };
-    </script>
-    <script 
-      is:inline
-      type="text/javascript" 
-      src="//www.highperformanceformat.com/20016c80aa06a20da138e161bee80b71/invoke.js"
-      defer
-    ></script>
-  </div>
+  <!-- Ad space reserved for future integration -->
 </div>
 

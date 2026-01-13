@@ -39,19 +39,32 @@ function formatWorkingHours(hours: any): string {
 function getBusinessSpecialties(center: RecyclingCenter): string[] {
   const text = (center.description || center.name || '').toLowerCase();
   const specialties: string[] = [];
+  const excluded = (center.excluded_specialties || []).map(s => s.toLowerCase());
   
   const serviceTypes = {
     'Electronics Recycling': ['electronic', 'computer', 'phone', 'laptop', 'tablet', 'tv', 'monitor', 'printer'],
-    'Metal Recycling': ['metal', 'scrap', 'iron', 'steel', 'aluminum', 'copper', 'brass'],
+    'Metal Recycling': ['metal recycling', 'scrap metal', 'metal scrap', 'scrap recycling'], // More specific - require actual metal recycling mention
     'Automotive Recycling': ['auto', 'car', 'vehicle', 'tire', 'battery', 'automotive'],
-    'Computer Repair': ['repair', 'fix', 'service', 'diagnostic', 'refurbish'],
+    'Computer Repair': ['repair', 'fix', 'diagnostic', 'refurbish'], // Removed 'service' - too broad
     'Data Destruction': ['data', 'destruction', 'shredding', 'secure', 'certified'],
     'Appliance Recycling': ['appliance', 'refrigerator', 'washer', 'dryer', 'dishwasher']
   };
   
   Object.entries(serviceTypes).forEach(([specialty, keywords]) => {
-    if (keywords.some(keyword => text.includes(keyword))) {
-      specialties.push(specialty);
+    // Skip if this specialty is in the excluded list
+    if (excluded.includes(specialty.toLowerCase())) {
+      return;
+    }
+    // For Metal Recycling, require exact phrase match (more strict)
+    if (specialty === 'Metal Recycling') {
+      if (keywords.some(keyword => text.includes(keyword))) {
+        specialties.push(specialty);
+      }
+    } else {
+      // For others, use word boundary matching where appropriate
+      if (keywords.some(keyword => text.includes(keyword))) {
+        specialties.push(specialty);
+      }
     }
   });
   
@@ -90,7 +103,8 @@ const businessSpecialties = getBusinessSpecialties(center);
         </div>
         
         <!-- Business Specialties -->
-        {businessSpecialties.length > 0 && (
+        {/* Temporarily disabled - will re-enable after verifying all centers (28,000+ API calls needed) */}
+        {/* {businessSpecialties.length > 0 && (
           <div class="mb-3">
             <div class="flex flex-wrap gap-1">
               {businessSpecialties.map(specialty => (
@@ -100,7 +114,7 @@ const businessSpecialties = getBusinessSpecialties(center);
               ))}
             </div>
           </div>
-        )}
+        )} */}
         
         {center.rating && (
           <div class="flex items-center mb-2">

@@ -26,6 +26,7 @@ export interface RecyclingCenter {
   is_legitimate?: boolean;
   is_suspicious?: boolean;
   scraped_at?: string;
+  excluded_specialties?: string[];
 }
 
 export interface City {

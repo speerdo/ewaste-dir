@@ -313,35 +313,35 @@ const { markers, initialZoom = 12 } = Astro.props;
       const resetButton = document.getElementById('resetMap');
 
       if (markerData) {
-        const { marker, data } = markerData;
+        const { marker } = markerData;
 
         // Close any existing popups
         map.closePopup();
-
-        // Open this marker's popup
-        marker.openPopup();
 
         // Remove bounce from previous marker
         if (activeMarker && activeMarker !== marker) {
           const prevIcon = activeMarker.getElement();
           if (prevIcon) prevIcon.classList.remove('marker-bounce');
         }
-
-        // Add bounce animation
-        const iconElement = marker.getElement();
-        if (iconElement) {
-          iconElement.classList.add('marker-bounce');
-          setTimeout(() => iconElement.classList.remove('marker-bounce'), 1500);
-        }
         activeMarker = marker;
-
-        // Pan map to marker position
-        map.setView(marker.getLatLng(), 15);
 
         // Show reset button
         if (resetButton) {
           resetButton.style.display = 'flex';
         }
+
+        // Instantly move map (no animation) and open popup
+        map.setView(marker.getLatLng(), 15, { animate: false });
+        marker.openPopup();
+
+        // Add bounce animation after a tiny delay for DOM to settle
+        setTimeout(() => {
+          const iconElement = marker.getElement();
+          if (iconElement) {
+            iconElement.classList.add('marker-bounce');
+            setTimeout(() => iconElement.classList.remove('marker-bounce'), 1500);
+          }
+        }, 10);
       }
     });
   }

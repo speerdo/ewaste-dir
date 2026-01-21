@@ -6,7 +6,7 @@ export interface Marker {
   address?: string;
   phone?: string;
   website?: string;
-  id: string; // Add ID for identifying centers
+  id: string;
 }
 
 export interface Props {
@@ -15,20 +15,13 @@ export interface Props {
 }
 
 const { markers, initialZoom = 12 } = Astro.props;
-
-declare global {
-  interface Window {
-    initializeMap: () => void;
-    openDirections: (lat: number, lng: number) => void;
-  }
-}
 ---
 
 <div class="relative w-full h-full rounded-lg overflow-hidden">
   <!-- Reset Map Button -->
   <button
     id="resetMap"
-    class="absolute top-4 right-4 bg-white rounded-lg shadow-md px-4 py-2 z-10 flex items-center gap-2 text-gray-700 hover:bg-gray-50 transition-colors"
+    class="absolute top-4 right-4 bg-white rounded-lg shadow-md px-4 py-2 z-[1000] flex items-center gap-2 text-gray-700 hover:bg-gray-50 transition-colors"
     style="display: none;"
   >
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -36,10 +29,10 @@ declare global {
     </svg>
     Reset Map
   </button>
-  
+
   <div id="map" class="w-full h-full" role="application" aria-label="Interactive map showing recycling center locations">
     <!-- Loading state -->
-    <div class="absolute inset-0 flex items-center justify-center bg-gray-100">
+    <div id="mapLoading" class="absolute inset-0 flex items-center justify-center bg-gray-100">
       <div class="text-gray-500" role="status" aria-live="polite">Loading map...</div>
     </div>
   </div>
@@ -53,54 +46,53 @@ declare global {
   </div>
 </div>
 
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
 <style>
-  /* Custom styles for Google Maps InfoWindow */
-  :global(.gm-style-iw.gm-style-iw-c) {
+  /* Custom styles for Leaflet popups to match previous design */
+  :global(.leaflet-popup-content-wrapper) {
     padding: 0 !important;
-    max-height: none !important;
+    border-radius: 8px !important;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.2) !important;
   }
 
-  :global(.gm-style-iw-d) {
-    overflow: hidden !important;
-    max-height: none !important;
+  :global(.leaflet-popup-content) {
+    margin: 0 !important;
+    min-width: 200px !important;
   }
 
-  :global(.gm-style-iw-tc) {
-    display: none !important;
-  }
-
-  :global(.gm-style-iw button[title="Close"]) {
-    margin: 8px !important;
-    padding: 0 !important;
-    top: 0 !important;
-    right: 0 !important;
+  :global(.leaflet-popup-close-button) {
     width: 28px !important;
     height: 28px !important;
-    opacity: 0.7;
-    border-radius: 50% !important;
-    background: white !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+    font-size: 20px !important;
+    padding: 4px !important;
+    color: #666 !important;
+    top: 4px !important;
+    right: 4px !important;
   }
 
-  :global(.gm-style-iw button[title="Close"]:hover) {
-    opacity: 1;
+  :global(.leaflet-popup-close-button:hover) {
+    color: #333 !important;
   }
 
-  :global(.gm-style-iw button[title="Close"] span) {
-    margin: 6px !important;
-    width: 16px !important;
-    height: 16px !important;
+  /* Custom marker styles */
+  :global(.leaflet-marker-icon) {
+    transition: transform 0.1s ease-out;
   }
 
-  :global(.gm-style-iw-chr) {
-    padding-top: 0 !important;
-    right: 0 !important;
-    top: 0 !important;
+  :global(.marker-bounce) {
+    animation: bounce 0.5s ease-in-out 3;
   }
-  
-  /* Remove focus outlines from info window links */
-  :global(.gm-style-iw-d a),
-  :global(.gm-style-iw-d button),
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* Remove focus outlines from popup links */
+  :global(.leaflet-popup-content a),
+  :global(.leaflet-popup-content button),
   :global(.map-link) {
     outline: none !important;
     box-shadow: none !important;
@@ -108,34 +100,53 @@ declare global {
     text-decoration: none !important;
     -webkit-tap-highlight-color: transparent !important;
   }
-  
-  :global(.gm-style-iw-d a:focus),
-  :global(.gm-style-iw-d button:focus),
-  :global(.map-link:focus) {
-    outline: none !important;
-    box-shadow: none !important;
-    border: none !important;
-    text-decoration: none !important;
-  }
 </style>
 
 <script define:vars={{ markers, initialZoom }}>
-  // Declare global variables for map functionality
-  let map;
+  // Store map state globally
+  let map = null;
   let activeMarker = null;
-  let activeInfoWindow = null;
   const markerRefs = new Map();
-  const infoWindowRefs = new Map();
   let initialBounds = null;
+  let initialCenter = null;
+  let initialZoomLevel = null;
+
+  // Global directions function
+  window.openDirections = function(lat, lng) {
+    if (!lat || !lng) return;
+    window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
+  };
+  window.showDirections = window.openDirections;
 
   function handleMapError(error) {
     console.error('Map error:', error);
     const mapElement = document.getElementById('map');
     const errorElement = document.getElementById('mapError');
+    const loadingElement = document.getElementById('mapLoading');
+    if (loadingElement) loadingElement.style.display = 'none';
     if (mapElement && errorElement) {
       mapElement.style.display = 'none';
-      errorElement.style.display = 'flex';
+      errorElement.classList.remove('hidden');
     }
+  }
+
+  // Load Leaflet script dynamically
+  function loadLeaflet() {
+    return new Promise((resolve, reject) => {
+      // Check if already loaded
+      if (window.L) {
+        resolve(window.L);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+      script.crossOrigin = '';
+      script.onload = () => resolve(window.L);
+      script.onerror = () => reject(new Error('Failed to load Leaflet'));
+      document.head.appendChild(script);
+    });
   }
 
   // Initialize the map with markers
@@ -143,146 +154,153 @@ declare global {
     try {
       const mapElement = document.getElementById('map');
       const resetButton = document.getElementById('resetMap');
+      const loadingElement = document.getElementById('mapLoading');
+
       if (!mapElement) {
         throw new Error('Map element not found');
       }
 
-      // Check if Google Maps is available
-      if (!window.google || !window.google.maps) {
-        throw new Error('Google Maps API is not loaded');
+      // Load Leaflet
+      const L = await loadLeaflet();
+
+      // Hide loading state
+      if (loadingElement) loadingElement.style.display = 'none';
+
+      // Calculate initial center from markers
+      const validMarkers = markers.filter(m => m.lat && m.lng && !isNaN(Number(m.lat)) && !isNaN(Number(m.lng)));
+
+      if (validMarkers.length === 0) {
+        throw new Error('No valid markers to display');
       }
 
-      // Get API key from window or environment
-      const apiKey = window.GOOGLE_MAPS_API_KEY;
-      if (!apiKey) {
-        throw new Error('Google Maps API key is missing');
-      }
+      const centerLat = validMarkers.reduce((sum, m) => sum + Number(m.lat), 0) / validMarkers.length;
+      const centerLng = validMarkers.reduce((sum, m) => sum + Number(m.lng), 0) / validMarkers.length;
 
-      // Initialize map with first marker as center
-      map = new google.maps.Map(mapElement, {
-        center: markers[0] ? { lat: Number(markers[0].lat), lng: Number(markers[0].lng) } : { lat: 0, lng: 0 },
+      // Initialize map
+      map = L.map(mapElement, {
+        center: [centerLat, centerLng],
         zoom: initialZoom,
-        styles: [
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
-          }
-        ]
+        scrollWheelZoom: true
       });
 
-      // Add markers to the map
-      const bounds = new google.maps.LatLngBounds();
-      let validMarkers = 0;
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
 
-      markers.forEach((marker) => {
-        if (marker.lat && marker.lng) {
-          const position = { lat: Number(marker.lat), lng: Number(marker.lng) };
-          const markerObj = new google.maps.Marker({
-            position,
-            map,
-            title: marker.name,
-            animation: google.maps.Animation.DROP,
-            optimized: true
-          });
+      // Create bounds for fitting
+      const bounds = L.latLngBounds();
 
-          bounds.extend(position);
-          validMarkers++;
+      // Add markers
+      validMarkers.forEach((marker) => {
+        const position = [Number(marker.lat), Number(marker.lng)];
+        bounds.extend(position);
 
-          // Create info window content
-          const content = `
-            <div class="p-4">
-              <h3 class="font-bold text-lg mb-2">${marker.name}</h3>
-              ${marker.address ? `<p class="text-gray-600 mb-2">${marker.address}</p>` : ''}
-              ${marker.phone ? `<p class="text-gray-600 mb-2">${marker.phone}</p>` : ''}
-              <div class="flex gap-2 mt-4">
-                ${marker.phone ? `<a href="tel:${marker.phone}" class="text-green-600 hover:text-green-700 map-link">Call</a>` : ''}
-                ${marker.website ? `<a href="${marker.website}" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700 map-link">Website</a>` : ''}
-                <button onclick="window.openDirections(${marker.lat}, ${marker.lng})" class="text-green-600 hover:text-green-700 map-link">Directions</button>
-              </div>
+        // Create custom icon
+        const icon = L.divIcon({
+          className: 'custom-marker',
+          html: `<svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="#22c55e" stroke="#166534" stroke-width="1"/>
+            <circle cx="12.5" cy="12.5" r="5" fill="white"/>
+          </svg>`,
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [0, -35]
+        });
+
+        const leafletMarker = L.marker(position, { icon }).addTo(map);
+
+        // Create popup content
+        const popupContent = `
+          <div class="p-4">
+            <h3 class="font-bold text-lg mb-2">${marker.name}</h3>
+            ${marker.address ? `<p class="text-gray-600 mb-2">${marker.address}</p>` : ''}
+            ${marker.phone ? `<p class="text-gray-600 mb-2">${marker.phone}</p>` : ''}
+            <div class="flex gap-2 mt-4">
+              ${marker.phone ? `<a href="tel:${marker.phone}" class="text-green-600 hover:text-green-700 map-link">Call</a>` : ''}
+              ${marker.website ? `<a href="${marker.website}" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700 map-link">Website</a>` : ''}
+              <button onclick="window.openDirections(${marker.lat}, ${marker.lng})" class="text-green-600 hover:text-green-700 map-link cursor-pointer">Directions</button>
             </div>
-          `;
+          </div>
+        `;
 
-          const infoWindow = new google.maps.InfoWindow({ content });
+        leafletMarker.bindPopup(popupContent);
 
-          markerObj.addListener('click', () => {
-            // Close any previously open info window
-            if (activeInfoWindow) {
-              activeInfoWindow.close();
-            }
-            
-            // Open this marker's info window
-            infoWindow.open(map, markerObj);
-            activeInfoWindow = infoWindow;
-            
-            // Set bounce animation
-            if (activeMarker && activeMarker !== markerObj) {
-              activeMarker.setAnimation(null);
-            }
-            markerObj.setAnimation(google.maps.Animation.BOUNCE);
-            setTimeout(() => markerObj.setAnimation(null), 2100);
-            activeMarker = markerObj;
+        // Handle marker click
+        leafletMarker.on('click', () => {
+          // Remove bounce from previous marker
+          if (activeMarker && activeMarker !== leafletMarker) {
+            const prevIcon = activeMarker.getElement();
+            if (prevIcon) prevIcon.classList.remove('marker-bounce');
+          }
 
-            // Show reset button
-            if (resetButton) {
-              resetButton.style.display = 'flex';
-            }
+          // Add bounce animation
+          const iconElement = leafletMarker.getElement();
+          if (iconElement) {
+            iconElement.classList.add('marker-bounce');
+            setTimeout(() => iconElement.classList.remove('marker-bounce'), 1500);
+          }
+          activeMarker = leafletMarker;
 
-            // Dispatch marker click event
-            const event = new CustomEvent('markerClick', {
-              detail: { centerId: marker.id }
-            });
-            document.dispatchEvent(event);
+          // Show reset button
+          if (resetButton) {
+            resetButton.style.display = 'flex';
+          }
+
+          // Dispatch marker click event
+          const event = new CustomEvent('markerClick', {
+            detail: { centerId: marker.id }
           });
+          document.dispatchEvent(event);
+        });
 
-          // Store references to markers and info windows
-          markerRefs.set(marker.id, markerObj);
-          infoWindowRefs.set(marker.id, infoWindow);
-        }
+        // Store reference
+        markerRefs.set(marker.id, { marker: leafletMarker, data: marker });
       });
 
-      // Fit bounds if we have multiple valid markers
-      if (validMarkers > 1) {
-        map.fitBounds(bounds);
-        const padding = { top: 50, right: 50, bottom: 50, left: 50 };
-        map.fitBounds(bounds, padding);
+      // Fit bounds if multiple markers
+      if (validMarkers.length > 1) {
+        map.fitBounds(bounds, { padding: [50, 50] });
       }
 
-      // Store initial bounds for reset functionality
+      // Store initial state for reset
       initialBounds = bounds;
+      initialCenter = map.getCenter();
+      initialZoomLevel = map.getZoom();
 
       // Add reset button functionality
       if (resetButton) {
         resetButton.addEventListener('click', () => {
-          // Close any open info windows
-          if (activeInfoWindow) {
-            activeInfoWindow.close();
-          }
-          
-          // Stop any bouncing markers
+          // Close any open popups
+          map.closePopup();
+
+          // Remove bounce animation from active marker
           if (activeMarker) {
-            activeMarker.setAnimation(null);
+            const iconElement = activeMarker.getElement();
+            if (iconElement) iconElement.classList.remove('marker-bounce');
           }
-          
+
           // Reset the map view
-          if (validMarkers > 1) {
-            map.fitBounds(initialBounds);
-            const padding = { top: 50, right: 50, bottom: 50, left: 50 };
-            map.fitBounds(initialBounds, padding);
+          if (validMarkers.length > 1) {
+            map.fitBounds(initialBounds, { padding: [50, 50] });
           } else {
-            map.setCenter(markers[0] ? { lat: Number(markers[0].lat), lng: Number(markers[0].lng) } : { lat: 0, lng: 0 });
-            map.setZoom(initialZoom);
+            map.setView(initialCenter, initialZoomLevel);
           }
-          
+
           // Hide the reset button
           resetButton.style.display = 'none';
-          
+
           // Remove highlight from all centers
           document.querySelectorAll('[data-center-id]').forEach((el) => {
             el.classList.remove('highlight-center');
           });
         });
       }
+
+      // Set up event listeners for center selection (from card clicks)
+      setupMapListeners();
+
     } catch (error) {
       handleMapError(error);
     }
@@ -290,70 +308,48 @@ declare global {
 
   // Set up event listeners for map interactions
   function setupMapListeners() {
-    // Listen for center selection events (from card clicks)
     document.addEventListener('centerSelect', (e) => {
-      const marker = markerRefs.get(e.detail.centerId);
+      const markerData = markerRefs.get(e.detail.centerId);
       const resetButton = document.getElementById('resetMap');
-      
-      if (marker) {
-        // Close any existing info window
-        if (activeInfoWindow) {
-          activeInfoWindow.close();
-        }
-        
-        // Find the associated info window and open it
-        const infoWindow = infoWindowRefs.get(e.detail.centerId);
-        if (infoWindow) {
-          infoWindow.open(map, marker);
-          activeInfoWindow = infoWindow;
-        }
-        
-        // Set marker animation
+
+      if (markerData) {
+        const { marker } = markerData;
+
+        // Close any existing popups
+        map.closePopup();
+
+        // Remove bounce from previous marker
         if (activeMarker && activeMarker !== marker) {
-          activeMarker.setAnimation(null);
+          const prevIcon = activeMarker.getElement();
+          if (prevIcon) prevIcon.classList.remove('marker-bounce');
         }
-        marker.setAnimation(google.maps.Animation.BOUNCE);
-        setTimeout(() => marker.setAnimation(null), 2100);
         activeMarker = marker;
-        
-        // Pan map to marker position
-        map.panTo(marker.getPosition());
-        map.setZoom(15);
-        
+
         // Show reset button
         if (resetButton) {
           resetButton.style.display = 'flex';
         }
+
+        // Instantly move map (no animation) and open popup
+        map.setView(marker.getLatLng(), 15, { animate: false });
+        marker.openPopup();
+
+        // Add bounce animation after a tiny delay for DOM to settle
+        setTimeout(() => {
+          const iconElement = marker.getElement();
+          if (iconElement) {
+            iconElement.classList.add('marker-bounce');
+            setTimeout(() => iconElement.classList.remove('marker-bounce'), 1500);
+          }
+        }, 10);
       }
     });
   }
-  
-  // Main function to initialize everything
-  function initMap() {
-    // Initialize the map with markers
-    initializeMap();
-    
-    // Set up event listeners
-    setupMapListeners();
-  }
 
-  // Initialize map when Google Maps API is loaded
-  function tryInitMap() {
-    if (typeof google !== 'undefined' && google.maps) {
-      initMap();
-    } else {
-      // Check if we have a loading timeout
-      setTimeout(() => {
-        if (!window.googleMapsLoaded) {
-          handleMapError(new Error('Google Maps API failed to load within timeout'));
-        }
-      }, 10000); // 10 second timeout
-      
-      // Listen for the ready event
-      window.addEventListener('google-maps-ready', initMap);
-    }
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeMap);
+  } else {
+    initializeMap();
   }
-  
-  // Start initialization
-  tryInitMap();
 </script>

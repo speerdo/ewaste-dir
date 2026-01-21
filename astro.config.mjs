@@ -50,18 +50,12 @@ export default defineConfig({
     remotePatterns: [{ protocol: 'https' }],
   },
   vite: {
-    define: {
-      'import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY': JSON.stringify(
-        process.env.PUBLIC_GOOGLE_MAPS_API_KEY
-      ),
-    },
     build: {
       reportCompressedSize: false,
       chunkSizeWarningLimit: 1000,
       rollupOptions: {
         output: {
           manualChunks: {
-            'google-maps': ['@googlemaps/js-api-loader'],
             supabase: ['@supabase/supabase-js'],
           },
         },

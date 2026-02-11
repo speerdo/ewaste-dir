@@ -512,6 +512,9 @@ function convertTimeFormat(timeStr: string): string | undefined {
   }
 }
 
+// Build-time verification date for disclaimer
+const verificationDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
 // Generate optimized title (target: 50-60 characters)
 const maxTitleLength = 60;
 const baseTitle = `Electronics Recycling Centers in ${cityName}, ${state.name} - Directory`;
@@ -585,6 +588,35 @@ if (baseTitle.length <= maxTitleLength) {
 
   <!-- Main content -->
   <div class="container mx-auto px-4 py-8">
+    <!-- Verification Disclaimer (top of every location page) -->
+    <div class="mb-6 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
+      <p class="text-sm text-amber-900 font-medium mb-1">
+        📋 Information Verified: {verificationDate}
+      </p>
+      <p class="text-sm text-amber-800 mb-1">
+        ⚠️ Call ahead to confirm they accept your specific items
+      </p>
+      <p class="text-sm text-amber-800">
+        📞 Facility details can change - always verify before visiting
+      </p>
+    </div>
+
+    <!-- Report Incorrect Listing (super visible) -->
+    <div class="mb-8 p-4 bg-orange-100 border-2 border-orange-400 rounded-lg shadow-sm">
+      <p class="text-base font-semibold text-orange-900 mb-2">
+        ⚠️ Is this information incorrect?
+      </p>
+      <a 
+        href="/contact" 
+        class="inline-flex items-center px-4 py-2 bg-orange-600 text-white font-bold rounded-md hover:bg-orange-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+      >
+        Report It
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      </a>
+    </div>
+
     <!-- Quick Stats Header -->
     <div class="mb-8">
              <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">

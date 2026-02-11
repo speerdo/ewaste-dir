@@ -37,6 +37,7 @@
     "regenerate-descriptions": "node scripts/regenerate-descriptions.js",
     "bulk-fix-specialties": "node scripts/bulk-fix-incorrect-specialties.js",
     "check-progress": "node scripts/check-progress.js",
+    "verify-centers": "node scripts/verify-recycling-centers.js",
     "descriptions-workflow": "npm run sync-cities && npm run generate-descriptions && npm run verify-descriptions",
     "clean": "rm -rf dist node_modules/.astro node_modules/.vite .vercel/output",
     "cleanup": "rm -rf dist/ .vercel/output/ .temp-build/"

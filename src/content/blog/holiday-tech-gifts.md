@@ -2,7 +2,7 @@
 title: 'The Hidden Environmental Cost of Holiday Tech Gifts (And How to Give Smarter in 2025)'
 pubDate: 2025-12-04T12:00:00Z
 description: 'Americans are expected to purchase over 125 million electronic devices as gifts during the holiday season.'
-image: '/images/tech-gift.jpg'
+image: '../../assets/images/tech-gift.jpg'
 featured: true
 author: 'Editorial Team'
 ---

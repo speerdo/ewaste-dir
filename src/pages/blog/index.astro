@@ -1,5 +1,6 @@
 ---
 export const prerender = true;
+import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
@@ -30,9 +31,11 @@ posts.sort((a: CollectionEntry<'blog'>, b: CollectionEntry<'blog'>) => b.data.pu
         {posts.map((post: CollectionEntry<'blog'>) => (
           <article class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
             <a href={`/blog/${post.slug}`} class="block">
-              <img 
-                src={post.data.image} 
+              <Image
+                src={post.data.image}
                 alt={post.data.title}
+                width={400}
+                height={192}
                 class="w-full h-48 object-cover"
               />
               <div class="p-6">

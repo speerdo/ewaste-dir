@@ -2,7 +2,7 @@
 title: 'How Your Old Smartphone Could Save a Gorilla’s Life: The Hidden Wildlife Connection'
 pubDate: 2025-08-17T12:00:00Z
 description: 'Find out the connection between your electronics and gorilla survival and see how you can make an impact.'
-image: '/images/gorilla.jpg'
+image: '../../assets/images/gorilla.jpg'
 featured: true
 author: 'Editorial Team'
 ---

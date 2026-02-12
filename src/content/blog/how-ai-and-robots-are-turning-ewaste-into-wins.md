@@ -2,7 +2,7 @@
 title: 'The Recycling Revolution: How AI and Robots are Turning E-Waste into Environmental Wins'
 pubDate: 2025-09-05T12:00:00Z
 description: '2025 is proving to be a breakthrough year for positive change in electronics recycling.'
-image: '/images/robotics-arm.jpg'
+image: '../../assets/images/robotics-arm.jpg'
 featured: true
 author: 'Editorial Team'
 ---

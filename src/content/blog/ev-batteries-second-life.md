@@ -2,7 +2,7 @@
 title: 'From Road to Grid: How EV Batteries Are Pioneering the Second Life Tech Revolution'
 pubDate: 2025-09-09T12:00:00Z
 description: 'What was once considered "end-of-life" tech waste is now becoming the foundation of a revolutionary approach to technology recycling'
-image: '/images/ev-charging.jpg'
+image: '../../assets/images/ev-charging.jpg'
 featured: true
 author: 'Editorial Team'
 ---

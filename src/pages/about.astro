@@ -1,5 +1,7 @@
 ---
 export const prerender = true;
+import { Image } from 'astro:assets';
+import { betterTomorrowImg, wasteImg, recyclingImg, corporateMeetingImg, profileImg } from '../assets/images';
 import Layout from '../layouts/Layout.astro';
 ---
 
@@ -10,7 +12,7 @@ import Layout from '../layouts/Layout.astro';
   <!-- Hero Section with Background Image -->
   <div class="relative pt-32 pb-16 overflow-hidden">
     <div class="absolute inset-0">
-      <img src="/images/better-tomorrow.jpg" alt="Environmental sustainability" class="w-full h-full object-cover">
+      <Image src={betterTomorrowImg} alt="Environmental sustainability" width={1200} height={400} class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-b from-green-900/90 via-green-800/85 to-green-700/90"></div>
     </div>
     <div class="container mx-auto px-4 relative z-10">
@@ -117,7 +119,7 @@ import Layout from '../layouts/Layout.astro';
 
         <!-- Visual break with e-waste problem image -->
         <div class="relative mb-12 rounded-xl overflow-hidden">
-          <img src="/images/waste.avif" alt="Electronic waste environmental impact" class="w-full h-64 object-cover">
+          <Image src={wasteImg} alt="Electronic waste environmental impact" width={1200} height={256} class="w-full h-64 object-cover" />
           <div class="absolute inset-0 bg-gradient-to-r from-red-900/80 to-orange-900/60 flex items-center">
             <div class="px-8">
               <h3 class="text-2xl font-bold text-white mb-2">The E-Waste Crisis</h3>
@@ -179,7 +181,7 @@ import Layout from '../layouts/Layout.astro';
 
         <!-- Visual break with recycling solution image -->
         <div class="relative mb-12 rounded-xl overflow-hidden">
-          <img src="/images/recycling.webp" alt="Modern recycling facility" class="w-full h-64 object-cover">
+          <Image src={recyclingImg} alt="Modern recycling facility" width={1200} height={256} class="w-full h-64 object-cover" />
           <div class="absolute inset-0 bg-gradient-to-l from-green-900/80 to-blue-900/60 flex items-center justify-end">
             <div class="px-8 text-right">
               <h3 class="text-2xl font-bold text-white mb-2">Technology-Driven Solutions</h3>
@@ -251,7 +253,7 @@ import Layout from '../layouts/Layout.astro';
 
         <!-- Visual break with impact image -->
         <div class="relative mb-12 rounded-xl overflow-hidden">
-          <img src="/images/corporate-meeting.jpg" alt="Team working on environmental solutions" class="w-full h-64 object-cover">
+          <Image src={corporateMeetingImg} alt="Team working on environmental solutions" width={1200} height={256} class="w-full h-64 object-cover" />
           <div class="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-transparent flex items-center">
             <div class="px-8">
               <h3 class="text-2xl font-bold text-white mb-2">Making a Difference Together</h3>
@@ -371,9 +373,11 @@ import Layout from '../layouts/Layout.astro';
           <div class="bg-white border-2 border-green-200 p-8 rounded-xl mb-8">
             <div class="flex flex-col md:flex-row items-start gap-8">
               <div class="flex-shrink-0">
-                <img 
-                  src="/images/profile.jpg" 
-                  alt="Adam Speer, Founder of RecycleOldTech" 
+                <Image
+                  src={profileImg}
+                  alt="Adam Speer, Founder of RecycleOldTech"
+                  width={192}
+                  height={192}
                   class="w-48 h-48 rounded-xl object-cover shadow-lg"
                 />
               </div>

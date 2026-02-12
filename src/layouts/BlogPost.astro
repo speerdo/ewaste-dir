@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { type CollectionEntry } from 'astro:content';
 import Layout from './Layout.astro';
 import TradeInCallout from '../components/TradeInCallout.astro';
@@ -18,14 +19,15 @@ const currentUrl = Astro.url;
 const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_URL).toString() : currentUrl.toString();
 ---
 
-<Layout title={`${title} | RecycleOldTech Blog`} description={description} ogImage={image}>
+<Layout title={`${title} | RecycleOldTech Blog`} description={description} ogImage={typeof image === 'string' ? image : image.src}>
   <article>
     <!-- Hero Section -->
     <div class="relative h-[600px] overflow-hidden mt-20">
-      <img 
-        src={image} 
+      <Image
+        src={image}
         alt={title}
-        loading="lazy"
+        width={1200}
+        height={600}
         class="w-full h-full object-cover"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>

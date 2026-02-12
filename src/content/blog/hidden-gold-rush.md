@@ -2,7 +2,7 @@
 title: 'The Hidden Gold Rush: Why Corporate Electronics Buyback Programs Are Reshaping the Recycling Landscape'
 pubDate: 2025-09-12T12:00:00Z
 description: 'Major tech companies are aggressively expanding their electronics buyback programs, and the implications reach far beyond simple customer service.'
-image: '/images/phones.jpg'
+image: '../../assets/images/phones.jpg'
 featured: true
 author: 'Editorial Team'
 ---

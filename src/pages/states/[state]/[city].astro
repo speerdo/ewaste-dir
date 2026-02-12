@@ -1,4 +1,11 @@
 ---
+import { Image } from 'astro:assets';
+import {
+  austinImg, newYorkCityImg, miamiImg, atlantaImg, bostonImg, chicagoImg,
+  denverImg, houstonImg, lasVegasImg, losAngelesImg, sanFranciscoImg, seattleImg,
+  recyclingImg
+} from '../../../assets/images';
+import type { ImageMetadata } from 'astro';
 import Layout from '../../../layouts/Layout.astro';
 import { getState, getRecyclingCentersByCity, normalizeForUrl, getLocalCityData, getAllStates, getCitiesByState, getCityDescription } from '../../../lib/supabase';
 import type { RecyclingCenter } from '../../../types/supabase';
@@ -13,8 +20,8 @@ import { generateCityMeta } from '../../../utils/metaGenerator';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
-// Default images
-const DEFAULT_LOGO = '/images/recycling.webp';
+// Default images - string URL for JS onerror fallback
+const DEFAULT_LOGO = recyclingImg.src;
 
 // Enable static generation now that we have a manageable number of pages (3,970)
 export const prerender = true;
@@ -212,22 +219,22 @@ const ogImageUrl = import.meta.env.PROD
   : '/images/default-og.png';
 
 // City-specific hero images (if available)
-const cityImages: Record<string, string> = {
-  'Austin': '/images/austin.jpg',
-  'New York': '/images/new_york_city.jpg',
-  'Miami': '/images/miami.jpg',
-  'Atlanta': '/images/atlanta.jpg',
-  'Boston': '/images/boston.jpg',
-  'Chicago': '/images/chicago.jpg',
-  'Denver': '/images/denver.JPG',
-  'Houston': '/images/houston.jpg',
-  'Las Vegas': '/images/las_vegas.jpg',
-  'Los Angeles': '/images/los_angeles.jpg',
-  'San Francisco': '/images/san_francisco.jpg',
-  'Seattle': '/images/seattle.jpg'
+const cityImages: Record<string, ImageMetadata> = {
+  'Austin': austinImg,
+  'New York': newYorkCityImg,
+  'Miami': miamiImg,
+  'Atlanta': atlantaImg,
+  'Boston': bostonImg,
+  'Chicago': chicagoImg,
+  'Denver': denverImg,
+  'Houston': houstonImg,
+  'Las Vegas': lasVegasImg,
+  'Los Angeles': losAngelesImg,
+  'San Francisco': sanFranciscoImg,
+  'Seattle': seattleImg
 };
 
-const cityHeroImage = cityImages[cityName] || '/images/recycling.webp';
+const cityHeroImage = cityImages[cityName] || recyclingImg;
 
 // Convert centers to map markers - only show the centers we're displaying
 const mapMarkers: Marker[] = displayCenters.map(center => ({
@@ -556,9 +563,11 @@ if (baseTitle.length <= maxTitleLength) {
   <!-- City Hero Image Section -->
   <div class="pt-16"> <!-- Added padding to account for fixed header -->
     <div class="relative h-64 mb-8 rounded-xl overflow-hidden">
-    <img 
-      src={cityHeroImage} 
-      alt={`${cityName}, ${state.name} cityscape`} 
+    <Image
+      src={cityHeroImage}
+      alt={`${cityName}, ${state.name} cityscape`}
+      width={1200}
+      height={256}
       class="w-full h-full object-cover"
     />
     <div class="absolute inset-0 bg-gradient-to-r from-green-900/80 via-green-800/60 to-transparent">

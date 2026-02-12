@@ -2,7 +2,7 @@
 title: 'The $1,000 Question: When to Repair Your Phone vs. When It’s Time to Let Go'
 pubDate: 2025-09-11T12:00:00Z
 description: 'The average lifespan of a smartphone is 4.7 years, but the average American user replaces their smartphone within three years.'
-image: '/images/smartphone-in-hand.jpg'
+image: '../../assets/images/smartphone-in-hand.jpg'
 featured: true
 author: 'Editorial Team'
 ---

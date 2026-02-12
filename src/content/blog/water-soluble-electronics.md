@@ -2,7 +2,7 @@
 title: 'The Dissolving Solution: How Water-Soluble Electronics Could End the E-Waste Crisis'
 pubDate: 2025-09-03T12:00:00Z
 description: 'Recent breakthroughs in water-soluble electronics technology are bringing this revolutionary approach to e-waste management closer to reality'
-image: '/images/water-phone.jpg'
+image: '../../assets/images/water-phone.jpg'
 featured: true
 author: 'Editorial Team'
 ---

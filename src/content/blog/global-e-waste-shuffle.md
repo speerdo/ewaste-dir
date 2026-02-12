@@ -2,7 +2,7 @@
 title: 'The Global E-Waste Shuffle: How Your Old iPhone Traveled Further After You Recycled It Than When It Was New'
 pubDate: 2025-10-14T12:00:00Z
 description: 'That iPhone you recycled last month may have already visited three continents, passed through half a dozen different facilities, and traveled further in its afterlife than it did during years of active use.'
-image: '/images/iphone-paris.jpg'
+image: '../../assets/images/iphone-paris.jpg'
 featured: true
 author: 'Editorial Team'
 ---

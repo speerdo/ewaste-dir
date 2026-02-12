@@ -1,27 +1,28 @@
 ---
 import { Image } from 'astro:assets';
+import { austinImg, newYorkCityImg, miamiImg } from '../assets/images';
 import SearchInput from './SearchInput.astro';
 import { getCurrentLocation, reverseGeocode } from '../lib/geocoding';
 import { normalizeForUrl } from '../lib/supabase';
 
 // Featured cities data
 const featuredCities = [
-  { 
-    state: "Texas", 
-    city: "Austin", 
-    image: "/images/austin.jpg",
+  {
+    state: "Texas",
+    city: "Austin",
+    image: austinImg,
     description: "Discover eco-friendly electronics recycling in the heart of Texas tech. Sustainable solutions for all your e-waste needs."
   },
-  { 
-    state: "New York", 
-    city: "New York", 
-    image: "/images/new_york_city.jpg",
+  {
+    state: "New York",
+    city: "New York",
+    image: newYorkCityImg,
     description: "Discover e-waste recycling locations across the five boroughs. Safe disposal solutions for all electronic devices."
   },
-  { 
-    state: "Florida", 
-    city: "Miami", 
-    image: "/images/miami.jpg",
+  {
+    state: "Florida",
+    city: "Miami",
+    image: miamiImg,
     description: "Find responsible electronics recycling centers in the Magic City. Professional e-waste disposal for businesses and residents."
   }
 ];
@@ -80,9 +81,11 @@ const featuredCities = [
           href={`/states/${normalizeForUrl(city.state)}/${normalizeForUrl(city.city)}`} 
           class="group relative rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
         >
-          <img 
-            src={city.image} 
-            alt={`${city.city}, ${city.state}`} 
+          <Image
+            src={city.image}
+            alt={`${city.city}, ${city.state}`}
+            width={400}
+            height={256}
             class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>

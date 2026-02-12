@@ -2,7 +2,7 @@
 title: 'The Two Faces of Electronics Recycling: Why Where You Drop Off Your Old Phone Matters More Than You Think'
 pubDate: 2025-09-04T12:00:00Z
 description: 'The difference directly impacts whether your old smartphone gets properly recycled or ends up contributing to environmental and human health disasters'
-image: '/images/store-recycling.jpg'
+image: '../../assets/images/store-recycling.jpg'
 featured: true
 author: 'Editorial Team'
 ---

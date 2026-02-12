@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import { usaGuideImg } from '../assets/images';
 import Layout from '../layouts/Layout.astro';
 import { getAllStates } from '../lib/supabase';
 import SchemaMarkup from '../components/SchemaMarkup.astro';
@@ -27,7 +29,7 @@ const sortedLetters = Object.keys(statesByLetter).sort();
   <!-- Hero Section with Background Image -->
   <div class="relative pt-32 pb-16 overflow-hidden">
     <div class="absolute inset-0">
-      <img src="/images/usa-guide.jpg" alt="United States electronics recycling guide" class="w-full h-full object-cover">
+      <Image src={usaGuideImg} alt="United States electronics recycling guide" width={1200} height={400} class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-b from-blue-900/90 via-blue-800/85 to-blue-700/90"></div>
     </div>
     <div class="container mx-auto px-4 relative z-10">

@@ -3,7 +3,7 @@ title: 'Business Electronics Recycling Guide 2025'
 description: 'Complete corporate guide for responsibly recycling IT equipment. Learn compliance, costs, security, and vendor selection for e-waste programs.'
 pubDate: 2025-06-01T12:00:00Z
 featured: false
-image: '/images/corporate-meeting.jpg'
+image: '../../assets/images/corporate-meeting.jpg'
 tags: ['business recycling', 'corporate', 'IT disposal', 'compliance']
 author: 'Editorial Team'
 ---

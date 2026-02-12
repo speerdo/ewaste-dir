@@ -2,7 +2,7 @@
 title: 'That "Worthless" Electronics Drawer Just Might Be Worth Hundreds: A Guide to the Hidden Secondary Markets'
 pubDate: 2025-11-19T12:00:00Z
 description: 'There’s a thriving global ecosystem of secondary markets where your "junk drawer" electronics could be worth significantly more than you realize.'
-image: '/images/retro-gaming.jpg'
+image: '../../assets/images/retro-gaming.jpg'
 featured: true
 author: 'Editorial Team'
 ---

@@ -1,26 +1,32 @@
 ---
 import { Image } from 'astro:assets';
+import {
+  losAngelesImg, sanFranciscoImg, newYorkCityImg, austinImg,
+  houstonImg, chicagoImg, seattleImg, bostonImg,
+  atlantaImg, denverImg, miamiImg, lasVegasImg
+} from '../assets/images';
+import type { ImageMetadata } from 'astro';
 
 interface PopularCity {
   state: string;
   city: string;
-  image: string;
+  image: ImageMetadata;
 }
 
 // Curated list of major cities with high population and likely e-waste recycling needs
 const popularCities: PopularCity[] = [
-  { state: "California", city: "Los Angeles", image: "/images/los_angeles.jpg" },
-  { state: "California", city: "San Francisco", image: "/images/san_francisco.jpg" },
-  { state: "New York", city: "New York", image: "/images/new_york_city.jpg" },
-  { state: "Texas", city: "Austin", image: "/images/austin.jpg" },
-  { state: "Texas", city: "Houston", image: "/images/houston.jpg" },
-  { state: "Illinois", city: "Chicago", image: "/images/chicago.jpg" },
-  { state: "Washington", city: "Seattle", image: "/images/seattle.jpg" },
-  { state: "Massachusetts", city: "Boston", image: "/images/boston.jpg" },
-  { state: "Georgia", city: "Atlanta", image: "/images/atlanta.jpg" },
-  { state: "Colorado", city: "Denver", image: "/images/denver.JPG" },
-  { state: "Florida", city: "Miami", image: "/images/miami.jpg" },
-  { state: "Nevada", city: "Las Vegas", image: "/images/las_vegas.jpg" }
+  { state: "California", city: "Los Angeles", image: losAngelesImg },
+  { state: "California", city: "San Francisco", image: sanFranciscoImg },
+  { state: "New York", city: "New York", image: newYorkCityImg },
+  { state: "Texas", city: "Austin", image: austinImg },
+  { state: "Texas", city: "Houston", image: houstonImg },
+  { state: "Illinois", city: "Chicago", image: chicagoImg },
+  { state: "Washington", city: "Seattle", image: seattleImg },
+  { state: "Massachusetts", city: "Boston", image: bostonImg },
+  { state: "Georgia", city: "Atlanta", image: atlantaImg },
+  { state: "Colorado", city: "Denver", image: denverImg },
+  { state: "Florida", city: "Miami", image: miamiImg },
+  { state: "Nevada", city: "Las Vegas", image: lasVegasImg }
 ];
 ---
 

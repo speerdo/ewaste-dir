@@ -1,5 +1,7 @@
 ---
 export const prerender = true;
+import { Image } from 'astro:assets';
+import { recyclePhoneImg, dataSecurityImg, brokenTvImg, usaGuideImg } from '../assets/images';
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import TradeInBanner from '../components/TradeInBanner.astro';
@@ -54,9 +56,11 @@ const featuredPosts = allBlogPosts
             return (
               <article class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
                 <div class="aspect-w-16 aspect-h-9">
-                  <img 
-                    src={post.data.image} 
-                    alt={post.data.title} 
+                  <Image
+                    src={post.data.image}
+                    alt={post.data.title}
+                    width={400}
+                    height={192}
                     class="w-full h-48 object-cover"
                   />
                 </div>
@@ -132,7 +136,7 @@ const featuredPosts = allBlogPosts
 
         <!-- Visual break with recycling image -->
         <div class="relative mb-12 rounded-xl overflow-hidden">
-          <img src="/images/recycle-phone.jpeg" alt="Electronics being recycled" class="w-full h-64 object-cover">
+          <Image src={recyclePhoneImg} alt="Electronics being recycled" width={1200} height={256} class="w-full h-64 object-cover" />
           <div class="absolute inset-0 bg-gradient-to-r from-green-900/80 to-transparent flex items-center">
             <div class="px-8">
               <h3 class="text-2xl font-bold text-white mb-2">Responsible Electronics Disposal</h3>
@@ -273,7 +277,7 @@ const featuredPosts = allBlogPosts
 
         <!-- Visual break with data security image -->
         <div class="relative mb-12 rounded-xl overflow-hidden">
-          <img src="/images/data-security.jpg" alt="Data security and electronics recycling" class="w-full h-64 object-cover">
+          <Image src={dataSecurityImg} alt="Data security and electronics recycling" width={1200} height={256} class="w-full h-64 object-cover" />
           <div class="absolute inset-0 bg-gradient-to-l from-blue-900/80 to-transparent flex items-center justify-end">
             <div class="px-8 text-right">
               <h3 class="text-2xl font-bold text-white mb-2">Secure Data Destruction</h3>
@@ -332,7 +336,7 @@ const featuredPosts = allBlogPosts
 
         <!-- Visual break with broken electronics image -->
         <div class="relative mb-12 rounded-xl overflow-hidden">
-          <img src="/images/broken-tv.jpeg" alt="Broken electronics ready for recycling" class="w-full h-64 object-cover">
+          <Image src={brokenTvImg} alt="Broken electronics ready for recycling" width={1200} height={256} class="w-full h-64 object-cover" />
           <div class="absolute inset-0 bg-gradient-to-l from-red-900/80 to-transparent flex items-center justify-end">
             <div class="px-8 text-right">
               <h3 class="text-2xl font-bold text-white mb-2">End of Life Electronics</h3>
@@ -417,7 +421,7 @@ const featuredPosts = allBlogPosts
 
         <!-- Visual break with USA guide image -->
         <div class="relative mb-12 rounded-xl overflow-hidden">
-          <img src="/images/usa-guide.jpg" alt="United States environmental regulations" class="w-full h-64 object-cover">
+          <Image src={usaGuideImg} alt="United States environmental regulations" width={1200} height={256} class="w-full h-64 object-cover" />
           <div class="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-transparent flex items-center">
             <div class="px-8">
               <h3 class="text-2xl font-bold text-white mb-2">State & Federal Regulations</h3>

@@ -2,7 +2,7 @@
 title: 'Amazon Trade-In vs. Recycling: Which Should You Choose for Your Old Electronics?'
 pubDate: 2025-12-08T12:00:00Z
 description: 'Deciding between trade-in or recycling your old electronics? Compare values, environmental impact, and find out which option saves you money while staying eco-friendly.'
-image: '/images/cash-laptop.jpg'
+image: '../../assets/images/cash-laptop.jpg'
 featured: true
 author: 'Editorial Team'
 ---

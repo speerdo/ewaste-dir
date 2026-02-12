@@ -2,7 +2,7 @@
 title: 'The "Internet of Waste": How Smart Technology is Revolutionizing Electronics Recycling in 2025'
 pubDate: 2025-09-08T12:00:00Z
 description: 'The emerging "Internet of Waste" is using connected sensors, artificial intelligence, and cloud analytics to completely reimagine how we collect, sort, and recycle electronic waste.'
-image: '/images/internet-of-waste.jpg'
+image: '../../assets/images/internet-of-waste.jpg'
 featured: true
 author: 'Editorial Team'
 ---

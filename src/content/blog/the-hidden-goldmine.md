@@ -2,7 +2,7 @@
 title: 'The Hidden Goldmine: How Small Electronics Recycling Businesses Are Thriving in 2025'
 pubDate: 2025-09-16T12:00:00Z
 description: 'With e-waste generation rising faster than large-scale processing capacity can handle, entrepreneurial recyclers are finding profitable niches that big players often overlook.'
-image: '/images/small-biz.jpg'
+image: '../../assets/images/small-biz.jpg'
 featured: true
 author: 'Editorial Team'
 ---

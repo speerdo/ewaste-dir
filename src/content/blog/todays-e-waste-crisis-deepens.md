@@ -2,7 +2,7 @@
 title: 'The Innovation Paradox: As IFA 2025 Unveils Tomorrow’s Tech, Today’s E-Waste Crisis Deepens'
 pubDate: 2025-09-01T12:00:00Z
 description: 'The faster we innovate, the faster we create electronic waste - and our recycling infrastructure is struggling to keep pace'
-image: '/images/IFA-BERLIN.jpg'
+image: '../../assets/images/IFA-BERLIN.jpg'
 featured: true
 author: 'Editorial Team'
 ---

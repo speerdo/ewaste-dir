@@ -2,7 +2,7 @@
 title: 'The Psychology of Hoarding: Why We Keep Broken Electronics and How to Finally Let Go'
 pubDate: 2025-09-19T12:00:00Z
 description: 'Understanding why we hoard broken electronics is the first step toward breaking free from these patterns and making more environmentally responsible choices.'
-image: '/images/hoarding.jpg'
+image: '../../assets/images/hoarding.jpg'
 featured: true
 author: 'Editorial Team'
 ---

@@ -1,5 +1,7 @@
 ---
 export const prerender = true;
+import { Image } from 'astro:assets';
+import { smartphoneInHandImg, phonesImg, autumnLaptopImg, retroGamingImg, storeRecyclingImg, dataSecurityImg, phoneRepairImg } from '../assets/images';
 import Layout from '../layouts/Layout.astro';
 
 const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
@@ -108,7 +110,7 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
 
         <!-- Visual break with phone image -->
         <div class="relative mb-16 rounded-xl overflow-hidden">
-          <img src="/images/smartphone-in-hand.jpg" alt="Trading in a smartphone" class="w-full h-64 object-cover" loading="lazy" />
+          <Image src={smartphoneInHandImg} alt="Trading in a smartphone" width={1200} height={256} class="w-full h-64 object-cover" />
           <div class="absolute inset-0 bg-gradient-to-r from-emerald-900/80 to-teal-900/60 flex items-center">
             <div class="px-8">
               <h3 class="text-2xl font-bold text-white mb-2">Your Old Device Has Value</h3>
@@ -132,7 +134,7 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
             <!-- Phones & Tablets -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
               <div class="h-40 overflow-hidden">
-                <img src="/images/phones.jpg" alt="Smartphones for trade-in" class="w-full h-full object-cover" loading="lazy" />
+                <Image src={phonesImg} alt="Smartphones for trade-in" width={400} height={160} class="w-full h-full object-cover" />
               </div>
               <div class="p-6">
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Phones & Tablets</h3>
@@ -167,7 +169,7 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
             <!-- Laptops & Computers -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
               <div class="h-40 overflow-hidden">
-                <img src="/images/autumn-laptop.jpg" alt="Laptop for trade-in" class="w-full h-full object-cover" loading="lazy" />
+                <Image src={autumnLaptopImg} alt="Laptop for trade-in" width={400} height={160} class="w-full h-full object-cover" />
               </div>
               <div class="p-6">
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Laptops & Computers</h3>
@@ -202,7 +204,7 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
             <!-- Gaming Consoles -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
               <div class="h-40 overflow-hidden">
-                <img src="/images/retro-gaming.jpg" alt="Gaming consoles for trade-in" class="w-full h-full object-cover" loading="lazy" />
+                <Image src={retroGamingImg} alt="Gaming consoles for trade-in" width={400} height={160} class="w-full h-full object-cover" />
               </div>
               <div class="p-6">
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Gaming Consoles</h3>
@@ -238,7 +240,7 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
 
         <!-- Visual break with recycling image -->
         <div class="relative mb-16 rounded-xl overflow-hidden">
-          <img src="/images/store-recycling.jpg" alt="Electronics recycling drop-off" class="w-full h-64 object-cover" loading="lazy" />
+          <Image src={storeRecyclingImg} alt="Electronics recycling drop-off" width={1200} height={256} class="w-full h-64 object-cover" />
           <div class="absolute inset-0 bg-gradient-to-l from-gray-900/80 to-gray-900/40 flex items-center justify-end">
             <div class="px-8 text-right max-w-md">
               <h3 class="text-2xl font-bold text-white mb-2">No Trade-In Value?</h3>
@@ -332,7 +334,7 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
           <div class="space-y-6">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden md:flex">
               <div class="md:w-1/3 h-48 md:h-auto">
-                <img src="/images/data-security.jpg" alt="Data security and privacy" class="w-full h-full object-cover" loading="lazy" />
+                <Image src={dataSecurityImg} alt="Data security and privacy" width={400} height={192} class="w-full h-full object-cover" />
               </div>
               <div class="p-6 md:w-2/3">
                 <h3 class="text-lg font-bold text-gray-900 mb-2">Do I need to wipe my data?</h3>
@@ -345,7 +347,7 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden md:flex md:flex-row-reverse">
               <div class="md:w-1/3 h-48 md:h-auto">
-                <img src="/images/phone-repair.jpg" alt="Damaged phone repair" class="w-full h-full object-cover" loading="lazy" />
+                <Image src={phoneRepairImg} alt="Damaged phone repair" width={400} height={192} class="w-full h-full object-cover" />
               </div>
               <div class="p-6 md:w-2/3">
                 <h3 class="text-lg font-bold text-gray-900 mb-2">What if my device is damaged?</h3>

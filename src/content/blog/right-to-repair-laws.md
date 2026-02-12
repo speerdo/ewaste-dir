@@ -2,7 +2,7 @@
 title: 'The Great Divide: How Right to Repair Laws Are Accidentally Undermining Electronics Recycling'
 pubDate: 2025-09-14T12:00:00Z
 description: 'The intersection of repair rights and recycling infrastructure reveals a complex policy landscape where two environmental priorities may be working at cross-purposes.'
-image: '/images/phone-repair.jpg'
+image: '../../assets/images/phone-repair.jpg'
 featured: true
 author: 'Editorial Team'
 ---

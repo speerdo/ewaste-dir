@@ -3,7 +3,7 @@ title: 'Is Your Electronics Recycling Business Missing from Our Directory? Hereâ
 description: 'Some of the best electronics recyclers operate locally, serve their communities faithfully, and somehow slip through the cracks of automated data gathering.'
 pubDate: 2025-10-19T12:00:00Z
 featured: true
-image: '/images/default-og.png'
+image: '../../assets/images/default-og.png'
 author: 'Editorial Team'
 ---
 

@@ -2,7 +2,7 @@
 title: 'The Post-Labor Day E-Waste Surge: Why September is Electronics Recycling’s Busiest Month'
 pubDate: 2025-09-02T12:00:00Z
 description: 'Understanding this seasonal pattern reveals much about our relationship with technology and offers insights into when and how to most effectively recycle our old devices.'
-image: '/images/autumn-laptop.jpg'
+image: '../../assets/images/autumn-laptop.jpg'
 featured: true
 author: 'Editorial Team'
 ---

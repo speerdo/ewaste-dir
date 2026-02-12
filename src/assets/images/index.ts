@@ -1,0 +1,47 @@
+// City images
+export { default as atlantaImg } from './atlanta.jpg';
+export { default as austinImg } from './austin.jpg';
+export { default as bostonImg } from './boston.jpg';
+export { default as chicagoImg } from './chicago.jpg';
+export { default as denverImg } from './denver.jpg';
+export { default as houstonImg } from './houston.jpg';
+export { default as lasVegasImg } from './las_vegas.jpg';
+export { default as losAngelesImg } from './los_angeles.jpg';
+export { default as miamiImg } from './miami.jpg';
+export { default as newYorkCityImg } from './new_york_city.jpg';
+export { default as sanFranciscoImg } from './san_francisco.jpg';
+export { default as seattleImg } from './seattle.jpg';
+
+// Blog / page images
+export { default as autumnLaptopImg } from './autumn-laptop.jpg';
+export { default as betterTomorrowImg } from './better-tomorrow.jpg';
+export { default as brokenTvImg } from './broken-tv.jpeg';
+export { default as cashLaptopImg } from './cash-laptop.jpg';
+export { default as corporateMeetingImg } from './corporate-meeting.jpg';
+export { default as dataSecurityImg } from './data-security.jpg';
+export { default as defaultOgImg } from './default-og.png';
+export { default as evChargingImg } from './ev-charging.jpg';
+export { default as ewasteDropoffImg } from './ewaste-dropoff.webp';
+export { default as ewastePileImg } from './ewaste-pile.jpg';
+export { default as gorillaImg } from './gorilla.jpg';
+export { default as hoardingImg } from './hoarding.jpg';
+export { default as ifaBerlinImg } from './IFA-BERLIN.jpg';
+export { default as internetOfWasteImg } from './internet-of-waste.jpg';
+export { default as iphoneParisImg } from './iphone-paris.jpg';
+export { default as mobileEwasteImg } from './mobile-ewaste.jpg';
+export { default as phoneRepairImg } from './phone-repair.jpg';
+export { default as phonesImg } from './phones.jpg';
+export { default as profileImg } from './profile.jpg';
+export { default as recycleElectronicsImg } from './recycle-electronics.jpg';
+export { default as recyclePhoneImg } from './recycle-phone.jpeg';
+export { default as recyclingImg } from './recycling.webp';
+export { default as retroGamingImg } from './retro-gaming.jpg';
+export { default as roboticsArmImg } from './robotics-arm.jpg';
+export { default as sciLabImg } from './sci-lab.jpg';
+export { default as smallBizImg } from './small-biz.jpg';
+export { default as smartphoneInHandImg } from './smartphone-in-hand.jpg';
+export { default as storeRecyclingImg } from './store-recycling.jpg';
+export { default as techGiftImg } from './tech-gift.jpg';
+export { default as usaGuideImg } from './usa-guide.jpg';
+export { default as wasteImg } from './waste.avif';
+export { default as waterPhoneImg } from './water-phone.jpg';

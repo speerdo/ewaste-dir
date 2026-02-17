@@ -1,7 +1,7 @@
 ---
 title: 'We''re Rebuilding RecycleOldTech From the Ground Up'
 pubDate: 2026-02-12T12:00:00Z
-description: 'how we''re ensuring RecycleOldTech becomes the most accurate electronics recycling resource available.'
+description: 'How we''re ensuring RecycleOldTech becomes the most accurate electronics recycling resource available.'
 image: 'https://images.unsplash.com/photo-1592659762303-90081d34b277?q=80&w=1546&auto=format&fit=crop'
 author: 'Editorial Team'
 ---

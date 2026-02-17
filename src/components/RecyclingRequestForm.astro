@@ -1,0 +1,271 @@
+---
+interface Props {
+  cityName: string;
+  stateName: string;
+  zipCode?: string;
+}
+
+const { cityName, stateName, zipCode = '' } = Astro.props;
+const web3formsKey = 'e1632ada-52d7-4436-a187-944a2ebcbe6f'; // Recycling Request Form in Web3Forms
+---
+
+<section id="recycling-request-form" class="my-10">
+  <div class="max-w-xl mx-auto">
+    <div class="bg-green-100 rounded-xl border border-green-300 p-6 md:p-8 shadow-md">
+      <div class="mb-6">
+        <h2 class="text-xl font-display font-bold text-gray-900 mb-1">
+          Need help recycling electronics?
+        </h2>
+        <p class="text-sm text-gray-600">
+          Tell us what you have and we'll connect you with local recyclers — free.
+        </p>
+      </div>
+
+      <form
+        id="recycling-form"
+        action="https://api.web3forms.com/submit"
+        method="POST"
+        class="space-y-5"
+        novalidate
+      >
+        <input type="hidden" name="access_key" value={web3formsKey} />
+        <input type="hidden" name="subject" value={`Recycling request from ${cityName}, ${stateName}`} />
+        <input type="hidden" name="redirect" value="https://www.recycleoldtech.com/thanks" />
+        <input type="hidden" name="city" value={cityName} />
+        <input type="hidden" name="state" value={stateName} />
+
+        <!-- What do you need help with? -->
+        <fieldset>
+          <legend class="block text-sm font-medium text-gray-700 mb-2">
+            What do you need help with? <span class="text-red-500" aria-hidden="true">*</span>
+          </legend>
+          <div class="space-y-2">
+            {[
+              'Drop off at center',
+              'Schedule pickup',
+              'Business cleanout',
+              'Data destruction',
+              'Sell/Buy used',
+            ].map((option) => (
+              <label class="flex items-center gap-3 px-3 py-2.5 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-green-400 hover:bg-green-50/50 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50 has-[:checked]:ring-1 has-[:checked]:ring-green-500">
+                <input
+                  type="radio"
+                  name="help_type"
+                  value={option}
+                  required
+                  class="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500 focus:ring-offset-0"
+                />
+                <span class="text-sm text-gray-800">{option}</span>
+              </label>
+            ))}
+          </div>
+          <p class="hidden mt-1 text-sm text-red-500" data-error="help_type">Please select what you need help with.</p>
+        </fieldset>
+
+        <!-- What devices? -->
+        <fieldset>
+          <legend class="block text-sm font-medium text-gray-700 mb-2">
+            What devices? <span class="text-gray-500 font-normal">(select all that apply)</span>
+          </legend>
+          <div class="flex flex-wrap gap-2">
+            {[
+              'Computers/Laptops',
+              'Phones/Tablets',
+              'TVs/Monitors',
+              'Printers',
+              'Batteries',
+              'Cables',
+              'Other',
+            ].map((device) => (
+              <label class="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-green-400 hover:bg-green-50/50 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50 has-[:checked]:ring-1 has-[:checked]:ring-green-500">
+                <input
+                  type="checkbox"
+                  name="devices"
+                  value={device}
+                  class="w-3.5 h-3.5 text-green-600 border-gray-300 rounded focus:ring-green-500 focus:ring-offset-0"
+                />
+                <span class="text-sm text-gray-800">{device}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <!-- Contact fields -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="req-name" class="block text-sm font-medium text-gray-700 mb-1">
+              Name <span class="text-red-500" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="text"
+              id="req-name"
+              name="name"
+              required
+              autocomplete="name"
+              class="w-full px-3 py-2 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="Your name"
+            />
+            <p class="hidden mt-1 text-sm text-red-500" data-error="name">Please enter your name.</p>
+          </div>
+          <div>
+            <label for="req-email" class="block text-sm font-medium text-gray-700 mb-1">
+              Email <span class="text-red-500" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="email"
+              id="req-email"
+              name="email"
+              required
+              autocomplete="email"
+              class="w-full px-3 py-2 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="you@example.com"
+            />
+            <p class="hidden mt-1 text-sm text-red-500" data-error="email">Please enter a valid email.</p>
+          </div>
+          <div>
+            <label for="req-phone" class="block text-sm font-medium text-gray-700 mb-1">
+              Phone <span class="text-gray-500 font-normal">(optional)</span>
+            </label>
+            <input
+              type="tel"
+              id="req-phone"
+              name="phone"
+              autocomplete="tel"
+              class="w-full px-3 py-2 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="(555) 123-4567"
+            />
+          </div>
+          <div>
+            <label for="req-zip" class="block text-sm font-medium text-gray-700 mb-1">
+              ZIP Code
+            </label>
+            <input
+              type="text"
+              id="req-zip"
+              name="zip_code"
+              inputmode="numeric"
+              pattern="[0-9]{5}"
+              maxlength="5"
+              autocomplete="postal-code"
+              value={zipCode}
+              class="w-full px-3 py-2 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="12345"
+            />
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div>
+          <label for="req-notes" class="block text-sm font-medium text-gray-700 mb-1">
+            Anything else? <span class="text-gray-500 font-normal">(optional)</span>
+          </label>
+          <textarea
+            id="req-notes"
+            name="message"
+            rows="2"
+            class="w-full px-3 py-2 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            placeholder="e.g. 5 monitors, need weekend pickup..."
+          ></textarea>
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-1">
+          <button
+            type="submit"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
+            <span id="recycling-form-btn-text">Get free help</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </button>
+          <p class="mt-2 text-xs text-gray-500">We'll email you recycling options within 24 hours.</p>
+        </div>
+      </form>
+
+      <!-- Success message (hidden by default) -->
+      <div id="form-success" class="hidden text-center py-8">
+        <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-display font-bold text-gray-900 mb-2">Thanks!</h3>
+        <p class="text-sm text-gray-600">We'll email you recycling options in {cityName} within 24 hours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function initRecyclingForm() {
+    const form = document.getElementById('recycling-form') as HTMLFormElement | null;
+    if (!form) return;
+
+    const successEl = document.getElementById('form-success');
+
+    function showError(name: string) {
+      const el = form!.querySelector(`[data-error="${name}"]`) as HTMLElement | null;
+      if (el) el.classList.remove('hidden');
+    }
+
+    function clearErrors() {
+      form!.querySelectorAll('[data-error]').forEach((el) => el.classList.add('hidden'));
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      let valid = true;
+      const helpType = form.querySelector('input[name="help_type"]:checked');
+      if (!helpType) {
+        showError('help_type');
+        valid = false;
+      }
+      const name = (form.querySelector('#req-name') as HTMLInputElement).value.trim();
+      if (!name) {
+        showError('name');
+        valid = false;
+      }
+      const email = (form.querySelector('#req-email') as HTMLInputElement).value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        showError('email');
+        valid = false;
+      }
+      if (!valid) {
+        const firstError = form.querySelector('[data-error]:not(.hidden)') as HTMLElement;
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      const btnText = document.getElementById('recycling-form-btn-text');
+      submitBtn.disabled = true;
+      if (btnText) btnText.textContent = 'Sending...';
+      try {
+        const data = new FormData(form);
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: data,
+          headers: { Accept: 'application/json' },
+        });
+        if (response.ok) {
+          form.classList.add('hidden');
+          if (successEl) successEl.classList.remove('hidden');
+        } else {
+          submitBtn.disabled = false;
+          if (btnText) btnText.textContent = 'Get free help';
+          alert('Something went wrong. Please try again or contact us directly.');
+        }
+      } catch {
+        submitBtn.disabled = false;
+        if (btnText) btnText.textContent = 'Get free help';
+        alert('Network error. Please check your connection and try again.');
+      }
+    });
+  }
+  initRecyclingForm();
+  document.addEventListener('astro:page-load', initRecyclingForm);
+</script>

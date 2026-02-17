@@ -16,6 +16,7 @@ import CityContentEnhancer from '../../../components/CityContentEnhancer.astro';
 import ResidentsGuide from '../../../components/ResidentsGuide.astro';
 import LocalNews from '../../../components/LocalNews.astro';
 import TradeInCallout from '../../../components/TradeInCallout.astro';
+import RecyclingRequestForm from '../../../components/RecyclingRequestForm.astro';
 import { generateCityMeta } from '../../../utils/metaGenerator';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
@@ -519,6 +520,9 @@ function convertTimeFormat(timeStr: string): string | undefined {
   }
 }
 
+// Get a ZIP code from the first center that has one (for form pre-fill)
+const cityZipCode = displayCenters.find(c => c.postal_code)?.postal_code?.toString() || '';
+
 // Build-time verification date for disclaimer
 const verificationDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -787,6 +791,7 @@ if (baseTitle.length <= maxTitleLength) {
       </div>
     )}
 
+    <!-- Lead Capture Form - moved to bottom of page -->
     <!-- Trade-In Callout -->
     <TradeInCallout />
 
@@ -818,6 +823,22 @@ if (baseTitle.length <= maxTitleLength) {
       <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
         <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} />
       </div>
+    </div>
+
+    <!-- Secondary CTA -->
+    <div class="mb-10 text-center bg-green-50 border border-green-200 rounded-lg p-6">
+      <p class="text-lg text-gray-700 mb-3">
+        Still not sure where to go? Let us help — fill out our quick form below.
+      </p>
+      <a
+        href="#recycling-request-form"
+        class="inline-flex items-center px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+      >
+        Get Free Help
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+      </a>
     </div>
 
     <!-- Local News Section (fetched client-side) -->
@@ -894,6 +915,13 @@ if (baseTitle.length <= maxTitleLength) {
         Remove personal data, call ahead to confirm accepted items and hours. {state.name} requires proper e-waste disposal - never put electronics in regular trash.
       </p>
     </div>
+
+    <!-- Lead Capture Form - at bottom of page -->
+    <RecyclingRequestForm
+      cityName={cityName}
+      stateName={state.name}
+      zipCode={cityZipCode}
+    />
 
 
 

@@ -1,0 +1,495 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Admin — Claims | RecycleOldTech.com"
+  description="Internal admin view for business claim submissions."
+>
+  <div class="pt-16 min-h-screen bg-gray-50">
+
+    <!-- Password Gate -->
+    <div id="admin-gate" class="flex items-center justify-center min-h-[80vh] px-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 w-full max-w-sm text-center">
+        <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
+          <svg class="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <h1 class="text-xl font-display font-bold text-gray-900 mb-2">Admin Access</h1>
+        <p class="text-sm text-gray-500 mb-6">Enter your admin password to view claim submissions.</p>
+        <form id="gate-form" class="space-y-4">
+          <div>
+            <input
+              type="password"
+              id="admin-password"
+              placeholder="Password"
+              autocomplete="current-password"
+              class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            />
+          </div>
+          <p id="gate-error" class="hidden text-sm text-red-500">Incorrect password.</p>
+          <button
+            type="submit"
+            class="w-full px-6 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Enter
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard (hidden until authenticated) -->
+    <div id="admin-dashboard" class="hidden px-4 py-10">
+      <div class="container mx-auto max-w-6xl">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h1 class="text-2xl font-display font-bold text-gray-900">Business Claim Submissions</h1>
+            <p class="text-sm text-gray-500 mt-1">All incoming claims, newest first.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              id="refresh-btn"
+              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh
+            </button>
+            <button
+              id="logout-btn"
+              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Log Out
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div id="stats-row" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8"></div>
+
+        <!-- Loading state -->
+        <div id="claims-loading" class="text-center py-16 text-gray-500">
+          <svg class="w-8 h-8 mx-auto animate-spin text-green-500 mb-3" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Loading claims...
+        </div>
+
+        <!-- Empty state -->
+        <div id="claims-empty" class="hidden text-center py-16 text-gray-500">
+          <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <p class="font-medium">No claim submissions yet.</p>
+          <p class="text-sm mt-1">New submissions will appear here.</p>
+        </div>
+
+        <!-- Claims table -->
+        <div id="claims-table-wrap" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                  <th class="text-left px-4 py-3 font-semibold text-gray-700">Business</th>
+                  <th class="text-left px-4 py-3 font-semibold text-gray-700">Location</th>
+                  <th class="text-left px-4 py-3 font-semibold text-gray-700">Contact</th>
+                  <th class="text-left px-4 py-3 font-semibold text-gray-700">Tier</th>
+                  <th class="text-left px-4 py-3 font-semibold text-gray-700">Status</th>
+                  <th class="text-left px-4 py-3 font-semibold text-gray-700">Submitted</th>
+                  <th class="text-left px-4 py-3 font-semibold text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="claims-tbody" class="divide-y divide-gray-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Detail Modal -->
+        <div id="claim-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 class="text-lg font-display font-bold text-gray-900" id="modal-title">Claim Details</h2>
+              <button id="modal-close" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div id="modal-body" class="p-6 space-y-4 text-sm text-gray-700"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</Layout>
+
+<script define:vars={{
+  supabaseUrl: import.meta.env.PUBLIC_SUPABASE_URL,
+  supabaseAnonKey: import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  adminPassword: import.meta.env.PUBLIC_ADMIN_PASSWORD || 'recycleadmin2026',
+}}>
+  const STATUS_OPTIONS = ['pending', 'contacted', 'active', 'cancelled', 'rejected'];
+  const STATUS_COLORS = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    contacted: 'bg-blue-100 text-blue-800',
+    active: 'bg-green-100 text-green-800',
+    cancelled: 'bg-gray-100 text-gray-600',
+    rejected: 'bg-red-100 text-red-700',
+  };
+  const TIER_COLORS = {
+    free: 'bg-gray-100 text-gray-700',
+    premium: 'bg-green-100 text-green-800',
+    featured: 'bg-amber-100 text-amber-800',
+  };
+
+  const TYPE_COLORS = {
+    new: 'bg-blue-100 text-blue-800',
+    update: 'bg-purple-100 text-purple-800',
+  };
+
+  let allClaims = [];
+  let currentModalClaim = null;
+
+  // ---- Password gate ----
+  console.log('[admin] expected password length:', adminPassword.length, '| first 3 chars:', adminPassword.slice(0, 3));
+  const gateEl = document.getElementById('admin-gate');
+  const dashEl = document.getElementById('admin-dashboard');
+  const gateForm = document.getElementById('gate-form');
+  const gateError = document.getElementById('gate-error');
+
+  // Check session
+  if (sessionStorage.getItem('admin_auth') === 'true') {
+    gateEl.classList.add('hidden');
+    dashEl.classList.remove('hidden');
+    loadClaims();
+  }
+
+  gateForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const pw = document.getElementById('admin-password').value;
+    console.log('[admin] typed length:', pw.length, '| expected length:', adminPassword.length);
+    console.log('[admin] typed chars:', [...pw].map(c => c.charCodeAt(0)));
+    console.log('[admin] expected chars:', [...adminPassword].map(c => c.charCodeAt(0)));
+    if (pw === adminPassword) {
+      sessionStorage.setItem('admin_auth', 'true');
+      gateEl.classList.add('hidden');
+      dashEl.classList.remove('hidden');
+      gateError.classList.add('hidden');
+      loadClaims();
+    } else {
+      gateError.classList.remove('hidden');
+      document.getElementById('admin-password').value = '';
+    }
+  });
+
+  // ---- Load claims via Supabase RPC ----
+  async function loadClaims() {
+    const loading = document.getElementById('claims-loading');
+    const empty = document.getElementById('claims-empty');
+    const tableWrap = document.getElementById('claims-table-wrap');
+    loading.classList.remove('hidden');
+    empty.classList.add('hidden');
+    tableWrap.classList.add('hidden');
+
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/get_all_business_claims`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      allClaims = await res.json();
+    } catch (err) {
+      console.error('Failed to load claims:', err);
+      loading.classList.add('hidden');
+      empty.textContent = 'Failed to load claims. Check console for details.';
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    loading.classList.add('hidden');
+    renderStats();
+
+    if (!allClaims.length) {
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    tableWrap.classList.remove('hidden');
+    renderTable();
+  }
+
+  // ---- Render stats row ----
+  function renderStats() {
+    const statsEl = document.getElementById('stats-row');
+    const counts = { total: allClaims.length };
+    STATUS_OPTIONS.forEach(s => counts[s] = allClaims.filter(c => c.status === s).length);
+
+    statsEl.innerHTML = [
+      { label: 'Total', value: counts.total, color: 'text-gray-900' },
+      { label: 'Pending', value: counts.pending, color: 'text-yellow-700' },
+      { label: 'Contacted', value: counts.contacted, color: 'text-blue-700' },
+      { label: 'Active', value: counts.active, color: 'text-green-700' },
+      { label: 'Rejected', value: counts.rejected, color: 'text-red-600' },
+    ].map(s => `
+      <div class="bg-white rounded-xl border border-gray-200 px-5 py-4 text-center">
+        <div class="text-2xl font-display font-bold ${s.color}">${s.value}</div>
+        <div class="text-xs text-gray-500 mt-0.5">${s.label}</div>
+      </div>
+    `).join('');
+  }
+
+  // ---- Render table ----
+  function renderTable() {
+    const tbody = document.getElementById('claims-tbody');
+    tbody.innerHTML = allClaims.map(claim => {
+      const date = new Date(claim.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const statusColor = STATUS_COLORS[claim.status] || 'bg-gray-100 text-gray-600';
+      const tierColor = TIER_COLORS[claim.tier] || 'bg-gray-100 text-gray-700';
+      return `
+        <tr class="hover:bg-gray-50 cursor-pointer" data-claim-id="${claim.id}">
+          <td class="px-4 py-3">
+            <div class="font-medium text-gray-900">${escHtml(claim.business_name)}</div>
+            <span class="inline-flex mt-0.5 px-1.5 py-0.5 rounded text-xs font-medium ${TYPE_COLORS[claim.submission_type] || 'bg-gray-100 text-gray-600'}">${claim.submission_type === 'update' ? 'Update' : 'New'}</span>
+            ${claim.website ? `<a href="${escHtml(claim.website)}" target="_blank" rel="noopener" class="text-xs text-green-600 hover:underline" onclick="event.stopPropagation()">${escHtml(claim.website)}</a>` : ''}
+          </td>
+          <td class="px-4 py-3 text-gray-600">${escHtml(claim.city)}, ${escHtml(claim.state)}</td>
+          <td class="px-4 py-3">
+            <div class="text-gray-900">${escHtml(claim.contact_name)}</div>
+            <a href="mailto:${escHtml(claim.contact_email)}" class="text-xs text-green-600 hover:underline" onclick="event.stopPropagation()">${escHtml(claim.contact_email)}</a>
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${tierColor}">${claim.tier}</span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColor}">${claim.status}</span>
+          </td>
+          <td class="px-4 py-3 text-gray-500 whitespace-nowrap">${date}</td>
+          <td class="px-4 py-3" onclick="event.stopPropagation()">
+            <select
+              class="text-xs border border-gray-300 rounded-md px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
+              data-update-status="${claim.id}"
+              onchange="handleStatusChange(this)"
+            >
+              ${STATUS_OPTIONS.map(s => `<option value="${s}" ${s === claim.status ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Row click → modal
+    tbody.querySelectorAll('tr[data-claim-id]').forEach(row => {
+      row.addEventListener('click', () => {
+        const id = row.getAttribute('data-claim-id');
+        const claim = allClaims.find(c => c.id === id);
+        if (claim) openModal(claim);
+      });
+    });
+  }
+
+  // ---- Status change ----
+  async function handleStatusChange(select) {
+    const claimId = select.getAttribute('data-update-status');
+    const newStatus = select.value;
+
+    try {
+      await fetch(`${supabaseUrl}/rest/v1/rpc/update_claim_status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({ p_claim_id: claimId, p_new_status: newStatus }),
+      });
+      // Update local data
+      const claim = allClaims.find(c => c.id === claimId);
+      if (claim) claim.status = newStatus;
+      renderStats();
+    } catch (err) {
+      console.error('Status update failed:', err);
+      alert('Failed to update status. Please try again.');
+    }
+  }
+  window.handleStatusChange = handleStatusChange;
+
+  // ---- Modal ----
+  function openModal(claim) {
+    currentModalClaim = claim;
+    const modal = document.getElementById('claim-modal');
+    const title = document.getElementById('modal-title');
+    const body = document.getElementById('modal-body');
+
+    const typeLabel = claim.submission_type === 'update' ? 'Update Request' : 'New Listing';
+    const typeColor = claim.submission_type === 'update' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
+
+    title.innerHTML = `${escHtml(claim.business_name)} <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium ${typeColor}">${typeLabel}</span>`;
+    body.innerHTML = `
+      <dl class="space-y-3">
+
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-1">Business Info</div>
+        ${detailRow('Business Name', claim.business_name)}
+        ${detailRow('Location', `${claim.city}, ${claim.state}${claim.zip ? ' ' + claim.zip : ''}`)}
+        ${claim.address ? detailRow('Address', claim.address) : ''}
+        ${claim.phone ? detailRow('Business Phone', `<a href="tel:${escHtml(claim.phone)}" class="text-green-600 hover:underline">${escHtml(claim.phone)}</a>`) : ''}
+        ${claim.website ? detailRow('Website', `<a href="${escHtml(claim.website)}" target="_blank" rel="noopener" class="text-green-600 hover:underline">${escHtml(claim.website)}</a>`) : ''}
+
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-1 pt-2">Contact</div>
+        ${detailRow('Contact Name', claim.contact_name)}
+        ${detailRow('Contact Email', `<a href="mailto:${escHtml(claim.contact_email)}" class="text-green-600 hover:underline">${escHtml(claim.contact_email)}</a>`)}
+        ${claim.contact_phone ? detailRow('Contact Phone', claim.contact_phone) : ''}
+
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-1 pt-2">Listing Details</div>
+        ${claim.accepted_items && claim.accepted_items.length ? detailRow('Accepts', claim.accepted_items.map(i => `<span class="inline-block bg-green-50 text-green-700 text-xs rounded px-1.5 py-0.5 mr-1 mb-1">${escHtml(i)}</span>`).join('')) : ''}
+        ${claim.services_offered && claim.services_offered.length ? detailRow('Services', claim.services_offered.map(s => `<span class="inline-block bg-blue-50 text-blue-700 text-xs rounded px-1.5 py-0.5 mr-1 mb-1">${escHtml(s)}</span>`).join('')) : ''}
+        ${claim.certifications && claim.certifications.length ? detailRow('Certifications', claim.certifications.map(c => `<span class="inline-block bg-amber-50 text-amber-700 text-xs rounded px-1.5 py-0.5 mr-1 mb-1">${escHtml(c)}</span>`).join('')) : ''}
+        ${claim.hours ? detailRow('Hours', `<pre class="text-xs text-gray-600 whitespace-pre-wrap font-sans">${escHtml(claim.hours)}</pre>`) : ''}
+        ${claim.description ? detailRow('Description', `<p class="text-gray-600 text-xs leading-relaxed">${escHtml(claim.description)}</p>`) : ''}
+
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-1 pt-2">Submission</div>
+        ${detailRow('Plan', claim.tier)}
+        ${detailRow('Status', claim.status)}
+        ${detailRow('Submitted', new Date(claim.created_at).toLocaleString())}
+        ${claim.message ? detailRow('Message', `<span class="text-gray-600 italic text-xs">${escHtml(claim.message)}</span>`) : ''}
+
+        ${detailRow('Internal Notes', `
+          <textarea
+            id="modal-notes"
+            rows="3"
+            class="w-full mt-1 px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+            placeholder="Internal notes..."
+          >${escHtml(claim.notes || '')}</textarea>
+          <button onclick="saveNotes('${claim.id}')" class="mt-2 px-4 py-1.5 text-xs bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">Save Notes</button>
+        `)}
+
+      </dl>
+
+      <div class="border-t border-gray-200 pt-4 mt-4">
+        <button
+          onclick="approveClaim('${claim.id}')"
+          class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          ${claim.submission_type === 'update' ? 'Approve Update & Apply to Directory' : 'Approve & Publish to Directory'}
+        </button>
+        ${claim.submission_type === 'update' ? '<p class="text-xs text-center text-gray-500 mt-2">Matches by business name + city + state. If no match is found, a new listing will be created.</p>' : ''}
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+  }
+
+  async function saveNotes(claimId) {
+    const notes = document.getElementById('modal-notes').value;
+    try {
+      await fetch(`${supabaseUrl}/rest/v1/rpc/update_claim_notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({ p_claim_id: claimId, p_notes: notes }),
+      });
+      const claim = allClaims.find(c => c.id === claimId);
+      if (claim) claim.notes = notes;
+      alert('Notes saved.');
+    } catch (err) {
+      alert('Failed to save notes.');
+    }
+  }
+  window.saveNotes = saveNotes;
+
+  // ---- Approve & Publish ----
+  async function approveClaim(claimId) {
+    const claim = allClaims.find(c => c.id === claimId);
+    const action = claim?.submission_type === 'update' ? 'apply this update to' : 'publish this listing to';
+    if (!confirm(`Are you sure you want to ${action} the directory?`)) return;
+
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/approve_claim`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({ p_claim_id: claimId }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+      const result = (await res.json()).replace(/"/g, '');
+
+      const messages = {
+        inserted:         'New listing published to the directory.',
+        updated:          'Existing listing updated in the directory.',
+        no_match_inserted: 'No exact match found — added as a new listing.',
+      };
+
+      alert(messages[result] || 'Published successfully.');
+
+      if (claim) claim.status = 'active';
+      renderStats();
+      renderTable();
+      document.getElementById('claim-modal').classList.add('hidden');
+    } catch (err) {
+      console.error('Approve failed:', err);
+      alert('Failed to approve: ' + err.message);
+    }
+  }
+  window.approveClaim = approveClaim;
+
+  document.getElementById('modal-close')?.addEventListener('click', () => {
+    document.getElementById('claim-modal').classList.add('hidden');
+  });
+  document.getElementById('claim-modal')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
+  });
+
+  document.getElementById('refresh-btn')?.addEventListener('click', loadClaims);
+
+  document.getElementById('logout-btn')?.addEventListener('click', () => {
+    sessionStorage.removeItem('admin_auth');
+    dashEl.classList.add('hidden');
+    gateEl.classList.remove('hidden');
+    document.getElementById('admin-password').value = '';
+  });
+
+  // ---- Helpers ----
+  function detailRow(label, value) {
+    return `
+      <div>
+        <dt class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-0.5">${label}</dt>
+        <dd>${value}</dd>
+      </div>
+    `;
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+</script>

@@ -5,15 +5,17 @@ import CenterCard from './CenterCard.astro';
 export interface Props {
   centers: RecyclingCenter[];
   defaultLogo: string;
+  city?: string;
+  state?: string;
 }
 
-const { centers, defaultLogo } = Astro.props;
+const { centers, defaultLogo, city = '', state = '' } = Astro.props;
 
 // Initial sort alphabetically
 const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
 ---
 
-<div class="lg:px-4 lg:py-4">
+<div class="lg:px-4 lg:py-4" data-city={city} data-state={state}>
   <div id="centersList" class="space-y-6">
     {sortedCenters.map(center => <CenterCard center={center} defaultLogo={defaultLogo} />)}
   </div>
@@ -243,12 +245,12 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
   
   // Run initialization after Astro page transitions
   document.addEventListener('astro:page-load', initSorting);
-  
+
   // Clean up event listeners on page transitions
   document.addEventListener('astro:before-swap', () => {
     const sortButton = document.querySelector('#sort-button-container #sortToggle');
     const trustButton = document.querySelector('#sort-button-container #trustSortToggle');
-    
+
     if (sortButton) {
       sortButton.removeEventListener('click', toggleSort);
     }
@@ -256,4 +258,122 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
       trustButton.removeEventListener('click', toggleTrustSort);
     }
   });
-</script> 
+</script>
+
+<script>
+  // Verified Partner enhancement:
+  // Fetches active verified_partners for this city/state and promotes them visually.
+  async function applyVerifiedPartners() {
+    const wrap = document.querySelector('[data-city][data-state]') as HTMLElement | null;
+    if (!wrap) return;
+
+    const city = wrap.getAttribute('data-city');
+    const state = wrap.getAttribute('data-state');
+    if (!city || !state) return;
+
+    const supabaseUrl = (import.meta as any).env?.PUBLIC_SUPABASE_URL;
+    const supabaseKey = (import.meta as any).env?.PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseKey) return;
+
+    try {
+      const params = new URLSearchParams({
+        city: `eq.${city}`,
+        state: `eq.${state}`,
+        is_active: 'eq.true',
+        select: 'business_name,tier,description,logo_url,is_featured',
+      });
+      const res = await fetch(`${supabaseUrl}/rest/v1/verified_partners?${params}`, {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+      });
+      if (!res.ok) return;
+      const partners: Array<{
+        business_name: string;
+        tier: 'premium' | 'featured';
+        description?: string;
+        logo_url?: string;
+        is_featured: boolean;
+      }> = await res.json();
+
+      if (!partners.length) return;
+
+      // Build a lookup map by normalized business name
+      const partnerMap = new Map(
+        partners.map(p => [p.business_name.toLowerCase().trim(), p])
+      );
+
+      const centersList = document.getElementById('centersList');
+      if (!centersList) return;
+
+      const cards = Array.from(centersList.children) as HTMLElement[];
+      const featuredCards: HTMLElement[] = [];
+      const premiumCards: HTMLElement[] = [];
+
+      cards.forEach(card => {
+        const nameEl = card.querySelector('h3');
+        if (!nameEl) return;
+        const name = (nameEl.textContent || '').toLowerCase().trim();
+        const partner = partnerMap.get(name);
+        if (!partner) return;
+
+        // Inject verified badge after h3
+        const badgeColor = partner.tier === 'featured'
+          ? 'bg-amber-50 text-amber-800 border-amber-300'
+          : 'bg-green-50 text-green-800 border-green-300';
+        const badgeLabel = partner.tier === 'featured' ? 'Featured Partner' : 'Verified Partner';
+
+        // Only add badge if not already present
+        if (!card.querySelector('.verified-badge')) {
+          const badge = document.createElement('span');
+          badge.className = `verified-badge inline-flex items-center gap-1 rounded-full font-medium border px-2.5 py-1 text-xs mb-2 ${badgeColor}`;
+          badge.title = 'This business has been verified by RecycleOldTech.com';
+          badge.innerHTML = `
+            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            ${badgeLabel}
+          `;
+          nameEl.parentElement?.insertBefore(badge, nameEl.nextSibling);
+        }
+
+        // Hide the claim link for verified partners
+        const claimLink = card.querySelector('a[href^="/claim"]') as HTMLElement | null;
+        if (claimLink?.parentElement) claimLink.parentElement.style.display = 'none';
+
+        // Set partner-tier data attribute for sorting
+        card.setAttribute('data-partner-tier', partner.is_featured ? 'featured' : 'premium');
+
+        if (partner.is_featured) {
+          featuredCards.push(card);
+        } else {
+          premiumCards.push(card);
+        }
+      });
+
+      // Re-order: featured first, then premium, then rest
+      if (!featuredCards.length && !premiumCards.length) return;
+
+      const promoted = [...featuredCards, ...premiumCards];
+      const rest = cards.filter(c => !promoted.includes(c));
+
+      const fragment = document.createDocumentFragment();
+      [...promoted, ...rest].forEach(c => fragment.appendChild(c));
+      centersList.innerHTML = '';
+      centersList.appendChild(fragment);
+
+    } catch (err) {
+      // Non-fatal — site still works without verified partner data
+      console.warn('Verified partners fetch failed:', err);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyVerifiedPartners);
+  } else {
+    applyVerifiedPartners();
+  }
+  document.addEventListener('astro:page-load', applyVerifiedPartners);
+</script>
+

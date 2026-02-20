@@ -133,11 +133,11 @@ import Layout from '../../layouts/Layout.astro';
   </div>
 </Layout>
 
-<script define:vars={{
-  supabaseUrl: import.meta.env.PUBLIC_SUPABASE_URL,
-  supabaseAnonKey: import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  adminPassword: import.meta.env.PUBLIC_ADMIN_PASSWORD || 'recycleadmin2026',
-}}>
+<script>
+  // @ts-nocheck — this was previously a define:vars script (vanilla JS, not TS-checked)
+  const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+  const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
   const STATUS_OPTIONS = ['pending', 'contacted', 'active', 'cancelled', 'rejected'];
   const STATUS_COLORS = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -161,31 +161,33 @@ import Layout from '../../layouts/Layout.astro';
   let currentModalClaim = null;
 
   // ---- Password gate ----
-  console.log('[admin] expected password length:', adminPassword.length, '| first 3 chars:', adminPassword.slice(0, 3));
   const gateEl = document.getElementById('admin-gate');
   const dashEl = document.getElementById('admin-dashboard');
   const gateForm = document.getElementById('gate-form');
   const gateError = document.getElementById('gate-error');
 
-  // Check session
-  if (sessionStorage.getItem('admin_auth') === 'true') {
+  function showDashboard() {
     gateEl.classList.add('hidden');
     dashEl.classList.remove('hidden');
     loadClaims();
   }
 
-  gateForm?.addEventListener('submit', (e) => {
+  // Check auth status via httpOnly cookie (server-side)
+  fetch('/api/admin-status').then(res => {
+    if (res.ok) showDashboard();
+  });
+
+  gateForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const pw = document.getElementById('admin-password').value;
-    console.log('[admin] typed length:', pw.length, '| expected length:', adminPassword.length);
-    console.log('[admin] typed chars:', [...pw].map(c => c.charCodeAt(0)));
-    console.log('[admin] expected chars:', [...adminPassword].map(c => c.charCodeAt(0)));
-    if (pw === adminPassword) {
-      sessionStorage.setItem('admin_auth', 'true');
-      gateEl.classList.add('hidden');
-      dashEl.classList.remove('hidden');
+    const res = await fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    if (res.ok) {
       gateError.classList.add('hidden');
-      loadClaims();
+      showDashboard();
     } else {
       gateError.classList.remove('hidden');
       document.getElementById('admin-password').value = '';
@@ -202,12 +204,12 @@ import Layout from '../../layouts/Layout.astro';
     tableWrap.classList.add('hidden');
 
     try {
-      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/get_all_business_claims`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_all_business_claims`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({}),
       });
@@ -309,12 +311,12 @@ import Layout from '../../layouts/Layout.astro';
     const newStatus = select.value;
 
     try {
-      await fetch(`${supabaseUrl}/rest/v1/rpc/update_claim_status`, {
+      await fetch(`${SUPABASE_URL}/rest/v1/rpc/update_claim_status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ p_claim_id: claimId, p_new_status: newStatus }),
       });
@@ -400,12 +402,12 @@ import Layout from '../../layouts/Layout.astro';
   async function saveNotes(claimId) {
     const notes = document.getElementById('modal-notes').value;
     try {
-      await fetch(`${supabaseUrl}/rest/v1/rpc/update_claim_notes`, {
+      await fetch(`${SUPABASE_URL}/rest/v1/rpc/update_claim_notes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ p_claim_id: claimId, p_notes: notes }),
       });
@@ -425,12 +427,12 @@ import Layout from '../../layouts/Layout.astro';
     if (!confirm(`Are you sure you want to ${action} the directory?`)) return;
 
     try {
-      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/approve_claim`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/approve_claim`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ p_claim_id: claimId }),
       });
@@ -466,8 +468,8 @@ import Layout from '../../layouts/Layout.astro';
 
   document.getElementById('refresh-btn')?.addEventListener('click', loadClaims);
 
-  document.getElementById('logout-btn')?.addEventListener('click', () => {
-    sessionStorage.removeItem('admin_auth');
+  document.getElementById('logout-btn')?.addEventListener('click', async () => {
+    await fetch('/api/admin-logout', { method: 'POST' });
     dashEl.classList.add('hidden');
     gateEl.classList.remove('hidden');
     document.getElementById('admin-password').value = '';

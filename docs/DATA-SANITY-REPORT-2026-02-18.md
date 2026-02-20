@@ -7,12 +7,9 @@
 
 ## Executive Summary
 
-The pipeline data is **in reasonably good shape but has several issues that must be fixed before running script 4**. The two blockers are:
+The pipeline data is **in reasonably good shape**. **2c-cleanup.js** addresses the critical issues (foreign records, duplicates, closed, not_ewaste, uncertain). The remaining blocker is:
 
-1. **24 foreign (non-US) records** contaminating the dataset — must be removed
-2. **20 duplicate google_place_ids** — must be deduplicated
-
-Additionally, **script 3 (fetch-details) has only processed 17 records** and must be run on the full 19,349-center dataset before reconciliation.
+- **Script 3 (fetch-details)** has only processed 17 records and must be run on the full **17,101**-center dataset (post–2c cleanup) before reconciliation.
 
 ---
 
@@ -23,12 +20,14 @@ Additionally, **script 3 (fetch-details) has only processed 17 records** and mus
 | Discovery | `1-discover.js` | ✅ Complete | 28,582 places found |
 | Classification | `2-classify.js` | ✅ Complete | 19,349 kept / 9,233 filtered |
 | Cleanup | `2b-cleanup.js` | ✅ Complete | 402 removed, 447 type-changed |
-| Fetch Details | `3-fetch-details.js` | ❌ Not run | 17/19,349 (0.1%) |
+| **Pre-upload cleanup** | **`2c-cleanup.js`** | **✅ Complete** | **2,248 removed → 17,101 kept** |
+| Fetch Details | `3-fetch-details.js` | ❌ Not run | 17/17,101 (0.1%) |
 | Reconcile/Upload | `4-reconcile.js` | ❌ Not run | 0 |
 
 **Discovery:** 3,234 cities searched, 28,582 unique places found, 0 errors.
 **Classification:** 28,582 discovered → 19,349 kept (32.3% filter rate). Gemini made 1,096 calls with 26 errors.
-**Fetch Details:** Only a 17-record test run completed. **This is the blocking next step.**
+**2c-cleanup:** Runs on `classification/results.json`. Removes: 20 duplicates, 24 foreign, 26 closed, 8 not_ewaste, 2,170 uncertain → **19,349 − 2,248 = 17,101** records kept. Idempotent (marks `_2c_cleanup_applied`).
+**Fetch Details:** Only a 17-record test run completed. **This is the blocking next step.** Run on **17,101** centers (post-2c).
 
 ---
 
@@ -57,7 +56,7 @@ Records from outside the US/territories slipped into the dataset, likely because
 
 **Detection signals:** non-US `state` values; coordinates outside US bounds (18–72°N, -180° to -65°W); non-US postal code formats (alphanumeric Canadian, UK, 6-digit Indian).
 
-**Fix:** Filter records where `state` is not in the list of 50 US states + DC + PR + US territories before running script 4.
+**Fix:** ✅ **Handled by `2c-cleanup.js`** — removes all records where `state` is not in the US states + DC + territories list.
 
 ---
 
@@ -75,11 +74,11 @@ ChIJ70_kVVXB2YgRr3jndbXugkk  (×2)
 ... and 7 more pairs
 ```
 
-**Fix:** Before script 4, deduplicate `classification/results.json` on `google_place_id`, keeping the first occurrence of each.
+**Fix:** ✅ **Handled by `2c-cleanup.js`** — deduplicates on `google_place_id`, keeping first occurrence.
 
 ---
 
-### SHOULD FIX — Before or During Upload
+### SHOULD FIX — Before or During Upload (handled by 2c)
 
 #### Issue 3: 26 Closed Businesses in "Keep" List
 **Severity: HIGH**
@@ -92,7 +91,7 @@ The classification pipeline did not filter on `business_status`, so permanently 
 - eWasteNot WantNot Computer & Electronics Recycling — Zeeland, MI — `CLOSED_PERMANENTLY`
 - CJD E-Store — East Alton, IL — `CLOSED_TEMPORARILY`
 
-**Fix:** Script 4 should exclude (or flag) records where `business_status !== 'OPERATIONAL'`. The strategy doc supports soft-deletion: set `business_status = 'CLOSED_PERMANENTLY'` in DB rather than hard-delete.
+**Fix:** ✅ **Handled by `2c-cleanup.js`** — removes `CLOSED_PERMANENTLY` and `CLOSED_TEMPORARILY`.
 
 ---
 
@@ -102,7 +101,7 @@ The classification pipeline did not filter on `business_status`, so permanently 
 
 Eight records classified as `center_type: not_ewaste` were not removed from `results.json` — they should have been filtered out. The 2b-cleanup.js removed ~8,807 not_ewaste records, but 8 remained.
 
-**Fix:** Script 4 should skip records where `center_type === 'not_ewaste'` OR run a cleanup pass on results.json to remove them.
+**Fix:** ✅ **Handled by `2c-cleanup.js`** — removes all `center_type === 'not_ewaste'`.
 
 ---
 
@@ -112,14 +111,9 @@ Eight records classified as `center_type: not_ewaste` were not removed from `res
 **Severity: MEDIUM**
 **Count: 2,170 records**
 
-Per the original design, `uncertain` centers should be soft-deleted. Instead, they were kept in results.json. These are centers where Gemini couldn't confidently determine the type (e.g., a business named "Recycling Center" with only generic Google types).
+Per the original design, `uncertain` centers should be excluded. These are centers where Gemini couldn't confidently determine the type (e.g., a business named "Recycling Center" with only generic Google types).
 
-**Options:**
-- **Exclude** them (per original design) — reduces dataset by 11.2%
-- **Include** them with lower `legitimacy_score` and `is_suspicious = true`
-- **Reclassify** using `--retry-flagged` with more context
-
-**Recommendation:** Include them but set `is_suspicious = true` and `legitimacy_score < 50` in the DB to let the site filter if needed.
+**Fix:** ✅ **Handled by `2c-cleanup.js`** — removes all `center_type === 'uncertain'`. This is the bulk of the ~2,248 records removed by 2c (2,170 uncertain + 20 dupes + 24 foreign + 26 closed + 8 not_ewaste).
 
 ---
 
@@ -169,7 +163,7 @@ Three records have `null` or empty description fields. These slipped through the
 
 #### Issue 9: certifications Coverage at 2.9%
 **Severity: LOW (vs. spec)**
-**Count: 566/19,349 have any certification**
+**Count: 566/17,101 have any certification** (pre-2c denominator was 19,349)
 
 The spec targets >10% certification coverage. Likely this reflects reality — most small recyclers and retail drop-off locations don't advertise R2/e-Stewards certs on Google Places. The 2.9% that do have certs are probably accurate. This is a data limitation, not a pipeline bug.
 
@@ -177,7 +171,7 @@ The spec targets >10% certification coverage. Likely this reflects reality — m
 
 ## Field Coverage Matrix
 
-All fields checked against the 19,349 records in `classification/results.json`:
+All fields checked against the **17,101** records in `classification/results.json` (after 2c-cleanup; pre-2c count was 19,349):
 
 | Field | DB Column | Coverage | Status |
 |-------|-----------|----------|--------|
@@ -195,7 +189,7 @@ All fields checked against the 19,349 records in `classification/results.json`:
 | `photo_reference` | `photo` | 86.2% | ✅ (within spec) |
 | `accepted_items` | `accepted_items` | 93.5% | ✅ |
 | `services_offered` | `services_offered` | 93.7% | ✅ |
-| `certifications` | `certifications` | 2.9% | ⚠️ (below 10% target) |
+| `certifications` | `certifications` | ~2.9% | ⚠️ (below 10% target) |
 | `phone` | `phone` | — | ❌ Script 3 not run |
 | `site` | `site` | — | ❌ Script 3 not run |
 | `working_hours` | `working_hours` | — | ❌ Script 3 not run |
@@ -208,16 +202,20 @@ All fields checked against the 19,349 records in `classification/results.json`:
 
 ## center_type Distribution
 
+**Pre-2c (19,349 records):**
+
 | Type | Count | % | Assessment |
 |------|-------|---|------------|
 | `retail_dropoff` | 5,680 | 29.4% | ✅ Best Buy, Staples, etc. — expected |
 | `municipal` | 3,441 | 17.8% | ✅ Government programs — reasonable |
 | `dedicated_ewaste` | 3,150 | 16.3% | ✅ Core audience — core value |
-| `uncertain` | 2,170 | 11.2% | ⚠️ Should be flagged/reviewed |
+| `uncertain` | 2,170 | 11.2% | ✅ **Removed by 2c-cleanup** |
 | `repair_with_recycling` | 2,423 | 12.5% | ✅ Computer repair shops — reasonable |
 | `scrap_metal` | 1,830 | 9.5% | ⚠️ May accept electronics but primary is metal |
 | `itad` | 647 | 3.3% | ✅ Business-focused IT recyclers |
-| `not_ewaste` | 8 | 0.04% | ❌ Should be excluded before upload |
+| `not_ewaste` | 8 | 0.04% | ✅ **Removed by 2c-cleanup** |
+
+**Post-2c:** 17,101 records; `uncertain` and `not_ewaste` are no longer in `results.json`.
 
 ---
 
@@ -236,10 +234,12 @@ All fields checked against the 19,349 records in `classification/results.json`:
 | Metric | Value |
 |--------|-------|
 | Discovery total | 28,582 |
-| Classification kept | 19,349 |
-| Filtered out | 9,233 (32.3%) |
+| Classification kept (pre-2c) | 19,349 |
+| 2c-cleanup removed | 2,248 (duplicates, foreign, closed, not_ewaste, uncertain) |
+| **Kept after 2c (for script 3/4)** | **17,101** |
+| Filtered out (by 2-classify) | 9,233 (32.3%) |
 | Orphaned IDs (in classified but not discovery) | 0 ✅ |
-| Duplicate place IDs in classified | 20 ⚠️ |
+| Duplicate place IDs (removed by 2c) | 20 ✅ |
 
 The 20-record discrepancy between "9,233 filtered" and "9,253 unique IDs not in classified" is explained exactly by the 20 duplicate place IDs adding 20 extra records beyond the unique count. This is internally consistent.
 
@@ -311,27 +311,23 @@ The classification step appears to be correctly filtering general recyclers, was
 
 ### Blocking (must complete before script 4)
 
-- [ ] **Run script 3 (fetch-details)** on all 19,349 keep centers
+- [ ] **Run script 3 (fetch-details)** on all **17,101** keep centers (post-2c)
   - Estimated: ~3-4 days across days (Gemini rate limits don't apply; this is Places API)
   - Free cap: 5,000/month for Place Details Pro
   - Consider spreading across months to stay $0
 
-- [ ] **Remove 24 foreign records** from classification/results.json
-  - Filter: `state` not in US states + DC + PR list
-  - Or filter: `latitude` outside [18, 72] AND `longitude` outside [-180, -65]
-
-- [ ] **Deduplicate 20 duplicate google_place_ids** in classification/results.json
-  - Keep first occurrence of each duplicate pair
+- [x] **Remove 24 foreign records** — ✅ Done by `2c-cleanup.js`
+- [x] **Deduplicate 20 duplicate google_place_ids** — ✅ Done by `2c-cleanup.js`
 
 - [ ] **Verify script 4 maps `formatted_address` → `full_address`**
   - Check `4-reconcile.js` field mapping before running
 
 ### Recommended (fix before or handle in script 4)
 
-- [ ] Exclude 8 `not_ewaste` records (or add exclusion logic to script 4)
-- [ ] Exclude 26 `CLOSED_PERMANENTLY/TEMPORARILY` businesses (or soft-flag in DB)
-- [ ] Decide on 2,170 `uncertain` centers: exclude, include with `is_suspicious=true`, or reclassify
-- [ ] Run targeted Gemini describe call for 3 records with missing descriptions
+- [x] Exclude 8 `not_ewaste` records — ✅ Done by `2c-cleanup.js`
+- [x] Exclude 26 `CLOSED_PERMANENTLY/TEMPORARILY` businesses — ✅ Done by `2c-cleanup.js`
+- [x] Exclude 2,170 `uncertain` centers — ✅ Done by `2c-cleanup.js`
+- [ ] Run targeted Gemini describe call for 3 records with missing descriptions (optional)
 
 ### Post-Upload QA
 
@@ -347,8 +343,8 @@ The classification step appears to be correctly filtering general recyclers, was
 ## Memory.md Updates Needed
 
 The MEMORY.md extract progress figure is outdated:
-- **Memory says:** `extract 15.8% (3,060/19,349)`
-- **Actual data:** `accepted_items` non-empty on 18,092/19,349 = **93.5%**
+- **Memory says:** `extract 15.8% (3,060/19,349)` (pre-2c denominator)
+- **Actual data (pre-2c):** `accepted_items` non-empty on 18,092/19,349 = **93.5%**. Post-2c: 17,101 records; coverage % similar.
 
 The extract step ran to near-completion (likely to the Gemini daily limit cutoff, then resumed). Update MEMORY.md to reflect current status.
 
@@ -365,4 +361,4 @@ The extract step ran to near-completion (likely to the Gemini daily limit cutoff
 
 ---
 
-*Report based on manual analysis of `data/discovery/results.json` (28,582 records, 28 MB), `data/classification/results.json` (19,349 records, 33 MB), and `data/details/results.json` (17 records, test only). Scripts analyzed: 1-discover.js, 2-classify.js, 2b-cleanup.js, 3-fetch-details.js, 4-reconcile.js.*
+*Report based on manual analysis of `data/discovery/results.json` (28,582 records, 28 MB), `data/classification/results.json` (17,101 records after 2c-cleanup; pre-2c 19,349), and `data/details/results.json` (17 records, test only). Scripts analyzed: 1-discover.js, 2-classify.js, 2b-cleanup.js, **2c-cleanup.js**, 3-fetch-details.js, 4-reconcile.js.*

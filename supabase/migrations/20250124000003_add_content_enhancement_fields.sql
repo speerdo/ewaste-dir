@@ -73,9 +73,12 @@ SET
   preparation_instructions = 'Remove all personal data, remove batteries when possible, call ahead to confirm hours and accepted items.',
   content_enhanced = TRUE,
   content_enhanced_at = NOW()
-WHERE legitimacy_score >= 50 
-  AND content_enhanced = FALSE
-LIMIT 100;
+WHERE id IN (
+  SELECT id FROM recycling_centers
+  WHERE legitimacy_score >= 50
+    AND content_enhanced = FALSE
+  LIMIT 100
+);
 
 -- Create a view for enhanced content reporting
 CREATE OR REPLACE VIEW enhanced_content_report AS
@@ -86,7 +89,9 @@ SELECT
   COUNT(*) FILTER (WHERE content_enhanced = TRUE) as enhanced_centers,
   COUNT(*) FILTER (WHERE content_enhanced = FALSE) as pending_enhancement,
   ROUND(
-    (COUNT(*) FILTER (WHERE content_enhanced = TRUE)::DECIMAL / COUNT(*)) * 100, 
+    CASE WHEN COUNT(*) = 0 THEN 0
+    ELSE (COUNT(*) FILTER (WHERE content_enhanced = TRUE)::DECIMAL / COUNT(*)) * 100
+    END,
     2
   ) as enhancement_percentage
 FROM recycling_centers

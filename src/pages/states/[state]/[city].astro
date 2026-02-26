@@ -821,7 +821,7 @@ if (baseTitle.length <= maxTitleLength) {
 
       <!-- Recycling Centers List (scrollable) -->
       <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
-        <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} />
+        <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} city={cityName} state={state.name} />
       </div>
     </div>
 

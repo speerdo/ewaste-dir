@@ -5,9 +5,14 @@ import type { RecyclingCenter } from '../../types/supabase';
 interface Props {
   center: RecyclingCenter;
   defaultLogo: string;
+  verifiedPartner?: {
+    tier: 'premium' | 'featured';
+    description?: string;
+    logo_url?: string;
+  } | null;
 }
 
-const { center, defaultLogo } = Astro.props;
+const { center, defaultLogo, verifiedPartner = null } = Astro.props;
 
 // Format working hours for display
 function formatWorkingHours(hours: any): string {
@@ -72,6 +77,25 @@ function getBusinessSpecialties(center: RecyclingCenter): string[] {
 }
 
 const businessSpecialties = getBusinessSpecialties(center);
+
+// Safely parse JSONB arrays that may arrive as arrays, JSON strings, or null
+function parseJsonArray(val: any): string[] {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(v => typeof v === 'string' && v.trim());
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch { return []; }
+  }
+  return [];
+}
+
+const acceptedItems   = parseJsonArray(center.accepted_items);
+const shownItems      = acceptedItems.slice(0, 5);
+const extraItemCount  = acceptedItems.length - shownItems.length;
+const servicesOffered = parseJsonArray(center.services_offered);
+const certifications  = parseJsonArray(center.certifications);
 ---
 
 <div 
@@ -101,6 +125,25 @@ const businessSpecialties = getBusinessSpecialties(center);
             {center.name}
           </h3>
         </div>
+        {/* Verified partner badge */}
+        {verifiedPartner && (
+          <div class="mb-2">
+            <span
+              class:list={[
+                'inline-flex items-center gap-1 rounded-full font-medium border px-2.5 py-1 text-xs',
+                verifiedPartner.tier === 'featured'
+                  ? 'bg-amber-50 text-amber-800 border-amber-300'
+                  : 'bg-green-50 text-green-800 border-green-300',
+              ]}
+              title="This business has been verified by RecycleOldTech.com"
+            >
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              {verifiedPartner.tier === 'featured' ? 'Featured Partner' : 'Verified Partner'}
+            </span>
+          </div>
+        )}
         
         <!-- Business Specialties -->
         {/* Temporarily disabled - will re-enable after verifying all centers (28,000+ API calls needed) */}
@@ -128,7 +171,23 @@ const businessSpecialties = getBusinessSpecialties(center);
             </span>
           </div>
         )}
-        
+
+        {/* Accepted items — shown on all cards */}
+        {shownItems.length > 0 && (
+          <div class="flex flex-wrap gap-1 mb-1">
+            {shownItems.map(item => (
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                {item}
+              </span>
+            ))}
+            {extraItemCount > 0 && (
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">
+                +{extraItemCount} more
+              </span>
+            )}
+          </div>
+        )}
+
       </div>
       
       <div class="flex-shrink-0 ml-4">
@@ -207,6 +266,37 @@ const businessSpecialties = getBusinessSpecialties(center);
         </div>
       )}
 
+      {/* Services & certifications — verified partners only */}
+      {verifiedPartner && servicesOffered.length > 0 && (
+        <div class="flex items-start gap-3">
+          <svg class="w-6 h-6 text-gray-400 mr-0 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+          <div class="flex flex-wrap gap-1">
+            {servicesOffered.map(svc => (
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
+                {svc}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {verifiedPartner && certifications.length > 0 && (
+        <div class="flex items-start gap-3">
+          <svg class="w-6 h-6 text-gray-400 mr-0 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+          <div class="flex flex-wrap gap-1">
+            {certifications.map(cert => (
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">
+                {cert}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {center.working_hours && (
         <div class="flex items-start">
           <svg class="w-6 h-6 text-gray-400 mr-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -273,5 +363,18 @@ const businessSpecialties = getBusinessSpecialties(center);
         Get Directions
       </button>
     </div>
+
+    {/* Claim listing link for unverified centers */}
+    {!verifiedPartner && (
+      <div class="mt-4 pt-4 border-t border-gray-100">
+        <a
+          href={`/claim?business=${encodeURIComponent(center.name)}&city=${encodeURIComponent(center.city || '')}&state=${encodeURIComponent(center.state || '')}`}
+          class="text-xs text-gray-400 hover:text-green-600 transition-colors"
+          onclick="event.stopPropagation()"
+        >
+          Is this your business? Claim this listing →
+        </a>
+      </div>
+    )}
   </div>
 </div> 

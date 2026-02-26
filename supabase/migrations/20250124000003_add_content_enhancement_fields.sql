@@ -89,7 +89,9 @@ SELECT
   COUNT(*) FILTER (WHERE content_enhanced = TRUE) as enhanced_centers,
   COUNT(*) FILTER (WHERE content_enhanced = FALSE) as pending_enhancement,
   ROUND(
-    (COUNT(*) FILTER (WHERE content_enhanced = TRUE)::DECIMAL / COUNT(*)) * 100, 
+    CASE WHEN COUNT(*) = 0 THEN 0
+    ELSE (COUNT(*) FILTER (WHERE content_enhanced = TRUE)::DECIMAL / COUNT(*)) * 100
+    END,
     2
   ) as enhancement_percentage
 FROM recycling_centers

@@ -4,6 +4,7 @@
 -- Created: 2026-02-19
 -- ============================================================
 
+DROP FUNCTION IF EXISTS approve_claim(uuid);
 CREATE OR REPLACE FUNCTION approve_claim(p_claim_id uuid)
 RETURNS TEXT
 LANGUAGE plpgsql

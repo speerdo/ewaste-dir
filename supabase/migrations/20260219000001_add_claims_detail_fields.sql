@@ -13,6 +13,7 @@ ALTER TABLE business_claims
 -- --------------------------------------------------------
 -- Update get_all_business_claims to return new columns
 -- --------------------------------------------------------
+DROP FUNCTION IF EXISTS get_all_business_claims();
 CREATE OR REPLACE FUNCTION get_all_business_claims()
 RETURNS TABLE (
   id uuid,

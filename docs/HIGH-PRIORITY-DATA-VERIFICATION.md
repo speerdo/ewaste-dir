@@ -1,21 +1,99 @@
 # RecycleOldTech Data Verification Strategy
 
+---
+
+## Pipeline Status (as of March 2026)
+
+| Script | Status | Notes |
+|--------|--------|-------|
+| `1-discover.js` | ✅ COMPLETE | 3,235 cities searched, ~19,349 raw results |
+| `2-classify.js` | ✅ COMPLETE | 17,096 "keep" centers, 100% with Gemini descriptions |
+| `2b/2c/2e/2f` cleanups | ✅ COMPLETE | False positives removed, types fixed, descriptions polished |
+| `2d-overlap-report.js` | ✅ COMPLETE | See findings below |
+| `3-fetch-details.js` | ⏳ NOT RUN | Only 17 test records. **Next step.** |
+| `4-reconcile.js` | ⏳ NOT RUN | Runs after script 3 |
+| `5-remove-stale.js` | ⏳ NOT RUN | Not needed — 4-reconcile handles deletions |
+
+### Overlap Report Findings (Feb 21, 2026)
+
+From `data/reports/overlap-report.md`:
+
+| Category | Count |
+|----------|------:|
+| Discovered + classified "keep" centers | 17,096 |
+| Already in DB (matched by name+city+state) | 10,439 |
+| **New centers (not in DB)** | **6,657** |
+| DB records NOT in discovery (stale) | 19,107 |
+| Total current DB entries | 28,519 |
+
+---
+
+## Revised Goal: Surgical Data Enrichment
+
+The pipeline is complete through classification. The remaining steps follow a **surgical enrichment** approach rather than a full replace:
+
+### 1. Remove Stale Records
+Delete DB entries that were **not found** in the 2026 Google Places discovery scan. These 19,107 records are likely:
+- Businesses that don't primarily accept e-waste (old scrape quality was lower)
+- Closed or renamed businesses
+- Duplicate/near-duplicate entries from the original scrape
+
+`4-reconcile.js` handles this automatically (protects `content_enhanced` records from deletion).
+
+### 2. Update Overlapping Records
+For the 10,439 centers that exist in **both** the DB and our discovery results, update with:
+- **Gemini-generated descriptions** (factual, unique — replacing generic templates)
+- **`accepted_items`** (structured JSON array from AI extraction)
+- **`center_type`** classification
+- **`google_place_id`**, `business_status`, `discovery_batch`, `verified_at`
+- Existing phone/website/hours are preserved (carried through from DB via `--new-only`)
+
+### 3. Insert Newly Discovered Centers
+Add the 6,657 centers that are **new to the DB** — confirmed by Gemini classification to actually recycle electronics. These get:
+- Fresh Place Details from Google (phone, website, hours, rating) — fetched in script 3
+- Gemini description and accepted_items from classification
+- `verification_source = 'google_places_discovery'`
+
+---
+
+## Execution Order (Remaining Steps)
+
+```bash
+# Step 1: Estimate cost before running
+node scripts/3-fetch-details.js --new-only --estimate
+
+# Step 2: Fetch Place Details only for NEW centers (~6,657)
+#   --new-only skips the 10,439 already in DB (carries existing contact info)
+#   Cost: ~$28 one-shot, or $0 spread over 2 months
+node scripts/3-fetch-details.js --new-only
+
+# Step 3: Dry-run reconciliation to review what will change
+node scripts/4-reconcile.js --dry-run
+
+# Step 4: Apply reconciliation (removes 19K stale, updates 10K, inserts 6.7K)
+node scripts/4-reconcile.js
+```
+
+**Note on `5-remove-stale.js`:** This script targets records by `center_type` column in the DB, which existing records don't have (it's a new column). `4-reconcile.js` already handles deletions comprehensively. Skip `5-remove-stale.js`.
+
+---
+
 ## Project Context
+
 RecycleOldTech.com is an electronics recycling directory that needs accurate, verified venue data. This document outlines the strategy for building a high-quality database through fresh discovery rather than verification of stale, questionable data.
 
-**Current Database State (as of Feb 2026):**
+**Original Database State (Feb 2026):**
 - **28,521 recycling centers** across 51 states and 3,235 cities
 - 99.6% have descriptions (but most are generic templates, not factual)
 - 86.4% have websites, 96.5% have phone numbers, 87.4% have ratings
 - 92.2% marked legitimate, 4.0% marked suspicious
-- Scraped June-July 2025 (7-8 months old)
-- **Phase 1 classification complete:** 28,132 centers classified via Gemini AI
+- Scraped June-July 2025 (8-9 months old)
 
 **Core Problem:**
-The existing database was scraped 7-8 months ago, contains generic template descriptions, and many entries may be computer repair shops, phone repair stores, or other businesses that don't primarily offer e-waste recycling. Attempting to verify 28,521 entries of questionable origin is expensive and backwards -- we'd be spending money to check bad data rather than finding good data.
+The existing database was scraped 8-9 months ago, contains generic template descriptions, and many entries may be computer repair shops, phone repair stores, or other businesses that don't primarily offer e-waste recycling. Attempting to verify 28,521 entries of questionable origin is expensive — we'd be spending money to check bad data rather than finding good data.
 
-**Revised Strategy:**
-Instead of verifying the existing database, we will **run fresh discovery** using Google Places Text Search across all 3,235 cities. This gives us Google-verified, current business data directly from the authoritative source.
+**Solution:**
+Run fresh discovery using Google Places Text Search across all 3,235 cities. This gives us Google-verified, current business data directly from the authoritative source, then use Gemini to classify and generate unique descriptions.
 
 **Why this is better than the original verification plan:**
 1. **Accuracy** -- Google Places data is current, verified, and authoritative

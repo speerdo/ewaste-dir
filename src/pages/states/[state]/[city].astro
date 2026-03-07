@@ -309,7 +309,7 @@ displayCenters.forEach(center => {
 // Centers with detailed information
 const centersWithDescriptions = displayCenters.filter(center => center.description && center.description.length > 50);
 const centersWithHours = displayCenters.filter(center => center.working_hours);
-const centersWithLogos = displayCenters.filter(center => center.logo);
+const centersWithLogos = displayCenters.filter(center => center.logo || center.photo);
 
 // Check if this is a large city (population > 100k or major city)
 const majorCities = [
@@ -821,7 +821,7 @@ if (baseTitle.length <= maxTitleLength) {
 
       <!-- Recycling Centers List (scrollable) -->
       <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
-        <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} />
+        <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} city={cityName} state={state.name} />
       </div>
     </div>
 
@@ -1044,7 +1044,7 @@ if (baseTitle.length <= maxTitleLength) {
         },
         telephone: center.phone || undefined,
         url: center.site || undefined,
-        image: center.logo || undefined,
+        image: center.logo || center.photo || undefined,
         geo: center.latitude && center.longitude ? {
           '@type': 'GeoCoordinates',
           latitude: center.latitude,

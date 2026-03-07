@@ -17,7 +17,9 @@ export interface RecyclingCenter {
   logo?: string;
   photo?: string;
   description?: string;
-  accepted_items?: string;
+  accepted_items?: string[] | null;
+  services_offered?: string[] | null;
+  certifications?: string[] | null;
   created_at?: string;
   updated_at?: string;
   matched?: boolean;

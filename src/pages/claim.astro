@@ -1,0 +1,1000 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const web3formsKey = 'aa2e5176-5a11-41b6-ade0-ac4ddba63cbf';
+
+const US_STATES = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+  'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
+  'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
+  'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
+  'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri',
+  'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
+  'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
+  'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
+  'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+  'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming',
+  'District of Columbia',
+];
+---
+
+<Layout
+  title="Claim Your Listing | RecycleOldTech.com"
+  description="Join over 15,000 monthly visitors searching for trusted recyclers. Claim your listing, get verified, and start receiving qualified leads."
+>
+  <div class="pt-16">
+
+    <!-- ===================================================
+         Hero
+    ==================================================== -->
+    <div class="bg-gradient-to-br from-green-900 via-green-800 to-green-700 text-white py-20 px-4">
+      <div class="container mx-auto max-w-3xl text-center">
+        <h1 class="text-4xl md:text-5xl font-display font-bold mb-6 leading-tight">
+          Get Your Recycling Business<br class="hidden sm:block" /> in Front of Local Customers
+        </h1>
+        <p class="text-xl text-green-100 max-w-2xl mx-auto">
+          Over 15,000 people search RecycleOldTech every month looking for a place to drop off their old electronics. Make sure they find you.
+        </p>
+      </div>
+    </div>
+
+    <!-- ===================================================
+         Why Claim Your Listing — 3 Value Props
+    ==================================================== -->
+    <div class="bg-gray-50 py-16 px-4">
+      <div class="container mx-auto max-w-5xl">
+        <h2 class="text-3xl font-display font-bold text-gray-900 text-center mb-12">
+          Why Claim Your Listing?
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Value Prop 1 -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+            <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-display font-bold text-gray-900 mb-3">More Visibility</h3>
+            <p class="text-gray-600 leading-relaxed">
+              Verified badge on your listing. Priority placement in city search results so customers find you first.
+            </p>
+          </div>
+
+          <!-- Value Prop 2 -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+            <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-display font-bold text-gray-900 mb-3">Qualified Leads</h3>
+            <p class="text-gray-600 leading-relaxed">
+              People actively searching for recyclers in your area, sent directly to your inbox. No shared lead pools.
+            </p>
+          </div>
+
+          <!-- Value Prop 3 -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+            <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-display font-bold text-gray-900 mb-3">Trust Signal</h3>
+            <p class="text-gray-600 leading-relaxed">
+              The verified badge tells consumers you're a legitimate, active business they can count on.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================
+         Example Verified Listing
+    ==================================================== -->
+    <div class="bg-white py-16 px-4">
+      <div class="container mx-auto max-w-2xl">
+        <h2 class="text-3xl font-display font-bold text-gray-900 text-center mb-3">
+          This Is What Customers See
+        </h2>
+        <p class="text-center text-gray-600 mb-10">
+          Your listing on every city page — with the badge that tells customers you're the real deal.
+        </p>
+
+        <!-- Mock listing card — mirrors CenterCard.astro structure exactly -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+          <div class="p-6">
+
+            <!-- Name + logo -->
+            <div class="flex items-start justify-between">
+              <div class="flex-grow">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                  Green Earth Electronics Recycling
+                </h3>
+
+                <!-- Verified badge -->
+                <div class="mb-2">
+                  <span class="inline-flex items-center gap-1 rounded-full font-medium border px-2.5 py-1 text-xs bg-green-50 text-green-800 border-green-300">
+                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    Verified Partner
+                  </span>
+                </div>
+
+                <!-- Stars -->
+                <div class="flex items-center mb-2">
+                  {Array.from({ length: 5 }).map(() => (
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                  <span class="ml-2 text-gray-600">4.8 (124 reviews)</span>
+                </div>
+              </div>
+
+              <!-- Logo placeholder -->
+              <div class="flex-shrink-0 ml-4">
+                <div class="w-16 h-16 rounded-lg bg-green-50 flex items-center justify-center">
+                  <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Details -->
+            <div class="mt-4 space-y-3">
+              <div class="flex items-start">
+                <svg class="w-6 h-6 text-gray-400 mr-3 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <address class="not-italic text-gray-600">2847 Lamar Blvd, Austin, TX 78705</address>
+              </div>
+
+              <div class="flex items-center">
+                <svg class="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <span class="text-green-600">(512) 555-0147</span>
+              </div>
+
+              <div class="flex items-center">
+                <svg class="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m-9 9a9 9 0 019-9" />
+                </svg>
+                <span class="text-green-600">Visit Website</span>
+              </div>
+
+              <div class="flex items-start">
+                <svg class="w-6 h-6 text-gray-400 mr-3 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-gray-600">Family-owned electronics recycler serving Austin since 2009. We accept computers, phones, TVs, and more. Certified data destruction available for businesses.</p>
+              </div>
+
+              <!-- Hours expanded for demo -->
+              <div class="flex items-start">
+                <svg class="w-6 h-6 text-gray-400 mr-3 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-gray-600 w-full">
+                  <p class="font-medium mb-1">Opening Hours</p>
+                  <div class="space-y-1 text-sm">
+                    {[
+                      ['Monday – Friday', '9:00 AM – 5:00 PM'],
+                      ['Saturday',        '9:00 AM – 1:00 PM'],
+                      ['Sunday',          'Closed'],
+                    ].map(([day, time]) => (
+                      <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">{day}</span>
+                        <span class="text-gray-600">{time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="mt-6 flex flex-wrap gap-3">
+              <span class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600">
+                Call Now
+              </span>
+              <span class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white">
+                Visit Website
+              </span>
+              <span class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white">
+                Get Directions
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        <p class="text-center text-sm text-gray-500 mt-5">
+          The verified badge appears on your listing in every city search result.
+        </p>
+      </div>
+    </div>
+
+    <!-- ===================================================
+         Pricing Tiers
+    ==================================================== -->
+    <div id="pricing" class="bg-gray-50 py-16 px-4">
+      <div class="container mx-auto max-w-5xl">
+        <h2 class="text-3xl font-display font-bold text-gray-900 text-center mb-4">
+          Simple, Transparent Pricing
+        </h2>
+        <p class="text-center text-gray-600 mb-12">Choose the plan that fits your business goals.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+
+          <!-- Free Tier -->
+          <div class="bg-white rounded-2xl border border-gray-200 p-8 flex flex-col">
+            <div class="mb-6">
+              <h3 class="text-lg font-display font-bold text-gray-900 mb-1">Free</h3>
+              <div class="flex items-baseline gap-1 mb-4">
+                <span class="text-4xl font-display font-bold text-gray-900">$0</span>
+                <span class="text-gray-500">/mo</span>
+              </div>
+              <p class="text-sm text-gray-600">Get your basic listing live — no commitment.</p>
+            </div>
+            <ul class="space-y-3 mb-8 flex-grow">
+              {[
+                { label: 'Listed in directory', included: true },
+                { label: 'Verified badge', included: false },
+                { label: 'Priority placement', included: false },
+                { label: 'Leads routed to you', included: false },
+                { label: 'Top of city page', included: false },
+                { label: 'Custom description', included: false },
+                { label: 'Logo on listing', included: false },
+              ].map(item => (
+                <li class="flex items-center gap-3 text-sm">
+                  {item.included ? (
+                    <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  ) : (
+                    <svg class="w-5 h-5 text-gray-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                  )}
+                  <span class={item.included ? 'text-gray-700' : 'text-gray-400'}>{item.label}</span>
+                </li>
+              ))}
+            </ul>
+            <a
+              href="#claim-form"
+              data-tier="free"
+              class="tier-select-btn block w-full text-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-colors"
+            >
+              Get Started Free
+            </a>
+          </div>
+
+          <!-- Premium Tier — Highlighted -->
+          <div class="bg-green-600 rounded-2xl border-2 border-green-600 p-8 flex flex-col relative shadow-xl">
+            <div class="absolute -top-4 left-1/2 -translate-x-1/2">
+              <span class="bg-amber-400 text-amber-900 text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wide shadow">
+                Most Popular
+              </span>
+            </div>
+            <div class="mb-6">
+              <h3 class="text-lg font-display font-bold text-white mb-1">Premium</h3>
+              <div class="flex items-baseline gap-1 mb-4">
+                <span class="text-4xl font-display font-bold text-white">$15</span>
+                <span class="text-green-200">/mo</span>
+              </div>
+              <p class="text-sm text-green-100">Everything you need to stand out and win leads.</p>
+            </div>
+            <ul class="space-y-3 mb-8 flex-grow">
+              {[
+                { label: 'Listed in directory', included: true },
+                { label: 'Verified badge', included: true },
+                { label: 'Priority placement', included: true },
+                { label: 'Leads routed to you', included: true },
+                { label: 'Top of city page', included: false },
+                { label: 'Custom description', included: true },
+                { label: 'Logo on listing', included: true },
+              ].map(item => (
+                <li class="flex items-center gap-3 text-sm">
+                  {item.included ? (
+                    <svg class="w-5 h-5 text-green-200 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  ) : (
+                    <svg class="w-5 h-5 text-green-400/50 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                  )}
+                  <span class={item.included ? 'text-white' : 'text-green-300/70'}>{item.label}</span>
+                </li>
+              ))}
+            </ul>
+            <a
+              href="#claim-form"
+              data-tier="premium"
+              class="tier-select-btn block w-full text-center px-6 py-3 bg-white text-green-700 font-bold rounded-xl hover:bg-green-50 transition-colors shadow"
+            >
+              Start Premium — $15/mo
+            </a>
+          </div>
+
+          <!-- Featured Tier -->
+          <div class="bg-white rounded-2xl border-2 border-amber-400 p-8 flex flex-col">
+            <div class="mb-6">
+              <h3 class="text-lg font-display font-bold text-gray-900 mb-1">Featured</h3>
+              <div class="flex items-baseline gap-1 mb-4">
+                <span class="text-4xl font-display font-bold text-gray-900">$30</span>
+                <span class="text-gray-500">/mo</span>
+              </div>
+              <p class="text-sm text-gray-600">Maximum visibility. Own the top spot in your cities.</p>
+            </div>
+            <ul class="space-y-3 mb-8 flex-grow">
+              {[
+                { label: 'Listed in directory', included: true },
+                { label: 'Verified badge', included: true },
+                { label: 'Priority placement', included: true },
+                { label: 'Leads routed to you', included: true },
+                { label: 'Top of city page', included: true },
+                { label: 'Custom description', included: true },
+                { label: 'Logo on listing', included: true },
+              ].map(item => (
+                <li class="flex items-center gap-3 text-sm">
+                  <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  <span class="text-gray-700">{item.label}</span>
+                </li>
+              ))}
+            </ul>
+            <a
+              href="#claim-form"
+              data-tier="featured"
+              class="tier-select-btn block w-full text-center px-6 py-3 bg-amber-400 text-amber-900 font-bold rounded-xl hover:bg-amber-500 transition-colors"
+            >
+              Start Featured — $30/mo
+            </a>
+          </div>
+        </div>
+
+        <p class="text-center text-sm text-gray-500 mt-8">
+          All paid plans are month-to-month. No contracts. Cancel anytime.
+        </p>
+      </div>
+    </div>
+
+    <!-- ===================================================
+         Claim Form
+    ==================================================== -->
+    <div id="claim-form" class="bg-gray-50 py-16 px-4">
+      <div class="container mx-auto max-w-2xl">
+
+        <!-- Success state (hidden by default) -->
+        <div id="claim-success" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-display font-bold text-gray-900 mb-3">You're all set!</h2>
+          <p class="text-gray-600 text-lg">
+            Thanks! We'll be in touch within 1–2 business days to get your listing set up.
+          </p>
+        </div>
+
+        <!-- Form card -->
+        <div id="claim-form-card" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 md:p-10">
+
+          <!-- Listing type toggle -->
+          <div class="mb-7">
+            <p class="text-sm font-medium text-gray-700 mb-2">Is your business already listed on RecycleOldTech?</p>
+            <div class="inline-flex items-center gap-0.5 p-1 bg-gray-200 rounded-xl w-full sm:w-auto border border-gray-300">
+              <button
+                type="button"
+                id="toggle-new"
+                class="flex-1 sm:flex-none px-5 py-2.5 text-sm font-medium rounded-lg bg-green-600 text-white shadow-sm transition-all"
+                aria-pressed="true"
+              >
+                No, Add New Listing
+              </button>
+              <button
+                type="button"
+                id="toggle-update"
+                class="flex-1 sm:flex-none px-5 py-2.5 text-sm font-medium rounded-lg bg-transparent text-gray-600 transition-all hover:text-gray-900 hover:bg-gray-100"
+                aria-pressed="false"
+              >
+                Yes, Update My Listing
+              </button>
+            </div>
+          </div>
+
+          <h2 id="form-title" class="text-2xl font-display font-bold text-gray-900 mb-2">Claim Your Listing</h2>
+          <p id="form-desc" class="text-gray-600 mb-8">Fill out the form below and we'll get back to you within 1–2 business days.</p>
+
+          <form
+            id="claim-listing-form"
+            action="https://api.web3forms.com/submit"
+            method="POST"
+            class="space-y-8"
+            novalidate
+          >
+            <input type="hidden" name="access_key" value={web3formsKey} />
+            <input type="hidden" name="subject" value="New Business Claim Submission — RecycleOldTech.com" />
+            <input type="hidden" name="from_name" value="RecycleOldTech Claim Form" />
+            <input type="hidden" name="submission_type" id="submission-type-input" value="new" />
+
+            <!-- ── Section: Business Information ── -->
+            <div class="space-y-5">
+              <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Business Information</h3>
+
+              <!-- Business Name -->
+              <div>
+                <label for="cl-business" class="block text-sm font-medium text-gray-700 mb-1">
+                  Business Name <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="cl-business"
+                  name="business_name"
+                  required
+                  autocomplete="organization"
+                  class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  placeholder="Acme Electronics Recycling"
+                />
+                <p class="hidden mt-1 text-sm text-red-500" data-error="business_name">Please enter your business name.</p>
+              </div>
+
+              <!-- Street Address -->
+              <div>
+                <label for="cl-address" class="block text-sm font-medium text-gray-700 mb-1">
+                  Street Address <span class="text-gray-500 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  id="cl-address"
+                  name="address"
+                  autocomplete="street-address"
+                  class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  placeholder="123 Main St"
+                />
+              </div>
+
+              <!-- City + State -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label for="cl-city" class="block text-sm font-medium text-gray-700 mb-1">
+                    City <span class="text-red-500" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="cl-city"
+                    name="city"
+                    required
+                    autocomplete="address-level2"
+                    class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    placeholder="Austin"
+                  />
+                  <p class="hidden mt-1 text-sm text-red-500" data-error="city">Please enter your city.</p>
+                </div>
+                <div>
+                  <label for="cl-state" class="block text-sm font-medium text-gray-700 mb-1">
+                    State <span class="text-red-500" aria-hidden="true">*</span>
+                  </label>
+                  <select
+                    id="cl-state"
+                    name="state"
+                    required
+                    class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  >
+                    <option value="">Select a state</option>
+                    {US_STATES.map(s => <option value={s}>{s}</option>)}
+                  </select>
+                  <p class="hidden mt-1 text-sm text-red-500" data-error="state">Please select your state.</p>
+                </div>
+              </div>
+
+              <!-- ZIP + Business Phone -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label for="cl-zip" class="block text-sm font-medium text-gray-700 mb-1">
+                    ZIP Code <span class="text-gray-500 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="cl-zip"
+                    name="zip"
+                    autocomplete="postal-code"
+                    inputmode="numeric"
+                    maxlength="10"
+                    class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    placeholder="78701"
+                  />
+                </div>
+                <div>
+                  <label for="cl-biz-phone" class="block text-sm font-medium text-gray-700 mb-1">
+                    Business Phone <span class="text-gray-500 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="cl-biz-phone"
+                    name="phone"
+                    autocomplete="tel"
+                    class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+              </div>
+
+              <!-- Website -->
+              <div>
+                <label for="cl-website" class="block text-sm font-medium text-gray-700 mb-1">
+                  Website <span class="text-gray-500 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="url"
+                  id="cl-website"
+                  name="website"
+                  autocomplete="url"
+                  class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  placeholder="https://www.yourbusiness.com"
+                />
+              </div>
+            </div>
+
+            <!-- ── Section: Your Contact Info ── -->
+            <div class="space-y-5">
+              <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Your Contact Information</h3>
+
+              <!-- Contact Name -->
+              <div>
+                <label for="cl-contact" class="block text-sm font-medium text-gray-700 mb-1">
+                  Your Name <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="cl-contact"
+                  name="contact_name"
+                  required
+                  autocomplete="name"
+                  class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  placeholder="Jane Smith"
+                />
+                <p class="hidden mt-1 text-sm text-red-500" data-error="contact_name">Please enter your name.</p>
+              </div>
+
+              <!-- Email + Contact Phone -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label for="cl-email" class="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address <span class="text-red-500" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="cl-email"
+                    name="contact_email"
+                    required
+                    autocomplete="email"
+                    class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    placeholder="jane@example.com"
+                  />
+                  <p class="hidden mt-1 text-sm text-red-500" data-error="contact_email">Please enter a valid email.</p>
+                </div>
+                <div>
+                  <label for="cl-contact-phone" class="block text-sm font-medium text-gray-700 mb-1">
+                    Your Phone <span class="text-gray-500 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="cl-contact-phone"
+                    name="contact_phone"
+                    autocomplete="tel"
+                    class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Section: What Do You Accept? ── -->
+            <fieldset>
+              <div class="border-b border-gray-100 pb-2 mb-4">
+                <legend class="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                  What Do You Accept?
+                </legend>
+                <p class="text-xs text-gray-500 mt-1">Check all that apply. <span class="text-red-500">*</span></p>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[
+                  'Computers & Laptops',
+                  'Phones & Tablets',
+                  'TVs & Monitors',
+                  'Printers & Scanners',
+                  'Gaming Consoles',
+                  'Audio / Video Equipment',
+                  'Batteries',
+                  'Small Electronics & Cables',
+                  'Hard Drives & Storage Media',
+                  'Servers & Networking Equipment',
+                ].map(item => (
+                  <label class="flex items-center gap-3 px-3 py-2.5 border border-gray-200 rounded-lg cursor-pointer hover:border-green-400 hover:bg-green-50/30 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                    <input
+                      type="checkbox"
+                      name="accepted_items"
+                      value={item}
+                      class="w-4 h-4 rounded text-green-600 border-gray-300 focus:ring-green-500 focus:ring-offset-0 flex-shrink-0"
+                    />
+                    <span class="text-sm text-gray-700">{item}</span>
+                  </label>
+                ))}
+              </div>
+              <p class="hidden mt-2 text-sm text-red-500" data-error="accepted_items">Please select at least one item type.</p>
+            </fieldset>
+
+            <!-- ── Section: Services Offered ── -->
+            <fieldset>
+              <div class="border-b border-gray-100 pb-2 mb-4">
+                <legend class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Services Offered</legend>
+                <p class="text-xs text-gray-500 mt-1">Check all that apply (optional).</p>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[
+                  'Free Drop-off Recycling',
+                  'Data Destruction',
+                  'Certificate of Destruction',
+                  'Business Pickup / Collection',
+                  'Mail-in Program',
+                  'ITAD (IT Asset Disposition)',
+                  'We Pay for Certain Items',
+                ].map(svc => (
+                  <label class="flex items-center gap-3 px-3 py-2.5 border border-gray-200 rounded-lg cursor-pointer hover:border-green-400 hover:bg-green-50/30 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                    <input
+                      type="checkbox"
+                      name="services_offered"
+                      value={svc}
+                      class="w-4 h-4 rounded text-green-600 border-gray-300 focus:ring-green-500 focus:ring-offset-0 flex-shrink-0"
+                    />
+                    <span class="text-sm text-gray-700">{svc}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <!-- ── Section: Certifications ── -->
+            <fieldset>
+              <div class="border-b border-gray-100 pb-2 mb-4">
+                <legend class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Certifications</legend>
+                <p class="text-xs text-gray-500 mt-1">Check all that apply (optional).</p>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[
+                  'R2 Certified',
+                  'e-Stewards Certified',
+                  'NAID AAA Certified',
+                  'ISO 14001',
+                  'RIOS Certified',
+                ].map(cert => (
+                  <label class="flex items-center gap-3 px-3 py-2.5 border border-gray-200 rounded-lg cursor-pointer hover:border-green-400 hover:bg-green-50/30 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                    <input
+                      type="checkbox"
+                      name="certifications"
+                      value={cert}
+                      class="w-4 h-4 rounded text-green-600 border-gray-300 focus:ring-green-500 focus:ring-offset-0 flex-shrink-0"
+                    />
+                    <span class="text-sm text-gray-700">{cert}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <!-- ── Section: Additional Details ── -->
+            <div class="space-y-5">
+              <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Additional Details</h3>
+
+              <!-- Business Hours -->
+              <div>
+                <label for="cl-hours" class="block text-sm font-medium text-gray-700 mb-1">
+                  Business Hours <span class="text-gray-500 font-normal">(optional)</span>
+                </label>
+                <textarea
+                  id="cl-hours"
+                  name="hours"
+                  rows="3"
+                  class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                  placeholder={"Monday – Friday: 9am – 5pm\nSaturday: 9am – 1pm\nSunday: Closed"}
+                ></textarea>
+              </div>
+
+              <!-- Business Description -->
+              <div>
+                <label for="cl-description" class="block text-sm font-medium text-gray-700 mb-1">
+                  Business Description <span class="text-gray-500 font-normal">(optional)</span>
+                </label>
+                <textarea
+                  id="cl-description"
+                  name="description"
+                  rows="4"
+                  class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                  placeholder="Tell customers about your business — what makes you stand out, how long you've been operating, special programs, etc."
+                ></textarea>
+                <p class="mt-1 text-xs text-gray-500">Shown on your listing page. Recommended for Premium and Featured plans.</p>
+              </div>
+            </div>
+
+            <!-- ── Section: Plan ── -->
+            <fieldset>
+              <div class="border-b border-gray-100 pb-2 mb-4">
+                <legend class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Plan</legend>
+              </div>
+              <div class="space-y-2">
+                {[
+                  { value: 'free', label: 'Free', desc: 'Basic directory listing — no badge or leads', price: '$0/mo' },
+                  { value: 'premium', label: 'Premium', desc: 'Verified badge, priority placement, lead routing', price: '$15/mo' },
+                  { value: 'featured', label: 'Featured', desc: 'Everything in Premium + top of city page', price: '$30/mo' },
+                ].map(tier => (
+                  <label class="flex items-center gap-4 px-4 py-3 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-green-400 hover:bg-green-50/30 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50 has-[:checked]:ring-1 has-[:checked]:ring-green-500">
+                    <input
+                      type="radio"
+                      name="tier"
+                      id={`tier-${tier.value}`}
+                      value={tier.value}
+                      class="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500 focus:ring-offset-0"
+                    />
+                    <div class="flex-grow">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-900">{tier.label}</span>
+                        <span class="text-sm font-medium text-gray-600">{tier.price}</span>
+                      </div>
+                      <p class="text-xs text-gray-500 mt-0.5">{tier.desc}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <p class="hidden mt-1 text-sm text-red-500" data-error="tier">Please select a plan.</p>
+            </fieldset>
+
+            <!-- Message -->
+            <div>
+              <label for="cl-message" class="block text-sm font-medium text-gray-700 mb-1">
+                Anything else you'd like us to know <span class="text-gray-500 font-normal">(optional)</span>
+              </label>
+              <textarea
+                id="cl-message"
+                name="message"
+                rows="3"
+                class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                placeholder="e.g. We already have a listing under a slightly different name..."
+              ></textarea>
+            </div>
+
+            <!-- Submit -->
+            <div class="pt-2">
+              <button
+                type="submit"
+                id="claim-submit-btn"
+                class="w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-green-600 text-white text-base font-semibold rounded-xl hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <span id="claim-btn-text">Submit My Claim</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </button>
+              <p class="mt-3 text-xs text-center text-gray-500">
+                For Premium and Featured plans, we'll reach out to confirm details before setting up billing.
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</Layout>
+
+<script define:vars={{ supabaseUrl: import.meta.env.PUBLIC_SUPABASE_URL, supabaseAnonKey: import.meta.env.PUBLIC_SUPABASE_ANON_KEY }}>
+  // Pre-fill form from query params (?business=, ?city=, ?state=)
+  function prefillFromParams() {
+    const params = new URLSearchParams(window.location.search);
+    const business = params.get('business');
+    const city = params.get('city');
+    const state = params.get('state');
+
+    if (business) {
+      const el = document.getElementById('cl-business');
+      if (el) el.value = decodeURIComponent(business);
+    }
+    if (city) {
+      const el = document.getElementById('cl-city');
+      if (el) el.value = decodeURIComponent(city);
+    }
+    if (state) {
+      const el = document.getElementById('cl-state');
+      if (el) {
+        const stateVal = decodeURIComponent(state);
+        const option = Array.from(el.options).find(o => o.value === stateVal);
+        if (option) el.value = stateVal;
+      }
+    }
+
+    // Show success banner if ?success=true
+    if (params.get('success') === 'true') {
+      const card = document.getElementById('claim-form-card');
+      const success = document.getElementById('claim-success');
+      if (card) card.classList.add('hidden');
+      if (success) success.classList.remove('hidden');
+    }
+  }
+
+  // Listing type toggle: No (new) vs Yes (update)
+  function setupClaimToggle() {
+    const btnNew = document.getElementById('toggle-new');
+    const btnUpdate = document.getElementById('toggle-update');
+    const typeInput = document.getElementById('submission-type-input');
+    const formTitle = document.getElementById('form-title');
+    const formDesc = document.getElementById('form-desc');
+    const submitText = document.getElementById('claim-btn-text');
+    const subjectInput = document.querySelector('input[name="subject"]');
+    if (!btnNew || !btnUpdate) return;
+
+    const BASE    = 'flex-1 sm:flex-none px-5 py-2.5 text-sm font-medium rounded-lg transition-all';
+    const ACTIVE  = BASE + ' bg-green-600 text-white shadow-sm';
+    const INACTIVE = BASE + ' bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100';
+
+    function setMode(mode) {
+      const isUpdate = mode === 'update';
+
+      btnNew.className    = isUpdate ? INACTIVE : ACTIVE;
+      btnUpdate.className = isUpdate ? ACTIVE   : INACTIVE;
+      btnNew.setAttribute('aria-pressed',    String(!isUpdate));
+      btnUpdate.setAttribute('aria-pressed', String(isUpdate));
+
+      if (typeInput)    typeInput.value = mode;
+      if (formTitle)    formTitle.textContent = isUpdate ? 'Update Your Listing' : 'Claim Your Listing';
+      if (formDesc)     formDesc.textContent  = isUpdate
+        ? "Already listed with us? Submit your updated information and we'll apply the changes within 1–2 business days."
+        : "Fill out the form below and we'll get back to you within 1–2 business days.";
+      if (submitText)   submitText.textContent = isUpdate ? 'Submit Update' : 'Submit My Claim';
+      if (subjectInput) subjectInput.value = isUpdate
+        ? 'Listing Update Request — RecycleOldTech.com'
+        : 'New Business Claim Submission — RecycleOldTech.com';
+    }
+    btnNew.addEventListener('click', () => setMode('new'));
+    btnUpdate.addEventListener('click', () => setMode('update'));
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('mode') === 'update') setMode('update');
+  }
+
+  // Tier selection buttons (pricing cards → scroll to form + pre-select tier)
+  function setupTierButtons() {
+    document.querySelectorAll('.tier-select-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tier = btn.getAttribute('data-tier');
+        if (tier) {
+          const radio = document.getElementById(`tier-${tier}`);
+          if (radio) radio.checked = true;
+        }
+      });
+    });
+  }
+
+  // Form validation + submission
+  function initClaimForm() {
+    const form = document.getElementById('claim-listing-form');
+    if (!form) return;
+
+    function showError(name) {
+      const el = form.querySelector(`[data-error="${name}"]`);
+      if (el) el.classList.remove('hidden');
+    }
+    function clearErrors() {
+      form.querySelectorAll('[data-error]').forEach(el => el.classList.add('hidden'));
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      let valid = true;
+      const businessName = form.querySelector('#cl-business').value.trim();
+      if (!businessName) { showError('business_name'); valid = false; }
+
+      const contactName = form.querySelector('#cl-contact').value.trim();
+      if (!contactName) { showError('contact_name'); valid = false; }
+
+      const email = form.querySelector('#cl-email').value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('contact_email'); valid = false; }
+
+      const city = form.querySelector('#cl-city').value.trim();
+      if (!city) { showError('city'); valid = false; }
+
+      const state = form.querySelector('#cl-state').value;
+      if (!state) { showError('state'); valid = false; }
+
+      const acceptedItems = Array.from(form.querySelectorAll('input[name="accepted_items"]:checked')).map(el => el.value);
+      if (acceptedItems.length === 0) { showError('accepted_items'); valid = false; }
+
+      const tier = form.querySelector('input[name="tier"]:checked');
+      if (!tier) { showError('tier'); valid = false; }
+
+      if (!valid) {
+        const firstError = form.querySelector('[data-error]:not(.hidden)');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const submitBtn = document.getElementById('claim-submit-btn');
+      const btnText = document.getElementById('claim-btn-text');
+      submitBtn.disabled = true;
+      if (btnText) btnText.textContent = 'Submitting...';
+
+      try {
+        // 1. Send to web3forms for email notification
+        const formData = new FormData(form);
+        const w3Response = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: { Accept: 'application/json' },
+        });
+
+        // 2. Insert into Supabase business_claims (public insert allowed by RLS)
+        if (supabaseUrl && supabaseAnonKey) {
+          try {
+            const claimData = {
+              business_name: businessName,
+              contact_name: contactName,
+              contact_email: email,
+              contact_phone: form.querySelector('#cl-contact-phone').value.trim() || null,
+              address: form.querySelector('#cl-address').value.trim() || null,
+              city: city,
+              state: state,
+              zip: form.querySelector('#cl-zip').value.trim() || null,
+              phone: form.querySelector('#cl-biz-phone').value.trim() || null,
+              website: form.querySelector('#cl-website').value.trim() || null,
+              accepted_items: acceptedItems,
+              services_offered: Array.from(form.querySelectorAll('input[name="services_offered"]:checked')).map(el => el.value),
+              certifications: Array.from(form.querySelectorAll('input[name="certifications"]:checked')).map(el => el.value),
+              hours: form.querySelector('#cl-hours').value.trim() || null,
+              description: form.querySelector('#cl-description').value.trim() || null,
+              tier: tier.value,
+              submission_type: form.querySelector('#submission-type-input')?.value || 'new',
+              message: form.querySelector('#cl-message').value.trim() || null,
+            };
+            await fetch(`${supabaseUrl}/rest/v1/business_claims`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': supabaseAnonKey,
+                'Authorization': `Bearer ${supabaseAnonKey}`,
+                'Prefer': 'return=minimal',
+              },
+              body: JSON.stringify(claimData),
+            });
+          } catch (dbErr) {
+            // Non-fatal: web3forms submission is the primary notification
+            console.warn('Supabase insert failed (non-fatal):', dbErr);
+          }
+        }
+
+        if (w3Response.ok) {
+          const card = document.getElementById('claim-form-card');
+          const success = document.getElementById('claim-success');
+          if (card) card.classList.add('hidden');
+          if (success) success.classList.remove('hidden');
+          success?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          submitBtn.disabled = false;
+          if (btnText) btnText.textContent = 'Submit My Claim';
+          alert('Something went wrong. Please try again or contact us directly.');
+        }
+      } catch {
+        submitBtn.disabled = false;
+        if (btnText) btnText.textContent = 'Submit My Claim';
+        alert('Network error. Please check your connection and try again.');
+      }
+    });
+  }
+
+  prefillFromParams();
+  setupClaimToggle();
+  setupTierButtons();
+  initClaimForm();
+  document.addEventListener('astro:page-load', () => {
+    prefillFromParams();
+    setupClaimToggle();
+    setupTierButtons();
+    initClaimForm();
+  });
+</script>

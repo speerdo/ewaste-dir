@@ -191,12 +191,12 @@ const certifications  = parseJsonArray(center.certifications);
       </div>
       
       <div class="flex-shrink-0 ml-4">
-        {center.logo ? (
+        {(center.logo || center.photo) ? (
           <img 
-            src={center.logo}
-            alt={`${center.name} company logo`}
+            src={center.logo || center.photo}
+            alt={`${center.name} ${center.logo ? 'company logo' : 'facility photo'}`}
             loading="lazy"
-            class="w-16 h-16 object-contain rounded-lg bg-gray-50"
+            class={`w-16 h-16 rounded-lg bg-gray-50 ${center.logo ? 'object-contain' : 'object-cover'}`}
             onerror={`
               this.onerror=null; 
               this.src='${defaultLogo}'; 
@@ -219,7 +219,7 @@ const certifications  = parseJsonArray(center.certifications);
           </div>
         )}
         <span id={`logo-desc-${center.id}`} class="sr-only">
-          Company logo for {center.name}, an electronics recycling center
+          {center.logo ? `Company logo for ${center.name}` : `Facility photo for ${center.name}`}, an electronics recycling center
         </span>
       </div>
     </div>

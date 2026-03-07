@@ -64,15 +64,15 @@ function formatWorkingHours(hours: any): string {
           {centersByCity[city].map((center: RecyclingCenter) => (
             <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
               <div class="relative">
-                {center.photo && (
+                {(center.photo || center.logo) && (
                   <img 
-                    src={center.photo} 
+                    src={center.photo || center.logo} 
                     alt={`${center.name} facility`} 
                     loading="lazy"
                     class="w-full h-48 object-cover"
                   />
                 )}
-                {center.logo && (
+                {center.logo && center.photo && (
                   <div class="absolute bottom-4 right-4">
                     <img 
                       src={center.logo} 

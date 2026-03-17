@@ -2,6 +2,7 @@
 import type { RecyclingCenter } from '../types/supabase';
 import { getRecyclingCentersByState } from '../lib/supabase';
 import type { CentersByCity } from '../lib/supabase';
+import { formatWorkingHours } from '../utils/formatWorkingHours';
 
 type Props = {
   state: string;
@@ -10,31 +11,6 @@ type Props = {
 const { state } = Astro.props;
 const centersByCity: CentersByCity = await getRecyclingCentersByState(state);
 const cities = Object.keys(centersByCity).sort();
-
-// Helper function to format working hours
-function formatWorkingHours(hours: any): string {
-  if (!hours) return 'Hours not available';
-  if (typeof hours === 'string') {
-    if (hours === '24/7') return 'Open 24/7';
-    return hours;
-  }
-  
-  try {
-    let parsed = hours;
-    if (typeof hours === 'string') {
-      parsed = JSON.parse(hours);
-    }
-    
-    const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return Object.entries(parsed)
-      .sort(([a], [b]) => daysOrder.indexOf(a) - daysOrder.indexOf(b))
-      .map(([day, time]) => `${day}: ${time}`)
-      .join('\n');
-  } catch (error) {
-    console.error('Error parsing hours:', error);
-    return hours.toString();
-  }
-}
 ---
 
 <!-- City Quick Nav -->

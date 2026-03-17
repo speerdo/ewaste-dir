@@ -1,6 +1,6 @@
 ---
 import type { RecyclingCenter } from '../../types/supabase';
-
+import { formatWorkingHours } from '../../utils/formatWorkingHours';
 
 interface Props {
   center: RecyclingCenter;
@@ -13,31 +13,6 @@ interface Props {
 }
 
 const { center, defaultLogo, verifiedPartner = null } = Astro.props;
-
-// Format working hours for display
-function formatWorkingHours(hours: any): string {
-  if (!hours) return 'Hours not available';
-  if (typeof hours === 'string') {
-    if (hours === '24/7') return 'Open 24/7';
-    return hours;
-  }
-  
-  try {
-    let parsed = hours;
-    if (typeof hours === 'string') {
-      parsed = JSON.parse(hours);
-    }
-    
-    const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return Object.entries(parsed)
-      .sort(([a], [b]) => daysOrder.indexOf(a) - daysOrder.indexOf(b))
-      .map(([day, time]) => `${day}: ${time}`)
-      .join('\n');
-  } catch (error) {
-    console.error('Error parsing hours:', error);
-    return hours.toString();
-  }
-}
 
 
 // Extract business specialties from description and name
@@ -322,7 +297,16 @@ const certifications  = parseJsonArray(center.certifications);
               style="display: none;"
             >
               {formatWorkingHours(center.working_hours).split('\n').map(line => {
-                const [day, time] = line.split(': ');
+                const colonIdx = line.indexOf(': ');
+                if (colonIdx < 0) {
+                  return (
+                    <div class="py-1">
+                      <span class="text-gray-600">{line}</span>
+                    </div>
+                  );
+                }
+                const day = line.slice(0, colonIdx);
+                const time = line.slice(colonIdx + 2);
                 return (
                   <div class="flex justify-between py-1">
                     <span class="font-medium text-gray-700">{day}</span>
@@ -366,13 +350,14 @@ const certifications  = parseJsonArray(center.certifications);
 
     {/* Claim listing link for unverified centers */}
     {!verifiedPartner && (
-      <div class="mt-4 pt-4 border-t border-gray-100">
+      <div class="mt-4 pt-4 -mx-6 -mb-6 px-4 py-3 bg-green-50/80 border-t border-green-100">
         <a
           href={`/claim?business=${encodeURIComponent(center.name)}&city=${encodeURIComponent(center.city || '')}&state=${encodeURIComponent(center.state || '')}`}
-          class="text-xs text-gray-400 hover:text-green-600 transition-colors"
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-green-800 hover:text-green-900 transition-colors"
           onclick="event.stopPropagation()"
         >
-          Is this your business? Claim this listing →
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-200/80 text-green-900">Owner?</span>
+          Claim this listing →
         </a>
       </div>
     )}

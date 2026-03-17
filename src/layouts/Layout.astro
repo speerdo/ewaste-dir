@@ -156,7 +156,7 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
               
               // Try to find what's creating the extra space
               // Check if centers-container is creating extra space
-              if (centersContainer) {
+              if (centersContainer instanceof HTMLElement) {
                 const containerRect = centersContainer.getBoundingClientRect();
                 const containerBottom = containerRect.bottom + window.scrollY;
                 

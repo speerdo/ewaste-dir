@@ -29,6 +29,9 @@ const US_STATES = [
     ==================================================== -->
     <div class="bg-gradient-to-br from-green-900 via-green-800 to-green-700 text-white py-20 px-4">
       <div class="container mx-auto max-w-3xl text-center">
+        <p class="text-sm font-medium text-green-200 uppercase tracking-wider mb-4">
+          Trusted by recyclers in 12 states
+        </p>
         <h1 class="text-4xl md:text-5xl font-display font-bold mb-6 leading-tight">
           Get Your Recycling Business<br class="hidden sm:block" /> in Front of Local Customers
         </h1>
@@ -258,7 +261,7 @@ const US_STATES = [
                   ) : (
                     <svg class="w-5 h-5 text-gray-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                   )}
-                  <span class={item.included ? 'text-gray-700' : 'text-gray-400'}>{item.label}</span>
+                  <span class={item.included ? 'text-gray-700' : 'text-gray-400 line-through decoration-gray-500'}>{item.label}</span>
                 </li>
               ))}
             </ul>

@@ -601,34 +601,7 @@ if (baseTitle.length <= maxTitleLength) {
 
   <!-- Main content -->
   <div class="container mx-auto px-4 py-8">
-    <!-- Verification Disclaimer (top of every location page) -->
-    <div class="mb-6 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
-      <p class="text-sm text-amber-900 font-medium mb-1">
-        📋 Information Verified: {verificationDate}
-      </p>
-      <p class="text-sm text-amber-800 mb-1">
-        ⚠️ Call ahead to confirm they accept your specific items
-      </p>
-      <p class="text-sm text-amber-800">
-        📞 Facility details can change - always verify before visiting
-      </p>
-    </div>
 
-    <!-- Report Incorrect Listing (super visible) -->
-    <div class="mb-8 p-4 bg-orange-100 border-2 border-orange-400 rounded-lg shadow-sm">
-      <p class="text-base font-semibold text-orange-900 mb-2">
-        ⚠️ Is this information incorrect?
-      </p>
-      <a 
-        href="/contact" 
-        class="inline-flex items-center px-4 py-2 bg-orange-600 text-white font-bold rounded-md hover:bg-orange-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-      >
-        Report It
-        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      </a>
-    </div>
 
     <!-- Quick Stats Header -->
     <div class="mb-8">
@@ -656,48 +629,6 @@ if (baseTitle.length <= maxTitleLength) {
             <span class="font-semibold">Note:</span> We couldn't find recycling centers specifically in {cityName}, 
             so we're showing you nearby options in the {state.name} area instead.
           </p>
-        </div>
-      )}
-
-      <!-- City Description Section (merged generated + database content) -->
-      {displayCenters.length > 0 && (
-        <div class="mt-6 bg-white border border-gray-200 rounded-lg p-6">
-          <h2 class="text-2xl font-bold text-gray-900 mb-4">
-            About Electronics Recycling in {cityName}
-          </h2>
-          
-          <div class="prose prose-lg max-w-none text-gray-700 space-y-4">
-            {/* Single intro paragraph from generated content */}
-            <p class="text-gray-600">
-              {selectedIntroPhrase}
-            </p>
-            
-            {/* Database description paragraphs - most prominent */}
-            {cityDescription ? (
-              cityDescription.split('\n\n').map((paragraph: string) => (
-                <p class="mb-4">{paragraph}</p>
-              ))
-            ) : (
-              /* Fallback if no database description */
-              <>
-                {localData.regulations?.has_ewaste_ban && (
-                  <p>
-                    What's great about {cityName} is that it has strict e-waste disposal laws, meaning electronics are banned from regular landfills—keeping our community environmentally responsible.
-                  </p>
-                )}
-                {!localData.regulations?.has_ewaste_ban && localData.regulations?.municipal_programs && (
-                  <p>
-                    The city actively supports electronics recycling through local programs and partnerships with certified facilities.
-                  </p>
-                )}
-                {localData.regulations?.special_events && (
-                  <p>
-                    Plus, {cityName} hosts special e-waste collection events throughout the year, making it even easier for residents to dispose of old electronics safely.
-                  </p>
-                )}
-              </>
-            )}
-          </div>
         </div>
       )}
 
@@ -791,10 +722,6 @@ if (baseTitle.length <= maxTitleLength) {
       </div>
     )}
 
-    <!-- Lead Capture Form - moved to bottom of page -->
-    <!-- Trade-In Callout -->
-    <TradeInCallout />
-
     <!-- Sort Controls -->
     <div class="mb-6 flex justify-between items-center">
       <h2 class="text-lg font-semibold text-gray-900">
@@ -824,6 +751,64 @@ if (baseTitle.length <= maxTitleLength) {
         <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} city={cityName} state={state.name} />
       </div>
     </div>
+
+    <!-- Thin page: surface help form immediately after listings -->
+    {displayCenters.length < 3 && (
+      <div class="mb-10 bg-green-50 border border-green-200 rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3">
+          Only {displayCenters.length} {displayCenters.length === 1 ? 'center' : 'centers'} found near {cityName}. Need more options?
+        </h2>
+        <p class="text-gray-600 mb-4">Fill out our quick form and we'll help you find the right place to recycle your electronics.</p>
+        <a
+          href="#recycling-request-form"
+          class="inline-flex items-center px-5 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+        >
+          Get Free Help →
+        </a>
+      </div>
+    )}
+
+    <!-- Amazon Trade-In Callout (after listings, before about) -->
+    <TradeInCallout />
+
+    <!-- About Section (moved below listings) -->
+    {displayCenters.length > 0 && (
+      <div class="mt-10 mb-8 bg-white border border-gray-200 rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+          About Electronics Recycling in {cityName}
+        </h2>
+
+        <div class="prose prose-lg max-w-none text-gray-700 space-y-4">
+          <p class="text-gray-600">
+            {selectedIntroPhrase}
+          </p>
+
+          {cityDescription ? (
+            cityDescription.split('\n\n').map((paragraph: string) => (
+              <p class="mb-4">{paragraph}</p>
+            ))
+          ) : (
+            <>
+              {localData.regulations?.has_ewaste_ban && (
+                <p>
+                  What's great about {cityName} is that it has strict e-waste disposal laws, meaning electronics are banned from regular landfills—keeping our community environmentally responsible.
+                </p>
+              )}
+              {!localData.regulations?.has_ewaste_ban && localData.regulations?.municipal_programs && (
+                <p>
+                  The city actively supports electronics recycling through local programs and partnerships with certified facilities.
+                </p>
+              )}
+              {localData.regulations?.special_events && (
+                <p>
+                  Plus, {cityName} hosts special e-waste collection events throughout the year, making it even easier for residents to dispose of old electronics safely.
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    )}
 
     <!-- Secondary CTA -->
     <div class="mb-10 text-center bg-green-50 border border-green-200 rounded-lg p-6">
@@ -922,6 +907,11 @@ if (baseTitle.length <= maxTitleLength) {
       stateName={state.name}
       zipCode={cityZipCode}
     />
+
+    <!-- Report incorrect info (subtle, bottom of page) -->
+    <p class="mt-6 text-center text-sm text-gray-400">
+      See an error? <a href="/contact" class="underline hover:text-gray-600 transition-colors">Report it →</a>
+    </p>
 
 
 

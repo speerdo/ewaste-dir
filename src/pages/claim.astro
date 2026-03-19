@@ -1,8 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-const web3formsKey = 'aa2e5176-5a11-41b6-ade0-ac4ddba63cbf';
-
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
   'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
@@ -441,12 +439,7 @@ const US_STATES = [
 
         <!-- Short form card -->
         <div id="short-claim-card" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <form id="short-claim-form" action="https://api.web3forms.com/submit" method="POST" class="space-y-5" novalidate>
-            <input type="hidden" name="access_key" value={web3formsKey} />
-            <input type="hidden" name="subject" value="New Listing Claim (Short Form) — RecycleOldTech.com" />
-            <input type="hidden" name="from_name" value="RecycleOldTech Claim Form" />
-            <input type="hidden" name="notes" value="Short form submission — follow up required" />
-            <input type="hidden" name="submission_type" value="new" />
+          <form id="short-claim-form" class="space-y-5" novalidate>
 
             <!-- Business Name -->
             <div>
@@ -616,15 +609,10 @@ const US_STATES = [
 
           <form
             id="claim-listing-form"
-            action="https://api.web3forms.com/submit"
-            method="POST"
             class="space-y-8"
             novalidate
           >
-            <input type="hidden" name="access_key" value={web3formsKey} />
-            <input type="hidden" name="subject" value="New Business Claim Submission — RecycleOldTech.com" />
-            <input type="hidden" name="from_name" value="RecycleOldTech Claim Form" />
-            <input type="hidden" name="submission_type" id="submission-type-input" value="new" />
+            <input type="hidden" id="submission-type-input" value="new" />
 
             <!-- ── Section: Business Information ── -->
             <div class="space-y-5">
@@ -993,7 +981,7 @@ const US_STATES = [
   </div>
 </Layout>
 
-<script define:vars={{ supabaseUrl: import.meta.env.PUBLIC_SUPABASE_URL, supabaseAnonKey: import.meta.env.PUBLIC_SUPABASE_ANON_KEY }}>
+<script>
   // Pre-fill form from query params (?business=, ?city=, ?state=)
   function prefillFromParams() {
     const params = new URLSearchParams(window.location.search);
@@ -1100,40 +1088,21 @@ const US_STATES = [
       if (btnText) btnText.textContent = 'Submitting...';
 
       try {
-        const formData = new FormData(form);
-        const w3Response = await fetch(form.action, {
+        const response = await fetch('/api/submit-claim', {
           method: 'POST',
-          body: formData,
-          headers: { Accept: 'application/json' },
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            business_name: businessName,
+            city: city,
+            state: state,
+            contact_email: email,
+            tier: tier.value,
+            submission_type: 'new',
+            is_short_form: true,
+          }),
         });
 
-        if (supabaseUrl && supabaseAnonKey) {
-          try {
-            const claimData = {
-              business_name: businessName,
-              contact_email: email,
-              city: city,
-              state: state,
-              tier: tier.value,
-              submission_type: 'new',
-              notes: 'Short form submission — follow up required',
-            };
-            await fetch(`${supabaseUrl}/rest/v1/business_claims`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': supabaseAnonKey,
-                'Authorization': `Bearer ${supabaseAnonKey}`,
-                'Prefer': 'return=minimal',
-              },
-              body: JSON.stringify(claimData),
-            });
-          } catch (dbErr) {
-            console.warn('Supabase insert failed (non-fatal):', dbErr);
-          }
-        }
-
-        if (w3Response.ok) {
+        if (response.ok) {
           const card = document.getElementById('short-claim-card');
           const success = document.getElementById('short-claim-success');
           if (card) card.classList.add('hidden');
@@ -1160,7 +1129,6 @@ const US_STATES = [
     const formTitle = document.getElementById('form-title');
     const formDesc = document.getElementById('form-desc');
     const submitText = document.getElementById('claim-btn-text');
-    const subjectInput = document.querySelector('input[name="subject"]');
     if (!btnNew || !btnUpdate) return;
 
     const BASE    = 'flex-1 sm:flex-none px-5 py-2.5 text-sm font-medium rounded-lg transition-all';
@@ -1181,9 +1149,6 @@ const US_STATES = [
         ? "Already listed with us? Submit your updated information and we'll apply the changes within 1–2 business days."
         : "Fill out the form below and we'll get back to you within 1–2 business days.";
       if (submitText)   submitText.textContent = isUpdate ? 'Submit Update' : 'Submit My Claim';
-      if (subjectInput) subjectInput.value = isUpdate
-        ? 'Listing Update Request — RecycleOldTech.com'
-        : 'New Business Claim Submission — RecycleOldTech.com';
     }
     btnNew.addEventListener('click', () => setMode('new'));
     btnUpdate.addEventListener('click', () => setMode('update'));
@@ -1255,54 +1220,33 @@ const US_STATES = [
       if (btnText) btnText.textContent = 'Submitting...';
 
       try {
-        // 1. Send to web3forms for email notification
-        const formData = new FormData(form);
-        const w3Response = await fetch(form.action, {
+        const response = await fetch('/api/submit-claim', {
           method: 'POST',
-          body: formData,
-          headers: { Accept: 'application/json' },
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            business_name: businessName,
+            contact_name: contactName,
+            contact_email: email,
+            contact_phone: form.querySelector('#cl-contact-phone').value.trim() || null,
+            address: form.querySelector('#cl-address').value.trim() || null,
+            city: city,
+            state: state,
+            zip: form.querySelector('#cl-zip').value.trim() || null,
+            phone: form.querySelector('#cl-biz-phone').value.trim() || null,
+            website: form.querySelector('#cl-website').value.trim() || null,
+            accepted_items: acceptedItems,
+            services_offered: Array.from(form.querySelectorAll('input[name="services_offered"]:checked')).map(el => el.value),
+            certifications: Array.from(form.querySelectorAll('input[name="certifications"]:checked')).map(el => el.value),
+            hours: form.querySelector('#cl-hours').value.trim() || null,
+            description: form.querySelector('#cl-description').value.trim() || null,
+            tier: tier.value,
+            submission_type: form.querySelector('#submission-type-input')?.value || 'new',
+            message: form.querySelector('#cl-message').value.trim() || null,
+            is_short_form: false,
+          }),
         });
 
-        // 2. Insert into Supabase business_claims (public insert allowed by RLS)
-        if (supabaseUrl && supabaseAnonKey) {
-          try {
-            const claimData = {
-              business_name: businessName,
-              contact_name: contactName,
-              contact_email: email,
-              contact_phone: form.querySelector('#cl-contact-phone').value.trim() || null,
-              address: form.querySelector('#cl-address').value.trim() || null,
-              city: city,
-              state: state,
-              zip: form.querySelector('#cl-zip').value.trim() || null,
-              phone: form.querySelector('#cl-biz-phone').value.trim() || null,
-              website: form.querySelector('#cl-website').value.trim() || null,
-              accepted_items: acceptedItems,
-              services_offered: Array.from(form.querySelectorAll('input[name="services_offered"]:checked')).map(el => el.value),
-              certifications: Array.from(form.querySelectorAll('input[name="certifications"]:checked')).map(el => el.value),
-              hours: form.querySelector('#cl-hours').value.trim() || null,
-              description: form.querySelector('#cl-description').value.trim() || null,
-              tier: tier.value,
-              submission_type: form.querySelector('#submission-type-input')?.value || 'new',
-              message: form.querySelector('#cl-message').value.trim() || null,
-            };
-            await fetch(`${supabaseUrl}/rest/v1/business_claims`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': supabaseAnonKey,
-                'Authorization': `Bearer ${supabaseAnonKey}`,
-                'Prefer': 'return=minimal',
-              },
-              body: JSON.stringify(claimData),
-            });
-          } catch (dbErr) {
-            // Non-fatal: web3forms submission is the primary notification
-            console.warn('Supabase insert failed (non-fatal):', dbErr);
-          }
-        }
-
-        if (w3Response.ok) {
+        if (response.ok) {
           const card = document.getElementById('claim-form-card');
           const success = document.getElementById('claim-success');
           if (card) card.classList.add('hidden');

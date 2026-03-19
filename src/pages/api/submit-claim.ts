@@ -195,7 +195,10 @@ hello@recycleoldtech.com
 
     <p style="margin-top: 24px;">
       Adam<br>
-      <a href="https://www.recycleoldtech.com">RecycleOldTech.com</a>
+      <a href="https://www.recycleoldtech.com">RecycleOldTech.com</a><br>
+      <a href="https://www.recycleoldtech.com">
+        <img src="https://www.recycleoldtech.com/images/default-og.png" alt="RecycleOldTech.com" width="300" style="display:block; margin-top:8px; border:0;" />
+      </a>
     </p>
   </div>
   <div class="footer">

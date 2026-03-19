@@ -29,15 +29,18 @@ const US_STATES = [
     ==================================================== -->
     <div class="bg-gradient-to-br from-green-900 via-green-800 to-green-700 text-white py-20 px-4">
       <div class="container mx-auto max-w-3xl text-center">
-        <p class="text-sm font-medium text-green-200 uppercase tracking-wider mb-4">
-          Trusted by recyclers in 12 states
-        </p>
         <h1 class="text-4xl md:text-5xl font-display font-bold mb-6 leading-tight">
-          Get Your Recycling Business<br class="hidden sm:block" /> in Front of Local Customers
+          Your Business Is Already Listed.<br class="hidden sm:block" /> Make It Work For You.
         </h1>
-        <p class="text-xl text-green-100 max-w-2xl mx-auto">
-          Over 15,000 people search RecycleOldTech every month looking for a place to drop off their old electronics. Make sure they find you.
+        <p class="text-xl text-green-100 max-w-2xl mx-auto mb-8">
+          15,000 people search RecycleOldTech every month looking for recyclers near them. Verified Partners appear at the top of every city page and receive leads directly in their inbox.
         </p>
+        <a
+          href="#claim-form"
+          class="inline-flex items-center px-8 py-3 bg-white text-green-800 font-semibold rounded-xl hover:bg-green-50 transition-colors shadow"
+        >
+          Claim Your Listing →
+        </a>
       </div>
     </div>
 
@@ -60,7 +63,7 @@ const US_STATES = [
             </div>
             <h3 class="text-xl font-display font-bold text-gray-900 mb-3">More Visibility</h3>
             <p class="text-gray-600 leading-relaxed">
-              Verified badge on your listing. Priority placement in city search results so customers find you first.
+              Verified badge on your listing. You appear above unverified businesses on every city page in your area — including competitors.
             </p>
           </div>
 
@@ -73,7 +76,7 @@ const US_STATES = [
             </div>
             <h3 class="text-xl font-display font-bold text-gray-900 mb-3">Qualified Leads</h3>
             <p class="text-gray-600 leading-relaxed">
-              People actively searching for recyclers in your area, sent directly to your inbox. No shared lead pools.
+              People who fill out our recycling request form get matched to verified recyclers first. Unverified listings don't receive these leads.
             </p>
           </div>
 
@@ -86,7 +89,7 @@ const US_STATES = [
             </div>
             <h3 class="text-xl font-display font-bold text-gray-900 mb-3">Trust Signal</h3>
             <p class="text-gray-600 leading-relaxed">
-              The verified badge tells consumers you're a legitimate, active business they can count on.
+              The verified badge signals to consumers that you're a legitimate, active business — not an outdated listing. Especially important for first-time visitors deciding who to call.
             </p>
           </div>
         </div>
@@ -235,84 +238,88 @@ const US_STATES = [
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
 
-          <!-- Free Tier -->
-          <div class="bg-white rounded-2xl border border-gray-200 p-8 flex flex-col">
+          <!-- Free Tier — looks "lesser" -->
+          <div class="bg-gray-50 rounded-2xl border border-gray-200 p-8 flex flex-col opacity-90">
             <div class="mb-6">
-              <h3 class="text-lg font-display font-bold text-gray-900 mb-1">Free</h3>
-              <div class="flex items-baseline gap-1 mb-4">
-                <span class="text-4xl font-display font-bold text-gray-900">$0</span>
-                <span class="text-gray-500">/mo</span>
+              <h3 class="text-lg font-display font-bold text-gray-500 mb-1">Basic Listing</h3>
+              <div class="flex items-baseline gap-1 mb-2">
+                <span class="text-4xl font-display font-bold text-gray-400">$0</span>
+                <span class="text-gray-400">/mo</span>
               </div>
-              <p class="text-sm text-gray-600">Get your basic listing live — no commitment.</p>
+              <p class="text-sm text-gray-400">You're already here. No action needed.</p>
             </div>
             <ul class="space-y-3 mb-8 flex-grow">
+              <li class="flex items-center gap-3 text-sm">
+                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span class="text-gray-500">Listed in directory</span>
+              </li>
               {[
-                { label: 'Listed in directory', included: true },
-                { label: 'Verified badge', included: false },
-                { label: 'Priority placement', included: false },
-                { label: 'Leads routed to you', included: false },
-                { label: 'Top of city page', included: false },
-                { label: 'Custom description', included: false },
-                { label: 'Logo on listing', included: false },
+                'Verified badge',
+                'Priority placement',
+                'Leads routed to you',
+                'Top of city page',
+                'Custom description',
+                'Logo on listing',
               ].map(item => (
                 <li class="flex items-center gap-3 text-sm">
-                  {item.included ? (
-                    <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  ) : (
-                    <svg class="w-5 h-5 text-gray-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                  )}
-                  <span class={item.included ? 'text-gray-700' : 'text-gray-400 line-through decoration-gray-500'}>{item.label}</span>
+                  <svg class="w-5 h-5 text-red-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                  <span class="text-gray-400 line-through decoration-gray-400">{item}</span>
                 </li>
               ))}
             </ul>
             <a
               href="#claim-form"
               data-tier="free"
-              class="tier-select-btn block w-full text-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-colors"
+              class="tier-select-btn block w-full text-center px-6 py-3 border-2 border-gray-300 text-gray-500 font-medium rounded-xl hover:border-gray-400 hover:bg-gray-100 transition-colors"
             >
-              Get Started Free
+              Already Listed — Upgrade
             </a>
           </div>
 
-          <!-- Premium Tier — Highlighted -->
-          <div class="bg-green-600 rounded-2xl border-2 border-green-600 p-8 flex flex-col relative shadow-xl">
+          <!-- Premium Tier — highlighted with green border -->
+          <div class="bg-white rounded-2xl border-2 border-green-500 p-8 flex flex-col relative shadow-lg">
             <div class="absolute -top-4 left-1/2 -translate-x-1/2">
               <span class="bg-amber-400 text-amber-900 text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wide shadow">
                 Most Popular
               </span>
             </div>
             <div class="mb-6">
-              <h3 class="text-lg font-display font-bold text-white mb-1">Premium</h3>
-              <div class="flex items-baseline gap-1 mb-4">
-                <span class="text-4xl font-display font-bold text-white">$15</span>
-                <span class="text-green-200">/mo</span>
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="text-lg font-display font-bold text-gray-900">Verified Partner</h3>
+                <span class="inline-flex items-center gap-1 rounded-full font-medium border px-2 py-0.5 text-xs bg-green-50 text-green-800 border-green-300">
+                  <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  Verified
+                </span>
               </div>
-              <p class="text-sm text-green-100">Everything you need to stand out and win leads.</p>
+              <div class="flex items-baseline gap-1 mb-2">
+                <span class="text-4xl font-display font-bold text-gray-900">$15</span>
+                <span class="text-gray-500">/mo</span>
+              </div>
+              <p class="text-sm text-gray-600">Everything you need to stand out and win leads.</p>
             </div>
             <ul class="space-y-3 mb-8 flex-grow">
               {[
-                { label: 'Listed in directory', included: true },
-                { label: 'Verified badge', included: true },
-                { label: 'Priority placement', included: true },
-                { label: 'Leads routed to you', included: true },
-                { label: 'Top of city page', included: false },
-                { label: 'Custom description', included: true },
-                { label: 'Logo on listing', included: true },
+                'Listed in directory',
+                'Verified badge',
+                'Priority placement in city results',
+                'Leads routed directly to your inbox',
+                'Custom description on your listing',
+                'Logo on listing',
               ].map(item => (
                 <li class="flex items-center gap-3 text-sm">
-                  {item.included ? (
-                    <svg class="w-5 h-5 text-green-200 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  ) : (
-                    <svg class="w-5 h-5 text-green-400/50 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                  )}
-                  <span class={item.included ? 'text-white' : 'text-green-300/70'}>{item.label}</span>
+                  <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  <span class="text-gray-700">{item}</span>
                 </li>
               ))}
+              <li class="flex items-center gap-3 text-sm">
+                <svg class="w-5 h-5 text-gray-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                <span class="text-gray-300 line-through">Top of city page (Featured only)</span>
+              </li>
             </ul>
             <a
               href="#claim-form"
               data-tier="premium"
-              class="tier-select-btn block w-full text-center px-6 py-3 bg-white text-green-700 font-bold rounded-xl hover:bg-green-50 transition-colors shadow"
+              class="tier-select-btn block w-full text-center px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors shadow"
             >
               Start Premium — $15/mo
             </a>
@@ -321,26 +328,28 @@ const US_STATES = [
           <!-- Featured Tier -->
           <div class="bg-white rounded-2xl border-2 border-amber-400 p-8 flex flex-col">
             <div class="mb-6">
-              <h3 class="text-lg font-display font-bold text-gray-900 mb-1">Featured</h3>
-              <div class="flex items-baseline gap-1 mb-4">
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="text-lg font-display font-bold text-gray-900">Featured Partner</h3>
+                <span class="inline-flex items-center gap-1 rounded-full font-medium border px-2 py-0.5 text-xs bg-amber-50 text-amber-800 border-amber-300">
+                  <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  Featured
+                </span>
+              </div>
+              <div class="flex items-baseline gap-1 mb-2">
                 <span class="text-4xl font-display font-bold text-gray-900">$30</span>
                 <span class="text-gray-500">/mo</span>
               </div>
-              <p class="text-sm text-gray-600">Maximum visibility. Own the top spot in your cities.</p>
+              <p class="text-sm text-gray-600">Maximum visibility. Own the top spot.</p>
             </div>
             <ul class="space-y-3 mb-8 flex-grow">
               {[
-                { label: 'Listed in directory', included: true },
-                { label: 'Verified badge', included: true },
-                { label: 'Priority placement', included: true },
-                { label: 'Leads routed to you', included: true },
-                { label: 'Top of city page', included: true },
-                { label: 'Custom description', included: true },
-                { label: 'Logo on listing', included: true },
+                'Everything in Premium',
+                'Top of city page — above all other listings',
+                'Exclusive top spot (one per city)',
               ].map(item => (
                 <li class="flex items-center gap-3 text-sm">
                   <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                  <span class="text-gray-700">{item.label}</span>
+                  <span class="text-gray-700">{item}</span>
                 </li>
               ))}
             </ul>
@@ -361,11 +370,208 @@ const US_STATES = [
     </div>
 
     <!-- ===================================================
-         Claim Form
+         FAQ
+    ==================================================== -->
+    <div class="bg-white py-16 px-4">
+      <div class="container mx-auto max-w-3xl">
+        <h2 class="text-3xl font-display font-bold text-gray-900 text-center mb-10">
+          Questions From Recyclers
+        </h2>
+        <div class="space-y-0 divide-y divide-gray-100 border border-gray-200 rounded-2xl overflow-hidden">
+          {[
+            {
+              q: 'My business is already listed — do I need to do anything?',
+              a: 'Not for the basic free listing. But if you want the verified badge, priority placement, and leads routed to you, you\'ll need to claim it. Takes about 60 seconds.',
+            },
+            {
+              q: 'How does billing work?',
+              a: 'We reach out after you submit to confirm your details. You won\'t be charged until we\'ve talked and you\'re happy with how your listing looks. Month-to-month, cancel anytime.',
+            },
+            {
+              q: 'What if my listing information is wrong?',
+              a: 'That\'s actually a great reason to claim it. Verified Partners can submit corrections and updates to their listing at any time.',
+            },
+            {
+              q: 'How many leads can I expect?',
+              a: 'It depends on your city and what you accept. We route all recycling request form submissions from your city/region to verified recyclers first. Unverified listings don\'t receive these.',
+            },
+            {
+              q: 'Is there a contract?',
+              a: 'No. Month-to-month. Cancel from your account or just email us.',
+            },
+          ].map((item, i) => (
+            <details class="group">
+              <summary class="flex items-center justify-between px-6 py-5 cursor-pointer list-none hover:bg-gray-50 transition-colors">
+                <span class="font-medium text-gray-900">{item.q}</span>
+                <svg class="w-5 h-5 text-gray-400 flex-shrink-0 ml-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-gray-600 text-sm leading-relaxed">
+                {item.a}
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================
+         Short Interest Form — Stage 1 (primary CTA)
     ==================================================== -->
     <div id="claim-form" class="bg-gray-50 py-16 px-4">
-      <div class="container mx-auto max-w-2xl">
+      <div class="container mx-auto max-w-lg">
+        <h2 class="text-3xl font-display font-bold text-gray-900 text-center mb-2">
+          Claim or Update Your Listing
+        </h2>
+        <p class="text-center text-gray-500 mb-10">
+          Start here — takes 60 seconds. We'll follow up within 1 business day.
+        </p>
 
+        <!-- Short form success state -->
+        <div id="short-claim-success" class="hidden bg-green-50 rounded-2xl border border-green-200 p-10 text-center">
+          <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Got it!</h3>
+          <p class="text-gray-600">Check your inbox — we'll be in touch within 1 business day to get your listing set up.</p>
+        </div>
+
+        <!-- Short form card -->
+        <div id="short-claim-card" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+          <form id="short-claim-form" action="https://api.web3forms.com/submit" method="POST" class="space-y-5" novalidate>
+            <input type="hidden" name="access_key" value={web3formsKey} />
+            <input type="hidden" name="subject" value="New Listing Claim (Short Form) — RecycleOldTech.com" />
+            <input type="hidden" name="from_name" value="RecycleOldTech Claim Form" />
+            <input type="hidden" name="notes" value="Short form submission — follow up required" />
+            <input type="hidden" name="submission_type" value="new" />
+
+            <!-- Business Name -->
+            <div>
+              <label for="sc-business" class="block text-sm font-medium text-gray-700 mb-1">
+                Business Name <span class="text-red-500" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="text"
+                id="sc-business"
+                name="business_name"
+                required
+                autocomplete="organization"
+                class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="Acme Electronics Recycling"
+              />
+              <p class="hidden mt-1 text-sm text-red-500" data-sc-error="business_name">Please enter your business name.</p>
+            </div>
+
+            <!-- City -->
+            <div>
+              <label for="sc-city" class="block text-sm font-medium text-gray-700 mb-1">
+                City <span class="text-red-500" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="text"
+                id="sc-city"
+                name="city"
+                required
+                autocomplete="address-level2"
+                class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="Austin"
+              />
+              <p class="hidden mt-1 text-sm text-red-500" data-sc-error="city">Please enter your city.</p>
+            </div>
+
+            <!-- State -->
+            <div>
+              <label for="sc-state" class="block text-sm font-medium text-gray-700 mb-1">
+                State <span class="text-red-500" aria-hidden="true">*</span>
+              </label>
+              <select
+                id="sc-state"
+                name="state"
+                required
+                class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              >
+                <option value="">Select a state</option>
+                {US_STATES.map(s => <option value={s}>{s}</option>)}
+              </select>
+              <p class="hidden mt-1 text-sm text-red-500" data-sc-error="state">Please select your state.</p>
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="sc-email" class="block text-sm font-medium text-gray-700 mb-1">
+                Your Email <span class="text-red-500" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="email"
+                id="sc-email"
+                name="contact_email"
+                required
+                autocomplete="email"
+                class="w-full px-4 py-2.5 text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="you@example.com"
+              />
+              <p class="hidden mt-1 text-sm text-red-500" data-sc-error="email">Please enter a valid email.</p>
+            </div>
+
+            <!-- Plan radio -->
+            <fieldset>
+              <legend class="block text-sm font-medium text-gray-700 mb-2">
+                Which plan interests you?
+              </legend>
+              <div class="space-y-2">
+                {[
+                  { value: 'free',     label: 'Free',     price: '$0/mo',  desc: 'Basic listing' },
+                  { value: 'premium',  label: 'Premium',  price: '$15/mo', desc: 'Verified badge + leads' },
+                  { value: 'featured', label: 'Featured', price: '$30/mo', desc: 'Top of city page' },
+                ].map(t => (
+                  <label class="flex items-center gap-4 px-4 py-3 border border-gray-200 rounded-xl cursor-pointer hover:border-green-400 hover:bg-green-50/30 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                    <input
+                      type="radio"
+                      name="tier"
+                      id={`sc-tier-${t.value}`}
+                      value={t.value}
+                      checked={t.value === 'premium'}
+                      class="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500 focus:ring-offset-0"
+                    />
+                    <div class="flex-grow">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-900">{t.label}</span>
+                        <span class="text-sm text-gray-500">{t.price}</span>
+                      </div>
+                      <p class="text-xs text-gray-500 mt-0.5">{t.desc}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <p class="hidden mt-1 text-sm text-red-500" data-sc-error="tier">Please select a plan.</p>
+            </fieldset>
+
+            <button
+              type="submit"
+              id="sc-submit-btn"
+              class="w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-green-600 text-white text-base font-semibold rounded-xl hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <span id="sc-btn-text">Claim My Listing →</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider between short form and full form -->
+    <div class="bg-gray-200 py-8 px-4 text-center border-y border-gray-300">
+      <p class="text-sm font-semibold text-gray-500 uppercase tracking-widest">Want to provide more detail?</p>
+      <p class="text-sm text-gray-400 mt-1">Fill out the full form below and we'll set everything up faster.</p>
+    </div>
+
+    <!-- ===================================================
+         Full Detail Form — Stage 2
+    ==================================================== -->
+    <div id="claim-form-full" class="bg-white py-16 px-4">
+      <div class="container mx-auto max-w-2xl">
         <!-- Success state (hidden by default) -->
         <div id="claim-success" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
           <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -821,6 +1027,131 @@ const US_STATES = [
     }
   }
 
+  function prefillShortForm() {
+    const params = new URLSearchParams(window.location.search);
+    const business = params.get('business');
+    const city = params.get('city');
+    const state = params.get('state');
+    const tier = params.get('tier');
+
+    if (business) {
+      const el = document.getElementById('sc-business');
+      if (el) el.value = decodeURIComponent(business);
+    }
+    if (city) {
+      const el = document.getElementById('sc-city');
+      if (el) el.value = decodeURIComponent(city);
+    }
+    if (state) {
+      const el = document.getElementById('sc-state');
+      if (el) {
+        const stateVal = decodeURIComponent(state);
+        const option = Array.from(el.options).find(o => o.value === stateVal);
+        if (option) el.value = stateVal;
+      }
+    }
+    if (tier) {
+      const radio = document.getElementById(`sc-tier-${tier}`);
+      if (radio) radio.checked = true;
+    }
+  }
+
+  function initShortClaimForm() {
+    const form = document.getElementById('short-claim-form');
+    if (!form) return;
+
+    function showScError(name) {
+      const el = form.querySelector(`[data-sc-error="${name}"]`);
+      if (el) el.classList.remove('hidden');
+    }
+    function clearScErrors() {
+      form.querySelectorAll('[data-sc-error]').forEach(el => el.classList.add('hidden'));
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearScErrors();
+
+      let valid = true;
+      const businessName = form.querySelector('#sc-business').value.trim();
+      if (!businessName) { showScError('business_name'); valid = false; }
+
+      const city = form.querySelector('#sc-city').value.trim();
+      if (!city) { showScError('city'); valid = false; }
+
+      const state = form.querySelector('#sc-state').value;
+      if (!state) { showScError('state'); valid = false; }
+
+      const email = form.querySelector('#sc-email').value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showScError('email'); valid = false; }
+
+      const tier = form.querySelector('input[name="tier"]:checked');
+      if (!tier) { showScError('tier'); valid = false; }
+
+      if (!valid) {
+        const firstError = form.querySelector('[data-sc-error]:not(.hidden)');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const submitBtn = document.getElementById('sc-submit-btn');
+      const btnText = document.getElementById('sc-btn-text');
+      submitBtn.disabled = true;
+      if (btnText) btnText.textContent = 'Submitting...';
+
+      try {
+        const formData = new FormData(form);
+        const w3Response = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: { Accept: 'application/json' },
+        });
+
+        if (supabaseUrl && supabaseAnonKey) {
+          try {
+            const claimData = {
+              business_name: businessName,
+              contact_email: email,
+              city: city,
+              state: state,
+              tier: tier.value,
+              submission_type: 'new',
+              notes: 'Short form submission — follow up required',
+            };
+            await fetch(`${supabaseUrl}/rest/v1/business_claims`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': supabaseAnonKey,
+                'Authorization': `Bearer ${supabaseAnonKey}`,
+                'Prefer': 'return=minimal',
+              },
+              body: JSON.stringify(claimData),
+            });
+          } catch (dbErr) {
+            console.warn('Supabase insert failed (non-fatal):', dbErr);
+          }
+        }
+
+        if (w3Response.ok) {
+          const card = document.getElementById('short-claim-card');
+          const success = document.getElementById('short-claim-success');
+          if (card) card.classList.add('hidden');
+          if (success) success.classList.remove('hidden');
+          success?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          submitBtn.disabled = false;
+          if (btnText) btnText.textContent = 'Claim My Listing →';
+          alert('Something went wrong. Please try again or contact us directly.');
+        }
+      } catch {
+        submitBtn.disabled = false;
+        if (btnText) btnText.textContent = 'Claim My Listing →';
+        alert('Network error. Please check your connection and try again.');
+      }
+    });
+  }
+
   // Listing type toggle: No (new) vs Yes (update)
   function setupClaimToggle() {
     const btnNew = document.getElementById('toggle-new');
@@ -991,13 +1322,17 @@ const US_STATES = [
   }
 
   prefillFromParams();
+  prefillShortForm();
   setupClaimToggle();
   setupTierButtons();
   initClaimForm();
+  initShortClaimForm();
   document.addEventListener('astro:page-load', () => {
     prefillFromParams();
+    prefillShortForm();
     setupClaimToggle();
     setupTierButtons();
     initClaimForm();
+    initShortClaimForm();
   });
 </script>

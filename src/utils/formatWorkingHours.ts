@@ -23,6 +23,12 @@ export function formatWorkingHours(hours: unknown): string {
 
     const obj = parsed as Record<string, unknown>;
 
+    // Claim approvals store free-form hours as { "text": "Mon–Fri …" }
+    const textField = obj.text;
+    if (typeof textField === 'string' && textField.trim()) {
+      return textField.trim();
+    }
+
     // Google Places format: use weekday_descriptions (or camelCase variant) when available
     const weekdayDescriptions = obj.weekday_descriptions ?? obj.weekdayDescriptions;
     if (Array.isArray(weekdayDescriptions) && weekdayDescriptions.length > 0) {

@@ -71,6 +71,11 @@ const shownItems      = acceptedItems.slice(0, 5);
 const extraItemCount  = acceptedItems.length - shownItems.length;
 const servicesOffered = parseJsonArray(center.services_offered);
 const certifications  = parseJsonArray(center.certifications);
+
+const listingDescription = center.description?.trim() ?? '';
+const descriptionUsesClamp =
+  listingDescription.length > 0 &&
+  (listingDescription.length > 140 || listingDescription.includes('\n'));
 ---
 
 <div 
@@ -232,8 +237,25 @@ const certifications  = parseJsonArray(center.certifications);
         </div>
       )}
 
-      {center.description && (
-        <p class="text-gray-500 text-sm truncate">{center.description}</p>
+      {listingDescription && (
+        <div class="min-w-0">
+          <p
+            id={`desc-${center.id}`}
+            class:list={[
+              'text-gray-500 text-sm whitespace-pre-line',
+              descriptionUsesClamp && 'line-clamp-3',
+            ]}
+          >{listingDescription}</p>
+          {descriptionUsesClamp && (
+            <button
+              type="button"
+              class="mt-1 text-xs font-medium text-green-600 hover:text-green-700"
+              onclick={`event.stopPropagation(); const p=document.getElementById('desc-${center.id}'); p.classList.toggle('line-clamp-3'); this.textContent=p.classList.contains('line-clamp-3')?'Show more':'Show less'`}
+            >
+              Show more
+            </button>
+          )}
+        </div>
       )}
 
       {/* Services & certifications — verified partners only */}

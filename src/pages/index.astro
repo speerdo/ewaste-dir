@@ -12,6 +12,7 @@ import Testimonials from '../components/Testimonials.astro';
 import CTA from '../components/CTA.astro';
 import SchemaMarkup from '../components/SchemaMarkup.astro';
 import { getCollection } from 'astro:content';
+import { getBlogSlug } from '../lib/blog';
 
 // Get featured blog posts
 const allBlogPosts = await getCollection('blog');
@@ -46,7 +47,7 @@ const featuredPosts = allBlogPosts
 
         <div class="grid md:grid-cols-3 gap-8">
           {featuredPosts.map((post) => {
-            const postUrl = `/blog/${post.slug}`;
+            const postUrl = `/blog/${getBlogSlug(post)}`;
             const formattedDate = new Date(post.data.pubDate).toLocaleDateString('en-US', { 
               year: 'numeric', 
               month: 'long', 

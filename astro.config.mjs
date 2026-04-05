@@ -1,5 +1,4 @@
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
 // Production domain
@@ -15,7 +14,6 @@ const SITE_URL =
 export default defineConfig({
   site: SITE_URL,
   integrations: [
-    tailwind(),
     sitemap({
       changefreq: 'weekly',
       priority: 0.7,
@@ -53,13 +51,6 @@ export default defineConfig({
     build: {
       reportCompressedSize: false,
       chunkSizeWarningLimit: 1000,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            supabase: ['@supabase/supabase-js'],
-          },
-        },
-      },
     },
   },
   compressHTML: true,

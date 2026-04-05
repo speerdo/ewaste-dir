@@ -1,17 +1,16 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
+import { getBlogSlug } from '../../lib/blog';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  console.log('Found posts:', posts.length);
-  console.log('Available slugs:', posts.map((p: CollectionEntry<'blog'>) => p.slug));
-  
+
   return posts.map((post: CollectionEntry<'blog'>) => ({
-    params: { slug: post.slug },
+    params: { slug: getBlogSlug(post) },
     props: { post },
   }));
 }
@@ -20,16 +19,13 @@ interface Props {
   post: CollectionEntry<'blog'>;
 }
 
-const { slug } = Astro.params;
 const { post } = Astro.props;
-console.log('Current slug:', slug);
-console.log('Found post:', post?.slug);
 
 if (!post) {
   return Astro.redirect('/404');
 }
 
-const { Content } = await post.render();
+const { Content } = await render(post);
 
 // We don't need to construct the OG image URL here anymore
 // The BlogPost component handles this correctly with our layout updates

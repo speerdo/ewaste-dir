@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .highlight-center {
   @apply ring-2 ring-green-500 transform scale-[1.02] shadow-lg transition-all duration-300;
   background: linear-gradient(to right bottom, #f0fdf4, #dcfce7);

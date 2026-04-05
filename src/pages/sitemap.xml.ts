@@ -5,6 +5,7 @@ import {
   isCanonicalUrl,
   PRODUCTION_URL,
 } from '../lib/url-utils';
+import { getBlogSlug } from '../lib/blog';
 import type { APIRoute } from 'astro';
 
 // export const prerender = false; // Commented out - Vercel will handle this as serverless function
@@ -37,7 +38,7 @@ export const GET: APIRoute = async () => {
 
   // Add blog post URLs
   for (const post of blogPosts) {
-    const blogUrl = `/blog/${post.slug}`;
+    const blogUrl = `/blog/${getBlogSlug(post)}`;
     const canonicalUrl = generateCanonicalUrl(blogUrl);
     if (isCanonicalUrl(canonicalUrl)) {
       urls.push({

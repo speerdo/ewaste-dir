@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { getBlogSlug } from '../../lib/blog';
 
 const posts = await getCollection('blog');
 posts.sort((a: CollectionEntry<'blog'>, b: CollectionEntry<'blog'>) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -30,7 +31,7 @@ posts.sort((a: CollectionEntry<'blog'>, b: CollectionEntry<'blog'>) => b.data.pu
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {posts.map((post: CollectionEntry<'blog'>) => (
           <article class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-            <a href={`/blog/${post.slug}`} class="block">
+            <a href={`/blog/${getBlogSlug(post)}`} class="block">
               <Image
                 src={post.data.image}
                 alt={post.data.title}

@@ -1,5 +1,17 @@
 import { XMLParser } from 'fast-xml-parser';
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+type VercelRequestLike = {
+  method?: string;
+  query: Record<string, string | string[] | undefined>;
+};
+
+type VercelResponseLike = {
+  setHeader: (name: string, value: string) => void;
+  status: (code: number) => {
+    end: () => void;
+    json: (body: unknown) => void;
+  };
+};
 
 /**
  * Vercel serverless function to fetch local recycling news via RSS feeds
@@ -9,8 +21,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * This works in static mode because it's a separate Vercel function, not an Astro route
  */
 export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
+  req: VercelRequestLike,
+  res: VercelResponseLike
 ) {
   // Handle OPTIONS for CORS preflight
   if (req.method === 'OPTIONS') {

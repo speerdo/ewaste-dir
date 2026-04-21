@@ -1,0 +1,1190 @@
+{
+  "generated_at": "2026-04-21T11:42:35.449Z",
+  "total_existing_city_redirects": 131,
+  "reason_counts": {
+    "exact_db_match_but_runtime_or_build_mismatch": 129,
+    "likely_slug_variant_or_abbreviation": 1,
+    "city_name_suffix_variant": 1
+  },
+  "items": [
+    {
+      "source": "/states/pennsylvania/hatboro",
+      "state_slug": "pennsylvania",
+      "city_slug": "hatboro",
+      "destination": "/states/pennsylvania",
+      "db_city_name": "Hatboro",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/pennsylvania/hatboro"
+    },
+    {
+      "source": "/states/new-hampshire/wilton",
+      "state_slug": "new-hampshire",
+      "city_slug": "wilton",
+      "destination": "/states/new-hampshire",
+      "db_city_name": "Wilton",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-hampshire/wilton"
+    },
+    {
+      "source": "/states/south-carolina/summerton",
+      "state_slug": "south-carolina",
+      "city_slug": "summerton",
+      "destination": "/states/south-carolina",
+      "db_city_name": "Summerton",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/south-carolina/summerton"
+    },
+    {
+      "source": "/states/alabama/midland-city",
+      "state_slug": "alabama",
+      "city_slug": "midland-city",
+      "destination": "/states/alabama",
+      "db_city_name": "Midland City",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/alabama/midland-city"
+    },
+    {
+      "source": "/states/kansas/leavenworth",
+      "state_slug": "kansas",
+      "city_slug": "leavenworth",
+      "destination": "/states/kansas",
+      "db_city_name": "Leavenworth",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kansas/leavenworth"
+    },
+    {
+      "source": "/states/minnesota/fosston",
+      "state_slug": "minnesota",
+      "city_slug": "fosston",
+      "destination": "/states/minnesota",
+      "db_city_name": "Fosston",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/minnesota/fosston"
+    },
+    {
+      "source": "/states/ohio/jackson-center",
+      "state_slug": "ohio",
+      "city_slug": "jackson-center",
+      "destination": "/states/ohio",
+      "db_city_name": "Jackson Center",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/ohio/jackson-center"
+    },
+    {
+      "source": "/states/illinois/montgomery",
+      "state_slug": "illinois",
+      "city_slug": "montgomery",
+      "destination": "/states/illinois",
+      "db_city_name": "Montgomery",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/illinois/montgomery"
+    },
+    {
+      "source": "/states/minnesota/oronoco",
+      "state_slug": "minnesota",
+      "city_slug": "oronoco",
+      "destination": "/states/minnesota",
+      "db_city_name": "Oronoco",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/minnesota/oronoco"
+    },
+    {
+      "source": "/states/ohio/canfield",
+      "state_slug": "ohio",
+      "city_slug": "canfield",
+      "destination": "/states/ohio",
+      "db_city_name": "Canfield",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/ohio/canfield"
+    },
+    {
+      "source": "/states/massachusetts/billerica",
+      "state_slug": "massachusetts",
+      "city_slug": "billerica",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Billerica",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/billerica"
+    },
+    {
+      "source": "/states/ohio/malinta",
+      "state_slug": "ohio",
+      "city_slug": "malinta",
+      "destination": "/states/ohio",
+      "db_city_name": "Malinta",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/ohio/malinta"
+    },
+    {
+      "source": "/states/maryland/largo",
+      "state_slug": "maryland",
+      "city_slug": "largo",
+      "destination": "/states/maryland",
+      "db_city_name": "Largo",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/maryland/largo"
+    },
+    {
+      "source": "/states/illinois/bolingbrook",
+      "state_slug": "illinois",
+      "city_slug": "bolingbrook",
+      "destination": "/states/illinois",
+      "db_city_name": "Bolingbrook",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/illinois/bolingbrook"
+    },
+    {
+      "source": "/states/pennsylvania/collingdale",
+      "state_slug": "pennsylvania",
+      "city_slug": "collingdale",
+      "destination": "/states/pennsylvania",
+      "db_city_name": "Collingdale",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/pennsylvania/collingdale"
+    },
+    {
+      "source": "/states/south-carolina/eastover",
+      "state_slug": "south-carolina",
+      "city_slug": "eastover",
+      "destination": "/states/south-carolina",
+      "db_city_name": "Eastover",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/south-carolina/eastover"
+    },
+    {
+      "source": "/states/new-jersey/netcong",
+      "state_slug": "new-jersey",
+      "city_slug": "netcong",
+      "destination": "/states/new-jersey",
+      "db_city_name": "Netcong",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-jersey/netcong"
+    },
+    {
+      "source": "/states/south-carolina/edisto-island",
+      "state_slug": "south-carolina",
+      "city_slug": "edisto-island",
+      "destination": "/states/south-carolina",
+      "db_city_name": "Edisto Island",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/south-carolina/edisto-island"
+    },
+    {
+      "source": "/states/new-hampshire/litchfield",
+      "state_slug": "new-hampshire",
+      "city_slug": "litchfield",
+      "destination": "/states/new-hampshire",
+      "db_city_name": "Litchfield",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-hampshire/litchfield"
+    },
+    {
+      "source": "/states/north-carolina/cornelius",
+      "state_slug": "north-carolina",
+      "city_slug": "cornelius",
+      "destination": "/states/north-carolina",
+      "db_city_name": "Cornelius",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/north-carolina/cornelius"
+    },
+    {
+      "source": "/states/hawaii/holualoa",
+      "state_slug": "hawaii",
+      "city_slug": "holualoa",
+      "destination": "/states/hawaii",
+      "db_city_name": "Holualoa",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/hawaii/holualoa"
+    },
+    {
+      "source": "/states/massachusetts/plainville",
+      "state_slug": "massachusetts",
+      "city_slug": "plainville",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Plainville",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/plainville"
+    },
+    {
+      "source": "/states/georgia/lake-park",
+      "state_slug": "georgia",
+      "city_slug": "lake-park",
+      "destination": "/states/georgia",
+      "db_city_name": "Lake Park",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/georgia/lake-park"
+    },
+    {
+      "source": "/states/kentucky/clarksville",
+      "state_slug": "kentucky",
+      "city_slug": "clarksville",
+      "destination": "/states/kentucky",
+      "db_city_name": "Clarksville",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kentucky/clarksville"
+    },
+    {
+      "source": "/states/michigan/gwinn",
+      "state_slug": "michigan",
+      "city_slug": "gwinn",
+      "destination": "/states/michigan",
+      "db_city_name": "Gwinn",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/michigan/gwinn"
+    },
+    {
+      "source": "/states/indiana/otterbein",
+      "state_slug": "indiana",
+      "city_slug": "otterbein",
+      "destination": "/states/indiana",
+      "db_city_name": "Otterbein",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/indiana/otterbein"
+    },
+    {
+      "source": "/states/new-hampshire/exeter",
+      "state_slug": "new-hampshire",
+      "city_slug": "exeter",
+      "destination": "/states/new-hampshire",
+      "db_city_name": "Exeter",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-hampshire/exeter"
+    },
+    {
+      "source": "/states/pennsylvania/export",
+      "state_slug": "pennsylvania",
+      "city_slug": "export",
+      "destination": "/states/pennsylvania",
+      "db_city_name": "Export",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/pennsylvania/export"
+    },
+    {
+      "source": "/states/illinois/bedford-park",
+      "state_slug": "illinois",
+      "city_slug": "bedford-park",
+      "destination": "/states/illinois",
+      "db_city_name": "Bedford Park",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/illinois/bedford-park"
+    },
+    {
+      "source": "/states/south-carolina/clover",
+      "state_slug": "south-carolina",
+      "city_slug": "clover",
+      "destination": "/states/south-carolina",
+      "db_city_name": "Clover",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/south-carolina/clover"
+    },
+    {
+      "source": "/states/florida/leesburg",
+      "state_slug": "florida",
+      "city_slug": "leesburg",
+      "destination": "/states/florida",
+      "db_city_name": "Leesburg",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/florida/leesburg"
+    },
+    {
+      "source": "/states/massachusetts/chatham",
+      "state_slug": "massachusetts",
+      "city_slug": "chatham",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Chatham",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/chatham"
+    },
+    {
+      "source": "/states/florida/high-springs",
+      "state_slug": "florida",
+      "city_slug": "high-springs",
+      "destination": "/states/florida",
+      "db_city_name": "High Springs",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/florida/high-springs"
+    },
+    {
+      "source": "/states/south-carolina/central",
+      "state_slug": "south-carolina",
+      "city_slug": "central",
+      "destination": "/states/south-carolina",
+      "db_city_name": "Central",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/south-carolina/central"
+    },
+    {
+      "source": "/states/minnesota/willow-river",
+      "state_slug": "minnesota",
+      "city_slug": "willow-river",
+      "destination": "/states/minnesota",
+      "db_city_name": "Willow River",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/minnesota/willow-river"
+    },
+    {
+      "source": "/states/kansas/park-city",
+      "state_slug": "kansas",
+      "city_slug": "park-city",
+      "destination": "/states/kansas",
+      "db_city_name": "Park City",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kansas/park-city"
+    },
+    {
+      "source": "/states/massachusetts/sandwich",
+      "state_slug": "massachusetts",
+      "city_slug": "sandwich",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Sandwich",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/sandwich"
+    },
+    {
+      "source": "/states/missouri/el-dorado-springs",
+      "state_slug": "missouri",
+      "city_slug": "el-dorado-springs",
+      "destination": "/states/missouri",
+      "db_city_name": "El Dorado Springs",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/missouri/el-dorado-springs"
+    },
+    {
+      "source": "/states/new-hampshire/new-boston",
+      "state_slug": "new-hampshire",
+      "city_slug": "new-boston",
+      "destination": "/states/new-hampshire",
+      "db_city_name": "New Boston",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-hampshire/new-boston"
+    },
+    {
+      "source": "/states/massachusetts/leicester",
+      "state_slug": "massachusetts",
+      "city_slug": "leicester",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Leicester",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/leicester"
+    },
+    {
+      "source": "/states/iowa/carroll",
+      "state_slug": "iowa",
+      "city_slug": "carroll",
+      "destination": "/states/iowa",
+      "db_city_name": "Carroll",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/iowa/carroll"
+    },
+    {
+      "source": "/states/ohio/cleveland-heights",
+      "state_slug": "ohio",
+      "city_slug": "cleveland-heights",
+      "destination": "/states/ohio",
+      "db_city_name": "Cleveland Heights",
+      "reason": "likely_slug_variant_or_abbreviation",
+      "suggested": "/states/ohio/cleveland"
+    },
+    {
+      "source": "/states/michigan/grandville",
+      "state_slug": "michigan",
+      "city_slug": "grandville",
+      "destination": "/states/michigan",
+      "db_city_name": "Grandville",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/michigan/grandville"
+    },
+    {
+      "source": "/states/california/live-oak",
+      "state_slug": "california",
+      "city_slug": "live-oak",
+      "destination": "/states/california",
+      "db_city_name": "Live Oak",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/california/live-oak"
+    },
+    {
+      "source": "/states/minnesota/otsego",
+      "state_slug": "minnesota",
+      "city_slug": "otsego",
+      "destination": "/states/minnesota",
+      "db_city_name": "Otsego",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/minnesota/otsego"
+    },
+    {
+      "source": "/states/florida/keystone-heights",
+      "state_slug": "florida",
+      "city_slug": "keystone-heights",
+      "destination": "/states/florida",
+      "db_city_name": "Keystone Heights",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/florida/keystone-heights"
+    },
+    {
+      "source": "/states/missouri/perryville",
+      "state_slug": "missouri",
+      "city_slug": "perryville",
+      "destination": "/states/missouri",
+      "db_city_name": "Perryville",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/missouri/perryville"
+    },
+    {
+      "source": "/states/massachusetts/millis",
+      "state_slug": "massachusetts",
+      "city_slug": "millis",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Millis",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/millis"
+    },
+    {
+      "source": "/states/minnesota/rosemount",
+      "state_slug": "minnesota",
+      "city_slug": "rosemount",
+      "destination": "/states/minnesota",
+      "db_city_name": "Rosemount",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/minnesota/rosemount"
+    },
+    {
+      "source": "/states/massachusetts/northbridge",
+      "state_slug": "massachusetts",
+      "city_slug": "northbridge",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Northbridge",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/northbridge"
+    },
+    {
+      "source": "/states/new-hampshire/north-hampton",
+      "state_slug": "new-hampshire",
+      "city_slug": "north-hampton",
+      "destination": "/states/new-hampshire",
+      "db_city_name": "North Hampton",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-hampshire/north-hampton"
+    },
+    {
+      "source": "/states/minnesota/iron-junction",
+      "state_slug": "minnesota",
+      "city_slug": "iron-junction",
+      "destination": "/states/minnesota",
+      "db_city_name": "Iron Junction",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/minnesota/iron-junction"
+    },
+    {
+      "source": "/states/new-york/cuba",
+      "state_slug": "new-york",
+      "city_slug": "cuba",
+      "destination": "/states/new-york",
+      "db_city_name": "Cuba",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-york/cuba"
+    },
+    {
+      "source": "/states/maine/nobleboro",
+      "state_slug": "maine",
+      "city_slug": "nobleboro",
+      "destination": "/states/maine",
+      "db_city_name": "Nobleboro",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/maine/nobleboro"
+    },
+    {
+      "source": "/states/michigan/mecosta",
+      "state_slug": "michigan",
+      "city_slug": "mecosta",
+      "destination": "/states/michigan",
+      "db_city_name": "Mecosta",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/michigan/mecosta"
+    },
+    {
+      "source": "/states/rhode-island/barrington",
+      "state_slug": "rhode-island",
+      "city_slug": "barrington",
+      "destination": "/states/rhode-island",
+      "db_city_name": "Barrington",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/rhode-island/barrington"
+    },
+    {
+      "source": "/states/kentucky/fort-mitchell",
+      "state_slug": "kentucky",
+      "city_slug": "fort-mitchell",
+      "destination": "/states/kentucky",
+      "db_city_name": "Fort Mitchell",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kentucky/fort-mitchell"
+    },
+    {
+      "source": "/states/massachusetts/hinsdale",
+      "state_slug": "massachusetts",
+      "city_slug": "hinsdale",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Hinsdale",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/hinsdale"
+    },
+    {
+      "source": "/states/new-jersey/freehold-township",
+      "state_slug": "new-jersey",
+      "city_slug": "freehold-township",
+      "destination": "/states/new-jersey",
+      "db_city_name": "Freehold Township",
+      "reason": "city_name_suffix_variant",
+      "suggested": "/states/new-jersey/freehold"
+    },
+    {
+      "source": "/states/georgia/ellabell",
+      "state_slug": "georgia",
+      "city_slug": "ellabell",
+      "destination": "/states/georgia",
+      "db_city_name": "Ellabell",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/georgia/ellabell"
+    },
+    {
+      "source": "/states/pennsylvania/dallastown",
+      "state_slug": "pennsylvania",
+      "city_slug": "dallastown",
+      "destination": "/states/pennsylvania",
+      "db_city_name": "Dallastown",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/pennsylvania/dallastown"
+    },
+    {
+      "source": "/states/pennsylvania/auburn",
+      "state_slug": "pennsylvania",
+      "city_slug": "auburn",
+      "destination": "/states/pennsylvania",
+      "db_city_name": "Auburn",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/pennsylvania/auburn"
+    },
+    {
+      "source": "/states/massachusetts/uxbridge",
+      "state_slug": "massachusetts",
+      "city_slug": "uxbridge",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Uxbridge",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/uxbridge"
+    },
+    {
+      "source": "/states/maryland/fort-washington",
+      "state_slug": "maryland",
+      "city_slug": "fort-washington",
+      "destination": "/states/maryland",
+      "db_city_name": "Fort Washington",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/maryland/fort-washington"
+    },
+    {
+      "source": "/states/ohio/chardon",
+      "state_slug": "ohio",
+      "city_slug": "chardon",
+      "destination": "/states/ohio",
+      "db_city_name": "Chardon",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/ohio/chardon"
+    },
+    {
+      "source": "/states/florida/bartow",
+      "state_slug": "florida",
+      "city_slug": "bartow",
+      "destination": "/states/florida",
+      "db_city_name": "Bartow",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/florida/bartow"
+    },
+    {
+      "source": "/states/massachusetts/wellesley",
+      "state_slug": "massachusetts",
+      "city_slug": "wellesley",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Wellesley",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/wellesley"
+    },
+    {
+      "source": "/states/iowa/mitchellville",
+      "state_slug": "iowa",
+      "city_slug": "mitchellville",
+      "destination": "/states/iowa",
+      "db_city_name": "Mitchellville",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/iowa/mitchellville"
+    },
+    {
+      "source": "/states/nebraska/plattsmouth",
+      "state_slug": "nebraska",
+      "city_slug": "plattsmouth",
+      "destination": "/states/nebraska",
+      "db_city_name": "Plattsmouth",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/nebraska/plattsmouth"
+    },
+    {
+      "source": "/states/new-york/east-islip",
+      "state_slug": "new-york",
+      "city_slug": "east-islip",
+      "destination": "/states/new-york",
+      "db_city_name": "East Islip",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-york/east-islip"
+    },
+    {
+      "source": "/states/ohio/chickasaw",
+      "state_slug": "ohio",
+      "city_slug": "chickasaw",
+      "destination": "/states/ohio",
+      "db_city_name": "Chickasaw",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/ohio/chickasaw"
+    },
+    {
+      "source": "/states/massachusetts/longmeadow",
+      "state_slug": "massachusetts",
+      "city_slug": "longmeadow",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Longmeadow",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/longmeadow"
+    },
+    {
+      "source": "/states/north-carolina/beaufort",
+      "state_slug": "north-carolina",
+      "city_slug": "beaufort",
+      "destination": "/states/north-carolina",
+      "db_city_name": "Beaufort",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/north-carolina/beaufort"
+    },
+    {
+      "source": "/states/iowa/lockridge",
+      "state_slug": "iowa",
+      "city_slug": "lockridge",
+      "destination": "/states/iowa",
+      "db_city_name": "Lockridge",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/iowa/lockridge"
+    },
+    {
+      "source": "/states/massachusetts/tyngsborough",
+      "state_slug": "massachusetts",
+      "city_slug": "tyngsborough",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Tyngsborough",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/tyngsborough"
+    },
+    {
+      "source": "/states/indiana/edinburgh",
+      "state_slug": "indiana",
+      "city_slug": "edinburgh",
+      "destination": "/states/indiana",
+      "db_city_name": "Edinburgh",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/indiana/edinburgh"
+    },
+    {
+      "source": "/states/georgia/clayton",
+      "state_slug": "georgia",
+      "city_slug": "clayton",
+      "destination": "/states/georgia",
+      "db_city_name": "Clayton",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/georgia/clayton"
+    },
+    {
+      "source": "/states/florida/indialantic",
+      "state_slug": "florida",
+      "city_slug": "indialantic",
+      "destination": "/states/florida",
+      "db_city_name": "Indialantic",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/florida/indialantic"
+    },
+    {
+      "source": "/states/california/coachella",
+      "state_slug": "california",
+      "city_slug": "coachella",
+      "destination": "/states/california",
+      "db_city_name": "Coachella",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/california/coachella"
+    },
+    {
+      "source": "/states/kansas/bel-aire",
+      "state_slug": "kansas",
+      "city_slug": "bel-aire",
+      "destination": "/states/kansas",
+      "db_city_name": "Bel Aire",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kansas/bel-aire"
+    },
+    {
+      "source": "/states/kentucky/fort-knox",
+      "state_slug": "kentucky",
+      "city_slug": "fort-knox",
+      "destination": "/states/kentucky",
+      "db_city_name": "Fort Knox",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kentucky/fort-knox"
+    },
+    {
+      "source": "/states/florida/lake-placid",
+      "state_slug": "florida",
+      "city_slug": "lake-placid",
+      "destination": "/states/florida",
+      "db_city_name": "Lake Placid",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/florida/lake-placid"
+    },
+    {
+      "source": "/states/connecticut/killingworth",
+      "state_slug": "connecticut",
+      "city_slug": "killingworth",
+      "destination": "/states/connecticut",
+      "db_city_name": "Killingworth",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/connecticut/killingworth"
+    },
+    {
+      "source": "/states/connecticut/north-stonington",
+      "state_slug": "connecticut",
+      "city_slug": "north-stonington",
+      "destination": "/states/connecticut",
+      "db_city_name": "North Stonington",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/connecticut/north-stonington"
+    },
+    {
+      "source": "/states/indiana/cedar-lake",
+      "state_slug": "indiana",
+      "city_slug": "cedar-lake",
+      "destination": "/states/indiana",
+      "db_city_name": "Cedar Lake",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/indiana/cedar-lake"
+    },
+    {
+      "source": "/states/new-jersey/maywood",
+      "state_slug": "new-jersey",
+      "city_slug": "maywood",
+      "destination": "/states/new-jersey",
+      "db_city_name": "Maywood",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-jersey/maywood"
+    },
+    {
+      "source": "/states/maryland/rosedale",
+      "state_slug": "maryland",
+      "city_slug": "rosedale",
+      "destination": "/states/maryland",
+      "db_city_name": "Rosedale",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/maryland/rosedale"
+    },
+    {
+      "source": "/states/massachusetts/hull",
+      "state_slug": "massachusetts",
+      "city_slug": "hull",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Hull",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/hull"
+    },
+    {
+      "source": "/states/illinois/hamilton",
+      "state_slug": "illinois",
+      "city_slug": "hamilton",
+      "destination": "/states/illinois",
+      "db_city_name": "Hamilton",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/illinois/hamilton"
+    },
+    {
+      "source": "/states/georgia/cleveland",
+      "state_slug": "georgia",
+      "city_slug": "cleveland",
+      "destination": "/states/georgia",
+      "db_city_name": "Cleveland",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/georgia/cleveland"
+    },
+    {
+      "source": "/states/connecticut/oxford",
+      "state_slug": "connecticut",
+      "city_slug": "oxford",
+      "destination": "/states/connecticut",
+      "db_city_name": "Oxford",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/connecticut/oxford"
+    },
+    {
+      "source": "/states/florida/lantana",
+      "state_slug": "florida",
+      "city_slug": "lantana",
+      "destination": "/states/florida",
+      "db_city_name": "Lantana",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/florida/lantana"
+    },
+    {
+      "source": "/states/indiana/elwood",
+      "state_slug": "indiana",
+      "city_slug": "elwood",
+      "destination": "/states/indiana",
+      "db_city_name": "Elwood",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/indiana/elwood"
+    },
+    {
+      "source": "/states/new-jersey/beachwood",
+      "state_slug": "new-jersey",
+      "city_slug": "beachwood",
+      "destination": "/states/new-jersey",
+      "db_city_name": "Beachwood",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/new-jersey/beachwood"
+    },
+    {
+      "source": "/states/minnesota/cohasset",
+      "state_slug": "minnesota",
+      "city_slug": "cohasset",
+      "destination": "/states/minnesota",
+      "db_city_name": "Cohasset",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/minnesota/cohasset"
+    },
+    {
+      "source": "/states/arkansas/sherwood",
+      "state_slug": "arkansas",
+      "city_slug": "sherwood",
+      "destination": "/states/arkansas",
+      "db_city_name": "Sherwood",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/arkansas/sherwood"
+    },
+    {
+      "source": "/states/connecticut/columbia",
+      "state_slug": "connecticut",
+      "city_slug": "columbia",
+      "destination": "/states/connecticut",
+      "db_city_name": "Columbia",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/connecticut/columbia"
+    },
+    {
+      "source": "/states/massachusetts/reading",
+      "state_slug": "massachusetts",
+      "city_slug": "reading",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Reading",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/reading"
+    },
+    {
+      "source": "/states/iowa/clear-lake",
+      "state_slug": "iowa",
+      "city_slug": "clear-lake",
+      "destination": "/states/iowa",
+      "db_city_name": "Clear Lake",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/iowa/clear-lake"
+    },
+    {
+      "source": "/states/louisiana/pineville",
+      "state_slug": "louisiana",
+      "city_slug": "pineville",
+      "destination": "/states/louisiana",
+      "db_city_name": "Pineville",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/louisiana/pineville"
+    },
+    {
+      "source": "/states/kentucky/millwood",
+      "state_slug": "kentucky",
+      "city_slug": "millwood",
+      "destination": "/states/kentucky",
+      "db_city_name": "Millwood",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kentucky/millwood"
+    },
+    {
+      "source": "/states/florida/cape-canaveral",
+      "state_slug": "florida",
+      "city_slug": "cape-canaveral",
+      "destination": "/states/florida",
+      "db_city_name": "Cape Canaveral",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/florida/cape-canaveral"
+    },
+    {
+      "source": "/states/michigan/mason",
+      "state_slug": "michigan",
+      "city_slug": "mason",
+      "destination": "/states/michigan",
+      "db_city_name": "Mason",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/michigan/mason"
+    },
+    {
+      "source": "/states/michigan/baraga",
+      "state_slug": "michigan",
+      "city_slug": "baraga",
+      "destination": "/states/michigan",
+      "db_city_name": "Baraga",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/michigan/baraga"
+    },
+    {
+      "source": "/states/florida/debary",
+      "state_slug": "florida",
+      "city_slug": "debary",
+      "destination": "/states/florida",
+      "db_city_name": "DeBary",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/florida/debary"
+    },
+    {
+      "source": "/states/kentucky/independence",
+      "state_slug": "kentucky",
+      "city_slug": "independence",
+      "destination": "/states/kentucky",
+      "db_city_name": "Independence",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kentucky/independence"
+    },
+    {
+      "source": "/states/illinois/hurst",
+      "state_slug": "illinois",
+      "city_slug": "hurst",
+      "destination": "/states/illinois",
+      "db_city_name": "Hurst",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/illinois/hurst"
+    },
+    {
+      "source": "/states/connecticut/greenwich",
+      "state_slug": "connecticut",
+      "city_slug": "greenwich",
+      "destination": "/states/connecticut",
+      "db_city_name": "Greenwich",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/connecticut/greenwich"
+    },
+    {
+      "source": "/states/indiana/english",
+      "state_slug": "indiana",
+      "city_slug": "english",
+      "destination": "/states/indiana",
+      "db_city_name": "English",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/indiana/english"
+    },
+    {
+      "source": "/states/iowa/sigourney",
+      "state_slug": "iowa",
+      "city_slug": "sigourney",
+      "destination": "/states/iowa",
+      "db_city_name": "Sigourney",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/iowa/sigourney"
+    },
+    {
+      "source": "/states/michigan/marquette",
+      "state_slug": "michigan",
+      "city_slug": "marquette",
+      "destination": "/states/michigan",
+      "db_city_name": "Marquette",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/michigan/marquette"
+    },
+    {
+      "source": "/states/massachusetts/hadley",
+      "state_slug": "massachusetts",
+      "city_slug": "hadley",
+      "destination": "/states/massachusetts",
+      "db_city_name": "Hadley",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/hadley"
+    },
+    {
+      "source": "/states/illinois/mundelein",
+      "state_slug": "illinois",
+      "city_slug": "mundelein",
+      "destination": "/states/illinois",
+      "db_city_name": "Mundelein",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/illinois/mundelein"
+    },
+    {
+      "source": "/states/georgia/bonaire",
+      "state_slug": "georgia",
+      "city_slug": "bonaire",
+      "destination": "/states/georgia",
+      "db_city_name": "Bonaire",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/georgia/bonaire"
+    },
+    {
+      "source": "/states/kentucky/hardinsburg",
+      "state_slug": "kentucky",
+      "city_slug": "hardinsburg",
+      "destination": "/states/kentucky",
+      "db_city_name": "Hardinsburg",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kentucky/hardinsburg"
+    },
+    {
+      "source": "/states/georgia/acworth",
+      "state_slug": "georgia",
+      "city_slug": "acworth",
+      "destination": "/states/georgia",
+      "db_city_name": "Acworth",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/georgia/acworth"
+    },
+    {
+      "source": "/states/indiana/hobart",
+      "state_slug": "indiana",
+      "city_slug": "hobart",
+      "destination": "/states/indiana",
+      "db_city_name": "Hobart",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/indiana/hobart"
+    },
+    {
+      "source": "/states/south-carolina/lando",
+      "state_slug": "south-carolina",
+      "city_slug": "lando",
+      "destination": "/states/south-carolina",
+      "db_city_name": "Lando",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/south-carolina/lando"
+    },
+    {
+      "source": "/states/delaware/cheswold",
+      "state_slug": "delaware",
+      "city_slug": "cheswold",
+      "destination": "/states/delaware",
+      "db_city_name": "Cheswold",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/delaware/cheswold"
+    },
+    {
+      "source": "/states/california/bellflower",
+      "state_slug": "california",
+      "city_slug": "bellflower",
+      "destination": "/states/california",
+      "db_city_name": "Bellflower",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/california/bellflower"
+    },
+    {
+      "source": "/states/pennsylvania/centralia",
+      "state_slug": "pennsylvania",
+      "city_slug": "centralia",
+      "destination": "/states/pennsylvania",
+      "db_city_name": "Centralia",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/pennsylvania/centralia"
+    },
+    {
+      "source": "/states/missouri/imperial",
+      "state_slug": "missouri",
+      "city_slug": "imperial",
+      "destination": "/states/missouri",
+      "db_city_name": "Imperial",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/missouri/imperial"
+    },
+    {
+      "source": "/states/kansas/holton",
+      "state_slug": "kansas",
+      "city_slug": "holton",
+      "destination": "/states/kansas",
+      "db_city_name": "Holton",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kansas/holton"
+    },
+    {
+      "source": "/states/ohio/arlington-heights",
+      "state_slug": "ohio",
+      "city_slug": "arlington-heights",
+      "destination": "/states/ohio",
+      "db_city_name": "Arlington Heights",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/ohio/arlington-heights"
+    },
+    {
+      "source": "/states/ohio/hilliard",
+      "state_slug": "ohio",
+      "city_slug": "hilliard",
+      "destination": "/states/ohio",
+      "db_city_name": "Hilliard",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/ohio/hilliard"
+    },
+    {
+      "source": "/states/indiana/griffith",
+      "state_slug": "indiana",
+      "city_slug": "griffith",
+      "destination": "/states/indiana",
+      "db_city_name": "Griffith",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/indiana/griffith"
+    },
+    {
+      "source": "/states/kansas/parker",
+      "state_slug": "kansas",
+      "city_slug": "parker",
+      "destination": "/states/kansas",
+      "db_city_name": "Parker",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/kansas/parker"
+    },
+    {
+      "source": "/states/north-carolina/lewisville",
+      "state_slug": "north-carolina",
+      "city_slug": "lewisville",
+      "destination": "/states/north-carolina",
+      "db_city_name": "Lewisville",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/north-carolina/lewisville"
+    },
+    {
+      "source": "/states/north-carolina/hertford",
+      "state_slug": "north-carolina",
+      "city_slug": "hertford",
+      "destination": "/states/north-carolina",
+      "db_city_name": "Hertford",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/north-carolina/hertford"
+    },
+    {
+      "source": "/states/missouri/neosho",
+      "state_slug": "missouri",
+      "city_slug": "neosho",
+      "destination": "/states/missouri",
+      "db_city_name": "Neosho",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/missouri/neosho"
+    },
+    {
+      "source": "/states/massachusetts/west-springfield",
+      "state_slug": "massachusetts",
+      "city_slug": "west-springfield",
+      "destination": "/states/massachusetts",
+      "db_city_name": "West Springfield",
+      "reason": "exact_db_match_but_runtime_or_build_mismatch",
+      "suggested": "/states/massachusetts/west-springfield"
+    }
+  ]
+}

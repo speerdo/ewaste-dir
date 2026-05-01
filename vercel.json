@@ -4039,6 +4039,3266 @@
       "permanent": true
     },
     {
+      "source": "/states/illinois/la-grange-park",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/rice-lake",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/nebraska/sidney",
+      "destination": "/states/nebraska",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/windham",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/cave-creek",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/marion",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/saginaw",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/sanford",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/bellingham",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-carolina/mt-pleasant",
+      "destination": "/states/south-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/north-billerica",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/kansas/lawrence",
+      "destination": "/states/kansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/sudbury",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/oregon/cave-junction",
+      "destination": "/states/oregon",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/kathleen",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/alhambra",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/lafayette",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/lock-haven",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/grove-hill",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/belgium",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/swansea",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-hampshire/kingston",
+      "destination": "/states/new-hampshire",
+      "permanent": true
+    },
+    {
+      "source": "/states/arkansas/malvern",
+      "destination": "/states/arkansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/forest",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/warsaw",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/jamaica-plain",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/milford",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/hillsville",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/ashland",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/district-of-columbia/washington",
+      "destination": "/states/district-of-columbia",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/lawrenceville",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/vineyard-haven",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-hampshire/jaffrey",
+      "destination": "/states/new-hampshire",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/oxford",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/connecticut/danielson",
+      "destination": "/states/connecticut",
+      "permanent": true
+    },
+    {
+      "source": "/states/oregon/pendleton",
+      "destination": "/states/oregon",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/tunnel-hill",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/la-jolla",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/montpelier",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/hubert",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/dudley",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/curwensville",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/nantucket",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/jackson",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/timberville",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/hanover",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/barron",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-hampshire/center-conway",
+      "destination": "/states/new-hampshire",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/franklin",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/odenton",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/bainbridge",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/carnegie",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/chester",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/fort-myer",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/locust-grove",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-hampshire/north-conway",
+      "destination": "/states/new-hampshire",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/strasburg",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/belmont",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/long-beach",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/rhode-island/exeter",
+      "destination": "/states/rhode-island",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/rockville",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/fort-eustis",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/east-earl",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/arkansas/little-rock-afb",
+      "destination": "/states/arkansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/dallas",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/franklin",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/attalla",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/burlington",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/oregon/newport",
+      "destination": "/states/oregon",
+      "permanent": true
+    },
+    {
+      "source": "/states/oklahoma/el-reno",
+      "destination": "/states/oklahoma",
+      "permanent": true
+    },
+    {
+      "source": "/states/louisiana/ball",
+      "destination": "/states/louisiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/chippewa-falls",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/geneva",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/berwick",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/crivitz",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/mansfield",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/bristol",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/hermitage",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/quinton",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/arlington",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/oregon/springfield",
+      "destination": "/states/oregon",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/kaukauna",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/corinth",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/providence-forge",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/dublin",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/albany",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-dakota/park-river",
+      "destination": "/states/north-dakota",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/meadville",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-dakota/winner",
+      "destination": "/states/south-dakota",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/clarksville",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/arkansas/russellville",
+      "destination": "/states/arkansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/prince-george",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/purcellville",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/jay",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/cresco",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-dakota/dell-rapids",
+      "destination": "/states/south-dakota",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/conshohocken",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/new-freedom",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/oregon/dallas",
+      "destination": "/states/oregon",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/hyannis",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/arkansas/magnolia",
+      "destination": "/states/arkansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-dakota/belle-fourche",
+      "destination": "/states/south-dakota",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/wilkes-barre-township",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/yucaipa",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/montana/cut-bank",
+      "destination": "/states/montana",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/greenville",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-dakota/arlington",
+      "destination": "/states/south-dakota",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/florence",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/connecticut/plantsville",
+      "destination": "/states/connecticut",
+      "permanent": true
+    },
+    {
+      "source": "/states/connecticut/riverside",
+      "destination": "/states/connecticut",
+      "permanent": true
+    },
+    {
+      "source": "/states/oklahoma/tahlequah",
+      "destination": "/states/oklahoma",
+      "permanent": true
+    },
+    {
+      "source": "/states/connecticut/terryville",
+      "destination": "/states/connecticut",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/ferris",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/clinton",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/north-hollywood",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/lake-ariel",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/marietta",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/winfield",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/ridgeland",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/marion",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/oregon/sweet-home",
+      "destination": "/states/oregon",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/mt-pleasant",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/troy",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/troy",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/utah/price",
+      "destination": "/states/utah",
+      "permanent": true
+    },
+    {
+      "source": "/states/connecticut/niantic",
+      "destination": "/states/connecticut",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-dakota/stanley",
+      "destination": "/states/north-dakota",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/luxemburg",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/montana/glasgow",
+      "destination": "/states/montana",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/syosset",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/alameda",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/mt-sterling",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/lovingston",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/ashburn",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/oklahoma/duncan",
+      "destination": "/states/oklahoma",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/bluffton",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/fort-sam-houston",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-hampshire/newport",
+      "destination": "/states/new-hampshire",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/sterling",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/kiel",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/rhode-island/cumberland",
+      "destination": "/states/rhode-island",
+      "permanent": true
+    },
+    {
+      "source": "/states/montana/dillon",
+      "destination": "/states/montana",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/northridge",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-dakota/gregory",
+      "destination": "/states/south-dakota",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/wilton",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/hanover",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/denton",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/sheridan",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/connecticut/north-windham",
+      "destination": "/states/connecticut",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-mexico/el-prado",
+      "destination": "/states/new-mexico",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/albany",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/beaumont",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/delaware/selbyville",
+      "destination": "/states/delaware",
+      "permanent": true
+    },
+    {
+      "source": "/states/rhode-island/newport",
+      "destination": "/states/rhode-island",
+      "permanent": true
+    },
+    {
+      "source": "/states/oklahoma/enid",
+      "destination": "/states/oklahoma",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/avenel",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/alamo",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/greenfield",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/iron-river",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/cave-city",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/bristol",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/bloomington",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/hayes",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/peyton",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/elfrida",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/coolidge",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/suttons-bay",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/bacliff",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/mt-carmel",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/laveen-village",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/lincoln",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/lamont",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/gardiner",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/alvarado",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/nebraska/lexington",
+      "destination": "/states/nebraska",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/washington",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/stillwater",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/duncansville",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/lafayette",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/montana/sidney",
+      "destination": "/states/montana",
+      "permanent": true
+    },
+    {
+      "source": "/states/louisiana/plaquemine",
+      "destination": "/states/louisiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/channelview",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/barnegat",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/delaware/dover",
+      "destination": "/states/delaware",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/kendallville",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/south-dennis",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/antioch",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/camden",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/beloit",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/morton",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/griffin",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/decatur",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/delaware/middletown",
+      "destination": "/states/delaware",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/hartford",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/crawfordsville",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/frankfort",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/hastings",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/carlisle",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/bay-minette",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/livingston",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/pisgah-forest",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/southampton",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/berlin",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/nebraska/elkhorn",
+      "destination": "/states/nebraska",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/pennsauken-township",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/sylmar",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/princeton",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/newton",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/hebron",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/murray",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/westminster",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/engelhard",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/fairfield",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/old-town",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/mays-landing",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/milaca",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/center",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/dublin",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-mexico/gallup",
+      "destination": "/states/new-mexico",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/greenfield",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/san-pedro",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/trevose",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/arkansas/osceola",
+      "destination": "/states/arkansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/southampton",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/pacheco",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/zumbrota",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/hillsboro",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/kenosha",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/elizabethville",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/roseland",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/aston-township",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/winnetka",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/clinton",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/playa-del-rey",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/nebraska/wayne",
+      "destination": "/states/nebraska",
+      "permanent": true
+    },
+    {
+      "source": "/states/vermont/white-river-junction",
+      "destination": "/states/vermont",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/apple-valley",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/erwin",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/middletown",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/vermont/barton",
+      "destination": "/states/vermont",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/maple-plain",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/greenville",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/richmond",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/janesville",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/athens",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/north-chesterfield",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/madisonville",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/mt-pleasant",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/decatur",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/kodak",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/grayson",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/fresh-meadows",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/marshall",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/princeton",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/blue-springs",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/lititz",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/medford",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/phillipsburg",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/union-city",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/west-hills",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/moore-haven",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/temple",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/dudley",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/sunbury",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/idaho/rexburg",
+      "destination": "/states/idaho",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/south-ozone-park",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/kill-devil-hills",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/oxford",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/charlton",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/st-joseph",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/greenville",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/diboll",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/brunswick",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/mt-airy",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/folsom",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/arkansas/paris",
+      "destination": "/states/arkansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/pompton-plains",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/north-dartmouth",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/grovetown",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/maricopa",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/tannersville",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/mechanicsville",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/canoga-park",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/spencer",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/oxford",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/edgewood",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/howard-beach",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/laurel",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/cortland",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/henderson",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/greenwood",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/stockbridge",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/clinton",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/laughlin-afb",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/oxford",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/hico",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/north-oxford",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/shrewsbury",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/jeffersonville",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/everett",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/valencia",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/somers-point",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/dover",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/parker",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/montrose",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/louisiana/denham-springs",
+      "destination": "/states/louisiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/marion",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/henderson",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/littleton",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-carolina/mauldin",
+      "destination": "/states/south-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/aubrey",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/portland",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/hawaii/pearl-city",
+      "destination": "/states/hawaii",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/east-chicago",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/new-hampton",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/madison",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/plymouth",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/lebanon",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/frankfort",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/antioch",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/st-clair",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/logan",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/tarzana",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/glasgow",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/avon",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/culver",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/durango",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/midlothian",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/flowood",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/hughesville",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/north-hills",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/homer",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/new-richmond",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/kingsford",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/caldwell",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/pleasanton",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/cameron",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/florence",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/mitchell",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/locust",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/mt-vernon",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/woodland-park",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/mineral-wells",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/kingwood",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/belton",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/st-pauls",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/delta",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/zebulon",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/danville",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/louisville",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/studio-city",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/creston",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-carolina/st-matthews",
+      "destination": "/states/south-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/garnerville",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/kansas/louisburg",
+      "destination": "/states/kansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/liberty",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/aledo",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/lincoln",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/vermont/colchester",
+      "destination": "/states/vermont",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/douglas",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/cambridge",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/marietta",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/hampstead",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/angier",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/arden",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/florence",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/virginia/exmore",
+      "destination": "/states/virginia",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/harlan",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/alvin",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/reseda",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/altamont",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/ridgewood",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/mt-vernon",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/oklahoma/stilwell",
+      "destination": "/states/oklahoma",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/hixson",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/kenmore",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/boonville",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/commerce",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/shelbyville",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/rochester",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/walton",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/owensville",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/florida",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/bethany",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/new-bloomfield",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/clinton",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/encino",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/edgewater",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/panorama-city",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/quincy",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/fairport",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/travis-afb",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/luverne",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-dakota/hankinson",
+      "destination": "/states/north-dakota",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/west-milford",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/loves-park",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/marshfield",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/pacoima",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/dundee",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/verona",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/reeds-spring",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/brownsburg",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/arcadia",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/st-johns",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/auburn",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/granby",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-hampshire/west-lebanon",
+      "destination": "/states/new-hampshire",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/green-lake",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/wellington",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/corinth",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/manahawkin",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/perry",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/new-ringgold",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/venice",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/maryville",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/greenville",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/bedford",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/cooperstown",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/orangeburg",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/connecticut/pawcatuck",
+      "destination": "/states/connecticut",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/halifax",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/lone-tree",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/belding",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/fairfield",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/slinger",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/hamilton",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/sarver",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/van-nuys",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/algonac",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/wilmington",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/rogers",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/cypress",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/mohegan-lake",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/lincoln",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/louisiana/deridder",
+      "destination": "/states/louisiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/herrin",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/mt-vernon",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/brandon",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-mexico/hobbs",
+      "destination": "/states/new-mexico",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/fort-meade",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/mt-pleasant",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/frankfort",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/phoenix",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/monticello",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/farmingdale",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/beverly-hills",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/georgetown",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/warwick",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/pine-grove",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/nevada",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/hamilton",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/vermont/montpelier",
+      "destination": "/states/vermont",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/susanville",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/independence",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/hallandale-beach",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/air-force-academy",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/richmond",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/owings",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/fort-kent",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/franklin",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/gouverneur",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/san-ramon",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/union",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/warsaw",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/delaware/greenwood",
+      "destination": "/states/delaware",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/new-richmond",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/ashland",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/waite-park",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/machias",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/monticello",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/mt-gilead",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/washington/issaquah",
+      "destination": "/states/washington",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/coram",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/capitola",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/candler",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/cleveland",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/sun-valley",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/ontario",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/bucyrus",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/patrick-space-force-base",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/liberty",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/fulton",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/waynesboro",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/monroe",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/maryland/dundalk",
+      "destination": "/states/maryland",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/mio",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/huntington-park",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/st-peter",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/beaver-dams",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/louisiana/alexandria",
+      "destination": "/states/louisiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/kewaskum",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/oregon/lake-oswego",
+      "destination": "/states/oregon",
+      "permanent": true
+    },
+    {
+      "source": "/states/mississippi/fulton",
+      "destination": "/states/mississippi",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-dakota/burke",
+      "destination": "/states/south-dakota",
+      "permanent": true
+    },
+    {
+      "source": "/states/vermont/st-johnsbury",
+      "destination": "/states/vermont",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/winfield",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/deer-park",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/newark",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/lake-city",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/ghent",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/mansfield",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/oneida",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/cazenovia",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/danville",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/marengo",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/wisconsin/deforest",
+      "destination": "/states/wisconsin",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/parsons",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/mechanic-falls",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/casa-grande",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/springfield",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/grandview",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/cranberry-twp",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/norwich",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/chatsworth",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/georgia/mcrae-helena",
+      "destination": "/states/georgia",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/st-paul",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/baxter",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/fort-recovery",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/campbell",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/lambertville",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/westfield",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/brooklyn",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/kincheloe",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/arkansas/pea-ridge",
+      "destination": "/states/arkansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/patterson",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/temperance",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/kittery",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/bloomington",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/centerville",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/portsmouth",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/west-sunbury",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/ferndale",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/farmingdale",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/midland",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/morrison",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/menifee",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/st-clair",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/livingston",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/st-charles",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/brentwood",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/dunlap",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/bethel",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/jensen-beach",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/estes-park",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/bryan",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/warsaw",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/peru",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/corry",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/ironwood",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/bainbridge",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/south-carolina/gray-court",
+      "destination": "/states/south-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/lebanon",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/utah/logan",
+      "destination": "/states/utah",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/kingston",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/washington/eatonville",
+      "destination": "/states/washington",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/quincy",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/lewisburg",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/vincennes",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/victorville",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/dickson",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/inwood",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/harrison-twp",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/somerset",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/cicero",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/clyde",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/bolivar",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/us",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/blue-bell",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/st-thomas",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/louisiana/many",
+      "destination": "/states/louisiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/hawthorne",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/sherburne",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/iselin",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/island-park",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/wabash",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/willow-springs",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/massachusetts/kingston",
+      "destination": "/states/massachusetts",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/rural-hall",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/pennsylvania/mohnton",
+      "destination": "/states/pennsylvania",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/naples",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/connecticut/oakville",
+      "destination": "/states/connecticut",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/washington",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/jackson",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/taylor",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/louisiana/deville",
+      "destination": "/states/louisiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/davis-junction",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/anna",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/wynantskill",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/wharton",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/east-greenbush",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/carrollton",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/missouri/greenfield",
+      "destination": "/states/missouri",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/masonic-widows-and-orphans-home",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/glen-st-mary",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/mt-pleasant",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/tennessee/hermitage",
+      "destination": "/states/tennessee",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/utica",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/highland",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/bartlett",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/slocomb",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/denison",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/mt-dora",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/oklahoma/tishomingo",
+      "destination": "/states/oklahoma",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/asbury-park",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/peoria-heights",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/troy",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/belmont",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/independence",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/st-michael",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/evans-mills",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/sidney",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/michigan/tecumseh",
+      "destination": "/states/michigan",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/pulaski",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/pine-knot",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/providence",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/maine/norway",
+      "destination": "/states/maine",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/mt-kisco",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/newburgh",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/danville",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/cocoa-beach",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/north-carolina/warrenton",
+      "destination": "/states/north-carolina",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/anamosa",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/lawrence",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/morrisville",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/corning",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/bedford-hills",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/auburn",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/kentucky/south-williamson",
+      "destination": "/states/kentucky",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/lewiston",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/carthage",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/longview",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/st-clairsville",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/clermont",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/blackwood",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/colorado/ridgway",
+      "destination": "/states/colorado",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-york/webster",
+      "destination": "/states/new-york",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/san-luis-obispo",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
+      "source": "/states/louisiana/independence",
+      "destination": "/states/louisiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/ohio/brunswick",
+      "destination": "/states/ohio",
+      "permanent": true
+    },
+    {
+      "source": "/states/indiana/union-city",
+      "destination": "/states/indiana",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/west-new-york",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/vermont/west-dover",
+      "destination": "/states/vermont",
+      "permanent": true
+    },
+    {
+      "source": "/states/minnesota/west-st-paul",
+      "destination": "/states/minnesota",
+      "permanent": true
+    },
+    {
+      "source": "/states/texas/waco",
+      "destination": "/states/texas",
+      "permanent": true
+    },
+    {
+      "source": "/states/arizona/thatcher",
+      "destination": "/states/arizona",
+      "permanent": true
+    },
+    {
+      "source": "/states/kansas/winfield",
+      "destination": "/states/kansas",
+      "permanent": true
+    },
+    {
+      "source": "/states/alabama/huntsville",
+      "destination": "/states/alabama",
+      "permanent": true
+    },
+    {
+      "source": "/states/new-jersey/jackson-township",
+      "destination": "/states/new-jersey",
+      "permanent": true
+    },
+    {
+      "source": "/states/florida/lake-city",
+      "destination": "/states/florida",
+      "permanent": true
+    },
+    {
+      "source": "/states/iowa/melcher-dallas",
+      "destination": "/states/iowa",
+      "permanent": true
+    },
+    {
+      "source": "/states/illinois/plano",
+      "destination": "/states/illinois",
+      "permanent": true
+    },
+    {
+      "source": "/states/california/corning",
+      "destination": "/states/california",
+      "permanent": true
+    },
+    {
       "source": "/recycling-guide",
       "destination": "/blog",
       "permanent": true

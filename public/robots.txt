@@ -7,4 +7,4 @@ Disallow: /search?*
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://www.recycleoldtech.com/sitemap.xml 
+Sitemap: https://www.recycleoldtech.com/sitemap-index.xml

@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { isCanonicalUrl } from './src/lib/url-utils.ts';
 
 // Production domain
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
@@ -13,13 +14,21 @@ const SITE_URL =
 // https://astro.build/config
 export default defineConfig({
   site: SITE_URL,
+  // Match Vercel cleanUrls (no trailing slashes) and isCanonicalUrl() rules
+  trailingSlash: 'never',
   integrations: [
     sitemap({
       changefreq: 'weekly',
       priority: 0.7,
       lastmod: new Date(),
       // Optionally customize URL generation
+      filter(page) {
+        return isCanonicalUrl(page);
+      },
       serialize(item) {
+        if (!isCanonicalUrl(item.url)) {
+          return undefined;
+        }
         // Customize priority based on URL patterns
         if (item.url === SITE_URL + '/') {
           item.priority = 1.0;

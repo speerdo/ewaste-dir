@@ -58,11 +58,24 @@
       ]
     },
     {
+      "source": "/api/news",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=21600, stale-while-revalidate=43200, max-age=3600"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, s-maxage=21600, stale-while-revalidate=43200"
+        }
+      ]
+    },
+    {
       "source": "/(.*\\.html)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, s-maxage=3600, stale-while-revalidate=86400"
+          "value": "public, s-maxage=86400, stale-while-revalidate=604800, max-age=3600"
         }
       ]
     },
@@ -71,7 +84,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, s-maxage=3600, stale-while-revalidate=86400"
+          "value": "public, s-maxage=86400, stale-while-revalidate=604800, max-age=3600"
         }
       ]
     },
@@ -80,7 +93,16 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, s-maxage=3600, stale-while-revalidate=86400"
+          "value": "public, s-maxage=86400, stale-while-revalidate=604800, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=86400, stale-while-revalidate=604800, max-age=3600"
         }
       ]
     }
@@ -94,6 +116,11 @@
     }
   },
   "redirects": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap-index.xml",
+      "permanent": true
+    },
     {
       "source": "/states/ohio/bridgeport",
       "destination": "/states/ohio",

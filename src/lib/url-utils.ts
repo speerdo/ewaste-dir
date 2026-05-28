@@ -94,7 +94,7 @@ export function getSharingUrl(requestUrl: URL | string): string {
  */
 export function isCanonicalUrl(url: string): boolean {
   try {
-    const urlObj = new URL(url);
+    const urlObj = new URL(url, PRODUCTION_URL);
 
     // Check for non-canonical patterns
     if (urlObj.search) return false; // Has query parameters

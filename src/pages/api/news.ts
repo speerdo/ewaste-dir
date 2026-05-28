@@ -1,5 +1,15 @@
 import type { APIRoute } from 'astro';
 import { XMLParser } from 'fast-xml-parser';
+import { NEWS_API_CACHE_CONTROL } from '../../lib/cache-control';
+
+const jsonHeaders: Record<string, string> = {
+  'Content-Type': 'application/json',
+  'Cache-Control': NEWS_API_CACHE_CONTROL,
+  'CDN-Cache-Control': NEWS_API_CACHE_CONTROL,
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
 
 /**
  * API endpoint to fetch local recycling news via RSS feeds
@@ -30,10 +40,11 @@ export const GET: APIRoute = async ({ url, request }) => {
   if (!city || !state) {
     return new Response(JSON.stringify({ error: 'City and state are required' }), {
       status: 400,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+        'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*',
+      },
     });
   }
   
@@ -133,20 +144,18 @@ export const GET: APIRoute = async ({ url, request }) => {
       .map(({ _sortDate, ...article }) => article); // Remove internal sort field
     
     // Return articles (limit to 5 most recent)
-    return new Response(JSON.stringify({
-      articles: sortedArticles.slice(0, 5),
-      city,
-      state
-    }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
+    return new Response(
+      JSON.stringify({
+        articles: sortedArticles.slice(0, 5),
+        city,
+        state,
+        fetchedAt: new Date().toISOString(),
+      }),
+      {
+        status: 200,
+        headers: jsonHeaders,
       }
-    });
+    );
     
   } catch (error) {
     console.error('News API Error:', error);
@@ -157,10 +166,11 @@ export const GET: APIRoute = async ({ url, request }) => {
       articles: []
     }), {
       status: 500,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+        'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*',
+      },
     });
   }
 };

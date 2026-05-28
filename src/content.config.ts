@@ -8,7 +8,12 @@ const blog = defineCollection({
       title: z.string(),
       description: z.string(),
       pubDate: z.date(),
-      image: image(),
+      // Public (/images/...) and remote URLs stay as strings; asset paths use image()
+      image: z.union([
+        z.string().startsWith('/'),
+        z.string().url(),
+        image(),
+      ]),
       featured: z.boolean().optional(),
       tags: z.array(z.string()).optional(),
       author: z.string().optional(),

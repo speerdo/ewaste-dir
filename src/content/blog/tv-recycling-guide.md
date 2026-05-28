@@ -3,7 +3,7 @@ title: "How to Recycle Your Old TV in 2026: A Practical Guide for Every Type of 
 pubDate: 2026-05-18T12:00:00Z
 description: "This guide covers every major TV type, every realistic disposal path, and what each one actually costs in 2026."
 featured: true
-image: "../../assets/images/broken-tv.png"
+image: "/images/tv-busted.jpg"
 author: "Editorial Team"
 ---
 
@@ -85,15 +85,15 @@ Even in states without specific TV disposal laws, electronics are generally proh
 
 ## Retailer Comparison Table
 
-| Option | Accepts CRT | Accepts Flat Screen | Fee | Size Limit |
-|--------|-------------|--------------------|----|------------|
-| Best Buy (most states) | Up to 32" | Up to 50" free | $29.99 for most CRTs | 50" flat screen free |
-| Best Buy (CA, CT, HI) | Yes | Yes | Free | 50" |
-| Best Buy (PA, WI, MI) | Up to 50" | Up to 50" | $29.99 + $30 gift card | 50" |
-| Staples | No | Up to 32" | Free | 32" |
-| Local e-waste event | Usually yes | Yes | Usually free | Usually no limit |
-| Certified e-waste recycler | Yes | Yes | $0-$35 | Varies |
-| Goodwill | No | Working only | Free (donation) | No limit |
+| Option                     | Accepts CRT | Accepts Flat Screen | Fee                    | Size Limit           |
+| -------------------------- | ----------- | ------------------- | ---------------------- | -------------------- |
+| Best Buy (most states)     | Up to 32"   | Up to 50" free      | $29.99 for most CRTs   | 50" flat screen free |
+| Best Buy (CA, CT, HI)      | Yes         | Yes                 | Free                   | 50"                  |
+| Best Buy (PA, WI, MI)      | Up to 50"   | Up to 50"           | $29.99 + $30 gift card | 50"                  |
+| Staples                    | No          | Up to 32"           | Free                   | 32"                  |
+| Local e-waste event        | Usually yes | Yes                 | Usually free           | Usually no limit     |
+| Certified e-waste recycler | Yes         | Yes                 | $0-$35                 | Varies               |
+| Goodwill                   | No          | Working only        | Free (donation)        | No limit             |
 
 ---
 

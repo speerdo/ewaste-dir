@@ -23,13 +23,25 @@ const shareUrl = import.meta.env.PROD ? new URL(currentUrl.pathname, PRODUCTION_
   <article>
     <!-- Hero Section -->
     <div class="relative h-[600px] overflow-hidden mt-20">
-      <Image
-        src={image}
-        alt={title}
-        width={1200}
-        height={600}
-        class="w-full h-full object-cover"
-      />
+      {typeof image === 'string' ? (
+        <img
+          src={image}
+          alt={title}
+          width={1200}
+          height={600}
+          class="w-full h-full object-cover"
+          loading="eager"
+          fetchpriority="high"
+        />
+      ) : (
+        <Image
+          src={image}
+          alt={title}
+          width={1200}
+          height={600}
+          class="w-full h-full object-cover"
+        />
+      )}
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
       <div class="absolute top-20 left-0 right-0 py-8">
         <div class="container mx-auto px-4">

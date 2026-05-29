@@ -1,7 +1,4 @@
 ---
-import { getAllCityStatePairs, type CityStatePair } from '../lib/cityData';
-import { PRODUCTION_URL } from '../lib/url-utils';
-
 interface Props {
   placeholder?: string;
   className?: string;
@@ -9,9 +6,6 @@ interface Props {
 }
 
 const { placeholder = "Enter a city...", className = "", variant = "hero" } = Astro.props;
-
-// Get all city-state pairs at build time
-const cityStatePairs = await getAllCityStatePairs();
 
 const id = variant === 'hero' ? 'hero' : 'nav';
 ---
@@ -59,371 +53,126 @@ const id = variant === 'hero' ? 'hero' : 'nav';
   </div>
 </div>
 
-<script define:vars={{ cityStatePairs }} type="module">
-  // Simple test script
-  console.log('Script loaded!');
+<script>
+  // All search is handled server-side via /api/search/suggestions.
+  // No city data is inlined into the page — queries go to the API on demand.
 
-  // Set up window global
-  if (typeof window !== 'undefined') {
-    window.__CITY_STATE_PAIRS__ = cityStatePairs;
-  }
-  
-  // Set up once DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded!');
-    
-    // Find all search components
     document.querySelectorAll('[data-search-component]').forEach(component => {
       const id = component.getAttribute('data-search-component');
-      console.log(`Found search component with ID: ${id}`);
-      
-      // Get elements for this search component
+
       const searchInput = document.getElementById(`search-input-${id}`);
       const searchButton = document.getElementById(`search-button-${id}`);
       const searchResults = document.getElementById(`search-results-${id}`);
       const resultsContent = document.getElementById(`results-content-${id}`);
       const searchForm = document.getElementById(`search-form-${id}`);
-      
-      // Exit if required elements not found
-      if (!searchInput || !searchResults || !resultsContent) {
-        console.error(`Missing required elements for search component ${id}`);
-        return;
-      }
-      
-      // Store global vars
+
+      if (!searchInput || !searchResults || !resultsContent) return;
+
       let searchTimeout;
-      let cityStatePairs = []; // Will be populated from the server
-      
-      // Helper functions for UI feedback
-      function showLoading(isLoading) {
-        const searchIcon = document.getElementById(`search-icon-${id}`);
-        const spinner = document.getElementById(`spinner-${id}`);
-        const searchButton = document.getElementById(`search-button-${id}`);
-        
-        if (isLoading) {
-          // Show loading state
-          if (searchIcon && spinner) {
-            searchIcon.classList.add('hidden');
-            spinner.classList.remove('hidden');
-          }
-          if (searchButton) {
-            searchButton.setAttribute('disabled', 'true');
-          }
-        } else {
-          // Remove loading state
-          if (searchIcon && spinner) {
-            searchIcon.classList.remove('hidden');
-            spinner.classList.add('hidden');
-          }
-          if (searchButton) {
-            searchButton.removeAttribute('disabled');
-          }
-        }
+
+      function showLoading(on) {
+        const icon = document.getElementById(`search-icon-${id}`);
+        const spin = document.getElementById(`spinner-${id}`);
+        const btn = document.getElementById(`search-button-${id}`);
+        icon?.classList.toggle('hidden', on);
+        spin?.classList.toggle('hidden', !on);
+        on ? btn?.setAttribute('disabled', 'true') : btn?.removeAttribute('disabled');
       }
-      
-      function showError(message) {
-        const errorEl = document.getElementById(`search-error-${id}`);
-        if (errorEl) {
-          errorEl.textContent = message;
-          errorEl.classList.remove('hidden');
-        }
+
+      function showError(msg) {
+        const el = document.getElementById(`search-error-${id}`);
+        if (el) { el.textContent = msg; el.classList.remove('hidden'); }
       }
-      
+
       function hideError() {
-        const errorEl = document.getElementById(`search-error-${id}`);
-        if (errorEl) {
-          errorEl.classList.add('hidden');
-        }
+        document.getElementById(`search-error-${id}`)?.classList.add('hidden');
       }
-      
-      // Use pre-loaded city data for static site
-      cityStatePairs = window.__CITY_STATE_PAIRS__ || [];
-      console.log(`Loaded ${cityStatePairs.length} cities for search`);
-  
-      // Search for matching cities/states
-      function searchLocations(query) {
-        console.log(`Searching for: "${query}"`);
-        query = query.toLowerCase().trim();
-        
-        if (!query) return [];
-        
-        // Check if input is numeric (likely a zip code)
-        if (/^\d+$/.test(query)) {
-          return [{
-            text: `Please enter a city name, not a zip code`,
-            type: 'error'
-          }];
-        }
-        
-        // Try to find exact and partial matches
-        const exactMatches = [];
-        const partialMatches = [];
-        
-        // Check if cityStatePairs is available and not empty
-        if (!cityStatePairs || cityStatePairs.length === 0) {
-          showError("Search data is still loading. Please try again in a moment.");
+
+      function renderSuggestions(suggestions) {
+        if (!suggestions.length) { searchResults.classList.add('hidden'); return; }
+        resultsContent.innerHTML = suggestions.map(s =>
+          `<button type="button"
+            class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group suggestion-item"
+            data-url="${s.url}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            </svg>
+            <span>${s.city}, ${s.state}</span>
+          </button>`
+        ).join('');
+        resultsContent.querySelectorAll('.suggestion-item').forEach(btn => {
+          btn.addEventListener('click', e => {
+            e.preventDefault();
+            const url = btn.getAttribute('data-url');
+            if (url) window.location.href = url;
+          });
+        });
+        searchResults.classList.remove('hidden');
+      }
+
+      async function fetchSuggestions(query) {
+        try {
+          const res = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
+          if (!res.ok) throw new Error('API error');
+          const data = await res.json();
+          // API returns { suggestions: [...] }
+          return Array.isArray(data.suggestions) ? data.suggestions : [];
+        } catch {
           return [];
         }
-        
-        cityStatePairs.forEach(pair => {
-          const cityLower = pair.city.toLowerCase();
-          const stateLower = pair.state.toLowerCase();
-          
-          // Check for exact match
-          if (cityLower === query || stateLower === query) {
-            exactMatches.push({...pair, type: 'city'});
-          }
-          // Check for partial match
-          else if (cityLower.includes(query) || stateLower.includes(query)) {
-            partialMatches.push({...pair, type: 'city'});
-          }
-        });
-        
-        // Combine and limit results
-        return [...exactMatches, ...partialMatches].slice(0, 8);
-      }
-      
-      // Display search suggestions
-      function showSuggestions(suggestions) {
-        console.log(`Found ${suggestions.length} suggestions`);
-        
-        if (suggestions.length === 0) {
-          searchResults?.classList.add('hidden');
-          return;
-        }
-        
-        // Generate suggestion HTML
-        if (resultsContent) {
-          resultsContent.innerHTML = suggestions
-            .map(suggestion => {
-              if (suggestion.type === 'error') {
-                return `
-                  <div class="px-4 py-3 text-red-500">
-                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    ${suggestion.text}
-                  </div>
-                `;
-              }
-              
-              return `
-                <button
-                  type="button"
-                  class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 group suggestion-item"
-                  data-type="city" 
-                  data-url="${suggestion.url}"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  </svg>
-                  <span>${suggestion.city}, ${suggestion.state}</span>
-                </button>
-              `;
-            })
-            .join('');
-            
-          // Add click handlers for suggestions
-          resultsContent.querySelectorAll('.suggestion-item').forEach(button => {
-            button.addEventListener('click', (e) => {
-              e.preventDefault();
-              const type = button.getAttribute('data-type');
-              
-              if (type === 'city') {
-                const url = button.getAttribute('data-url');
-                if (url) window.location.href = url;
-              }
-            });
-          });
-        }
-        
-        // Show results dropdown
-        searchResults?.classList.remove('hidden');
-      }
-      
-      // Handle a zip code search - keeping code for now but disabling functionality
-      async function handleZipSearch(zipCode) {
-        console.log(`Zip code search disabled`);
-        showError("Please enter a city name, not a zip code");
-        showLoading(false);
-        
-        if (resultsContent) {
-          resultsContent.innerHTML = `
-            <div class="px-4 py-3 text-red-500">
-              <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Please enter a city name, not a zip code
-            </div>
-          `;
-        }
-        searchResults?.classList.remove('hidden');
-      }
-      
-      // Calculate distance between two coordinate points
-      function calculateDistance(point1, point2) {
-        const R = 6371; // Earth's radius in kilometers
-        const dLat = toRad(point2.lat - point1.lat);
-        const dLon = toRad(point2.lng - point1.lng);
-        const lat1 = toRad(point1.lat);
-        const lat2 = toRad(point2.lat);
-
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
       }
 
-      function toRad(value) {
-        return (value * Math.PI) / 180;
-      }
-      
-      // Handle main search submission
-      function handleSearch() {
-        console.log('Search button clicked');
+      async function handleSearch() {
         const query = searchInput.value.trim();
         hideError();
-        showLoading(true);
-        
         if (query.length < 2) {
-          if (resultsContent) {
-            resultsContent.innerHTML = `<div class="px-4 py-3 text-gray-600">Please enter a city name.</div>`;
-          }
-          searchResults?.classList.remove('hidden');
-          showError("Please enter at least 2 characters");
-          showLoading(false);
+          resultsContent.innerHTML = `<div class="px-4 py-3 text-gray-600">Please enter a city name.</div>`;
+          searchResults.classList.remove('hidden');
           return;
         }
-        
-        // Check for numeric input that might be a zip code
-        const isAllDigits = /^\d+$/.test(query);
-        if (isAllDigits) {
-          if (resultsContent) {
-            resultsContent.innerHTML = `
-              <div class="px-4 py-3 text-red-500">
-                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Please enter a city name, not a zip code.
-              </div>
-            `;
-          }
-          searchResults?.classList.remove('hidden');
-          showError("Please enter a city name, not a zip code");
-          showLoading(false);
+        if (/^\d+$/.test(query)) {
+          showError('Please enter a city name, not a zip code');
           return;
         }
-        
-        // Try to find city match
-        const exactMatch = cityStatePairs.find(pair => 
-          pair.city.toLowerCase() === query.toLowerCase() ||
-          pair.state.toLowerCase() === query.toLowerCase() ||
-          `${pair.city.toLowerCase()}, ${pair.state.toLowerCase()}` === query.toLowerCase()
-        );
-        
-        if (exactMatch) {
-          window.location.href = exactMatch.url;
-          return;
-        }
-        
-        // Show suggestions if any exist
-        const suggestions = searchLocations(query);
-        if (suggestions.length > 0) {
-          showSuggestions(suggestions);
-          return;
-        }
-        
-        // No matches found
-        if (resultsContent) {
-          resultsContent.innerHTML = `
-            <div class="px-4 py-3 text-red-500">
-              <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              No recycling centers found for "${query}". Please try another city.
-            </div>
-          `;
-        }
-        searchResults?.classList.remove('hidden');
-        showError(`No recycling centers found for "${query}"`);
+        showLoading(true);
+        const suggestions = await fetchSuggestions(query);
         showLoading(false);
+        if (!suggestions.length) {
+          resultsContent.innerHTML = `<div class="px-4 py-3 text-red-500">No recycling centers found for "${query}". Please try another city.</div>`;
+          searchResults.classList.remove('hidden');
+          return;
+        }
+        const exact = suggestions.find(s =>
+          s.city?.toLowerCase() === query.toLowerCase() ||
+          `${s.city?.toLowerCase()}, ${s.state?.toLowerCase()}` === query.toLowerCase()
+        );
+        if (exact?.url) { window.location.href = exact.url; return; }
+        renderSuggestions(suggestions);
       }
-      
-      // Set up event listeners
-      
-      // Input change - show suggestions as you type
-      if (searchInput) {
-        searchInput.addEventListener('input', () => {
-          console.log(`Input changed: ${searchInput.value}`);
-          if (searchTimeout) {
-            clearTimeout(searchTimeout);
-          }
-          
-          const query = searchInput.value.trim();
-          if (query.length < 2) {
-            searchResults?.classList.add('hidden');
-            return;
-          }
-          
-          searchTimeout = setTimeout(() => {
-            const suggestions = searchLocations(query);
-            showSuggestions(suggestions);
-          }, 150);
-        });
-        
-        // Handle Enter key press
-        searchInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSearch();
-          } else if (e.key === 'Escape') {
-            searchResults?.classList.add('hidden');
-          }
-        });
-      }
-      
-      // Search button click
-      if (searchButton) {
-        searchButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          handleSearch();
-        });
-      }
-      
-      // Form submit
-      if (searchForm) {
-        searchForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          handleSearch();
-          return false;
-        });
-      }
-      
-      // Close suggestions when clicking outside
-      document.addEventListener('click', (e) => {
-        const target = e.target;
-        if (searchInput && searchResults && !searchInput.contains(target) && !searchResults.contains(target)) {
+
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        const query = searchInput.value.trim();
+        if (query.length < 2) { searchResults.classList.add('hidden'); return; }
+        searchTimeout = setTimeout(async () => {
+          renderSuggestions(await fetchSuggestions(query));
+        }, 200);
+      });
+
+      searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); handleSearch(); }
+        else if (e.key === 'Escape') { searchResults.classList.add('hidden'); }
+      });
+
+      searchButton?.addEventListener('click', e => { e.preventDefault(); handleSearch(); });
+      searchForm?.addEventListener('submit', e => { e.preventDefault(); handleSearch(); });
+
+      document.addEventListener('click', e => {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
           searchResults.classList.add('hidden');
         }
       });
-      
-      // Instead of using imported data, re-use the initial city state pairs that are already defined
-      // in the component.
-      try {
-        if (typeof window !== 'undefined' && window.__CITY_STATE_PAIRS__) {
-          cityStatePairs = window.__CITY_STATE_PAIRS__;
-          console.log(`Using ${cityStatePairs.length} pre-loaded city pairs`);
-        }
-      } catch (e) {
-        console.error('Error accessing city data:', e);
-      }
     });
   });
-</script>
-
-<!-- Add global data for client-side access -->
-<script define:vars={{ cityStatePairs }} type="module">
-  // Make city data available to client-side scripts
-  window.__CITY_STATE_PAIRS__ = cityStatePairs;
 </script>

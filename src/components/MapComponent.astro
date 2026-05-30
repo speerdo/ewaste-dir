@@ -46,8 +46,8 @@ const { markers, initialZoom = 12 } = Astro.props;
   </div>
 </div>
 
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<!-- Leaflet CSS — self-hosted, served from same origin with long-term caching -->
+<link rel="stylesheet" href="/vendor/leaflet-1.9.4.css" />
 
 <style>
   /* Custom styles for Leaflet popups to match previous design */
@@ -140,9 +140,7 @@ const { markers, initialZoom = 12 } = Astro.props;
       }
 
       const script = document.createElement('script');
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-      script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
-      script.crossOrigin = '';
+      script.src = '/vendor/leaflet-1.9.4.js';
       script.onload = () => resolve(window.L);
       script.onerror = () => reject(new Error('Failed to load Leaflet'));
       document.head.appendChild(script);

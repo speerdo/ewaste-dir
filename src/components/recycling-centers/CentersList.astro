@@ -272,7 +272,7 @@ const sortedCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
     if (!city || !state) return;
 
     const supabaseUrl = (import.meta as any).env?.PUBLIC_SUPABASE_URL;
-    const supabaseKey = (import.meta as any).env?.PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseKey = (import.meta as any).env?.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     if (!supabaseUrl || !supabaseKey) return;
 
     try {

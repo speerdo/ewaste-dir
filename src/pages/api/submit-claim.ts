@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const supabase = createClient(
     import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.SUPABASE_SERVICE_ROLE_KEY // Use service role — bypasses RLS
+    import.meta.env.SUPABASE_SECRET_KEY // Use secret key — bypasses RLS
   );
 
   const claimRow = {

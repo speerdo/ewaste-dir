@@ -136,7 +136,7 @@ import Layout from '../../layouts/Layout.astro';
 <script>
   // @ts-nocheck — this was previously a define:vars script (vanilla JS, not TS-checked)
   const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL;
-  const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   const STATUS_OPTIONS = ['pending', 'contacted', 'active', 'cancelled', 'rejected'];
   const STATUS_COLORS = {

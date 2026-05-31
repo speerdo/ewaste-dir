@@ -46,8 +46,8 @@ const { markers, initialZoom = 12 } = Astro.props;
   </div>
 </div>
 
-<!-- Leaflet CSS — self-hosted, served from same origin with long-term caching -->
-<link rel="stylesheet" href="/vendor/leaflet-1.9.4.css" />
+<!-- Leaflet CSS is injected lazily when the map becomes visible -->
+<!-- This avoids blocking parse with a render-blocking stylesheet on initial load -->
 
 <style>
   /* Custom styles for Leaflet popups to match previous design */
@@ -130,13 +130,21 @@ const { markers, initialZoom = 12 } = Astro.props;
     }
   }
 
-  // Load Leaflet script dynamically
+  // Load Leaflet CSS + JS lazily (only when map is about to be visible)
   function loadLeaflet() {
     return new Promise((resolve, reject) => {
       // Check if already loaded
       if (window.L) {
         resolve(window.L);
         return;
+      }
+
+      // Inject Leaflet CSS only when needed (avoids render-blocking link tag)
+      if (!document.querySelector('link[href="/vendor/leaflet-1.9.4.css"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/vendor/leaflet-1.9.4.css';
+        document.head.appendChild(link);
       }
 
       const script = document.createElement('script');
@@ -344,10 +352,36 @@ const { markers, initialZoom = 12 } = Astro.props;
     });
   }
 
-  // Initialize when DOM is ready
+  // Initialize the map lazily using IntersectionObserver.
+  // Leaflet JS + CSS (~160 KB combined) are only fetched when the map
+  // container enters the viewport, saving bandwidth for users who never
+  // scroll past the fold.
+  function setupLazyMap() {
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) return;
+
+    if (!('IntersectionObserver' in window)) {
+      // Fallback: initialize immediately for older browsers
+      initializeMap();
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        if (entries[0].isIntersecting) {
+          obs.disconnect();
+          initializeMap();
+        }
+      },
+      { rootMargin: '200px' } // start loading 200px before map enters view
+    );
+
+    observer.observe(mapContainer);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeMap);
+    document.addEventListener('DOMContentLoaded', setupLazyMap);
   } else {
-    initializeMap();
+    setupLazyMap();
   }
 </script>

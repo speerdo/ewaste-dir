@@ -148,6 +148,12 @@ const hasNearbyMatches = nearbyMatches.length > 0;
 // Otherwise, show the nearby matches
 const displayCenters = hasExactMatches ? exactMatches : centers;
 
+// Cap the number of centers rendered in HTML to keep page size manageable.
+// Map markers still use the full list for a complete interactive map.
+const MAX_VISIBLE_CENTERS = 50;
+const visibleCenters = displayCenters.slice(0, MAX_VISIBLE_CENTERS);
+const hasMoreCenters = displayCenters.length > MAX_VISIBLE_CENTERS;
+
 // Use the new matched flag - only show the "nearby centers" message if none of the centers match
 const showNearbyMessage = !hasExactMatches && hasNearbyMatches;
 
@@ -421,9 +427,11 @@ if (baseTitle.length <= maxTitleLength) {
     <Image
       src={cityHeroImage}
       alt={`${cityName}, ${state.name} cityscape`}
-      width={1200}
-      height={256}
-      quality={70}
+      width={800}
+      height={200}
+      quality={60}
+      format="webp"
+      loading="eager"
       class="w-full h-full object-cover"
     />
     <div class="absolute inset-0 bg-gradient-to-r from-green-900/80 via-green-800/60 to-transparent">
@@ -600,7 +608,12 @@ if (baseTitle.length <= maxTitleLength) {
 
       <!-- Recycling Centers List (scrollable) -->
       <div class="centers-container lg:h-[600px] lg:overflow-y-auto">
-        <CentersList centers={displayCenters} defaultLogo={DEFAULT_LOGO} city={cityName} state={state.name} />
+        <CentersList centers={visibleCenters} defaultLogo={DEFAULT_LOGO} city={cityName} state={state.name} />
+        {hasMoreCenters && (
+          <p class="text-sm text-gray-500 text-center py-4 px-4">
+            Showing {MAX_VISIBLE_CENTERS} of {displayCenters.length} recycling centers in {cityName}.
+          </p>
+        )}
       </div>
     </div>
 

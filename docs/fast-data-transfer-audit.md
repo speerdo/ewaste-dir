@@ -140,19 +140,93 @@ grep -oE 'src="https://[^"]*"' dist/states/new-york/brooklyn/index.html
 
 ---
 
-## Expected Findings / Hypothesis Priority
+## Investigation Results (May 31 2026)
 
-1. **Most likely:** Pages are not being served from Vercel CDN cache (`x-vercel-cache: MISS`) and are hitting the origin on every request, compounding transfer
-2. **Second most likely:** Large unoptimized images or a heavy JS bundle from an Astro island (map componeasnt, search widget, etc.)
-3. **Less likely but possible:** Inline JSON data blob embedded in SSG HTML output is bloating raw page size
+### Bot protection status
 
-## Output Format
+Live curl tests confirm both `/claim` and all `/states/**` pages return:
 
-Please report back with:
+```
+HTTP/2 429
+x-vercel-mitigated: challenge
+cache-control: private, no-store, max-age=0
+```
 
-- Actual `content-encoding` and `x-vercel-cache` header values from the curl checks
-- Raw uncompressed and compressed HTML byte counts for at least 2 city pages
-- Top 5 JS bundles by size from `dist/_astro`
-- Whether `compressHTML` is enabled in astro config
-- Contents of `vercel.json` (or note if it doesn't exist)
-- Any images found that are NOT going through Astro's image optimizer
+**Bot protection IS active.** The Vercel "challenge" mode is site-wide. Every non-browser request
+gets a 33KB challenge page (Vercel's JS puzzle). After a real browser solves the puzzle once, it
+gets a cookie and subsequent visits are served normally.
+
+### The /claim problem (16K requests, 1.37GB in 6h)
+
+- Challenge mode was enabled AFTER most of the 16K bot requests occurred (historical data)
+- Going forward: 16K attempts × 33KB challenge page = ~528MB — still significant
+- The challenge page contains an obfuscated JavaScript solver (~30KB minified) — Vercel controls this
+- Bots using headless browsers (Playwright, Puppeteer) CAN solve the JS challenge automatically
+- **Fix required in Vercel Dashboard**: change bot protection action from `challenge` → `deny` for `/claim`
+  - `deny` returns a minimal 403 with near-zero body, not the 33KB challenge page
+  - Path: Security → Firewall → Bot Protection → Add custom rule for path `/claim` with action `deny`
+  - This is safe because `/claim` is a B2B lead form — only humans with real browsers should submit it
+
+### City page transfer (1.7MB per request)
+
+City pages like `/states/new-york/albany` generate ~1.7MB per cold page load
+(7 requests × 11.9MB = that's challenge + actual page for each of 7 users, since Vercel
+counts challenge bytes under the matched route too).
+
+The actual page components contributing to size:
+- **Hero image**: source files 800–900KB JPG → Astro outputs WebP at 1200×256 q=70 ≈ 200–400KB
+- **Leaflet.js**: 145KB loaded dynamically (good) but CSS was loaded synchronously
+- **CenterCard HTML**: 382-line component × N centers = significant HTML bulk for large cities
+- **No center count limit**: `getRecyclingCentersByCity` returns ALL centers without a LIMIT,
+  meaning large cities could render 100+ full-detail HTML cards
+
+### JSON-LD schema
+
+Already well-optimized: `SCHEMA_BUSINESS_LIMIT = 25`, descriptions truncated to 160 chars.
+
+---
+
+## Fixes Applied (May 31 2026 session)
+
+### 1. Lazy-load Leaflet map — `src/components/MapComponent.astro`
+
+Leaflet CSS is no longer loaded as a blocking `<link>` tag. Both the CSS and JS are now
+injected dynamically via `IntersectionObserver` when the map container enters the viewport
+(200px before it becomes visible). Users who don't scroll to the map save ~145KB of JS.
+
+### 2. Reduce hero image size — `src/pages/states/[state]/[city].astro`
+
+Changed from `width={1200} height={256} quality={70}` to `width={800} height={200} quality={60} format="webp"`.
+Estimated saving: 100–200KB per cold page load (Astro converts at build time).
+
+### 3. Cap city page HTML at 50 centers — `src/pages/states/[state]/[city].astro`
+
+Added `MAX_VISIBLE_CENTERS = 50`. The HTML listing uses `visibleCenters` (first 50 centers).
+Map markers still use the full `displayCenters` array so the interactive map remains complete.
+A "Showing 50 of X" note is shown when the cap is hit.
+
+---
+
+## Remaining Dashboard Actions Required
+
+These CANNOT be done via code — requires Vercel dashboard access:
+
+### Critical: Change /claim protection from challenge → deny
+
+1. Go to Vercel Dashboard → recycle-old-tech project → Security → Firewall
+2. Under Bot Protection, add a **custom path rule**:
+   - Path: `/claim`
+   - Action: **Deny** (not Challenge)
+3. This drops the per-request cost from 33KB (challenge HTML) to ~0.5KB (403 response)
+
+### Verify rate limit uses "deny" not "challenge"
+
+1. Go to Security → Firewall → Rate Limiting
+2. Check the existing `/claim` rule — ensure the action is **Deny**, not Challenge
+3. Current threshold should be ≤ 10 requests/minute per IP for /claim
+
+### Enable AI bots managed rule
+
+1. Go to Security → Firewall → Managed Rules
+2. Enable **AI Bots** with action: **Deny**
+3. This blocks known AI crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.) site-wide

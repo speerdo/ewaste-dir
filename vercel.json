@@ -98,6 +98,10 @@
         {
           "key": "Cache-Control",
           "value": "public, s-maxage=86400, stale-while-revalidate=604800, max-age=3600"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
         }
       ]
     },

@@ -14,6 +14,26 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
+  // ── 0. Validate required fields ──────────────────────────────────────
+
+  const requiredFields = ['business_name', 'contact_email', 'city', 'state'] as const;
+  for (const field of requiredFields) {
+    if (!data[field] || typeof data[field] !== 'string' || !(data[field] as string).trim()) {
+      return new Response(JSON.stringify({ error: `Missing required field: ${field}` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!emailRegex.test(String(data.contact_email))) {
+    return new Response(JSON.stringify({ error: 'Invalid email address' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // ── 1. Insert into Supabase business_claims ──────────────────────────
 
   const supabase = createClient(

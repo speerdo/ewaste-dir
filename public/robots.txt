@@ -2,10 +2,11 @@
 User-agent: *
 Allow: /
 
-# Disallow search with parameters, API endpoints, and admin pages
+# Disallow search with parameters, API endpoints, admin pages, and claim form
 Disallow: /search?*
 Disallow: /api/
 Disallow: /admin/
+Disallow: /claim
 
 # Sitemap location
 Sitemap: https://www.recycleoldtech.com/sitemap-index.xml

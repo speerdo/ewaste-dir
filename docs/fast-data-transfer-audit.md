@@ -143,7 +143,7 @@ grep -oE 'src="https://[^"]*"' dist/states/new-york/brooklyn/index.html
 ## Expected Findings / Hypothesis Priority
 
 1. **Most likely:** Pages are not being served from Vercel CDN cache (`x-vercel-cache: MISS`) and are hitting the origin on every request, compounding transfer
-2. **Second most likely:** Large unoptimized images or a heavy JS bundle from an Astro island (map component, search widget, etc.)
+2. **Second most likely:** Large unoptimized images or a heavy JS bundle from an Astro island (map componeasnt, search widget, etc.)
 3. **Less likely but possible:** Inline JSON data blob embedded in SSG HTML output is bloating raw page size
 
 ## Output Format

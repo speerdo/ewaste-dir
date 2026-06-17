@@ -12,6 +12,7 @@
     "prebuild:old": "npm run cleanup",
     "verify": "npm run verify-ssr",
     "verify-ssr": "node scripts/verify-ssr.js",
+    "submit:indexnow": "node scripts/submit-indexnow.js",
     "preview": "vercel dev",
     "astro": "astro",
     "import-data": "node scripts/import-data.js",
@@ -70,6 +71,7 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.21",
-    "@types/nodemailer": "^7.0.11"
+    "@types/nodemailer": "^7.0.11",
+    "fast-glob": "^3.3.3"
   }
 }

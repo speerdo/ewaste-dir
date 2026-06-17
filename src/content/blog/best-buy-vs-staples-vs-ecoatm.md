@@ -3,7 +3,7 @@ title: "Best Buy vs. Staples vs. ecoATM: Which E-Waste Recycling Option is Right
 pubDate: 2026-02-26T12:00:00Z
 description: "Here’s a practical breakdown of each program so you can walk in prepared."
 featured: true
-image: "http://images.unsplash.com/photo-1502160348486-995f41fa55b1?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+image: "https://images.unsplash.com/photo-1502160348486-995f41fa55b1?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 author: "Editorial Team"
 ---
 
@@ -84,4 +84,4 @@ Responsible recycling is about more than just the environment. Your data securit
 
 ---
 
-_Looking for a drop-off location near you? Use the [RecycleOldTech.com directory](https://www.recycleoldtech.com) to find certified electronics recyclers in your area._
+_Looking for a drop-off location near you? Use the [RecycleOldTech.com directory](https://www.recycleoldtech.com) to find certified electronics recyclers in your area. If you're specifically trying to get rid of a television, read our dedicated [TV recycling guide](/blog/tv-recycling-guide) for every TV type and disposal option._

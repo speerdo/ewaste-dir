@@ -5,6 +5,7 @@ import TradeInCallout from '../components/TradeInCallout.astro';
 import { getState, getRecyclingCentersByState, normalizeForUrl } from '../lib/supabase';
 import type { State, RecyclingCenter, City } from '../types/supabase';
 import type { CentersByCity } from '../lib/supabase';
+import { buildStateTitle } from '../utils/metaGenerator';
 
 interface Props {
   state: State;
@@ -119,23 +120,8 @@ const defaultStateImage = 'https://images.unsplash.com/photo-1532601224476-15c79
 // Default description if not provided
 const metaDescription = description || `Find electronics recycling centers in ${state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.`;
 
-// Generate optimized title (target: 50-60 characters)
-const maxTitleLength = 60;
-const baseStateTitle = `Electronics Recycling Centers in ${state.name} - Complete Directory`;
-const mediumStateTitle = `Electronics Recycling Centers in ${state.name} - Directory`;
-const shortStateTitle = `E-Waste Recycling Centers in ${state.name}`;
-const ultraShortStateTitle = `E-Waste Centers: ${state.name}`;
-
-let statePageTitle;
-if (baseStateTitle.length <= maxTitleLength) {
-  statePageTitle = baseStateTitle;
-} else if (mediumStateTitle.length <= maxTitleLength) {
-  statePageTitle = mediumStateTitle;
-} else if (shortStateTitle.length <= maxTitleLength) {
-  statePageTitle = shortStateTitle;
-} else {
-  statePageTitle = ultraShortStateTitle;
-}
+// Generate optimized title (target: ~55 characters)
+const statePageTitle = buildStateTitle(state.name);
 
 // Generate enhanced meta description (120-155 characters)
 const enhancedDescription = description || (() => {
@@ -212,7 +198,7 @@ const enhancedDescription = description || (() => {
           </p>
         ) : (
           <p class="text-gray-600 leading-relaxed text-lg">
-            Find electronics recycling centers in {state.name}. Safe and responsible disposal of computers, phones, TVs and other electronic devices.
+            {state.name} has a strong e-waste recycling infrastructure with certified facilities across major cities and towns. Whether you need to dispose of old computers, phones, TVs, or business equipment, electronics recycling centers throughout {state.name} provide safe, responsible disposal and secure data destruction.
           </p>
         )}
       </div>

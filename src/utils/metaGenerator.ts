@@ -1,5 +1,37 @@
 import type { RecyclingCenter } from '../types/supabase';
 
+const STATE_ABBR: Record<string, string> = {
+  alabama: 'AL', alaska: 'AK', arizona: 'AZ', arkansas: 'AR', california: 'CA',
+  colorado: 'CO', connecticut: 'CT', delaware: 'DE', florida: 'FL', georgia: 'GA',
+  hawaii: 'HI', idaho: 'ID', illinois: 'IL', indiana: 'IN', iowa: 'IA',
+  kansas: 'KS', kentucky: 'KY', louisiana: 'LA', maine: 'ME', maryland: 'MD',
+  massachusetts: 'MA', michigan: 'MI', minnesota: 'MN', mississippi: 'MS', missouri: 'MO',
+  montana: 'MT', nebraska: 'NE', nevada: 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+  'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', ohio: 'OH',
+  oklahoma: 'OK', oregon: 'OR', pennsylvania: 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+  'south dakota': 'SD', tennessee: 'TN', texas: 'TX', utah: 'UT', vermont: 'VT',
+  virginia: 'VA', washington: 'WA', 'west virginia': 'WV', wisconsin: 'WI', wyoming: 'WY',
+  'district of columbia': 'DC',
+};
+
+function getStateAbbr(state: string): string {
+  const abbr = STATE_ABBR[state.toLowerCase().trim()];
+  if (abbr) return abbr;
+  // Fallback: take first letters of each word and uppercase.
+  return state
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join('');
+}
+
+export function buildStateTitle(state: string): string {
+  // Prefer concise title: E-Waste Recycling in {State} | RecycleOldTech
+  const title = `E-Waste Recycling in ${state} | RecycleOldTech`;
+  if (title.length <= 55) return title;
+  // For long state names (e.g. District of Columbia), replace with abbreviation + label
+  return `E-Waste Recycling in ${state} | Recycle`;
+}
+
 interface MetaData {
   title: string;
   description: string;
@@ -25,7 +57,7 @@ export function generateCityMeta({
   showNearbyMessage,
 }: CityMetaProps): MetaData {
   const centerCount = centers.length;
-  const centerWord = centerCount === 1 ? 'center' : 'centers';
+  const centerWord = centerCount === 1 ? 'Center' : 'Centers';
 
   // Analyze centers for unique selling points
   const topRated = centers
@@ -47,25 +79,12 @@ export function generateCityMeta({
 
   const withHours = centers.filter((c) => c.working_hours);
 
-  // Generate title variations to avoid repetition
-  const titleVariations = [
-    `Electronics Recycling Centers in ${cityName}, ${state}`,
-    `${cityName} Electronics Recycling & E-Waste Disposal`,
-    `Computer & Phone Recycling in ${cityName}, ${state}`,
-    `Safe Electronics Disposal in ${cityName}, ${state}`,
-    `${cityName} E-Waste Recycling Centers & Services`,
-  ];
-
-  // Add unique elements to title based on what's special about this city
-  let titleModifier = '';
-  if (centerCount > 15) {
-    titleModifier = ` - ${centerCount} Locations`;
-  } else if (topRated && Number(topRated.rating) >= 4.5) {
-    titleModifier = ` - Top-Rated Services`;
-  } else if (cityGov) {
-    titleModifier = ` - City & Private Options`;
-  } else if (centerCount === 1) {
-    titleModifier = ` - Local Drop-Off`;
+  // Use a single, concise city title pattern to stay under ~55 chars
+  // E.g. "E-Waste Recycling in Phoenix, AZ | 39 Centers" (46 chars)
+  const stateAbbr = getStateAbbr(state);
+  let title = `E-Waste Recycling in ${cityName}, ${stateAbbr} | ${centerCount} ${centerWord}`;
+  if (title.length > 55) {
+    title = `E-Waste Recycling in ${cityName}, ${stateAbbr} | ${centerCount}`;
   }
 
   // Select title based on city name hash to ensure consistency but variety
@@ -73,8 +92,6 @@ export function generateCityMeta({
     a = (a << 5) - a + b.charCodeAt(0);
     return a & a;
   }, 0);
-  const titleIndex = Math.abs(cityHash) % titleVariations.length;
-  const title = titleVariations[titleIndex] + titleModifier;
 
   // Generate compelling, unique descriptions
   const descriptionElements = [];
@@ -90,7 +107,7 @@ export function generateCityMeta({
     );
   } else {
     descriptionElements.push(
-      `${centerCount} electronics recycling ${centerWord} in ${cityName}, ${state}`
+      `Find ${centerCount} certified electronics recycling ${centerWord.toLowerCase()} in ${cityName}, ${state}`
     );
   }
 
@@ -142,12 +159,12 @@ export function generateCityMeta({
 
   const description = descriptionElements.join('');
 
-  // Ensure description is within optimal length (150-160 characters)
+  // Ensure description is within optimal length (150-155 characters for city pages)
   let finalDescription = description;
-  if (description.length > 160) {
-    // Trim to fit, preserving complete words
+  if (description.length > 155) {
+    // Trim to fit under 155 chars, preserving complete words
     finalDescription =
-      description.substring(0, 157).replace(/\s+\S*$/, '') + '...';
+      description.substring(0, 152).replace(/\s+\S*$/, '') + '...';
   } else if (description.length < 150) {
     // Add more context if too short
     const additions = [];
@@ -163,7 +180,7 @@ export function generateCityMeta({
 
     // Add additions until we reach the minimum length
     for (const addition of additions) {
-      if (finalDescription.length + addition.length <= 160) {
+      if (finalDescription.length + addition.length <= 155) {
         finalDescription += addition;
         if (finalDescription.length >= 150) break;
       }
@@ -190,8 +207,9 @@ export function generateCityMeta({
   if (localData?.regulations?.has_ewaste_ban)
     keywords.push('e-waste laws', 'legal disposal');
 
+  // Ensure city title stays under 55 characters
   return {
-    title: title.length > 60 ? title.substring(0, 57) + '...' : title,
+    title: title.length > 55 ? title.substring(0, 52) + '...' : title,
     description: finalDescription,
     keywords: keywords.slice(0, 10).join(', '),
   };
@@ -202,31 +220,21 @@ export function generateStateMeta(
   cityCount: number,
   centerCount: number
 ): MetaData {
-  const titleVariations = [
-    `Electronics Recycling Centers in ${state}`,
-    `${state} E-Waste Recycling Directory`,
-    `Computer & Electronics Recycling in ${state}`,
-    `${state} Electronics Disposal Centers`,
-  ];
+  // Concise title pattern to stay under ~55 characters
+  // E.g. "E-Waste Recycling in Colorado | RecycleOldTech"
+  const title = `E-Waste Recycling in ${state} | RecycleOldTech`;
 
-  // Use state name hash for consistent but varied titles
+  // Keep a hash for description/keyword variation
   const stateHash = state.split('').reduce((a, b) => {
     a = (a << 5) - a + b.charCodeAt(0);
     return a & a;
   }, 0);
-  const titleIndex = Math.abs(stateHash) % titleVariations.length;
-
-  const title = `${titleVariations[titleIndex]} - ${centerCount} Locations`;
 
   let description = `Find ${centerCount} electronics recycling centers across ${cityCount} cities in ${state}. Safe disposal of computers, phones, TVs & e-waste. Certified facilities with secure data destruction services.`;
 
-  // Ensure state description is also 150-160 characters
-  if (description.length < 150) {
-    description +=
-      ' Compliant with state regulations & environmental standards for proper disposal of electronic waste items.';
-  }
-  if (description.length > 160) {
-    description = description.substring(0, 157) + '...';
+  // Ensure state description stays under 155 characters
+  if (description.length > 155) {
+    description = description.substring(0, 152).replace(/\s+\S*$/, '') + '...';
   }
 
   const keywords = [
@@ -240,7 +248,7 @@ export function generateStateMeta(
   ];
 
   return {
-    title: title.length > 60 ? title.substring(0, 57) + '...' : title,
+    title: title.length > 55 ? title.substring(0, 52) + '...' : title,
     description,
     keywords: keywords.join(', '),
   };

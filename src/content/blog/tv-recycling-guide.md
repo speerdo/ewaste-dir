@@ -1,5 +1,5 @@
 ---
-title: "How to Recycle Your Old TV in 2026: A Practical Guide for Every Type of Set"
+title: "How to Recycle Your Old TV Near You in 2026 — Every Type Covered"
 pubDate: 2026-05-18T12:00:00Z
 description: "This guide covers every major TV type, every realistic disposal path, and what each one actually costs in 2026."
 featured: true

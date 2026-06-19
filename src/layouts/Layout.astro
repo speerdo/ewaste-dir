@@ -39,8 +39,8 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
     <link rel="canonical" href={canonicalUrl} />
 
     <!-- Google AdSense -->
-    <script 
-      async 
+    <script
+      async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036507666294295"
       crossorigin="anonymous">
     </script>
@@ -53,7 +53,7 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
         dataLayer.push(arguments);
       }
       gtag('js', new Date());
-      gtag('config', 'G-3GBQV8F6PX');
+      gtag('config', 'G-3GBQV8F6PX', { 'anonymize_ip': true });
     </script>
 
     <!-- Ahrefs -->
@@ -80,8 +80,9 @@ const canonicalUrl = getCanonicalUrl(currentUrl);
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://analytics.ahrefs.com">
     
-    <!-- Google Fonts with display=swap for better performance -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts: loaded non-blocking. print media swapped to all once loaded to avoid render-blocking -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@600;700;800&display=swap"></noscript>
     
     <title>{title}</title>
   </head>

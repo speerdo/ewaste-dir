@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { getFeaturedStates } from '../lib/supabase';
 import type { State } from '../types/supabase';
 
@@ -18,10 +19,16 @@ const states: State[] = await getFeaturedStates();
           href={`/states/${state.id}`}
           class="group relative h-80 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
         >
-          <img 
-            src={state.image_url} 
-            alt={state.name} 
+          <Image
+            src={state.image_url}
+            alt={state.name}
+            inferSize
+            widths={[420, 840]}
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            format="webp"
+            quality={70}
             loading="lazy"
+            decoding="async"
             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>

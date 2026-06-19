@@ -1,5 +1,6 @@
 ---
 import Layout from './Layout.astro';
+import { Image } from 'astro:assets';
 import StateDescription from '../components/StateDescription.astro';
 import TradeInCallout from '../components/TradeInCallout.astro';
 import { getState, getRecyclingCentersByState, normalizeForUrl } from '../lib/supabase';
@@ -148,10 +149,16 @@ const enhancedDescription = description || (() => {
   <div class="mt-20">
     <!-- Hero Image -->
     <div class="relative h-[400px] overflow-hidden">
-      <img 
-        src={state.image_url || defaultStateImage} 
-        alt={`Electronics recycling in ${state.name}`} 
-        loading="lazy"
+      <Image
+        src={state.image_url || defaultStateImage}
+        alt={`Electronics recycling in ${state.name}`}
+        inferSize
+        widths={[640, 960, 1280, 1600]}
+        sizes="100vw"
+        format="webp"
+        quality={65}
+        loading="eager"
+        fetchpriority="high"
         class="w-full h-full object-cover"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
@@ -270,9 +277,17 @@ const enhancedDescription = description || (() => {
                   <a href={`/states/${relatedState.id}`} class="block group">
                     <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
                       <div class="w-10 h-10 rounded-lg overflow-hidden mr-3">
-                        <img 
-                          src={relatedState.image_url || defaultStateImage} 
-                          alt={relatedState.name} 
+                        <Image
+                          src={relatedState.image_url || defaultStateImage}
+                          alt={relatedState.name}
+                          width={80}
+                          height={80}
+                          widths={[40, 80]}
+                          sizes="40px"
+                          format="webp"
+                          quality={70}
+                          loading="lazy"
+                          decoding="async"
                           class="w-full h-full object-cover"
                         />
                       </div>

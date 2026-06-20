@@ -86,6 +86,10 @@ const featuredCities = [
             alt={`${city.city}, ${city.state}`}
             width={400}
             height={256}
+            widths={[400, 800]}
+            sizes="(max-width: 768px) 100vw, 33vw"
+            format="webp"
+            quality={60}
             class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>

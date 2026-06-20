@@ -105,11 +105,6 @@ export function isCanonicalUrl(url: string): boolean {
     if (urlObj.pathname.includes('/debug')) return false; // Debug pages
     if (urlObj.pathname.endsWith('/') && urlObj.pathname !== '/') return false; // Trailing slash (except root)
 
-    // Check if it uses the production domain in production
-    if (import.meta.env.PROD && urlObj.origin !== PRODUCTION_URL) {
-      return false;
-    }
-
     return true;
   } catch {
     return false;

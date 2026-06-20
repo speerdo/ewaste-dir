@@ -1,45 +1,26 @@
 Performance 59
-SEO 92
 
 Metrics
 Expand view
 First Contentful Paint
-6.2 s
+4.8 s
 Largest Contentful Paint
-8.8 s
+8.2 s
 Total Blocking Time
-70 ms
+180 ms
 Cumulative Layout Shift
 0
 Speed Index
-6.3 s
+6.0 s
 
-Render-blocking requests Est savings of 300 ms
-Requests are blocking the page's initial render, which may delay LCP. Deferring or inlining can move these network requests out of the critical path.LCPFCPUnscored
-URL
-Transfer Size
-Duration
-recycleoldtech.com 1st party
-10.2 KiB	570 ms
-/assets/Layout.DvRXmrJR.css(www.recycleoldtech.com)
-10.2 KiB
-570 ms
-Google Fonts cdn 
-1.6 KiB	780 ms
-/css2?family=…(fonts.googleapis.com)
-1.6 KiB
-780 ms
-
-Use efficient cache lifetimes Est savings of 40 KiB
+Insights
+Use efficient cache lifetimes Est savings of 19 KiB
 A long cache lifetime can speed up repeat visits to your page. Learn more about caching.LCPFCPUnscored
 Request
 Cache TTL
 Transfer Size
 Google/Doubleclick Ads ad 
-195 KiB
-…js/rum.js?fcd=true(pagead2.googlesyndication.com)
-1h
-26 KiB
+169 KiB
 …m202…/show_ads_impl_fy2021.js?bust=31099218(pagead2.googlesyndication.com)
 14d
 169 KiB
@@ -48,17 +29,21 @@ ahrefs.com
 /analytics.js(analytics.ahrefs.com)
 4h
 3 KiB
-
+Google Tag Manager tag-manager 
+0 KiB
+/a?v=…(www.googletagmanager.com)
+None
+0 KiB
 Forced reflow
 A forced reflow occurs when JavaScript queries geometric properties (such as offsetWidth) after styles have been invalidated by a change to the DOM state. This can result in poor performance. Learn more about forced reflows and possible mitigations.Unscored
 Top function call
 Total reflow time
 https://www.recycleoldtech.com:62:9842
-50 ms
+100 ms
 Source
 Total reflow time
 …js/adsbygoogle.js?client=ca-pub-103…:102:457(pagead2.googlesyndication.com)
-32 ms
+56 ms
 …js/adsbygoogle.js?client=ca-pub-103…:179:25(pagead2.googlesyndication.com)
 1 ms
 …js/adsbygoogle.js?client=ca-pub-103…:68:602(pagead2.googlesyndication.com)
@@ -68,17 +53,15 @@ Total reflow time
 …js/adsbygoogle.js?client=ca-pub-103…:181:399(pagead2.googlesyndication.com)
 0 ms
 https://www.recycleoldtech.com:61:10368
-50 ms
-
+100 ms
+[unattributed]
+39 ms
 Network dependency tree
 Avoid chaining critical requests by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load.LCPUnscored
-Maximum critical path latency: 456 ms
+Maximum critical path latency: 362 ms
 Initial Navigation
-https://www.recycleoldtech.com - 170 ms, 21.42 KiB
-/css2?family=…(fonts.googleapis.com) - 172 ms, 1.58 KiB
-…v20/UcC73FwrK….woff2(fonts.gstatic.com) - 456 ms, 48.09 KiB
-…v31/JTUSjIg1_….woff2(fonts.gstatic.com) - 456 ms, 35.47 KiB
-/assets/Layout.DvRXmrJR.css(www.recycleoldtech.com) - 356 ms, 10.17 KiB
+https://www.recycleoldtech.com - 175 ms, 21.65 KiB
+/assets/Layout.DvRXmrJR.css(www.recycleoldtech.com) - 362 ms, 10.17 KiB
 Preconnected origins
 preconnect hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The following are the origins that the page preconnected to.
 Origin
@@ -96,41 +79,22 @@ Preconnect candidates
 Add preconnect hints to your most important origins, but try to use no more than 4.
 Origin
 Est LCP savings
-https://images.pexels.com
-
-
-Improve image delivery Est savings of 3,825 KiB
+https://fundingchoicesmessages.google.com
+300 ms
+Improve image delivery Est savings of 51 KiB
 Reducing the download time of images can improve the perceived load time of the page and LCP. Learn more about optimizing image sizeLCPFCPUnscored
 URL
 Resource Size
 Est Savings
-pexels.com
-4,018.9 KiB	3,802.7 KiB
-Florida
-<img src="https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg" alt="Florida" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:s…">
-…1108572/pexels-photo-1108572.jpeg(images.pexels.com)
-3,183.3 KiB
-3,131.0 KiB
-This image file is larger than it needs to be (5827x4912) for its displayed dimensions (839x560). Use responsive images to reduce the image download size.
-3,131.0 KiB
-California
-<img src="https://images.pexels.com/photos/159397/solar-panel-array-power-sun-electr…" alt="California" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:s…">
-…159397/solar-panel-array-power-sun-electricity-159397.jpeg(images.pexels.com)
-491.3 KiB
-400.6 KiB
-Using a modern image format (WebP, AVIF) or increasing the image compression could improve this image's download size.
-265.5 KiB
-This image file is larger than it needs to be (1285x1080) for its displayed dimensions (996x560). Use responsive images to reduce the image download size.
-293.9 KiB
-New York
-<img src="https://images.pexels.com/photos/269077/pexels-photo-269077.jpeg" alt="New York" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:s…">
-…269077/pexels-photo-269077.jpeg(images.pexels.com)
-344.3 KiB
-271.1 KiB
-This image file is larger than it needs to be (1621x1365) for its displayed dimensions (840x560). Use responsive images to reduce the image download size.
-271.1 KiB
 recycleoldtech.com 1st party
-33.6 KiB	21.9 KiB
+105.5 KiB	50.6 KiB
+California
+<img src="https://www.recycleoldtech.com/assets/solar-panel-array-power-sun-electric…" srcset="/assets/solar-panel-array-power-sun-electricity-159397_Z2dsAng.webp 420w, …" alt="California" sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" loading="lazy" decoding="async" width="1920" height="1080" class="w-full h-full object-cover transition-transform duration-700 group-hover:s…">
+/assets/solar-pan….webp(www.recycleoldtech.com)
+72.0 KiB
+28.7 KiB
+Increasing the image compression factor could improve this image's download size.
+28.7 KiB
 Austin, Texas
 <img src="/assets/austin.Bpp-Fvr0_1xF3Q8.webp" alt="Austin, Texas" loading="lazy" decoding="async" width="400" height="256" class="w-full h-64 object-cover transition-transform duration-700 group-hover:sca…">
 /assets/austin.Bpp-Fvr0_1xF3Q8.webp(www.recycleoldtech.com)
@@ -145,55 +109,41 @@ Miami, Florida
 10.1 KiB
 Increasing the image compression factor could improve this image's download size.
 10.1 KiB
-
-
-Avoid enormous network payloads Total size was 4,837 KiB
-Large network payloads cost users real money and are highly correlated with long load times. Learn how to reduce payload sizes.Unscored
+Render-blocking requests
+Requests are blocking the page's initial render, which may delay LCP. Deferring or inlining can move these network requests out of the critical path.LCPFCPUnscored
 URL
 Transfer Size
-pexels.com
-4,021.6 KiB
-…1108572/pexels-photo-1108572.jpeg(images.pexels.com)
-3,184.2 KiB
-…159397/solar-panel-array-power-sun-electricity-159397.jpeg(images.pexels.com)
-492.2 KiB
-…269077/pexels-photo-269077.jpeg(images.pexels.com)
-345.2 KiB
-Google/Doubleclick Ads ad 
-249.9 KiB
-…m202…/show_ads_impl_fy2021.js?bust=31099218(pagead2.googlesyndication.com)
-169.2 KiB
-…js/adsbygoogle.js?client=ca-pub-103…(pagead2.googlesyndication.com)
-54.7 KiB
-…js/rum.js?fcd=true(pagead2.googlesyndication.com)
-26.0 KiB
-Google Tag Manager tag-manager 
-155.7 KiB
-/gtag/js?id=G-3GBQV8F6PX(www.googletagmanager.com)
-155.7 KiB
-Google Fonts cdn 
-83.6 KiB
-…v20/UcC73FwrK….woff2(fonts.gstatic.com)
-48.1 KiB
-…v31/JTUSjIg1_….woff2(fonts.gstatic.com)
-35.5 KiB
-Google FundingChoices consent-provider 
-70.5 KiB
-/i/ca-pub-10…?href=https%3A%2F%2Fwww.recycleoldtech.com&ers=2(fundingchoicesmessages.google.com)
-70.5 KiB
-
-Navigation
-Heading elements are not in a sequentially-descending order
-Properly ordered headings that do not skip levels convey the semantic structure of the page, making it easier to navigate and understand when using assistive technologies. Learn more about heading order.
-Failing Elements
-Austin, Texas
-<h3 class="text-xl font-bold text-white mb-1">
-
-Content Best Practices
-Links do not have descriptive text 1 link found
-Descriptive link text helps search engines understand your content. Learn how to make links more accessible.
-Link destination
-Link Text
+Duration
 recycleoldtech.com 1st party
-/about(www.recycleoldtech.com)
-Learn More
+10.2 KiB	670 ms
+/assets/Layout.DvRXmrJR.css(www.recycleoldtech.com)
+10.2 KiB
+670 ms
+Optimize DOM size
+LCP breakdown
+3rd parties
+These insights are also available in the Chrome DevTools Performance Panel - record a trace to view more detailed information.
+Diagnostics
+Reduce unused JavaScript Est savings of 248 KiB
+Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. Learn how to reduce unused JavaScript.LCPFCPUnscored
+URL
+Transfer Size
+Est Savings
+Google/Doubleclick Ads ad 
+222.4 KiB	149.2 KiB
+…m202…/show_ads_impl_fy2021.js?bust=31099218(pagead2.googlesyndication.com)
+168.5 KiB
+105.8 KiB
+…js/adsbygoogle.js?fcd=true(pagead2.googlesyndication.com)
+53.9 KiB
+43.4 KiB
+Google Tag Manager tag-manager 
+155.1 KiB	63.4 KiB
+/gtag/js?id=G-3GBQV8F6PX(www.googletagmanager.com)
+155.1 KiB
+63.4 KiB
+Google FundingChoices consent-provider 
+68.6 KiB	35.8 KiB
+/i/ca-pub-10…?href=https%3A%2F%2Fwww.recycleoldtech.com&ers=2(fundingchoicesmessages.google.com)
+68.6 KiB
+35.8 KiB

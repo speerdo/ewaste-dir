@@ -6,10 +6,13 @@ import { isCanonicalUrl } from './src/lib/url-utils.ts';
 const PRODUCTION_URL = 'https://www.recycleoldtech.com';
 
 // Get the site URL from environment variables or use a default for preview deployments
+// VERCEL_URL is set by Vercel on every build (including production), so it must only
+// be used for non-production deployments or it will override the custom domain.
+const VERCEL_ENV = process.env.VERCEL_ENV;
 const VERCEL_URL = process.env.VERCEL_URL;
 const SITE_URL =
   process.env.SITE_URL ||
-  (VERCEL_URL ? `https://${VERCEL_URL}` : PRODUCTION_URL);
+  (VERCEL_ENV !== 'production' && VERCEL_URL ? `https://${VERCEL_URL}` : PRODUCTION_URL);
 
 // https://astro.build/config
 export default defineConfig({

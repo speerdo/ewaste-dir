@@ -35,7 +35,9 @@ Staples has been running a free electronics recycling program since 2012, and th
 
 **What they accept:** Computers, laptops, tablets, monitors, printers, scanners, keyboards, cables, smartphones, digital cameras, and all types of batteries, including alkaline and rechargeable. You can bring up to seven items per visit.
 
-**Cost:** Completely free. Staples does not charge fees for monitors or printers, which gives them a leg up over Best Buy for certain items.
+**Cost:** Staples still offers free recycling for most office tech—computers, laptops, printers, scanners, and the like. **Important:** Staples has recently shifted their policy and now charges a handling fee for monitors (typically $20) at many locations across the country. California and some other states prohibit such fees, so policies vary by location.
+
+**Always call ahead:** Before you make the trip, **call your specific Staples store** to confirm their current fees and policies. This is especially important if you're bringing monitors—it can save you a wasted trip and ensure you're not surprised by unexpected charges.
 
 **The rewards perk:** Staples Rewards members earn $5 back (as a rewards certificate) every time they recycle or shred in-store, plus $2 back for each recycled ink or toner cartridge. If you're already a Rewards member, this is one of the easiest ways to offset your office supply spending.
 
@@ -63,7 +65,7 @@ You can find ecoATM kiosks inside Walmart, Kroger, and other major retailers. Us
 
 | What you have                         | Where to go                     |
 | ------------------------------------- | ------------------------------- |
-| TV or monitor                         | Best Buy                        |
+| TV or monitor                         | Best Buy or Staples (call ahead—fees vary by location) |
 | Old laptop or desktop                 | Best Buy or Staples             |
 | Printer, scanner, or shredder         | Staples (free, no fee)          |
 | Batteries                             | Staples                         |
@@ -74,9 +76,11 @@ You can find ecoATM kiosks inside Walmart, Kroger, and other major retailers. Us
 
 ---
 
-## One Thing You Should Always Do First
+## Two Things You Should Always Do First
 
-No matter where you end up, do a factory reset on your devices before dropping them off. This wipes your personal accounts, photos, passwords, and stored data before the device changes hands. It takes about five minutes and is worth doing every single time.
+**1. Call ahead.** Policies and fees vary by location—especially for monitors at Staples and TVs at Best Buy. A quick call to your specific store before you load up the car can save you a wasted trip and unexpected charges.
+
+**2. Factory reset your devices.** No matter where you end up, do a factory reset on your devices before dropping them off. This wipes your personal accounts, photos, passwords, and stored data before the device changes hands. It takes about five minutes and is worth doing every single time.
 
 For phones, go to **Settings > General > Transfer or Reset** (iPhone) or **Settings > General Management > Reset** (Android). For laptops, use the built-in reset option in your operating system settings.
 

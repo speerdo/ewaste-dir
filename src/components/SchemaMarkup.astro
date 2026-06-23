@@ -1,6 +1,6 @@
 ---
 interface Props {
-  type: 'website' | 'recyclingCenter' | 'localBusiness' | 'article';
+  type: 'website' | 'recyclingCenter' | 'localBusiness' | 'article' | 'faq';
   data?: Record<string, any>;
 }
 
@@ -126,7 +126,21 @@ const generateSchema = () => {
           '@id': data.url || baseUrl,
         },
       };
-      
+
+    case 'faq':
+      return {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: (data.questions || []).map((q: { question: string; answer: string }) => ({
+          '@type': 'Question',
+          name: q.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: q.answer,
+          },
+        })),
+      };
+
     default:
       return {};
   }

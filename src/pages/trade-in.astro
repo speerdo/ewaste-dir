@@ -1,16 +1,46 @@
 ---
 export const prerender = true;
 import { Image } from 'astro:assets';
-import { smartphoneInHandImg, phonesImg, autumnLaptopImg, retroGamingImg, storeRecyclingImg, dataSecurityImg, phoneRepairImg } from '../assets/images';
+import { smartphoneInHandImg, phonesImg, autumnLaptopImg, retroGamingImg, storeRecyclingImg, dataSecurityImg, phoneRepairImg, cashLaptopImg } from '../assets/images';
 import Layout from '../layouts/Layout.astro';
+import SchemaMarkup from '../components/SchemaMarkup.astro';
 
 const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
+
+const faqItems = [
+  {
+    question: 'How much is my laptop worth for trade-in?',
+    answer: "It depends on the brand, model, age, and condition. Working MacBooks from the last 4-5 years typically trade in for the most, often $150-$500+. Mainstream Windows laptops (Dell, HP, Lenovo) usually trade in for $20-$200 depending on specs and condition. Get an instant, no-obligation quote to see your exact laptop's value.",
+  },
+  {
+    question: 'Can I trade in a laptop that has a cracked screen or won’t turn on?',
+    answer: "Yes. Amazon Trade-In accepts laptops in 'Acceptable' condition, which includes cracked screens, dead batteries, and units that won't power on. You'll receive a lower offer than for a fully working laptop, but it still has value rather than being scrapped.",
+  },
+  {
+    question: 'Do I need to wipe my laptop before trading it in?',
+    answer: 'Yes, always back up your files and perform a factory reset before trading in or recycling any laptop. This protects your personal information and is required by most trade-in and recycling programs.',
+  },
+  {
+    question: 'What if my device is damaged?',
+    answer: "Amazon still accepts damaged devices, but the trade-in value will be lower. It's worth getting a quote to see what your device is worth – you might be surprised!",
+  },
+  {
+    question: 'How do I get paid for my trade-in?',
+    answer: 'Amazon Trade-In provides an Amazon.com gift card, not cash. This is applied directly to your Amazon account. If you prefer cash, consider other trade-in services or selling your device privately.',
+  },
+  {
+    question: 'How long does the laptop trade-in process take?',
+    answer: "After you ship your device (free with the prepaid label), Amazon typically verifies and processes your trade-in within 5-10 business days. You'll receive your gift card once verification is complete.",
+  },
+];
 ---
 
-<Layout 
-  title="Trade In Your Old Electronics for Cash | RecycleOldTech" 
-  description="Get cash for your old phone, laptop, tablet, or gaming console through Amazon Trade-In. Free shipping, instant quotes, and Amazon gift card payment."
+<Layout
+  title="Laptop Trade In for Cash | Trade In Your Old Electronics | RecycleOldTech"
+  description="Trade in your laptop, phone, tablet, or gaming console for an instant Amazon gift card quote. See what old laptops are worth, free shipping, and no obligation."
 >
+  <SchemaMarkup type="faq" data={{ questions: faqItems }} />
+
   <!-- Hero Section -->
   <div class="relative pt-32 pb-16 overflow-hidden">
     <div class="absolute inset-0">
@@ -33,10 +63,10 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h1 class="text-4xl md:text-5xl font-display font-bold text-white text-center">Trade In Your Old Electronics for Cash</h1>
+        <h1 class="text-4xl md:text-5xl font-display font-bold text-white text-center">Laptop Trade In for Cash (Plus Phones, Tablets & More)</h1>
       </div>
       <p class="text-xl text-green-50 text-center max-w-3xl mx-auto mb-8">
-        Before you recycle your old phone, laptop, or tablet, you might be able to get cash for it! Here's how electronic trade-in programs work and how to get the best value.
+        Before you recycle your old laptop, phone, or tablet, you might be able to get cash for it! Here's what your laptop trade-in is really worth and how electronic trade-in programs work.
       </p>
       <div class="flex justify-center">
         <a 
@@ -238,6 +268,68 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
           </div>
         </section>
 
+        <!-- Laptop Trade-In Guide -->
+        <section class="mb-16">
+          <div class="flex items-center mb-8">
+            <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mr-4">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+              </svg>
+            </div>
+            <h2 class="text-3xl font-display font-bold text-gray-900">Laptop Trade In: What's Your Laptop Worth?</h2>
+          </div>
+
+          <div class="md:flex gap-10 items-center mb-10">
+            <div class="md:w-1/2 mb-8 md:mb-0 rounded-xl overflow-hidden">
+              <Image src={cashLaptopImg} alt="Cash value for a used laptop trade-in" width={600} height={400} class="w-full h-full object-cover" />
+            </div>
+            <div class="md:w-1/2">
+              <p class="text-gray-700 leading-relaxed mb-4">
+                Laptop trade-in value depends mainly on three things: brand, age, and condition. Before you recycle an old laptop, it's worth checking its trade-in value first &mdash; even laptops with cracked screens or dead batteries are often worth something.
+              </p>
+              <ul class="text-gray-700 space-y-2">
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  <span><strong>MacBooks</strong> hold value longest &mdash; even 5-6 year old models can be worth $150-$400+.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  <span><strong>Windows laptops</strong> (Dell, HP, Lenovo) trade in for less but still add up, especially business-grade and gaming models.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  <span><strong>Broken or won't power on?</strong> Amazon's "Acceptable" condition tier still accepts laptops with cracked screens or dead batteries at a reduced value.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  <span><strong>Storage and specs matter</strong> &mdash; higher RAM/SSD configurations and larger screens generally trade in for more.</span>
+                </li>
+              </ul>
+              <a
+                href={AFFILIATE_LINK}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                class="inline-flex items-center mt-6 bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-emerald-700 transition-all"
+              >
+                Get Your Laptop's Trade-In Value
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h3 class="font-semibold text-gray-900 mb-3">Before you trade in your laptop:</h3>
+            <ol class="text-gray-700 space-y-2 list-decimal list-inside">
+              <li>Back up your files to an external drive or cloud storage.</li>
+              <li>Sign out of all accounts (iCloud, Google, Microsoft) and disable Find My Mac / Find My Device.</li>
+              <li>Perform a full factory reset to wipe personal data.</li>
+              <li>Remove any SD cards, dongles, or accessories not included with the original device.</li>
+            </ol>
+          </div>
+        </section>
+
         <!-- Visual break with recycling image -->
         <div class="relative mb-16 rounded-xl overflow-hidden">
           <Image src={storeRecyclingImg} alt="Electronics recycling drop-off" width={1200} height={256} class="w-full h-64 object-cover" />
@@ -332,6 +424,20 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
           </div>
 
           <div class="space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h3 class="text-lg font-bold text-gray-900 mb-2">How much is my laptop worth for trade-in?</h3>
+              <p class="text-gray-600">
+                It depends on brand, age, and condition. Working MacBooks from the last 4-5 years typically trade in for $150-$500+. Mainstream Windows laptops (Dell, HP, Lenovo) usually land between $20-$200 depending on specs and condition.
+              </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h3 class="text-lg font-bold text-gray-900 mb-2">Can I trade in a laptop with a cracked screen or that won't turn on?</h3>
+              <p class="text-gray-600">
+                Yes. Amazon Trade-In accepts laptops in "Acceptable" condition, which covers cracked screens, dead batteries, and units that won't power on. You'll get a lower offer than for a fully working laptop, but it still has value.
+              </p>
+            </div>
+
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden md:flex">
               <div class="md:w-1/3 h-48 md:h-auto">
                 <Image src={dataSecurityImg} alt="Data security and privacy" width={400} height={192} class="w-full h-full object-cover" />
@@ -339,7 +445,7 @@ const AFFILIATE_LINK = "https://amzn.to/3Kk2E45";
               <div class="p-6 md:w-2/3">
                 <h3 class="text-lg font-bold text-gray-900 mb-2">Do I need to wipe my data?</h3>
                 <p class="text-gray-600">
-                  Yes, always factory reset your device before trading it in. This protects your personal information and is required by most trade-in programs. 
+                  Yes, always back up your files and factory reset your device before trading it in. This protects your personal information and is required by most trade-in programs.
                   <a href="/blog/data-security-recycling" class="text-emerald-600 hover:text-emerald-800 font-medium">Learn how to securely wipe your device →</a>
                 </p>
               </div>

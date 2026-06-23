@@ -1,0 +1,244 @@
+---
+export const prerender = true;
+import { Image } from 'astro:assets';
+import { ewasteDropoffImg, recycleElectronicsImg, sciLabImg, dataSecurityImg } from '../assets/images';
+import Layout from '../layouts/Layout.astro';
+import SchemaMarkup from '../components/SchemaMarkup.astro';
+
+const faqItems = [
+  {
+    question: 'What is an electronics recycling center?',
+    answer: 'An electronics recycling center is a facility that safely collects, dismantles, and processes old or unwanted electronic devices so that materials like metals, plastics, and glass can be recovered and hazardous substances such as lead and mercury are kept out of landfills. Certified centers follow strict environmental and data-security standards.',
+  },
+  {
+    question: 'How do I find a certified electronics recycling center near me?',
+    answer: 'Look for facilities certified under R2 (Responsible Recycling) or e-Stewards, the two main third-party certifications recognized by the EPA. You can browse certified and verified recycling centers by state and city in our directory.',
+  },
+  {
+    question: 'Is electronics recycling free?',
+    answer: "Many items are free to recycle, especially through retailer programs like Best Buy and Staples. Some items, particularly older CRT TVs and large monitors, may carry a small handling fee due to the cost of safely processing glass and mercury components.",
+  },
+  {
+    question: 'What happens to electronics after they are recycled?',
+    answer: 'Devices are sorted, manually and mechanically disassembled, and separated by material. Hard drives and storage media are securely wiped or destroyed. Metals, plastics, and rare earth elements are recovered and sold back into manufacturing supply chains, while hazardous components are disposed of according to environmental regulations.',
+  },
+  {
+    question: 'Can I just take my electronics to Best Buy or Staples instead of a recycling center?',
+    answer: "Yes, for most consumer devices. Best Buy and Staples both run free in-store electronics recycling programs and are a convenient option for items like laptops, monitors, and printers. See our breakdown of what each retailer accepts.",
+  },
+];
+---
+
+<Layout
+  title="Electronics Recycling Center Guide: Find Certified E-Waste Recycling | RecycleOldTech"
+  description="Find a certified electronics recycling center near you. Learn what tech recycling covers, how certified e-waste recycling works, and where to safely recycle electronics."
+>
+  <SchemaMarkup type="faq" data={{ questions: faqItems }} />
+
+  <!-- Hero -->
+  <div class="relative pt-32 pb-16 overflow-hidden">
+    <div class="absolute inset-0">
+      <Image src={recycleElectronicsImg} alt="Electronics recycling center processing e-waste" width={1200} height={400} class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-b from-green-900/90 via-green-800/85 to-green-700/90"></div>
+    </div>
+    <div class="container mx-auto px-4 relative z-10">
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-6">
+          Electronics Recycling Centers: The Complete Guide
+        </h1>
+        <p class="text-xl text-green-50 max-w-3xl mx-auto mb-8">
+          Everything you need to know about finding a certified electronics recycling center, what tech recycling actually covers, and how to recycle your old devices responsibly.
+        </p>
+        <a
+          href="/states"
+          class="inline-flex items-center bg-white text-green-700 px-8 py-4 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl hover:bg-green-50 transition-all transform hover:-translate-y-1"
+        >
+          Find a Recycling Center Near You
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto">
+
+        <!-- What is an electronics recycling center -->
+        <section class="mb-16">
+          <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">What Is an Electronics Recycling Center?</h2>
+          <p class="text-gray-700 leading-relaxed mb-4">
+            An <strong>electronics recycling center</strong> is a facility built specifically to handle end-of-life devices &mdash; everything from laptops and monitors to TVs, printers, and small appliances. Unlike a regular landfill or scrapyard, these centers dismantle devices by hand and machine, separate materials by type, and route each stream (metals, plastics, glass, batteries) to the right downstream processor.
+          </p>
+          <p class="text-gray-700 leading-relaxed mb-4">
+            This matters because electronics aren't ordinary trash. A single laptop can contain lead, mercury, cadmium, and flame retardants alongside recoverable gold, copper, and rare earth elements. Sent to a landfill, those hazardous materials can leach into soil and groundwater. Sent to a certified <strong>electronic recycle</strong> facility, the harmful components are safely contained and the valuable ones are recovered and reused in new products.
+          </p>
+          <p class="text-gray-700 leading-relaxed">
+            That's the core idea behind <strong>tech recycling</strong>: instead of treating old devices as waste, certified recyclers treat them as a source of raw material that just needs to be safely separated and processed.
+          </p>
+        </section>
+
+        <!-- Visual break -->
+        <div class="relative mb-16 rounded-xl overflow-hidden">
+          <Image src={sciLabImg} alt="Materials recovery at an electronics recycling facility" width={1200} height={256} class="w-full h-64 object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-r from-green-900/80 to-transparent flex items-center">
+            <div class="px-8">
+              <h3 class="text-2xl font-bold text-white mb-2">Up to 95% of Materials Can Be Recovered</h3>
+              <p class="text-green-100">Certified facilities extract metals, plastics, and rare earth elements for reuse in new products.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Certified vs uncertified -->
+        <section class="mb-16">
+          <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">Certified Electronics Recycling: Why It Matters</h2>
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Not every recycler that takes electronics is equally rigorous. <strong>Certified electronics recycling</strong> means a facility has passed an independent, third-party audit confirming it meets specific environmental, safety, and data-security standards. The two certifications recognized by the EPA are:
+          </p>
+          <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-50 p-6 rounded-lg">
+              <h3 class="font-semibold text-green-700 mb-2">R2 (Responsible Recycling)</h3>
+              <p class="text-gray-700 text-sm">
+                Focuses on responsible reuse, refurbishment, and materials recovery, with strict requirements for data destruction and downstream tracking of every material stream.
+              </p>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg">
+              <h3 class="font-semibold text-green-700 mb-2">e-Stewards</h3>
+              <p class="text-gray-700 text-sm">
+                Goes further on environmental and labor standards, and prohibits exporting hazardous e-waste to developing countries, even indirectly through downstream vendors.
+              </p>
+            </div>
+          </div>
+          <p class="text-gray-700 leading-relaxed">
+            Want the full breakdown of how these two certifications differ and why it's worth checking before you drop off a device?
+            <a href="/blog/r2-vs-e-stewards-recycler-certifications" class="text-green-700 font-medium hover:text-green-800">Read our R2 vs. e-Stewards guide →</a>
+          </p>
+        </section>
+
+        <!-- What can be recycled -->
+        <section class="mb-16">
+          <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">What Electronics Can You Recycle?</h2>
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Most certified electronics recycling centers accept the full range of consumer and business electronics:
+          </p>
+          <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white border border-gray-200 p-6 rounded-lg">
+              <h4 class="font-semibold text-gray-900 mb-3">Computing</h4>
+              <ul class="text-gray-700 text-sm space-y-1">
+                <li>Laptops & desktops</li>
+                <li>Monitors & keyboards</li>
+                <li>Servers & networking gear</li>
+                <li>Hard drives & storage</li>
+              </ul>
+            </div>
+            <div class="bg-white border border-gray-200 p-6 rounded-lg">
+              <h4 class="font-semibold text-gray-900 mb-3">Mobile & Home</h4>
+              <ul class="text-gray-700 text-sm space-y-1">
+                <li>Smartphones & tablets</li>
+                <li>TVs & audio equipment</li>
+                <li>Gaming consoles</li>
+                <li>Small household electronics</li>
+              </ul>
+            </div>
+            <div class="bg-white border border-gray-200 p-6 rounded-lg">
+              <h4 class="font-semibold text-gray-900 mb-3">Office</h4>
+              <ul class="text-gray-700 text-sm space-y-1">
+                <li>Printers & scanners</li>
+                <li>Cables, chargers, adapters</li>
+                <li>Batteries (most types)</li>
+                <li>Point-of-sale equipment</li>
+              </ul>
+            </div>
+          </div>
+          <div class="bg-blue-50 border border-blue-100 p-6 rounded-lg">
+            <p class="text-blue-900">
+              <strong>Still works and you don't just want to recycle it?</strong> Many laptops, phones, and tablets have real resale value even with normal wear.
+              <a href="/trade-in" class="font-semibold text-blue-700 hover:text-blue-800">Check what your device is worth before recycling it →</a>
+            </p>
+          </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="mb-16">
+          <h2 class="text-3xl font-display font-bold text-gray-900 mb-6">How to Recycle Your Electronics</h2>
+          <div class="space-y-6">
+            <div class="flex items-start">
+              <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1 flex-shrink-0">1</span>
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">Back up and wipe your data</h3>
+                <p class="text-gray-700">Back up anything you need, sign out of accounts, and factory reset the device. <a href="/blog/data-security-recycling" class="text-green-700 hover:text-green-800">See our data security checklist →</a></p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1 flex-shrink-0">2</span>
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">Check if it has trade-in value first</h3>
+                <p class="text-gray-700">Working laptops, phones, and tablets are often worth more traded in than recycled. <a href="/trade-in" class="text-green-700 hover:text-green-800">Get an instant trade-in quote →</a></p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1 flex-shrink-0">3</span>
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">Find a certified recycling center near you</h3>
+                <p class="text-gray-700">Search our directory of recycling centers by state and city, or check a national retailer's in-store program. <a href="/blog/best-buy-vs-staples-vs-ecoatm" class="text-green-700 hover:text-green-800">Compare Best Buy, Staples, and ecoATM →</a></p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1 flex-shrink-0">4</span>
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">Drop off and confirm certification</h3>
+                <p class="text-gray-700">Ask whether the facility is R2 or e-Stewards certified and whether they provide a certificate of data destruction, especially for business equipment.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Visual break -->
+        <div class="relative mb-16 rounded-xl overflow-hidden">
+          <Image src={ewasteDropoffImg} alt="Dropping off electronics at a recycling center" width={1200} height={256} class="w-full h-64 object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-l from-gray-900/80 to-gray-900/40 flex items-center justify-end">
+            <div class="px-8 text-right max-w-md">
+              <h3 class="text-2xl font-bold text-white mb-2">3,970+ Cities Covered</h3>
+              <p class="text-gray-200">Browse our nationwide directory to find centers near you.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <section class="mb-16">
+          <h2 class="text-3xl font-display font-bold text-gray-900 mb-8">Frequently Asked Questions</h2>
+          <div class="space-y-6">
+            {faqItems.map((item) => (
+              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900 mb-2">{item.question}</h3>
+                <p class="text-gray-600">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section class="mb-8">
+          <div class="bg-gradient-to-r from-green-600 to-green-800 rounded-2xl p-8 md:p-12 text-center">
+            <h2 class="text-3xl font-display font-bold text-white mb-4">Find a Certified Recycling Center Near You</h2>
+            <p class="text-green-50 text-lg mb-8 max-w-2xl mx-auto">
+              Browse certified and verified electronics recycling centers across all 50 states.
+            </p>
+            <a
+              href="/states"
+              class="inline-flex items-center bg-white text-green-700 px-10 py-4 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl hover:bg-green-50 transition-all transform hover:-translate-y-1"
+            >
+              Browse the Directory
+              <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</Layout>

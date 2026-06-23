@@ -74,6 +74,24 @@ You can find ecoATM kiosks inside Walmart, Kroger, and other major retailers. Us
 
 ---
 
+## Frequently Asked Questions
+
+### Does Best Buy take old TVs?
+
+Yes. Best Buy accepts flat-panel TVs and monitors under 50 inches, plus CRT (tube) TVs up to 31 inches, at most store locations. Expect a recycling fee of around $25 per TV to cover the specialized handling required for glass and mercury components. California has no drop-off fee, while Pennsylvania and Connecticut don't accept in-store TV drop-offs at all, so it's worth checking your local store's policy before you load up the car.
+
+### Does Best Buy recycle printers?
+
+Yes, Best Buy accepts printers, scanners, and ink/toner cartridges as part of its free residential electronics recycling program, with no recycling fee for printers (the $25 fee applies specifically to TVs and certain monitors). The standard three-items-per-household-per-day limit applies, so a printer counts as one of your three items for that visit.
+
+### Does Staples recycle electronics?
+
+Yes. Staples has run a free in-store electronics recycling program since 2012, accepting computers, laptops, tablets, monitors, printers, scanners, keyboards, cables, smartphones, and most batteries, up to seven items per visit. Unlike Best Buy, Staples doesn't charge a fee for monitors or printers, and Rewards members earn $5 back for each recycling or shredding visit, plus $2 back per recycled ink or toner cartridge.
+
+### Does Staples take old TVs?
+
+No. Staples does not accept televisions under any circumstances. If you have a TV to recycle, Best Buy or a local certified electronics recycling center is the better option.
+
 ## One Thing You Should Always Do First
 
 No matter where you end up, do a factory reset on your devices before dropping them off. This wipes your personal accounts, photos, passwords, and stored data before the device changes hands. It takes about five minutes and is worth doing every single time.
@@ -84,4 +102,4 @@ Responsible recycling is about more than just the environment. Your data securit
 
 ---
 
-_Looking for a drop-off location near you? Use the [RecycleOldTech.com directory](https://www.recycleoldtech.com) to find certified electronics recyclers in your area. If you're specifically trying to get rid of a television, read our dedicated [TV recycling guide](/blog/tv-recycling-guide) for every TV type and disposal option._
+_Looking for a drop-off location near you? Use the [RecycleOldTech.com directory](https://www.recycleoldtech.com) to find certified electronics recyclers in your area, or read our [complete guide to electronics recycling centers](/electronics-recycling) for everything to know before you go. If you're specifically trying to get rid of a television, read our dedicated [TV recycling guide](/blog/tv-recycling-guide) for every TV type and disposal option._

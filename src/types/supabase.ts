@@ -44,6 +44,15 @@ export interface City {
   updated_at: string;
 }
 
+export interface StateExtendedContent {
+  why_it_matters?: string;
+  certified_recyclers_intro?: string;
+  environmental_benefits_intro?: string;
+  getting_started_intro?: string;
+  business_recycling_intro?: string;
+  business_benefits_intro?: string;
+}
+
 export interface State {
   id: string;
   name: string;
@@ -51,6 +60,7 @@ export interface State {
   image_url?: string;
   featured?: boolean;
   nearby_states?: string[];
+  extended_content?: StateExtendedContent;
   created_at?: string;
   updated_at?: string;
 }

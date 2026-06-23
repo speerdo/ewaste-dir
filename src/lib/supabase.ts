@@ -179,6 +179,7 @@ export async function getAllStates(): Promise<State[]> {
           'https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
         featured: state.featured,
         nearby_states: state.nearby_states,
+        extended_content: state.extended_content,
       };
 
       // Cache individual state
@@ -240,6 +241,7 @@ export async function getState(stateId: string): Promise<State | null> {
         created_at: exactMatch.created_at,
         updated_at: exactMatch.updated_at,
         nearby_states: exactMatch.nearby_states,
+        extended_content: exactMatch.extended_content,
       };
 
       // Cache the result
@@ -267,6 +269,7 @@ export async function getState(stateId: string): Promise<State | null> {
         created_at: likeMatch.created_at,
         updated_at: likeMatch.updated_at,
         nearby_states: likeMatch.nearby_states,
+        extended_content: likeMatch.extended_content,
       };
 
       // Cache the result

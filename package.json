@@ -25,6 +25,8 @@
     "scrape-and-update": "npm run scrape-websites && npm run update-database",
     "sync-cities": "node scripts/sync-cities-table.js",
     "generate-descriptions": "node scripts/generate-city-descriptions.js",
+    "generate-state-content": "node scripts/generate-state-content.js",
+    "import-state-content": "node scripts/import-state-content.js",
     "verify-descriptions": "node scripts/verify-city-descriptions.js",
     "verify-factual-accuracy": "node scripts/verify-factual-accuracy.js",
     "fetch-news": "node scripts/fetch-local-news.js",
